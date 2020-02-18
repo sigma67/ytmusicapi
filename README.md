@@ -13,7 +13,8 @@ Note: I have not tested this with any account other than my own. Please let me k
 
 `pip install git+https://github.com/sigma67/ytmusicapi`
 
-###Authenticated requests
+**Authenticated requests**
+
 To run authenticated requests you need to copy your request headers from a POST request in your YTMusic Web Client. 
 To do so, follow these steps: 
 - Copy `headers_auth.json.example` to `headers_auth.json` 
