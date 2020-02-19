@@ -24,12 +24,16 @@ class YTMusic:
         self.body['query'] = query
         self.body['params'] = 'Eg-KAQwIARAAGAAgACgAMABqChAEEAMQCRAFEAo%3D'
         endpoint = 'search'
-
-        response = self.__send_request(endpoint)
-        results = response['contents']['sectionListRenderer']['contents'][0]['musicShelfRenderer']['contents']
         songs = []
-        for result in results:
-            try:
+        try:
+            response = self.__send_request(endpoint)
+            results = response['contents']['sectionListRenderer']['contents']
+            for res in results:
+                if 'musicShelfRenderer' in res:
+                    results = res['musicShelfRenderer']['contents']
+                    break
+
+            for result in results:
                 data = result['musicResponsiveListItemRenderer']
                 # videoId
                 videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
@@ -37,10 +41,8 @@ class YTMusic:
                 title = data['flexColumns'][0]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
                 song = {'videoId': videoId, 'artist': artist, 'title': title}
                 songs.append(song)
-            except Exception as e:
-                print(str(e))
-
-            print(str(len(songs)) + " search results")
+        except Exception as e:
+            print(str(e))
 
         return songs
 
@@ -70,7 +72,6 @@ class YTMusic:
             songs.extend(parse_songs(results))
             request_count += 1
 
-        print(len(songs))
         return songs
 
     def add_playlist(self, title, description, public=False):
@@ -85,14 +86,14 @@ class YTMusic:
         self.body['playlistId'] = playlistId
         endpoint = 'playlist/delete'
         response = self.__send_request(endpoint)
-        print(response)
+        return response['status'] if 'status' in response else response
 
     def add_playlist_item(self, playlistId, videoId):
         self.body['playlistId'] = playlistId
         self.body['actions'] = {'action': 'ACTION_ADD_VIDEO', 'addedVideoId': videoId}
         endpoint = 'browse/edit_playlist'
         response = self.__send_request(endpoint)
-        print(response)
+        return response['status'] if 'status' in response else response
 
     def remove_playlist_item(self, playlistId, song):
         if not song['removeAction']:
@@ -103,4 +104,4 @@ class YTMusic:
         self.body['actions'] = song['removeAction']
         endpoint = 'browse/edit_playlist'
         response = self.__send_request(endpoint)
-        print(response)
+        return response['status'] if 'status' in response else response

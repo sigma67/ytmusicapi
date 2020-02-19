@@ -13,6 +13,10 @@ def get_owned_playlist():
     songs = youtube_auth.get_playlist_items('PLQwVIlKxHM6oCeKLTsUx_w9CmWjHKdg68')
     assert (len(songs) == 64)
 
+def search():
+    results = youtube_auth.search("Oasis Wonderwall")
+    print(results)
+
 #end to end test adding playlist, adding item, deleting item, deleting playlist
 def end2end():
     playlist = youtube_auth.add_playlist("test", "test description", False)
@@ -38,4 +42,5 @@ def end2end():
 # YTMusic.search('lione revive')
 
 if __name__ == '__main__':
-    end2end()
+    #end2end()
+    search()
