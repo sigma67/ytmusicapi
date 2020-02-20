@@ -1,13 +1,14 @@
 from ytmusicapi.ytmusic import YTMusic
 
-# YTMusic.get_playlist_items("PLQwVIlKxHM6qgidcRDp0-KFY1JmdGS206")
 youtube = YTMusic()
 youtube_auth = YTMusic('../headers_auth.json')
+
+def get_playlists():
+    songs = youtube.get_playlists()
 
 def get_foreign_playlist():
     songs = youtube.get_playlist_items("PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5")
     assert (len(songs) == 200)
-
 
 def get_owned_playlist():
     songs = youtube_auth.get_playlist_items('PLQwVIlKxHM6oCeKLTsUx_w9CmWjHKdg68')
@@ -19,14 +20,14 @@ def search():
 
 #end to end test adding playlist, adding item, deleting item, deleting playlist
 def end2end():
-    playlist = youtube_auth.add_playlist("test", "test description", False)
+    playlist = youtube_auth.create_playlist("test", "test description")
     print(playlist)
     response = youtube_auth.add_playlist_item(playlist, 'y0Hhvtmv0gk')
-    assert(response['status'] == 'STATUS_SUCCEEDED')
+    assert(response == 'STATUS_SUCCEEDED')
     items = youtube_auth.get_playlist_items(playlist)
     assert(len(items) == 1)
     response = youtube_auth.remove_playlist_item(playlist, items[0])
-    assert(response['status'] == 'STATUS_SUCCEEDED')
+    assert(response == 'STATUS_SUCCEEDED')
     response = youtube_auth.delete_playlist(playlist)
     assert(response['command']['handlePlaylistDeletionCommand']['playlistId'] == playlist)
 
@@ -43,4 +44,6 @@ def end2end():
 
 if __name__ == '__main__':
     #end2end()
-    search()
+    #search()
+    #get_owned_playlist()
+    youtube_auth.get_liked_songs()

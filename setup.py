@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='ytmusicapi',
-      version='0.2',
+      version='0.3',
       description='Unofficial YTMusic API',
       long_description=(open('README.md').read()),
       url='https://github.com/sigma67/ytmusicapi',
