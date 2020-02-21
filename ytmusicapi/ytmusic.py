@@ -6,14 +6,23 @@ from ytmusicapi.helpers import parse_songs
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
 
+
 class YTMusic:
     def __init__(self, auth=""):
+        """
+        Create a new instance to interact with YouTube Music.
+
+        :param auth: Optional. Provide authentication credentials to manage your library.
+          Should be an adjusted version of `headers_auth.json.example` in the project root.
+          Default: A default header is used without authentication.
+
+        """
         self.auth = auth
         file = auth if auth else pkg_resources.resource_filename('ytmusicapi', 'headers.json')
         with open(file) as json_file:
             self.headers = json.load(json_file)
 
-        with open(pkg_resources.resource_filename('ytmusicapi','context.json')) as json_file:
+        with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.body = json.load(json_file)
 
     def __send_request(self, endpoint, additionalParams=""):
@@ -25,6 +34,27 @@ class YTMusic:
             raise Exception("Please provide authentication before using this function")
 
     def search(self, query):
+        """
+        Search for any song within YouTube music
+        :param query: Query string, i.e. 'Oasis Wonderwall'
+        :return: List of song results
+
+        Example list:
+
+            [
+                {
+                    'videoId': 'ZrOKjDZOtkA',
+                    'artist': 'Oasis',
+                    'title': 'Wonderwall (Remastered)',
+                },
+                {
+                    'videoId': 'Gvfgut8nAgw',
+                    'artist': 'Oasis',
+                    'title': 'Wonderwall',
+                }
+            ]
+
+        """
         self.body['query'] = query
         self.body['params'] = 'Eg-KAQwIARAAGAAgACgAMABqChAEEAMQCRAFEAo%3D'
         endpoint = 'search'
@@ -53,7 +83,16 @@ class YTMusic:
     def get_playlists(self):
         """
         Retrieves the content of the 'Library' page
-        :return: List of owned playlists
+
+        :return: List of owned playlists.
+
+        Each item is in the following format::
+
+            {
+                'playlistId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
+                'title': 'Playlist title'
+            }
+
         """
         self.__check_auth()
         self.body['browseId'] = 'FEmusic_liked_playlists'
@@ -83,9 +122,23 @@ class YTMusic:
     def get_playlist_items(self, playlistId, limit=1000):
         """
         Returns a list of playlist items
-        :param playlistId: The playlist's id
+
+        :param playlistId: Playlist id
         :param limit: How many songs to return. Default: 1000
-        :return: List of playlistItem dictionaries, containing { videoId, artist, title, setVideoId }
+        :return: List of playlistItem dictionaries
+
+        Each item is in the following format::
+
+            {
+                'videoId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
+                'artist': 'Artist',
+                'title': 'Song Title',
+                'setVideoId': '56B44F6D10557CC6'
+            }
+
+        The setVideoId is the unique id of this playlist item and
+        needed for moving/removing playlist items
+
         """
         self.body['browseEndpointContextSupportedConfigs'] = {"browseEndpointContextMusicConfig": {"pageType": "MUSIC_PAGE_TYPE_PLAYLIST"}}
         self.body['browseId'] = "VL" + playlistId
@@ -117,6 +170,7 @@ class YTMusic:
     def create_playlist(self, title, description, privacy_status="PRIVATE"):
         """
         Creates a new empty playlist and returns its id.
+
         :param title: Playlist title
         :param description: Playlist description
         :param privacy_status: Playlists can be 'PUBLIC', 'PRIVATE', or 'UNLISTED'. Default: 'PRIVATE'
@@ -132,12 +186,13 @@ class YTMusic:
 
     def edit_playlist(self, playlistId, title=None, description=None, privacyStatus=None):
         """
+        Edit title, description or privacyStatus of a playlist.
 
-        :param playlistId: Playlist ID
+        :param playlistId: Playlist id
         :param title: Optional. New title for the playlist
         :param description: Optional. New description for the playlist
         :param privacyStatus: Optional. New privacy status for the playlist
-        :return: Request status
+        :return: Status String or full response
         """
         self.__check_auth()
         self.body['playlistId'] = playlistId
@@ -157,6 +212,12 @@ class YTMusic:
         return response['status'] if 'status' in response else response
 
     def delete_playlist(self, playlistId):
+        """
+        Delete a playlist.
+
+        :param playlistId: Playlist id
+        :return: Status String or full response
+        """
         self.__check_auth()
         self.body['playlistId'] = playlistId
         endpoint = 'playlist/delete'
@@ -164,6 +225,13 @@ class YTMusic:
         return response['status'] if 'status' in response else response
 
     def add_playlist_item(self, playlistId, videoId):
+        """
+        Add a song to an existing playlist
+
+        :param playlistId: Playlist id
+        :param videoId: Video id
+        :return: Status String or full response
+        """
         self.__check_auth()
         self.body['playlistId'] = playlistId
         self.body['actions'] = {'action': 'ACTION_ADD_VIDEO', 'addedVideoId': videoId}
@@ -172,6 +240,13 @@ class YTMusic:
         return response['status'] if 'status' in response else response
 
     def remove_playlist_item(self, playlistId, song):
+        """
+        Remove a song from an existing playlist
+
+        :param playlistId: Playlist id
+        :param song: Dictionary containing song information. Must contain videoId and setVideoId
+        :return: Status String or full response
+        """
         self.__check_auth()
         if not song['setVideoId']:
             print("Cannot remove this song, since you don't own this playlist.")

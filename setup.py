@@ -1,7 +1,18 @@
 from setuptools import setup, find_packages
+import re
+
+VERSIONFILE = 'ytmusicapi/_version.py'
+
+version_line = open(VERSIONFILE).read()
+version_re = r"^__version__ = ['\"]([^'\"]*)['\"]"
+match = re.search(version_re, version_line, re.M)
+if match:
+      version = match.group(1)
+else:
+      raise RuntimeError("Could not find version in '%s'" % VERSIONFILE)
 
 setup(name='ytmusicapi',
-      version='0.3',
+      version=version,
       description='Unofficial YTMusic API',
       long_description=(open('README.md').read()),
       url='https://github.com/sigma67/ytmusicapi',
