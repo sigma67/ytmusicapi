@@ -8,6 +8,11 @@ base_url = 'https://music.youtube.com/youtubei/v1/'
 
 
 class YTMusic:
+    """
+    Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
+    Permits both authenticated and non-authenticated requests.
+    Authentication header data must be provided on initialization.
+    """
     def __init__(self, auth=""):
         """
         Create a new instance to interact with YouTube Music.
@@ -36,10 +41,11 @@ class YTMusic:
     def search(self, query):
         """
         Search for any song within YouTube music
+
         :param query: Query string, i.e. 'Oasis Wonderwall'
         :return: List of song results
 
-        Example list:
+          Example list::
 
             [
                 {
@@ -53,6 +59,7 @@ class YTMusic:
                     'title': 'Wonderwall',
                 }
             ]
+
 
         """
         self.body['query'] = query
@@ -110,6 +117,12 @@ class YTMusic:
         return playlists
 
     def get_liked_songs(self, limit=1000):
+        """
+        Gets playlist items for the 'Liked Songs' playlist
+
+        :param limit: How many items to return. Default: 1000
+        :return: List of playlistItem dictionaries. See :py:func:`get_playlist_items`
+        """
         return self.get_playlist_items('LM', limit)
 
     def get_history(self):
