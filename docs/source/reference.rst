@@ -11,6 +11,8 @@ Reference for the YTMusic class.
 .. automethod:: YTMusic.search
 .. automethod:: YTMusic.get_playlists
 .. automethod:: YTMusic.get_liked_songs
+.. automethod:: YTMusic.get_history
+.. automethod:: YTMusic.rate_song
 .. automethod:: YTMusic.get_playlist_items
 .. automethod:: YTMusic.create_playlist
 .. automethod:: YTMusic.edit_playlist

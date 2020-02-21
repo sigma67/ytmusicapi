@@ -126,11 +126,50 @@ class YTMusic:
         return self.get_playlist_items('LM', limit)
 
     def get_history(self):
+        """
+        Gets your play history in reverse chronological order
+
+        :return: List of playlistItems, see :py:func:`get_playlist_items`
+          The additional property 'played' indicates when the playlistItem was played
+        """
         self.__check_auth()
         self.body['browseId'] = 'FEmusic_history'
         endpoint = 'browse'
         response = self.__send_request(endpoint)
-        raise NotImplementedError
+        results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content'][
+            'sectionListRenderer']['contents']
+        songs = []
+        for content in results:
+            data = content['musicShelfRenderer']['contents']
+            songlist = parse_songs(data)
+            for song in songlist:
+                song['played'] = content['musicShelfRenderer']['title']['runs'][0]['text']
+            songs.extend(songlist)
+
+        return songs
+
+    def rate_song(self, videoId, rating='INDIFFERENT'):
+        """
+        Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
+
+        :param videoId: Video id
+        :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
+
+          | 'INDIFFERENT' removes the previous rating and assigns no rating
+        """
+        self.__check_auth()
+        self.body['target'] = {'videoId': videoId}
+        if rating == 'LIKE':
+            endpoint = 'like/like'
+        elif rating == 'DISLIKE':
+            endpoint = 'like/dislike'
+        elif rating == 'INDIFFERENT':
+            endpoint = 'like/removelike'
+        else:
+            return
+
+        self.__send_request(endpoint)
+
 
     def get_playlist_items(self, playlistId, limit=1000):
         """
