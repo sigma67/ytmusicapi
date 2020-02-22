@@ -1,7 +1,7 @@
 import requests
 import json
 import pkg_resources
-from ytmusicapi.helpers import parse_songs
+from ytmusicapi.helpers import parse_songs, get_item_text
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
@@ -38,12 +38,17 @@ class YTMusic:
         if self.auth == "":
             raise Exception("Please provide authentication before using this function")
 
-    def search(self, query):
+    def search(self, query, filter='songs'):
         """
-        Search for any song within YouTube music
+        Search YouTube music
+        Returns up to 20 results within the provided category.
+        By default only songs (audio-only) are returned
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
-        :return: List of song results
+        :param filter: Filter for item types: 'songs', 'videos', 'albums', 'artists', 'playlists'
+        :return: List of results depending on filter.
+          albums, artists and playlists additionally contain a browseId, corresponding to
+          albumId, channelId and playlistId (browseId='VL'+playlistId)
 
           Example list::
 
@@ -63,9 +68,24 @@ class YTMusic:
 
         """
         self.body['query'] = query
-        self.body['params'] = 'Eg-KAQwIARAAGAAgACgAMABqChAEEAMQCRAFEAo%3D'
+        param1 = 'Eg-KAQwIA'
+        param3 = 'MABqChAEEAMQCRAFEAo%3D'
+
+        if filter == 'videos':
+            param2 = 'BABGAAgACgA'
+        elif filter == 'albums':
+            param2 = 'BAAGAEgACgA'
+        elif filter == 'artists':
+            param2 = 'BAAGAAgASgA'
+        elif filter == 'playlists':
+            param2 = 'BAAGAAgACgB'
+        else:
+            param2 = 'RAAGAAgACgA'
+
+        self.body['params'] = param1 + param2 + param3
+
         endpoint = 'search'
-        songs = []
+        search_results = []
         try:
             response = self.__send_request(endpoint)
             results = response['contents']['sectionListRenderer']['contents']
@@ -77,15 +97,37 @@ class YTMusic:
             for result in results:
                 data = result['musicResponsiveListItemRenderer']
                 # videoId
-                videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
-                artist = data['flexColumns'][1]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
-                title = data['flexColumns'][0]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
-                song = {'videoId': videoId, 'artist': artist, 'title': title}
-                songs.append(song)
+                search_result = {}
+
+                if filter in ['artists', 'albums', 'playlists']:
+                    search_result['browseId'] = data['navigationEndpoint']['browseEndpoint']['browseId']
+                    search_result['pageType'] = data['navigationEndpoint']['browseEndpoint']['browseEndpointContextSupportedConfigs']['browseEndpointContextMusicConfig']['pageType']
+
+                if filter in ['artists']:
+                    search_result['artist'] = get_item_text(data, 0)
+
+                elif filter in ['albums']:
+                    search_result['title'] = get_item_text(data, 0)
+                    search_result['type'] = get_item_text(data, 1)
+                    search_result['artist'] = get_item_text(data, 2)
+                    search_result['year'] = get_item_text(data, 3)
+
+                elif filter in ['playlists']:
+                    search_result['title'] = get_item_text(data, 0)
+                    search_result['author'] = get_item_text(data, 1)
+                    search_result['itemCount'] = get_item_text(data, 2).split(' ')[0]
+
+                # songs, videos
+                else:
+                    search_result['videoId'] = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
+                    search_result['title'] = get_item_text(data, 0)
+                    search_result['artist'] = get_item_text(data, 1)
+
+                search_results.append(search_result)
         except Exception as e:
             print(str(e))
 
-        return songs
+        return search_results
 
     def get_playlists(self):
         """

@@ -26,3 +26,6 @@ def parse_songs(results):
             print("Item " + str(count) + ": " + str(e))
 
     return songs
+
+def get_item_text(item, index):
+    return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
