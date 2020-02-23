@@ -61,8 +61,10 @@ def parse_search_result(data, resultType = None):
         search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
 
     elif resultType in ['song']:
-        search_result['album'] = get_item_text(data, 2 + default)
-        search_result['duration'] = get_item_text(data, 3 + default)
+        hasAlbum = len(data['flexColumns'] == 4)
+        if hasAlbum:
+            search_result['album'] = get_item_text(data, 2 + default)
+        search_result['duration'] = get_item_text(data, 2 + hasAlbum + default)
 
     elif resultType in ['video']:
         search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
