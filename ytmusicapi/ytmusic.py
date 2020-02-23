@@ -244,6 +244,9 @@ class YTMusic:
         else:
             header = response['header']['musicEditablePlaylistDetailHeaderRenderer']['header']['musicDetailHeaderRenderer']
         song_count = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+        if song_count == 0:
+            return songs
+
         songs_to_get = min(limit, song_count)
         songs.extend(parse_songs(results['contents']))
         request_count = 1
