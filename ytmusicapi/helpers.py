@@ -9,7 +9,7 @@ def parse_songs(results):
             continue
         data = result['musicResponsiveListItemRenderer']
         try:
-            # if item is not playable, there is not videoId
+            # if item is not playable, there is no videoId
             if 'playNavigationEndpoint' in data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']:
                 videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
             else:
@@ -26,6 +26,45 @@ def parse_songs(results):
             print("Item " + str(count) + ": " + str(e))
 
     return songs
+
+
+def parse_search_result(data, resultType = None):
+    search_result = {}
+    default = not resultType
+    if not resultType:
+        resultType = get_item_text(data, 1).lower()
+        # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
+        if resultType not in ['artist', 'playlist', 'song', 'video']:
+            resultType = 'album'
+
+    if resultType in ['artist', 'album', 'playlist']:
+        search_result['browseId'] = data['navigationEndpoint']['browseEndpoint']['browseId']
+
+    if resultType in ['artist']:
+        search_result['artist'] = get_item_text(data, 0)
+
+    elif resultType in ['album']:
+        search_result['title'] = get_item_text(data, 0)
+        search_result['type'] = get_item_text(data, 1)
+        search_result['artist'] = get_item_text(data, 2)
+        search_result['year'] = get_item_text(data, 3)
+
+    elif resultType in ['playlist']:
+        search_result['title'] = get_item_text(data, 0)
+        search_result['author'] = get_item_text(data, 1 + default)
+        search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
+
+    # songs, videos
+    elif resultType in ['song', 'video']:
+        search_result['videoId'] = data['overlay']['musicItemThumbnailOverlayRenderer']['content'][
+            'musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
+        search_result['title'] = get_item_text(data, 0)
+        search_result['artist'] = get_item_text(data, 1 + default)
+
+    search_result['resultType'] = resultType
+
+    return search_result
+
 
 def get_item_text(item, index):
     return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']

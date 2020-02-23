@@ -1,7 +1,7 @@
 import requests
 import json
 import pkg_resources
-from ytmusicapi.helpers import parse_songs, get_item_text
+from ytmusicapi.helpers import parse_songs, parse_search_result
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
@@ -28,25 +28,29 @@ class YTMusic:
             self.headers = json.load(json_file)
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
-            self.body = json.load(json_file)
+            self.context = json.load(json_file)
 
-    def __send_request(self, endpoint, additionalParams=""):
-        response = requests.post(base_url + endpoint + params + additionalParams, json=self.body, headers=self.headers)
+    def __send_request(self, endpoint, body, additionalParams=""):
+        body.update(self.context)
+        response = requests.post(base_url + endpoint + params + additionalParams, json=body, headers=self.headers)
         return json.loads(response.text)
 
     def __check_auth(self):
         if self.auth == "":
             raise Exception("Please provide authentication before using this function")
 
-    def search(self, query, filter='songs'):
+    def search(self, query, filter=None):
         """
         Search YouTube music
         Returns up to 20 results within the provided category.
         By default only songs (audio-only) are returned
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
-        :param filter: Filter for item types: 'songs', 'videos', 'albums', 'artists', 'playlists'
+        :param filter: Filter for item types. Allowed values:
+          'songs', 'videos', 'albums', 'artists', 'playlists'.
+          Default: Default search, including all types of items.
         :return: List of results depending on filter.
+          resultType specifies the type of item (important for default search).
           albums, artists and playlists additionally contain a browseId, corresponding to
           albumId, channelId and playlistId (browseId='VL'+playlistId)
 
@@ -57,73 +61,61 @@ class YTMusic:
                     'videoId': 'ZrOKjDZOtkA',
                     'artist': 'Oasis',
                     'title': 'Wonderwall (Remastered)',
+                    'resultType': 'song'
                 },
                 {
                     'videoId': 'Gvfgut8nAgw',
                     'artist': 'Oasis',
                     'title': 'Wonderwall',
+                    'resultType': 'song'
                 }
             ]
 
 
         """
-        self.body['query'] = query
-        param1 = 'Eg-KAQwIA'
-        param3 = 'MABqChAEEAMQCRAFEAo%3D'
-
-        if filter == 'videos':
-            param2 = 'BABGAAgACgA'
-        elif filter == 'albums':
-            param2 = 'BAAGAEgACgA'
-        elif filter == 'artists':
-            param2 = 'BAAGAAgASgA'
-        elif filter == 'playlists':
-            param2 = 'BAAGAAgACgB'
-        else:
-            param2 = 'RAAGAAgACgA'
-
-        self.body['params'] = param1 + param2 + param3
-
+        body = {'query': query}
         endpoint = 'search'
         search_results = []
+
+        if filter:
+            param1 = 'Eg-KAQwIA'
+            param3 = 'MABqChAEEAMQCRAFEAo%3D'
+
+            if filter == 'videos':
+                param2 = 'BABGAAgACgA'
+            elif filter == 'albums':
+                param2 = 'BAAGAEgACgA'
+            elif filter == 'artists':
+                param2 = 'BAAGAAgASgA'
+            elif filter == 'playlists':
+                param2 = 'BAAGAAgACgB'
+            else:
+                param2 = 'RAAGAAgACgA'
+
+            body['params'] = param1 + param2 + param3
+
+        elif filter not in ['albums', 'artists', 'playlists', 'songs', 'videos', None]:
+            return search_results
+
+        response = self.__send_request(endpoint, body)
+
         try:
-            response = self.__send_request(endpoint)
             results = response['contents']['sectionListRenderer']['contents']
+
+            # no results
+            if len(results) == 1 and 'itemSectionRenderer' in results:
+                return search_results
+
             for res in results:
                 if 'musicShelfRenderer' in res:
                     results = res['musicShelfRenderer']['contents']
-                    break
 
-            for result in results:
-                data = result['musicResponsiveListItemRenderer']
-                # videoId
-                search_result = {}
+                    for result in results:
+                        data = result['musicResponsiveListItemRenderer']
+                        type = filter[:-1] if filter else None
+                        search_result = parse_search_result(data, type)
+                        search_results.append(search_result)
 
-                if filter in ['artists', 'albums', 'playlists']:
-                    search_result['browseId'] = data['navigationEndpoint']['browseEndpoint']['browseId']
-                    search_result['pageType'] = data['navigationEndpoint']['browseEndpoint']['browseEndpointContextSupportedConfigs']['browseEndpointContextMusicConfig']['pageType']
-
-                if filter in ['artists']:
-                    search_result['artist'] = get_item_text(data, 0)
-
-                elif filter in ['albums']:
-                    search_result['title'] = get_item_text(data, 0)
-                    search_result['type'] = get_item_text(data, 1)
-                    search_result['artist'] = get_item_text(data, 2)
-                    search_result['year'] = get_item_text(data, 3)
-
-                elif filter in ['playlists']:
-                    search_result['title'] = get_item_text(data, 0)
-                    search_result['author'] = get_item_text(data, 1)
-                    search_result['itemCount'] = get_item_text(data, 2).split(' ')[0]
-
-                # songs, videos
-                else:
-                    search_result['videoId'] = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
-                    search_result['title'] = get_item_text(data, 0)
-                    search_result['artist'] = get_item_text(data, 1)
-
-                search_results.append(search_result)
         except Exception as e:
             print(str(e))
 
@@ -144,9 +136,9 @@ class YTMusic:
 
         """
         self.__check_auth()
-        self.body['browseId'] = 'FEmusic_liked_playlists'
+        body = {'browseId': 'FEmusic_liked_playlists'}
         endpoint = 'browse'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][1]['itemSectionRenderer']['contents'][0]['gridRenderer']['items']
         playlists = []
         # skip first item ("New Playlist" button)
@@ -175,9 +167,9 @@ class YTMusic:
           The additional property 'played' indicates when the playlistItem was played
         """
         self.__check_auth()
-        self.body['browseId'] = 'FEmusic_history'
+        body = {'browseId': 'FEmusic_history'}
         endpoint = 'browse'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content'][
             'sectionListRenderer']['contents']
         songs = []
@@ -200,7 +192,7 @@ class YTMusic:
           | 'INDIFFERENT' removes the previous rating and assigns no rating
         """
         self.__check_auth()
-        self.body['target'] = {'videoId': videoId}
+        body = {'target': {'videoId': videoId}}
         if rating == 'LIKE':
             endpoint = 'like/like'
         elif rating == 'DISLIKE':
@@ -210,7 +202,7 @@ class YTMusic:
         else:
             return
 
-        self.__send_request(endpoint)
+        self.__send_request(endpoint, body)
 
 
     def get_playlist_items(self, playlistId, limit=1000):
@@ -234,10 +226,17 @@ class YTMusic:
         needed for moving/removing playlist items
 
         """
-        self.body['browseEndpointContextSupportedConfigs'] = {"browseEndpointContextMusicConfig": {"pageType": "MUSIC_PAGE_TYPE_PLAYLIST"}}
-        self.body['browseId'] = "VL" + playlistId
+        body = { 'browseEndpointContextSupportedConfigs':
+          {
+            "browseEndpointContextMusicConfig":
+              {
+                "pageType": "MUSIC_PAGE_TYPE_PLAYLIST"
+              }
+          },
+          'browseId': "VL" + playlistId
+        }
         endpoint = 'browse'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][0]['musicPlaylistShelfRenderer']
         songs = []
         if 'musicDetailHeaderRenderer' in response['header']: #playlist not owned
@@ -254,7 +253,7 @@ class YTMusic:
             print("requested from " + str(request_count * 100))
             additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
 
-            response = self.__send_request(endpoint, additionalParams)
+            response = self.__send_request(endpoint, body, additionalParams)
             results = response['continuationContents']['musicPlaylistShelfContinuation']
             songs.extend(parse_songs(results['contents']))
             request_count += 1
@@ -271,11 +270,9 @@ class YTMusic:
         :return: ID of the YouTube playlist
         """
         self.__check_auth()
-        self.body['title'] = title
-        self.body['description'] = description
-        self.body['privacyStatus'] = privacy_status
+        body = {'title': title, 'description': description, 'privacyStatus': privacy_status}
         endpoint = 'playlist/create'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         return response['playlistId']
 
     def edit_playlist(self, playlistId, title=None, description=None, privacyStatus=None):
@@ -289,7 +286,7 @@ class YTMusic:
         :return: Status String or full response
         """
         self.__check_auth()
-        self.body['playlistId'] = playlistId
+        body = {'playlistId': playlistId}
         actions = []
         if title:
             actions.append({'action': 'ACTION_SET_PLAYLIST_NAME', 'playlistName': title})
@@ -300,9 +297,9 @@ class YTMusic:
         if privacyStatus:
             actions.append({'action': 'ACTION_SET_PLAYLIST_PRIVACY', 'playlistPrivacy': privacyStatus})
 
-        self.body['actions'] = actions
+        body['actions'] = actions
         endpoint = 'browse/edit_playlist'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
 
     def delete_playlist(self, playlistId):
@@ -313,41 +310,52 @@ class YTMusic:
         :return: Status String or full response
         """
         self.__check_auth()
-        self.body['playlistId'] = playlistId
+        body = {'playlistId': playlistId}
         endpoint = 'playlist/delete'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
 
-    def add_playlist_item(self, playlistId, videoId):
+    def add_playlist_items(self, playlistId, videoIds):
         """
-        Add a song to an existing playlist
+        Add songs to an existing playlist
 
         :param playlistId: Playlist id
-        :param videoId: Video id
+        :param videoIds: List of Video ids
         :return: Status String or full response
         """
         self.__check_auth()
-        self.body['playlistId'] = playlistId
-        self.body['actions'] = {'action': 'ACTION_ADD_VIDEO', 'addedVideoId': videoId}
+        body = {'playlistId': playlistId, 'actions': []}
+        for videoId in videoIds:
+            body['actions'].append({
+                'action': 'ACTION_ADD_VIDEO',
+                'addedVideoId': videoId
+            })
+
         endpoint = 'browse/edit_playlist'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
 
-    def remove_playlist_item(self, playlistId, song):
+    def remove_playlist_items(self, playlistId, videos):
         """
-        Remove a song from an existing playlist
+        Remove songs from an existing playlist
 
         :param playlistId: Playlist id
-        :param song: Dictionary containing song information. Must contain videoId and setVideoId
+        :param videos: List of Dictionaries containing video information. Must contain videoId and setVideoId
         :return: Status String or full response
         """
         self.__check_auth()
-        if not song['setVideoId']:
-            print("Cannot remove this song, since you don't own this playlist.")
+        if not videos[0]['setVideoId']:
+            print("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
             return
+        
+        body = {'playlistId': playlistId, 'actions': []}
+        for video in videos:
+            body['actions'].append({
+                'setVideoId': video['setVideoId'],
+                'removedVideoId': video['videoId'],
+                'action': 'ACTION_REMOVE_VIDEO'
+            })
 
-        self.body['playlistId'] = playlistId
-        self.body['actions'] = { 'setVideoId': song['setVideoId'], 'removedVideoId': song['videoId'], 'action': 'ACTION_REMOVE_VIDEO'}
         endpoint = 'browse/edit_playlist'
-        response = self.__send_request(endpoint)
+        response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
