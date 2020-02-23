@@ -37,6 +37,12 @@ def parse_search_result(data, resultType = None):
         if resultType not in ['artist', 'playlist', 'song', 'video']:
             resultType = 'album'
 
+    if resultType in ['song', 'video']:
+        search_result['videoId'] = data['overlay']['musicItemThumbnailOverlayRenderer']['content'][
+            'musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
+        search_result['title'] = get_item_text(data, 0)
+        search_result['artist'] = get_item_text(data, 1 + default)
+
     if resultType in ['artist', 'album', 'playlist']:
         search_result['browseId'] = data['navigationEndpoint']['browseEndpoint']['browseId']
 
@@ -54,12 +60,13 @@ def parse_search_result(data, resultType = None):
         search_result['author'] = get_item_text(data, 1 + default)
         search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
 
-    # songs, videos
-    elif resultType in ['song', 'video']:
-        search_result['videoId'] = data['overlay']['musicItemThumbnailOverlayRenderer']['content'][
-            'musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
-        search_result['title'] = get_item_text(data, 0)
-        search_result['artist'] = get_item_text(data, 1 + default)
+    elif resultType in ['song']:
+        search_result['album'] = get_item_text(data, 2 + default)
+        search_result['duration'] = get_item_text(data, 3 + default)
+
+    elif resultType in ['video']:
+        search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
+        search_result['duration'] = get_item_text(data, 3 + default)
 
     search_result['resultType'] = resultType
 
