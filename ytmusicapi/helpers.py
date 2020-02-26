@@ -1,4 +1,7 @@
-## Static helper methods
+import re
+
+# Static helper methods
+
 
 def parse_songs(results):
     songs = []
@@ -77,3 +80,10 @@ def parse_search_result(data, resultType = None):
 
 def get_item_text(item, index):
     return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
+
+
+def html_to_txt(html_text):
+    tags = re.findall("<[^>]+>",html_text)
+    for tag in tags:
+        html_text = html_text.replace(tag,'')
+    return html_text

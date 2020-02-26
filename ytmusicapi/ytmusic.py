@@ -1,7 +1,8 @@
 import requests
 import json
 import pkg_resources
-from ytmusicapi.helpers import parse_songs, parse_search_result
+from ytmusicapi.helpers import \
+    parse_songs, parse_search_result, html_to_txt
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
@@ -273,7 +274,11 @@ class YTMusic:
         :return: ID of the YouTube playlist
         """
         self.__check_auth()
-        body = {'title': title, 'description': description, 'privacyStatus': privacy_status}
+        body = {
+            'title': title,
+            'description': html_to_txt(description),  # YT does not allow HTML tags
+            'privacyStatus': privacy_status
+        }
         endpoint = 'playlist/create'
         response = self.__send_request(endpoint, body)
         return response['playlistId']
