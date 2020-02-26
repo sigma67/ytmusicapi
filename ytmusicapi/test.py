@@ -28,17 +28,17 @@ def search():
 def end2end():
     playlist = youtube_auth.create_playlist("test", "test description")
     print(playlist)
-    response = youtube_auth.add_playlist_item(playlist, 'y0Hhvtmv0gk')
+    response = youtube_auth.add_playlist_items(playlist,['y0Hhvtmv0gk'])
     assert(response == 'STATUS_SUCCEEDED')
     items = youtube_auth.get_playlist_items(playlist)
     assert(len(items) == 1)
-    response = youtube_auth.remove_playlist_item(playlist, items[0])
+    response = youtube_auth.remove_playlist_items(playlist, items)
     assert(response == 'STATUS_SUCCEEDED')
     response = youtube_auth.delete_playlist(playlist)
     assert(response['command']['handlePlaylistDeletionCommand']['playlistId'] == playlist)
 
 
 if __name__ == '__main__':
-    #end2end()
-    search()
+    end2end()
+    #search()
     #get_owned_playlist()
