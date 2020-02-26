@@ -61,7 +61,7 @@ def parse_search_result(data, resultType = None):
         search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
 
     elif resultType in ['song']:
-        hasAlbum = len(data['flexColumns'] == 4)
+        hasAlbum = len(data['flexColumns']) == 4
         if hasAlbum:
             search_result['album'] = get_item_text(data, 2 + default)
         search_result['duration'] = get_item_text(data, 2 + hasAlbum + default)
