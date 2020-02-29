@@ -13,8 +13,8 @@ else:
 
 setup(name='ytmusicapi',
       version=version,
-      description='Unofficial YTMusic API',
-      long_description=(open('README.md').read()),
+      description='Unofficial API for YouTube Music',
+      long_description=(open('README.rst').read()),
       url='https://github.com/sigma67/ytmusicapi',
       author='sigma67',
       author_email='',
