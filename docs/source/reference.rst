@@ -17,5 +17,5 @@ Reference for the YTMusic class.
 .. automethod:: YTMusic.create_playlist
 .. automethod:: YTMusic.edit_playlist
 .. automethod:: YTMusic.delete_playlist
-.. automethod:: YTMusic.add_playlist_item
-.. automethod:: YTMusic.remove_playlist_item
+.. automethod:: YTMusic.add_playlist_items
+.. automethod:: YTMusic.remove_playlist_items
