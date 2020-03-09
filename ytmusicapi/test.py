@@ -19,6 +19,10 @@ def get_owned_playlist():
     assert (len(songs) == 64)
 
 
+def get_history():
+    songs = youtube_auth.get_history()
+    assert (len(songs) > 0)
+
 def search():
     results = youtube_auth.search("Oasis Wonderwall")
     print(results)
@@ -40,5 +44,6 @@ def end2end():
 
 if __name__ == '__main__':
     end2end()
+    #get_history()
     #search()
     #get_owned_playlist()

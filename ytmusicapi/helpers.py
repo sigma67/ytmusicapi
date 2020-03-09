@@ -3,23 +3,28 @@ import re
 # Static helper methods
 
 
-def parse_songs(results):
+def parse_playlist_items(results, owned=False):
     songs = []
     count = 1
     for result in results:
         count += 1
-        if not 'musicResponsiveListItemRenderer' in result:
+        if 'musicResponsiveListItemRenderer' not in result:
             continue
         data = result['musicResponsiveListItemRenderer']
-        try:
-            # if item is not playable, there is no videoId
-            if 'playNavigationEndpoint' in data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']:
-                videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
-            else:
-                videoId = None
+        videoId = None
 
+        try:
             # if playlist is not owned, the playlist item can't be interacted with
-            setVideoId = data['playlistItemData']['playlistSetVideoId'] if 'playlistItemData' in data else None
+            if owned:
+                for item in data['menu']['menuRenderer']['items']:
+                    if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in item['menuServiceItemRenderer']['serviceEndpoint']:
+                        setVideoId = item['menuServiceItemRenderer']['serviceEndpoint']['playlistEditEndpoint']['actions'][0]['setVideoId']
+                        videoId = item['menuServiceItemRenderer']['serviceEndpoint']['playlistEditEndpoint']['actions'][0]['removedVideoId']
+                        break
+            else:
+                videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
+                setVideoId = None
+
 
             artist = data['flexColumns'][1]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
             title = data['flexColumns'][0]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']

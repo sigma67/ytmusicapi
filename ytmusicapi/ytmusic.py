@@ -2,7 +2,7 @@ import requests
 import json
 import pkg_resources
 from ytmusicapi.helpers import \
-    parse_songs, parse_search_result, html_to_txt
+    parse_playlist_items, parse_search_result, html_to_txt
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
@@ -176,7 +176,7 @@ class YTMusic:
         songs = []
         for content in results:
             data = content['musicShelfRenderer']['contents']
-            songlist = parse_songs(data)
+            songlist = parse_playlist_items(data)
             for song in songlist:
                 song['played'] = content['musicShelfRenderer']['title']['runs'][0]['text']
             songs.extend(songlist)
@@ -248,8 +248,9 @@ class YTMusic:
         if song_count == 0:
             return songs
 
+        own_playlist = 'musicEditablePlaylistDetailHeaderRenderer' in response['header']
+        songs.extend(parse_playlist_items(results['contents'], own_playlist))
         songs_to_get = min(limit, song_count)
-        songs.extend(parse_songs(results['contents']))
         request_count = 1
 
         while request_count * 100 < songs_to_get:
@@ -259,7 +260,7 @@ class YTMusic:
 
             response = self.__send_request(endpoint, body, additionalParams)
             results = response['continuationContents']['musicPlaylistShelfContinuation']
-            songs.extend(parse_songs(results['contents']))
+            songs.extend(parse_playlist_items(results['contents'], own_playlist))
             request_count += 1
 
         return songs
