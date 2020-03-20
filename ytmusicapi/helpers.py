@@ -22,7 +22,11 @@ def parse_playlist_items(results, owned=False):
                         videoId = item['menuServiceItemRenderer']['serviceEndpoint']['playlistEditEndpoint']['actions'][0]['removedVideoId']
                         break
             else:
-                videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
+                # if item is not playable, there is no videoId
+                if 'playNavigationEndpoint' in data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']:
+                    videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
+                else:
+                    videoId = None
                 setVideoId = None
 
 
