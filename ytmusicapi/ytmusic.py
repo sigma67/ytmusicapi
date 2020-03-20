@@ -260,7 +260,6 @@ class YTMusic:
 
         while request_count * 100 < songs_to_get:
             ctoken = results['continuations'][0]['nextContinuationData']['continuation']
-            print("requested from " + str(request_count * 100))
             additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
 
             response = self.__send_request(endpoint, body, additionalParams)
