@@ -13,7 +13,7 @@ Usage
 If an endpoint requires authentication you will receive an error:
 ``Please provide authentication before using this function``
 
-For authenticated requests you need to set up your credentials first: `Setup <setup>`_
+For authenticated requests you need to set up your credentials first: :doc:`Setup <setup>`
 
 **Authenticated** request to interact with your playlist:
 

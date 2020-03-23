@@ -6,6 +6,9 @@ youtube_auth = YTMusic('../headers_auth.json')
 
 
 class TestYTMusic(unittest.TestCase):
+    def test_setup(self):
+        YTMusic.setup()
+
     def test_get_playlists(self):
         playlists = youtube_auth.get_playlists()
         self.assertGreater(len(playlists), 0)

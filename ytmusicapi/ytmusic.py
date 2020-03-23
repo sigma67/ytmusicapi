@@ -5,6 +5,7 @@ import ntpath
 import os
 from ytmusicapi.helpers import \
     parse_playlist_items, parse_uploaded_items, parse_search_result, html_to_txt
+from ytmusicapi.setup import setup
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
@@ -41,6 +42,14 @@ class YTMusic:
     def __check_auth(self):
         if self.auth == "":
             raise Exception("Please provide authentication before using this function")
+
+    @classmethod
+    def setup(self):
+        """
+        Requests browser headers from the user and stores a configuration
+        JSON file in the correct format in the current directory
+        """
+        setup()
 
     def search(self, query, filter=None):
         """
