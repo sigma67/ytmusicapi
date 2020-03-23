@@ -1,8 +1,10 @@
 import requests
 import json
 import pkg_resources
+import ntpath
+import os
 from ytmusicapi.helpers import \
-    parse_playlist_items, parse_search_result, html_to_txt
+    parse_playlist_items, parse_uploaded_items, parse_search_result, html_to_txt
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
@@ -353,7 +355,8 @@ class YTMusic:
         Remove songs from an existing playlist
 
         :param playlistId: Playlist id
-        :param videos: List of Dictionaries containing video information. Must contain videoId and setVideoId
+        :param videos: List of PlaylistItems, see :py:func:`get_playlist_items`.
+            Must contain videoId and setVideoId
         :return: Status String or full response
         """
         self.__check_auth()
@@ -372,3 +375,96 @@ class YTMusic:
         endpoint = 'browse/edit_playlist'
         response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
+
+    def get_uploaded_songs(self, limit=25):
+        """
+        Returns a list of uploaded songs
+
+        :param limit: How many songs to return. Default: 25
+        :return: List of uploaded songs.
+
+        Each item is in the following format::
+
+            {
+              "entityId": "t_po_CICr2crg7OWpchDpjPjrBA",
+              "videoId": "Uise6RPKoek",
+              "artist": "Coldplay",
+              "title": "A Sky Full Of Stars",
+              "album": "Ghost Stories"
+            }
+
+        """
+        self.__check_auth()
+        endpoint = 'browse'
+        body = {"browseId": "FEmusic_library_privately_owned_tracks"}
+        response = self.__send_request(endpoint, body)
+        results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][1]['itemSectionRenderer']['contents'][0]['musicShelfRenderer']
+        songs = []
+
+        songs.extend(parse_uploaded_items(results['contents'][1:]))
+
+        request_count = 1
+        while request_count * 25 < limit:
+            ctoken = results['continuations'][0]['nextContinuationData']['continuation']
+            additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
+            response = self.__send_request(endpoint, body, additionalParams)
+            results = response['continuationContents']['musicShelfContinuation']
+            songs.extend(parse_uploaded_items(results['contents']))
+            request_count += 1
+
+        return songs
+
+    def upload_song(self, filepath):
+        """
+        Uploads a song to YouTube Music
+
+        :param filepath: Path to the music file
+        :return: Status String or full response
+        """
+        self.__check_auth()
+        if not os.path.isfile(filepath):
+            return
+
+        headers = self.headers
+        upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=0"
+        file = open(filepath, 'rb')
+        req = requests.Request('POST', upload_url,
+                      files={'file': file},
+                      headers=headers)
+        prepped = req.prepare()
+        filesize = str(int(prepped.headers['content-length']) -500)
+
+        body = "filename=" + ntpath.basename(filepath)
+        headers['content-type'] = 'application/x-www-form-urlencoded;charset=utf-8'
+        headers['X-Goog-Upload-Command'] = 'start'
+        headers['X-Goog-Upload-Header-Content-Length'] = filesize
+        headers['X-Goog-Upload-Protocol'] = 'resumable'
+        response = requests.post(upload_url, data=body, headers=headers)
+        headers['X-Goog-Upload-Command'] = 'upload, finalize'
+        headers['X-Goog-Upload-Offset'] = '0'
+        upload_url = response.headers['X-Goog-Upload-URL']
+        file.seek(0)
+        response = requests.post(upload_url, files={'file': file}, headers=headers)
+        file.close()
+        if response.status_code == 200:
+            return 'STATUS_SUCCEEDED'
+        else:
+            return response.content
+
+    def delete_uploaded_song(self, uploaded_song):
+        """
+        Deletes a previously uploaded song
+
+        :param uploaded_song: The uploaded song to delete,
+            e.g. retrieved from :py:func:`get_uploaded_songs`
+        :return: Status String or error
+        """
+        self.__check_auth()
+        endpoint = 'music/delete_privately_owned_entity'
+        body = {"entityId": uploaded_song['entityId']}
+        response = self.__send_request(endpoint, body)
+
+        if 'error' not in response:
+            return 'STATUS_SUCCEEDED'
+        else:
+            return response['error']

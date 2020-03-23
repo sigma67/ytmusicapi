@@ -14,6 +14,7 @@ Features
 --------
 -  Library management: list, create, delete, and modify playlists and playlist items
 -  Search: Search for songs on YouTube Music
+-  Uploads: Upload songs, list uploaded songs and delete uploaded songs
 
 Usage Example
 -------------

@@ -39,6 +39,26 @@ def parse_playlist_items(results, owned=False):
 
     return songs
 
+def parse_uploaded_items(results):
+    songs = []
+    for result in results:
+        data = result['musicResponsiveListItemRenderer']
+        entityId = data['menu']['menuRenderer']['items'][-1]['menuNavigationItemRenderer']['navigationEndpoint'][
+            'confirmDialogEndpoint']['content']['confirmDialogRenderer']['confirmButton']['buttonRenderer']['command'][
+            'musicDeletePrivatelyOwnedEntityCommand']['entityId']
+
+        videoId = data['menu']['menuRenderer']['items'][0]['menuServiceItemRenderer']['serviceEndpoint'][
+            'queueAddEndpoint']['queueTarget']['videoId']
+
+        title = get_item_text(data, 0)
+        artist = get_item_text(data, 1)
+        album = get_item_text(data, 2)
+
+        song = {'entityId': entityId, 'videoId': videoId, 'artist': artist, 'title': title, 'album': album}
+        songs.append(song)
+
+    return songs
+
 
 def parse_search_result(data, resultType = None):
     search_result = {}
@@ -88,7 +108,11 @@ def parse_search_result(data, resultType = None):
 
 
 def get_item_text(item, index):
+    if not 'runs' in item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']:
+        return ''
+
     return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
+
 
 
 def html_to_txt(html_text):

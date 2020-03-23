@@ -5,8 +5,6 @@ A work-in-progress API that emulates web requests from the YouTube Music web cli
 
 Currently you need to extract your authentication data from your web browser and provide it through a file for it to work.
 
-Note: I have not tested this with any account other than my own. Please let me know if it works for you.
-
 Simple usage example:
 
 .. code-block:: python
@@ -26,7 +24,7 @@ Requirements
 Setup and Usage
 ===============
 
-See the `Documentation <https://ytmusicapi.readthedocs.io/en/latest/reference.html>`_ for detailed instructions
+See the `Documentation <https://ytmusicapi.readthedocs.io/en/latest/usage.html>`_ for detailed instructions
 
 Contributing
 ==============

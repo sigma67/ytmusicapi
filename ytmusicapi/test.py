@@ -26,6 +26,19 @@ class TestYTMusic(unittest.TestCase):
         results = youtube_auth.search("Oasis Wonderwall")
         self.assertGreater(len(results), 0)
 
+    def test_get_uploaded_songs(self):
+        results = youtube_auth.get_uploaded_songs(50)
+        self.assertEqual(len(results), 50)
+
+    def test_upload_song(self):
+        response = youtube_auth.upload_song('../12 - Turning Point.mp3')
+        self.assertEqual(response, 'OK')
+
+    def test_delete_uploaded_song(self):
+        results = youtube_auth.get_uploaded_songs()
+        response = youtube_auth.delete_uploaded_song(results[0])
+        self.assertEqual(response, 'STATUS_SUCCEEDED')
+
     # end to end test adding playlist, adding item, deleting item, deleting playlist
     def test_end2end(self):
         playlist = youtube_auth.create_playlist("test", "test description")
