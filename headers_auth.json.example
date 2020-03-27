@@ -6,6 +6,5 @@
     "X-Goog-AuthUser": "0",
     "x-origin": "https://music.youtube.com",
     "Authorization": "PASTE_AUTHORIZATION",
-    "X-Youtube-Identity-Token": "PASTE_IDENTITY",
     "Cookie" : "PASTE_COOKIE"
 }

@@ -15,7 +15,7 @@ def setup():
             break
         contents.append(line)
 
-    required_headers = ["Authorization", "X-Youtube-Identity-Token", "Cookie"]
+    required_headers = ["Authorization", "Cookie"]
     try:
         headers = {}
         for content in contents:
