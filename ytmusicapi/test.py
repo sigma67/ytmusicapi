@@ -35,7 +35,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_upload_song(self):
         response = youtube_auth.upload_song('../12 - Turning Point.mp3')
-        self.assertEqual(response, 'OK')
+        self.assertEqual(response, 'STATUS_SUCCEEDED')
 
     def test_delete_uploaded_song(self):
         results = youtube_auth.get_uploaded_songs()

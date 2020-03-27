@@ -27,6 +27,7 @@ class YTMusic:
 
         """
         self.auth = auth
+
         file = auth if auth else pkg_resources.resource_filename('ytmusicapi', 'headers.json')
         with open(file) as json_file:
             self.headers = json.load(json_file)
@@ -441,7 +442,7 @@ class YTMusic:
                       files={'file': file},
                       headers=headers)
         prepped = req.prepare()
-        filesize = str(int(prepped.headers['content-length']) -500)
+        filesize = prepped.headers['content-length']
 
         body = "filename=" + ntpath.basename(filepath)
         headers['content-type'] = 'application/x-www-form-urlencoded;charset=utf-8'
