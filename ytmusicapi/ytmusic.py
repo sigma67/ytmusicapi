@@ -29,11 +29,18 @@ class YTMusic:
         self.auth = auth
 
         file = auth if auth else pkg_resources.resource_filename('ytmusicapi', 'headers.json')
+
         with open(file) as json_file:
             self.headers = json.load(json_file)
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
+
+        # verify authentication credentials work
+        if auth:
+            response = self.__send_request('guide', {})
+            if 'error' in response:
+                raise Exception("The provided credentials are invalid. Reason given by the server: " + response['error']['status'])
 
     def __send_request(self, endpoint, body, additionalParams=""):
         body.update(self.context)
