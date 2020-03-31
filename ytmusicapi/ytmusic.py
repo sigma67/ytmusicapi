@@ -259,6 +259,7 @@ class YTMusic:
                 'videoId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
                 'artist': 'Artist',
                 'title': 'Song Title',
+                'album': None,
                 'setVideoId': '56B44F6D10557CC6'
             }
 

@@ -11,10 +11,10 @@ def parse_playlist_items(results, owned=False):
         if 'musicResponsiveListItemRenderer' not in result:
             continue
         data = result['musicResponsiveListItemRenderer']
-        videoId = None
 
         try:
             # if playlist is not owned, the playlist item can't be interacted with
+            videoId = setVideoId = None
             if owned:
                 for item in data['menu']['menuRenderer']['items']:
                     if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in item['menuServiceItemRenderer']['serviceEndpoint']:
@@ -25,14 +25,13 @@ def parse_playlist_items(results, owned=False):
                 # if item is not playable, there is no videoId
                 if 'playNavigationEndpoint' in data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']:
                     videoId = data['overlay']['musicItemThumbnailOverlayRenderer']['content']['musicPlayButtonRenderer']['playNavigationEndpoint']['watchEndpoint']['videoId']
-                else:
-                    videoId = None
-                setVideoId = None
 
+            runs = [None] * 3
+            for i in range(len(runs)):
+                if 'runs' in data['flexColumns'][i]['musicResponsiveListItemFlexColumnRenderer']['text']:
+                    runs[i] = data['flexColumns'][i]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
 
-            artist = data['flexColumns'][1]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
-            title = data['flexColumns'][0]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
-            song = {'videoId': videoId, 'artist': artist, 'title': title, 'setVideoId': setVideoId}
+            song = {'videoId': videoId, 'title': runs[0], 'artist': runs[1], 'album': runs[2], 'setVideoId': setVideoId}
             songs.append(song)
         except Exception as e:
             print("Item " + str(count) + ": " + str(e))
