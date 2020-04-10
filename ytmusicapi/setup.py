@@ -1,11 +1,14 @@
 import pkg_resources
 import json
 import os
+import platform
 
 path = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
+
 def setup():
-    print("Please paste the request headers from Firefox and press Ctrl-D continue:")
+    eof = "Ctrl-D" if platform.system() != "Windows" else "'Enter, Ctrl-Z, Enter'"
+    print("Please paste the request headers from Firefox and press " + eof + " to continue:")
 
     contents = []
     while True:
@@ -24,10 +27,10 @@ def setup():
             if key in required_headers:
                 headers[key] = ': '.join(header[1:])
 
-    except:
-        raise Exception("Error parsing your input, please try again.")
+    except Exception as e:
+        raise Exception("Error parsing your input, please try again. Full error: " + str(e))
 
-    if len(headers) is not 3:
+    if len(headers) != len(required_headers):
         missing = set(required_headers) - set(headers)
         raise Exception("The following entries are missing in your headers: " + ", ".join(missing) +
                         ". Please try a different request (such as /browse) and make sure you are logged in.")
