@@ -120,6 +120,10 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
 
         try:
+            # no results
+            if 'contents' not in response:
+                return search_results
+
             if 'tabbedSearchResultsRenderer' in response['contents']:
                 results = response['contents']['tabbedSearchResultsRenderer']['tabs'][0]['tabRenderer']['content']
             else:
