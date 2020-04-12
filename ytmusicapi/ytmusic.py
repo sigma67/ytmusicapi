@@ -449,28 +449,23 @@ class YTMusic:
         headers = self.headers
         upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=0"
         file = open(filepath, 'rb')
-        req = requests.Request('POST', upload_url,
-                      files={'file': file},
-                      headers=headers)
-        prepped = req.prepare()
-        filesize = prepped.headers['content-length']
-
+        filesize = os.path.getsize(filepath)
         body = "filename=" + ntpath.basename(filepath)
         headers['content-type'] = 'application/x-www-form-urlencoded;charset=utf-8'
         headers['X-Goog-Upload-Command'] = 'start'
-        headers['X-Goog-Upload-Header-Content-Length'] = filesize
+        headers['X-Goog-Upload-Header-Content-Length'] = str(filesize)
         headers['X-Goog-Upload-Protocol'] = 'resumable'
         response = requests.post(upload_url, data=body, headers=headers)
         headers['X-Goog-Upload-Command'] = 'upload, finalize'
         headers['X-Goog-Upload-Offset'] = '0'
         upload_url = response.headers['X-Goog-Upload-URL']
         file.seek(0)
-        response = requests.post(upload_url, files={'file': file}, headers=headers)
+        response = requests.post(upload_url, data=file, headers=headers)
         file.close()
         if response.status_code == 200:
             return 'STATUS_SUCCEEDED'
         else:
-            return response.content
+            return response
 
     def delete_uploaded_song(self, uploaded_song):
         """
