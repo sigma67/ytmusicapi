@@ -17,21 +17,29 @@ class YTMusic:
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
-    def __init__(self, auth=""):
+    def __init__(self, auth=None):
         """
         Create a new instance to interact with YouTube Music.
 
-        :param auth: Optional. Provide authentication credentials to manage your library.
+        :param auth: Optional. Provide a string or path to file.
+          Authentication credentials are needed to manage your library.
           Should be an adjusted version of `headers_auth.json.example` in the project root.
+          See :py:func:`setup` for how to fill in the correct credentials.
           Default: A default header is used without authentication.
 
         """
         self.auth = auth
 
-        file = auth if auth else pkg_resources.resource_filename('ytmusicapi', 'headers.json')
-
-        with open(file) as json_file:
-            self.headers = json.load(json_file)
+        try:
+            if auth is None or os.path.isfile(auth):
+                file = auth if auth else pkg_resources.resource_filename('ytmusicapi', 'headers.json')
+                with open(file) as json_file:
+                    self.headers = json.load(json_file)
+            else:
+                self.headers = json.loads(auth)
+        except Exception as e:
+            print("Failed loading provided credentials. Make sure to provide a string or a file path. "
+                  "Reason: " + str(e))
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
@@ -52,12 +60,15 @@ class YTMusic:
             raise Exception("Please provide authentication before using this function")
 
     @classmethod
-    def setup(self):
+    def setup(cls, filepath=None):
         """
-        Requests browser headers from the user and stores a configuration
-        JSON file in the correct format in the current directory
+        Requests browser headers from the user via command line
+        and returns a string that can be passed to YTMusic()
+
+        :param filepath: Optional filepath to store headers to.
+        :return: configuration headers string
         """
-        setup()
+        return setup(filepath)
 
     def search(self, query, filter=None):
         """
@@ -384,7 +395,7 @@ class YTMusic:
         if not videos[0]['setVideoId']:
             print("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
             return
-        
+
         body = {'playlistId': playlistId, 'actions': []}
         for video in videos:
             body['actions'].append({

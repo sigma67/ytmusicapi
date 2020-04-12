@@ -6,7 +6,7 @@ import platform
 path = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
 
-def setup():
+def setup(filepath=None):
     eof = "Ctrl-D" if platform.system() != "Windows" else "'Enter, Ctrl-Z, Enter'"
     print("Please paste the request headers from Firefox and press " + eof + " to continue:")
 
@@ -39,7 +39,8 @@ def setup():
         default_headers = json.load(json_file)
 
     headers.update(default_headers)
-    with open(path + 'headers_auth.json', 'w') as file:
-        json.dump(headers, file, ensure_ascii=True, indent=4, sort_keys=True)
+    if filepath is not None:
+        with open(filepath, 'w') as file:
+            json.dump(headers, file, ensure_ascii=True, indent=4, sort_keys=True)
 
-    return
+    return json.dumps(headers)
