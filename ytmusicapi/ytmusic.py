@@ -466,7 +466,7 @@ class YTMusic:
         headers = self.headers
         upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=0"
         filesize = os.path.getsize(filepath)
-        body = "filename=" + ntpath.basename(filepath)
+        body = ("filename=" + ntpath.basename(filepath)).encode('utf-8')
         headers['content-type'] = 'application/x-www-form-urlencoded;charset=utf-8'
         headers['X-Goog-Upload-Command'] = 'start'
         headers['X-Goog-Upload-Header-Content-Length'] = str(filesize)
