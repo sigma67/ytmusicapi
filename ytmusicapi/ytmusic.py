@@ -450,16 +450,20 @@ class YTMusic:
         """
         Uploads a song to YouTube Music
 
-        :param filepath: Path to the music file
+        :param filepath: Path to the music file (mp3, m4a, wma, flac or ogg)
         :return: Status String or full response
         """
         self.__check_auth()
         if not os.path.isfile(filepath):
             return
 
+        supported_filetypes = ["mp3", "m4a", "wma", "flac", "ogg"]
+        if os.path.splitext(filepath)[1][1:] not in supported_filetypes:
+            raise Exception("The provided file type is not supported by YouTube Music. Supported file types are " +
+                            ', '.join(supported_filetypes))
+
         headers = self.headers
         upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=0"
-        file = open(filepath, 'rb')
         filesize = os.path.getsize(filepath)
         body = "filename=" + ntpath.basename(filepath)
         headers['content-type'] = 'application/x-www-form-urlencoded;charset=utf-8'
@@ -470,9 +474,9 @@ class YTMusic:
         headers['X-Goog-Upload-Command'] = 'upload, finalize'
         headers['X-Goog-Upload-Offset'] = '0'
         upload_url = response.headers['X-Goog-Upload-URL']
-        file.seek(0)
-        response = requests.post(upload_url, data=file, headers=headers)
-        file.close()
+        with open(filepath, 'rb') as file:
+            response = requests.post(upload_url, data=file, headers=headers)
+
         if response.status_code == 200:
             return 'STATUS_SUCCEEDED'
         else:
