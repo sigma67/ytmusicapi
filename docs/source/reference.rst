@@ -19,6 +19,11 @@ Search
 ------
 .. automethod:: YTMusic.search
 
+Browsing
+--------
+.. automethod:: YTMusic.get_artist
+.. automethod:: YTMusic.get_album
+
 Library
 -------
 .. automethod:: YTMusic.get_liked_songs
