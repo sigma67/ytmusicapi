@@ -45,12 +45,15 @@ class YTMusic:
 
         # verify authentication credentials work
         if auth:
+            self.sapisid = sapisid_from_cookie(self.headers['Cookie'])
             response = self.__send_request('guide', {})
             if 'error' in response:
                 raise Exception("The provided credentials are invalid. Reason given by the server: " + response['error']['status'])
 
     def __send_request(self, endpoint, body, additionalParams=""):
         body.update(self.context)
+        if self.auth:
+            self.headers["Authorization"] = get_authorization(self.sapisid + ' ' + self.headers['x-origin'])
         response = requests.post(base_url + endpoint + params + additionalParams, json=body, headers=self.headers)
         return json.loads(response.text)
 

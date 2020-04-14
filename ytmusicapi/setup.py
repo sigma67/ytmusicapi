@@ -18,7 +18,7 @@ def setup(filepath=None):
             break
         contents.append(line)
 
-    required_headers = ["Authorization", "Cookie"]
+    required_headers = ["Cookie"]
     try:
         headers = {}
         for content in contents:

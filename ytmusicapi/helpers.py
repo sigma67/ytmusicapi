@@ -1,4 +1,7 @@
 import re
+from http.cookies import SimpleCookie
+from hashlib import sha1
+import time
 
 #commonly used navigation paths
 SINGLE_COLUMN_TAB = ['contents', 'singleColumnBrowseResultsRenderer', 'tabs', 0, 'tabRenderer', 'content']
@@ -153,3 +156,18 @@ def html_to_txt(html_text):
     for tag in tags:
         html_text = html_text.replace(tag,'')
     return html_text
+
+
+def sapisid_from_cookie(raw_cookie):
+    cookie = SimpleCookie()
+    cookie.load(raw_cookie)
+    return cookie['SAPISID'].value
+
+
+# SAPISID Hash reverse engineered by
+# https://stackoverflow.com/a/32065323/5726546
+def get_authorization(auth):
+    sha_1 = sha1()
+    unix_timestamp = str(int(time.time()))
+    sha_1.update((unix_timestamp + ' ' + auth).encode('utf-8'))
+    return "SAPISIDHASH " + unix_timestamp + "_" + sha_1.hexdigest()
