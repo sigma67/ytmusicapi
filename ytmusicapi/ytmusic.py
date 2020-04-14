@@ -166,54 +166,54 @@ class YTMusic:
 
         :param channelId: channel id of the artist
         :return: Detailed information about the artist and
-            their songs, albums, singles and videos. Example:
+          their songs, albums, singles and videos. Example::
 
             {
-              "name": "Oasis"
-              "description": "Oasis were ...",
-              "views": "1,838,795,605",
-              "songs": {
-                "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
-                "results": [
-                  {
-                    "videoId": "ZrOKjDZOtkA",
-                    "title": "Wonderwall (Remastered)",
-                    "artist": "Oasis",
-                    "album": "(What's The Story) Morning Glory? (Remastered)"
-                  }
-                ]
-              },
-              "albums": {
-                "results": [
-                  {
-                    "title": "Familiar To Millions",
-                    "year": "2018",
-                    "browseId": "MPREb_AYetWMZunqA"
-                  }
-                ],
-                "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
-              },
-              "singles": {
-                "results": [
-                  {
-                    "title": "Stand By Me (Mustique Demo)",
-                    "year": "2016",
-                    "browseId": "MPREb_7MPKLhibN5G"
-                  }
-                ],
-                "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
-              },
-              "videos": {
-                "results": [
-                  {
-                    "title": "Wonderwall",
-                    "views": "358M",
-                    "videoId": "bx1Bh8ZvH84",
-                    "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
-                  }
-                ],
-                "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
-              }
+                "name": "Oasis",
+                "description": "Oasis were ...",
+                "views": "1,838,795,605",
+                "songs": {
+                    "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
+                    "results": [
+                        {
+                            "videoId": "ZrOKjDZOtkA",
+                            "title": "Wonderwall (Remastered)",
+                            "artist": "Oasis",
+                            "album": "(What's The Story) Morning Glory? (Remastered)"
+                        }
+                    ]
+                },
+                "albums": {
+                    "results": [
+                        {
+                            "title": "Familiar To Millions",
+                            "year": "2018",
+                            "browseId": "MPREb_AYetWMZunqA"
+                        }
+                    ],
+                    "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
+                },
+                "singles": {
+                    "results": [
+                        {
+                            "title": "Stand By Me (Mustique Demo)",
+                            "year": "2016",
+                            "browseId": "MPREb_7MPKLhibN5G"
+                        }
+                    ],
+                    "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
+                },
+                "videos": {
+                    "results": [
+                        {
+                            "title": "Wonderwall",
+                            "views": "358M",
+                            "videoId": "bx1Bh8ZvH84",
+                            "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                        }
+                    ],
+                    "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                }
             }
 
         """
@@ -257,12 +257,6 @@ class YTMusic:
 
         return artist
 
-    def get_artist_songs(self, playlistId):
-        body = {"browseId": playlistId}
-        endpoint = 'browse'
-        response = self.__send_request(endpoint, body)
-        pass
-
     def get_artist_albums(self, channelId, params):
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
@@ -275,17 +269,17 @@ class YTMusic:
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
-        :return: Dictionary with title, description, artist and tracks
+        :return: Dictionary with title, description, artist and tracks.
 
-            Each track is in the following format:
+          Each track is in the following format::
 
-                {
-                  "index": "1",
-                  "title": "WIEE (feat. Mesto)",
-                  "artists": "Martin Garrix",
-                  "videoId": "8xMNeXI9wxI",
-                  "lengthMs": "203406"
-                }
+            {
+               "index": "1",
+               "title": "WIEE (feat. Mesto)",
+               "artists": "Martin Garrix",
+               "videoId": "8xMNeXI9wxI",
+               "lengthMs": "203406"
+            }
 
         """
         body = prepare_browse_endpoint("ALBUM", browseId)
