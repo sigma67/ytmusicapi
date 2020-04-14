@@ -3,8 +3,7 @@ import json
 import pkg_resources
 import ntpath
 import os
-from ytmusicapi.helpers import \
-    parse_playlist_items, parse_uploaded_items, parse_search_result, html_to_txt
+from ytmusicapi.helpers import *
 from ytmusicapi.setup import setup
 
 params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
@@ -140,7 +139,7 @@ class YTMusic:
             else:
                 results = response['contents']
 
-            results = results['sectionListRenderer']['contents']
+            results = nav(results, SECTION_LIST)
 
             # no results
             if len(results) == 1 and 'itemSectionRenderer' in results:
@@ -161,6 +160,154 @@ class YTMusic:
 
         return search_results
 
+    def get_artist(self, channelId):
+        """
+        Get data about an artist
+
+        :param channelId: channel id of the artist
+        :return: Detailed information about the artist and
+            their songs, albums, singles and videos. Example:
+
+            {
+              "name": "Oasis"
+              "description": "Oasis were ...",
+              "views": "1,838,795,605",
+              "songs": {
+                "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
+                "results": [
+                  {
+                    "videoId": "ZrOKjDZOtkA",
+                    "title": "Wonderwall (Remastered)",
+                    "artist": "Oasis",
+                    "album": "(What's The Story) Morning Glory? (Remastered)"
+                  }
+                ]
+              },
+              "albums": {
+                "results": [
+                  {
+                    "title": "Familiar To Millions",
+                    "year": "2018",
+                    "browseId": "MPREb_AYetWMZunqA"
+                  }
+                ],
+                "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
+              },
+              "singles": {
+                "results": [
+                  {
+                    "title": "Stand By Me (Mustique Demo)",
+                    "year": "2016",
+                    "browseId": "MPREb_7MPKLhibN5G"
+                  }
+                ],
+                "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
+              },
+              "videos": {
+                "results": [
+                  {
+                    "title": "Wonderwall",
+                    "views": "358M",
+                    "videoId": "bx1Bh8ZvH84",
+                    "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                  }
+                ],
+                "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+              }
+            }
+
+        """
+        body = prepare_browse_endpoint("ARTIST", channelId)
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+
+        artist = {}
+        artist['name'] = response['header']['musicImmersiveHeaderRenderer']['title']['runs'][0]['text']
+        artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
+        artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0]['text'].split(' ')[0]
+        artist['songs'] = {}
+        artist['songs']['browseId'] = results[0]['musicShelfRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+        artist['songs']['results'] = parse_playlist_items(results[0]['musicShelfRenderer']['contents'])
+
+        categories = ['albums', 'singles', 'videos']
+        for category in categories:
+            data = [r['musicCarouselShelfRenderer'] for r in results if 'musicCarouselShelfRenderer' in r
+                    and nav(r['musicCarouselShelfRenderer'], CAROUSEL_TITLE)['text'].lower() == category]
+            if len(data) > 0:
+                artist[category] = {"results": []}
+                if 'navigationEndpoint' in nav(data[0], CAROUSEL_TITLE):
+                    artist[category]['browseId'] = nav(data[0], CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['browseId']
+                    if category in ['albums', 'singles']:
+                        artist[category]['params'] = nav(data[0], CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
+
+                for item in data[0]['contents']:
+                    result = {'title': item['musicTwoRowItemRenderer']['title']['runs'][0]['text']}
+                    if category == 'albums':
+                        result['year'] = item['musicTwoRowItemRenderer']['subtitle']['runs'][2]['text']
+                        result['browseId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+                    elif category == 'singles':
+                        result['year'] = item['musicTwoRowItemRenderer']['subtitle']['runs'][0]['text']
+                        result['browseId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+                    elif category == 'videos':
+                        result['views'] = item['musicTwoRowItemRenderer']['subtitle']['runs'][2]['text'].split(' ')[0]
+                        result['videoId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['watchEndpoint']['videoId']
+                        result['playlistId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['watchEndpoint']['playlistId']
+                    artist[category]['results'].append(result)
+
+        return artist
+
+    def get_artist_songs(self, playlistId):
+        body = {"browseId": playlistId}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        pass
+
+    def get_artist_albums(self, channelId, params):
+        body = {"browseId": channelId, "params": params}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        pass
+
+    def get_album(self, browseId):
+        """
+        Get information and tracks of an album
+
+        :param browseId: browseId of the album, for example
+            returned by :py:func:`search`
+        :return: Dictionary with title, description, artist and tracks
+
+            Each track is in the following format:
+
+                {
+                  "index": "1",
+                  "title": "WIEE (feat. Mesto)",
+                  "artists": "Martin Garrix",
+                  "videoId": "8xMNeXI9wxI",
+                  "lengthMs": "203406"
+                }
+
+        """
+        body = prepare_browse_endpoint("ALBUM", browseId)
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        album = {}
+        album['title'] = nav(response, FRAMEWORK_MUTATIONS)[0]['payload']['musicAlbumRelease']['title']
+        album['description'] = nav(response, FRAMEWORK_MUTATIONS)[1]['payload']['musicAlbumReleaseDetail']['description']
+        album['artist'] = nav(response, FRAMEWORK_MUTATIONS)[3]['payload']['musicArtist']['name']
+        album['tracks'] = []
+        for item in nav(response, FRAMEWORK_MUTATIONS)[4:]:
+            if 'musicTrack' in item['payload']:
+                track = {}
+                track['index'] = item['payload']['musicTrack']['albumTrackIndex']
+                track['title'] = item['payload']['musicTrack']['title']
+                track['artists'] = item['payload']['musicTrack']['artistNames']
+                track['videoId'] = item['payload']['musicTrack']['videoId']
+                track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
+                album['tracks'].append(track)
+
+        return album
+
     def get_playlists(self):
         """
         Retrieves the content of the 'Library' page
@@ -179,7 +326,8 @@ class YTMusic:
         body = {'browseId': 'FEmusic_liked_playlists'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][1]['itemSectionRenderer']['contents'][0]['gridRenderer']['items']
+
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + ITEM_SECTION)['gridRenderer']['items']
         playlists = []
         # skip first item ("New Playlist" button)
         for result in results[1:]:
@@ -210,8 +358,7 @@ class YTMusic:
         body = {'browseId': 'FEmusic_history'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content'][
-            'sectionListRenderer']['contents']
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         songs = []
         for content in results:
             data = content['musicShelfRenderer']['contents']
@@ -267,18 +414,10 @@ class YTMusic:
         needed for moving/removing playlist items
 
         """
-        body = { 'browseEndpointContextSupportedConfigs':
-          {
-            "browseEndpointContextMusicConfig":
-              {
-                "pageType": "MUSIC_PAGE_TYPE_PLAYLIST"
-              }
-          },
-          'browseId': "VL" + playlistId
-        }
+        body = prepare_browse_endpoint("PLAYLIST", "VL" + playlistId)
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][0]['musicPlaylistShelfRenderer']
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)[0]['musicPlaylistShelfRenderer']
         songs = []
         if 'musicDetailHeaderRenderer' in response['header']: #playlist not owned
             header = response['header']['musicDetailHeaderRenderer']
@@ -294,7 +433,7 @@ class YTMusic:
         request_count = 1
 
         while request_count * 100 < songs_to_get:
-            ctoken = results['continuations'][0]['nextContinuationData']['continuation']
+            ctoken = nav(results, CONTINUATION)
             additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
 
             response = self.__send_request(endpoint, body, additionalParams)
@@ -431,14 +570,14 @@ class YTMusic:
         endpoint = 'browse'
         body = {"browseId": "FEmusic_library_privately_owned_tracks"}
         response = self.__send_request(endpoint, body)
-        results = response['contents']['singleColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][1]['itemSectionRenderer']['contents'][0]['musicShelfRenderer']
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + ITEM_SECTION)['musicShelfRenderer']
         songs = []
 
         songs.extend(parse_uploaded_items(results['contents'][1:]))
 
         request_count = 1
         while request_count * 25 < limit:
-            ctoken = results['continuations'][0]['nextContinuationData']['continuation']
+            ctoken = nav(results, CONTINUATION)
             additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
             response = self.__send_request(endpoint, body, additionalParams)
             results = response['continuationContents']['musicShelfContinuation']

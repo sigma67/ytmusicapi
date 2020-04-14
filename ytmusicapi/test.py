@@ -29,6 +29,15 @@ class TestYTMusic(unittest.TestCase):
         results = youtube_auth.search("Oasis Wonderwall")
         self.assertGreater(len(results), 0)
 
+    def test_get_artist(self):
+        results = youtube.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")
+        self.assertEqual(len(results), 4)
+
+    def test_get_album(self):
+        results = youtube.get_album("MPREb_BQZvl3BFGay")
+        self.assertEqual(len(results), 4)
+        self.assertEqual(len(results['tracks']), 7)
+
     def test_get_uploaded_songs(self):
         results = youtube_auth.get_uploaded_songs(50)
         self.assertEqual(len(results), 50)
