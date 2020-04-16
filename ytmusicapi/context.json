@@ -1,10 +1,5 @@
 {
   "context": {
-    "activePlayers": [
-      {
-        "playerContextParams": "Q0FFU0FnZ0I="
-      }
-    ],
     "capabilities": {},
     "client": {
       "clientName": "WEB_REMIX",

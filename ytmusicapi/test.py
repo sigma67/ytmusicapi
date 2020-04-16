@@ -21,6 +21,10 @@ class TestYTMusic(unittest.TestCase):
         songs = youtube_auth.get_playlist_items('PLQwVIlKxHM6oCeKLTsUx_w9CmWjHKdg68')
         self.assertEqual(len(songs), 64)
 
+    def test_get_liked_songs(self):
+        songs = youtube_auth.get_liked_songs(100)
+        self.assertGreater(len(songs), 0)
+
     def test_get_history(self):
         songs = youtube_auth.get_history()
         self.assertGreater(len(songs), 0)
@@ -31,7 +35,17 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_artist(self):
         results = youtube.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")
-        self.assertEqual(len(results), 4)
+        self.assertEqual(len(results), 7)
+
+    def test_get_artist_albums(self):
+        artist = youtube.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
+        results = youtube.get_artist_albums(artist['albums']['browseId'], artist['albums']['params'])
+        self.assertGreater(len(results), 0)
+
+    def test_get_artist_singles(self):
+        artist = youtube_auth.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
+        results = youtube_auth.get_artist_albums(artist['singles']['browseId'], artist['singles']['params'])
+        self.assertGreater(len(results), 0)
 
     def test_get_album(self):
         results = youtube.get_album("MPREb_BQZvl3BFGay")

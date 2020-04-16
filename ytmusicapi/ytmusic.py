@@ -165,11 +165,14 @@ class YTMusic:
 
     def get_artist(self, channelId):
         """
-        Get data about an artist
+        Get information about an artist and their top releases (songs,
+        albums, singles and videos). The top lists contain pointers
+        for getting the full list of releases. For songs/videos, pass
+        the browseId to :py:func:`get_playlist_items`. For albums/singles,
+        pass browseId and params to :py:func:`get_artist_albums`.
 
         :param channelId: channel id of the artist
-        :return: Detailed information about the artist and
-          their songs, albums, singles and videos. Example::
+        :return: Dictionary with requested information. Example::
 
             {
                 "name": "Oasis",
@@ -230,8 +233,9 @@ class YTMusic:
         artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
         artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0]['text'].split(' ')[0]
         artist['songs'] = {}
-        artist['songs']['browseId'] = results[0]['musicShelfRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
-        artist['songs']['results'] = parse_playlist_items(results[0]['musicShelfRenderer']['contents'])
+        if 'musicShelfRenderer' in results[0]: # API sometimes does not return songs
+            artist['songs']['browseId'] = results[0]['musicShelfRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+            artist['songs']['results'] = parse_playlist_items(results[0]['musicShelfRenderer']['contents'])
 
         categories = ['albums', 'singles', 'videos']
         for category in categories:
@@ -261,10 +265,41 @@ class YTMusic:
         return artist
 
     def get_artist_albums(self, channelId, params):
+        """
+        Get the full list of an artist's albums or singles
+
+        :param channelId: channel Id of the artist
+        :param params: params obtained by :py:func:`get_artist`
+        :return: List of albums or singles
+
+            Example::
+
+            {
+                "browseId": "MPREb_0rtvKhqeCY0",
+                "artist": "Armin van Buuren",
+                "title": "This I Vow (feat. Mila Josef)",
+                "type": "EP",
+                "year": "2020"
+            }
+
+        """
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        pass
+        artist = response['header']['musicHeaderRenderer']['title']['runs'][0]['text']
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        albums = []
+        musicShelf = results[0]['musicShelfRenderer']
+        release_type = musicShelf['title']['runs'][0]['text'].lower()
+        for result in musicShelf['contents']:
+            data = result['musicResponsiveListItemRenderer']
+            browseId = data['navigationEndpoint']['browseEndpoint']['browseId']
+            title = get_item_text(data, 0)
+            album_type = get_item_text(data, 1) if release_type == "albums" else "Single"
+            year = get_item_text(data, 1, 2) if release_type == "albums" else get_item_text(data, 1)
+            albums.append({"browseId": browseId, "artist": artist, "title": title, "type": album_type, "year": year})
+
+        return albums
 
     def get_album(self, browseId):
         """
@@ -299,7 +334,8 @@ class YTMusic:
                 track['index'] = item['payload']['musicTrack']['albumTrackIndex']
                 track['title'] = item['payload']['musicTrack']['title']
                 track['artists'] = item['payload']['musicTrack']['artistNames']
-                track['videoId'] = item['payload']['musicTrack']['videoId']
+                # in case the song is unavailable, there is no videoId
+                track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item['payload']['musicTrack'] else None
                 track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
                 album['tracks'].append(track)
 
@@ -411,7 +447,8 @@ class YTMusic:
         needed for moving/removing playlist items
 
         """
-        body = prepare_browse_endpoint("PLAYLIST", "VL" + playlistId)
+        browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
+        body = prepare_browse_endpoint("PLAYLIST", browseId)
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)[0]['musicPlaylistShelfRenderer']

@@ -131,11 +131,11 @@ def parse_search_result(data, resultType = None):
     return search_result
 
 
-def get_item_text(item, index):
+def get_item_text(item, index, run_index=0):
     if 'runs' not in item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']:
         return None
 
-    return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][0]['text']
+    return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][run_index]['text']
 
 
 def prepare_browse_endpoint(type, browseId):
