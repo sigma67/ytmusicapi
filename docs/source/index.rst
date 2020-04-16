@@ -12,6 +12,7 @@ such as retrieving your library content or creating large playlists.
 
 Features
 --------
+-  Browsing: get artist information and releases (songs, videos, albums, singles), get albums
 -  Library management: list, create, delete, and modify playlists and playlist items
 -  Search: Search for songs on YouTube Music
 -  Uploads: Upload songs, list uploaded songs and delete uploaded songs
@@ -29,6 +30,7 @@ For a complete documentation of available functions, refer to the :doc:`Referenc
     search_results = ytmusic.search("Oasis Wonderwall")
     ytmusic.add_playlist_items(playlistId, [search_results[0]['videoId']])
 
+The `tests <https://github.com/sigma67/ytmusicapi/blob/master/ytmusicapi/test.py/>`_ are also a great source of usage examples.
 
 
 Contents

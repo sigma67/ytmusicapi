@@ -22,6 +22,7 @@ Search
 Browsing
 --------
 .. automethod:: YTMusic.get_artist
+.. automethod:: YTMusic.get_artist_albums
 .. automethod:: YTMusic.get_album
 
 Library
