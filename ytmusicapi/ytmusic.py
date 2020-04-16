@@ -172,55 +172,59 @@ class YTMusic:
         pass browseId and params to :py:func:`get_artist_albums`.
 
         :param channelId: channel id of the artist
-        :return: Dictionary with requested information. Example::
+        :return: Dictionary with requested information.
 
-            {
-                "name": "Oasis",
-                "description": "Oasis were ...",
-                "views": "1,838,795,605",
-                "songs": {
-                    "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
-                    "results": [
-                        {
-                            "videoId": "ZrOKjDZOtkA",
-                            "title": "Wonderwall (Remastered)",
-                            "artist": "Oasis",
-                            "album": "(What's The Story) Morning Glory? (Remastered)"
-                        }
-                    ]
-                },
-                "albums": {
-                    "results": [
-                        {
-                            "title": "Familiar To Millions",
-                            "year": "2018",
-                            "browseId": "MPREb_AYetWMZunqA"
-                        }
-                    ],
-                    "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
-                },
-                "singles": {
-                    "results": [
-                        {
-                            "title": "Stand By Me (Mustique Demo)",
-                            "year": "2016",
-                            "browseId": "MPREb_7MPKLhibN5G"
-                        }
-                    ],
-                    "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA"
-                },
-                "videos": {
-                    "results": [
-                        {
-                            "title": "Wonderwall",
-                            "views": "358M",
-                            "videoId": "bx1Bh8ZvH84",
-                            "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
-                        }
-                    ],
-                    "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+            Example::
+
+                {
+                    "name": "Oasis",
+                    "description": "Oasis were ...",
+                    "views": "1,838,795,605",
+                    "songs": {
+                        "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
+                        "results": [
+                            {
+                                "videoId": "ZrOKjDZOtkA",
+                                "title": "Wonderwall (Remastered)",
+                                "artist": "Oasis",
+                                "album": "(What's The Story) Morning Glory? (Remastered)"
+                            }
+                        ]
+                    },
+                    "albums": {
+                        "results": [
+                            {
+                                "title": "Familiar To Millions",
+                                "year": "2018",
+                                "browseId": "MPREb_AYetWMZunqA"
+                            }
+                        ],
+                        "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                        "params": "6gPTAUNwc0JDbndLYlFBQV..."
+                    },
+                    "singles": {
+                        "results": [
+                            {
+                                "title": "Stand By Me (Mustique Demo)",
+                                "year": "2016",
+                                "browseId": "MPREb_7MPKLhibN5G"
+                            }
+                        ],
+                        "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                        "params": "6gPTAUNwc0JDbndLYlFBQV..."
+                    },
+                    "videos": {
+                        "results": [
+                            {
+                                "title": "Wonderwall",
+                                "views": "358M",
+                                "videoId": "bx1Bh8ZvH84",
+                                "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                            }
+                        ],
+                        "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                    }
                 }
-            }
 
         """
         body = prepare_browse_endpoint("ARTIST", channelId)
@@ -274,13 +278,13 @@ class YTMusic:
 
             Example::
 
-            {
-                "browseId": "MPREb_0rtvKhqeCY0",
-                "artist": "Armin van Buuren",
-                "title": "This I Vow (feat. Mila Josef)",
-                "type": "EP",
-                "year": "2020"
-            }
+                {
+                    "browseId": "MPREb_0rtvKhqeCY0",
+                    "artist": "Armin van Buuren",
+                    "title": "This I Vow (feat. Mila Josef)",
+                    "type": "EP",
+                    "year": "2020"
+                }
 
         """
         body = {"browseId": channelId, "params": params}
