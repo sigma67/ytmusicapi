@@ -50,7 +50,10 @@ def parse_playlist_items(results, owned=False):
 
             duration = None
             if 'fixedColumns' in data:
-                duration = data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']['simpleText']
+                if 'simpleText' in data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']:
+                    duration = data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']['simpleText']
+                else:
+                    duration = data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
 
             song = {'videoId': videoId, 'title': runs[0], 'artist': runs[1], 'album': runs[2]}
             if duration:
