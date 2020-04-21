@@ -365,7 +365,8 @@ class YTMusic:
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
 
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + ITEM_SECTION)['gridRenderer']['items']
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['gridRenderer']['items']
         playlists = []
         # skip first item ("New Playlist" button)
         for result in results[1:]:
@@ -609,7 +610,8 @@ class YTMusic:
         endpoint = 'browse'
         body = {"browseId": "FEmusic_library_privately_owned_tracks"}
         response = self.__send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + ITEM_SECTION)['musicShelfRenderer']
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
         songs = []
 
         songs.extend(parse_uploaded_items(results['contents'][1:]))

@@ -136,3 +136,10 @@ def nav(root, items):
     """Access a nested object in root by item sequence."""
     for k in items: root = root[k]
     return root
+
+
+def find_object_by_key(object_list, key):
+    for item in object_list:
+        if key in item:
+            return item
+    return None
