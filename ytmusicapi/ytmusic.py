@@ -234,7 +234,7 @@ class YTMusic:
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
         artist = {}
-        artist['name'] = response['header']['musicImmersiveHeaderRenderer']['title']['runs'][0]['text']
+        artist['name'] = nav(response['header']['musicImmersiveHeaderRenderer'], TITLE)
         artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
         artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0]['text'].split(' ')[0]
         artist['songs'] = {}
@@ -254,15 +254,15 @@ class YTMusic:
                         artist[category]['params'] = nav(data[0], CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
 
                 for item in data[0]['contents']:
-                    result = {'title': item['musicTwoRowItemRenderer']['title']['runs'][0]['text']}
+                    result = {'title': nav(item['musicTwoRowItemRenderer'], TITLE)}
                     if category == 'albums':
-                        result['year'] = item['musicTwoRowItemRenderer']['subtitle']['runs'][2]['text']
+                        result['year'] = nav(item['musicTwoRowItemRenderer'], SUBTITLE2)
                         result['browseId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
                     elif category == 'singles':
-                        result['year'] = item['musicTwoRowItemRenderer']['subtitle']['runs'][0]['text']
+                        result['year'] = nav(item['musicTwoRowItemRenderer'], SUBTITLE)
                         result['browseId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
                     elif category == 'videos':
-                        result['views'] = item['musicTwoRowItemRenderer']['subtitle']['runs'][2]['text'].split(' ')[0]
+                        result['views'] = nav(item['musicTwoRowItemRenderer'], SUBTITLE2).split(' ')[0]
                         result['videoId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['watchEndpoint']['videoId']
                         result['playlistId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['watchEndpoint']['playlistId']
                     artist[category]['results'].append(result)
@@ -291,11 +291,11 @@ class YTMusic:
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        artist = response['header']['musicHeaderRenderer']['title']['runs'][0]['text']
+        artist = nav(response['header']['musicHeaderRenderer'], TITLE)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         albums = []
         musicShelf = results[0]['musicShelfRenderer']
-        release_type = musicShelf['title']['runs'][0]['text'].lower()
+        release_type = nav(musicShelf, TITLE).lower()
         for result in musicShelf['contents']:
             data = result['musicResponsiveListItemRenderer']
             browseId = data['navigationEndpoint']['browseEndpoint']['browseId']
@@ -356,7 +356,8 @@ class YTMusic:
 
             {
                 'playlistId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
-                'title': 'Playlist title'
+                'title': 'Playlist title',
+                'count': 5
             }
 
         """
@@ -371,9 +372,13 @@ class YTMusic:
         # skip first item ("New Playlist" button)
         for result in results[1:]:
             data = result['musicTwoRowItemRenderer']
-            playlistId = data['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId'][2:]
-            title = data['title']['runs'][0]['text']
-            playlists.append({'playlistId': playlistId, 'title': title})
+            playlist = {}
+            playlist['playlistId'] = data['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId'][2:]
+            playlist['title'] = nav(data, TITLE)
+            if len(data['subtitle']['runs']) == 3:
+                playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
+
+            playlists.append(playlist)
 
         return playlists
 
@@ -403,7 +408,7 @@ class YTMusic:
             data = content['musicShelfRenderer']['contents']
             songlist = parse_playlist_items(data)
             for song in songlist:
-                song['played'] = content['musicShelfRenderer']['title']['runs'][0]['text']
+                song['played'] = nav(content['musicShelfRenderer'], TITLE)
             songs.extend(songlist)
 
         return songs

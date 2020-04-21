@@ -8,7 +8,9 @@ MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
 PLAY_BUTTON = ['overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer']
 CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'runs', 0]
 FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
-
+TITLE = ['title', 'runs', 0, 'text']
+SUBTITLE = ['subtitle', 'runs', 0, 'text']
+SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
 
 def parse_playlist_items(results, owned=False):
     songs = []
