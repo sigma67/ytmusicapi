@@ -65,6 +65,8 @@ def parse_uploaded_items(results):
     songs = []
     for result in results:
         data = result['musicResponsiveListItemRenderer']
+        if 'menu' not in data:
+            continue
         entityId = nav(data, MENU_ITEMS)[-1]['menuNavigationItemRenderer']['navigationEndpoint'][
             'confirmDialogEndpoint']['content']['confirmDialogRenderer']['confirmButton']['buttonRenderer']['command'][
             'musicDeletePrivatelyOwnedEntityCommand']['entityId']
@@ -132,6 +134,20 @@ def get_item_text(item, index, run_index=0):
         return None
 
     return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']['runs'][run_index]['text']
+
+
+def get_continuations(results, continuation_type, per_page, limit, request_func, parse_func):
+    request_count = 1
+    items = []
+    while 'continuations' in results and request_count * per_page < limit:
+        ctoken = nav(results, CONTINUATION)
+        additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
+        response = request_func(additionalParams)
+        results = response['continuationContents'][continuation_type]
+        items.extend(parse_func(results['contents']))
+        request_count += 1
+
+    return items
 
 
 def nav(root, items):

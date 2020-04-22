@@ -18,8 +18,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(songs), 200)
 
     def test_get_owned_playlist(self):
-        songs = youtube_auth.get_playlist_items('PLQwVIlKxHM6oCeKLTsUx_w9CmWjHKdg68')
-        self.assertEqual(len(songs), 64)
+        songs = youtube_auth.get_playlist_items('PL528pVfw3ao2VzfY6zE1TOZm1cBSdk7Q0')
+        self.assertEqual(len(songs), 287)
 
     def test_get_liked_songs(self):
         songs = youtube_auth.get_liked_songs(100)
@@ -53,8 +53,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results['tracks']), 7)
 
     def test_get_uploaded_songs(self):
-        results = youtube_auth.get_uploaded_songs(50)
-        self.assertEqual(len(results), 50)
+        results = youtube_auth.get_uploaded_songs(126)
+        self.assertEqual(len(results), 126)
 
     def test_upload_song(self):
         response = youtube_auth.upload_song('../12 - Turning Point 자.mp3')

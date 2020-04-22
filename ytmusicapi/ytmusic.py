@@ -477,14 +477,10 @@ class YTMusic:
         songs_to_get = min(limit, song_count)
         request_count = 1
 
-        while request_count * 100 < songs_to_get:
-            ctoken = nav(results, CONTINUATION)
-            additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
-
-            response = self.__send_request(endpoint, body, additionalParams)
-            results = response['continuationContents']['musicPlaylistShelfContinuation']
-            songs.extend(parse_playlist_items(results['contents'], own_playlist))
-            request_count += 1
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_playlist_items(contents, own_playlist)
+            songs.extend(get_continuations(results, 'musicPlaylistShelfContinuation', 100, songs_to_get, request_func, parse_func))
 
         return songs
 
@@ -621,14 +617,9 @@ class YTMusic:
 
         songs.extend(parse_uploaded_items(results['contents'][1:]))
 
-        request_count = 1
-        while request_count * 25 < limit:
-            ctoken = nav(results, CONTINUATION)
-            additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
-            response = self.__send_request(endpoint, body, additionalParams)
-            results = response['continuationContents']['musicShelfContinuation']
-            songs.extend(parse_uploaded_items(results['contents']))
-            request_count += 1
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            songs.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_uploaded_items))
 
         return songs
 
