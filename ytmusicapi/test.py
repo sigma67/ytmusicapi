@@ -9,25 +9,9 @@ class TestYTMusic(unittest.TestCase):
     def test_setup(self):
         YTMusic.setup()
 
-    def test_get_playlists(self):
-        playlists = youtube_auth.get_playlists()
-        self.assertGreater(len(playlists), 0)
-
-    def test_get_foreign_playlist(self):
-        songs = youtube.get_playlist_items("PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5")
-        self.assertEqual(len(songs), 200)
-
-    def test_get_owned_playlist(self):
-        songs = youtube_auth.get_playlist_items('PL528pVfw3ao2VzfY6zE1TOZm1cBSdk7Q0')
-        self.assertEqual(len(songs), 287)
-
-    def test_get_liked_songs(self):
-        songs = youtube_auth.get_liked_songs(100)
-        self.assertGreater(len(songs), 0)
-
-    def test_get_history(self):
-        songs = youtube_auth.get_history()
-        self.assertGreater(len(songs), 0)
+    ###############
+    # BROWSING
+    ###############
 
     def test_search(self):
         results = youtube_auth.search("Oasis Wonderwall")
@@ -51,6 +35,54 @@ class TestYTMusic(unittest.TestCase):
         results = youtube.get_album("MPREb_BQZvl3BFGay")
         self.assertEqual(len(results), 4)
         self.assertEqual(len(results['tracks']), 7)
+
+    ###############
+    # LIBRARY
+    ###############
+
+    def test_get_liked_songs(self):
+        songs = youtube_auth.get_liked_songs(100)
+        self.assertGreater(len(songs), 0)
+
+    def test_get_history(self):
+        songs = youtube_auth.get_history()
+        self.assertGreater(len(songs), 0)
+
+    def test_rate_song(self):
+        response = youtube_auth.rate_song('ZrOKjDZOtkA', 'LIKE')
+        self.assertIn('actions', response)
+        response = youtube_auth.rate_song('ZrOKjDZOtkA', 'INDIFFERENT')
+        self.assertIn('actions', response)
+
+    def test_rate_playlist(self):
+        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'DISLIKE')
+        self.assertIn('actions', response)
+        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'INDIFFERENT')
+        self.assertIn('actions', response)
+
+    def test_subscribe_artists(self):
+        youtube_auth.subscribe_artists(['UCmMUZbaYdNH0bEd1PAlAqsA', 'UCEPMVbUzImPl4p8k4LkGevA'])
+        youtube_auth.unsubscribe_artists(['UCmMUZbaYdNH0bEd1PAlAqsA', 'UCEPMVbUzImPl4p8k4LkGevA'])
+
+    ###############
+    # PLAYLISTS
+    ###############
+
+    def test_get_playlists(self):
+        playlists = youtube_auth.get_playlists()
+        self.assertGreater(len(playlists), 0)
+
+    def test_get_foreign_playlist(self):
+        songs = youtube.get_playlist_items("PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5")
+        self.assertEqual(len(songs), 200)
+
+    def test_get_owned_playlist(self):
+        songs = youtube_auth.get_playlist_items('PL528pVfw3ao2VzfY6zE1TOZm1cBSdk7Q0')
+        self.assertEqual(len(songs), 287)
+
+    ###############
+    # UPLOADS
+    ###############
 
     def test_get_uploaded_songs(self):
         results = youtube_auth.get_uploaded_songs(126)

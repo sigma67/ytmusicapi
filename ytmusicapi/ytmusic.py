@@ -73,6 +73,10 @@ class YTMusic:
         """
         return setup(filepath)
 
+    ###############
+    # BROWSING
+    ###############
+
     def search(self, query, filter=None):
         """
         Search YouTube music
@@ -346,6 +350,10 @@ class YTMusic:
 
         return album
 
+    ###############
+    # LIBRARY
+    ###############
+
     def get_playlists(self):
         """
         Retrieves the content of the 'Library' page
@@ -421,20 +429,64 @@ class YTMusic:
         :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
 
           | 'INDIFFERENT' removes the previous rating and assigns no rating
+
+        :return: Full response
         """
         self.__check_auth()
         body = {'target': {'videoId': videoId}}
-        if rating == 'LIKE':
-            endpoint = 'like/like'
-        elif rating == 'DISLIKE':
-            endpoint = 'like/dislike'
-        elif rating == 'INDIFFERENT':
-            endpoint = 'like/removelike'
-        else:
+        endpoint = prepare_like_endpoint(rating)
+        if endpoint is None:
             return
 
-        self.__send_request(endpoint, body)
+        return self.__send_request(endpoint, body)
 
+    def rate_playlist(self, playlistId, rating='INDIFFERENT'):
+        """
+        Rates a playlist/album ("Add to library"/"Remove from library" interactions on YouTube Music)
+        You can also dislike a playlist/album, which has an effect on your recommendations
+
+        :param videoId: Video id
+        :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
+
+          | 'INDIFFERENT' removes the playlist/album from the library
+
+        :return: Full response
+        """
+        self.__check_auth()
+        body = {'target': {'playlistId': playlistId}}
+        endpoint = prepare_like_endpoint(rating)
+        if endpoint is None:
+            return
+
+        return self.__send_request(endpoint, body)
+
+    def subscribe_artists(self, channelIds: list) -> dict:
+        """
+        Subscribe to artists. Adds the artists to your libary
+
+        :param channelIds: Artist channel ids
+        :return: Full response
+        """
+        self.__check_auth()
+        body = {'channelIds': channelIds}
+        endpoint = 'subscription/subscribe'
+        return self.__send_request(endpoint, body)
+
+    def unsubscribe_artists(self, channelIds: list) -> dict:
+        """
+        Unsubscribe from artists. Removes the artists from your libary
+
+        :param channelIds: Artist channel ids
+        :return: Full response
+        """
+        self.__check_auth()
+        body = {'channelIds': channelIds}
+        endpoint = 'subscription/unsubscribe'
+        return self.__send_request(endpoint, body)
+
+    ###############
+    # PLAYLISTS
+    ###############
 
     def get_playlist_items(self, playlistId, limit=1000):
         """
@@ -588,6 +640,10 @@ class YTMusic:
         endpoint = 'browse/edit_playlist'
         response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
+
+    ###############
+    # UPLOADS
+    ###############
 
     def get_uploaded_songs(self, limit=25):
         """

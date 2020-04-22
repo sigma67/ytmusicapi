@@ -17,6 +17,17 @@ def prepare_browse_endpoint(type, browseId):
     }
 
 
+def prepare_like_endpoint(rating):
+    if rating == 'LIKE':
+        return 'like/like'
+    elif rating == 'DISLIKE':
+        return 'like/dislike'
+    elif rating == 'INDIFFERENT':
+        return 'like/removelike'
+    else:
+        return None
+
+
 def html_to_txt(html_text):
     tags = re.findall("<[^>]+>",html_text)
     for tag in tags:

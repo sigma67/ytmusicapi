@@ -30,6 +30,9 @@ Library
 .. automethod:: YTMusic.get_liked_songs
 .. automethod:: YTMusic.get_history
 .. automethod:: YTMusic.rate_song
+.. automethod:: YTMusic.rate_playlist
+.. automethod:: YTMusic.subscribe_artists
+.. automethod:: YTMusic.unsubscribe_artists
 
 Playlists
 ---------
