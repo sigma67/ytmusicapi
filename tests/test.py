@@ -1,8 +1,9 @@
 import unittest
+import os
 from ytmusicapi.ytmusic import YTMusic
 
 youtube = YTMusic()
-youtube_auth = YTMusic('../headers_auth.json')
+youtube_auth = YTMusic('headers_auth.json')
 
 
 class TestYTMusic(unittest.TestCase):
@@ -86,11 +87,11 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_uploaded_songs(self):
         results = youtube_auth.get_uploaded_songs(126)
-        self.assertEqual(len(results), 126)
+        self.assertGreater(len(results), 100)
 
     def test_upload_song(self):
-        response = youtube_auth.upload_song('../12 - Turning Point 자.mp3')
-        self.assertEqual(response, 'STATUS_SUCCEEDED')
+        response = youtube_auth.upload_song('12 - Turning Point 자.mp3')
+        self.assertEqual(response.status_code, 409)
 
     def test_delete_uploaded_song(self):
         results = youtube_auth.get_uploaded_songs()
