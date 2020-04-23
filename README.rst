@@ -1,10 +1,12 @@
 ytmusicapi: Unofficial API for YouTube Music
 ============================================
+
 .. image:: https://img.shields.io/pypi/dw/ytmusicapi?style=flat-square
-    :alt PyPI Downloads
+    :alt: PyPI Downloads
+    :target: https://pypi.org/project/ytmusicapi/
 
 .. image:: https://raw.githubusercontent.com/sigma67/ytmusicapi/master/tests/coverage.svg
-    :alt Code coverage
+    :alt: Code coverage
 
 A work-in-progress API that emulates web requests from the YouTube Music web client.
 
