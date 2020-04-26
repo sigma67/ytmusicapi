@@ -520,14 +520,18 @@ class YTMusic:
             header = response['header']['musicDetailHeaderRenderer']
         else:
             header = response['header']['musicEditablePlaylistDetailHeaderRenderer']['header']['musicDetailHeaderRenderer']
-        song_count = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+
+        if len(header['secondSubtitle']['runs']) > 1:
+            song_count = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+        else:
+            song_count = limit
+
         if song_count == 0:
             return songs
 
         own_playlist = 'musicEditablePlaylistDetailHeaderRenderer' in response['header']
         songs.extend(parse_playlist_items(results['contents'], own_playlist))
         songs_to_get = min(limit, song_count)
-        request_count = 1
 
         if 'continuations' in results:
             request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
