@@ -41,6 +41,22 @@ class TestYTMusic(unittest.TestCase):
     # LIBRARY
     ###############
 
+    def test_get_playlists(self):
+        playlists = youtube_auth.get_playlists()
+        self.assertGreater(len(playlists), 0)
+
+    def test_get_library_songs(self):
+        songs = youtube_auth.get_library_songs();
+        self.assertGreater(len(songs), 0)
+
+    def test_get_library_albums(self):
+        albums = youtube_auth.get_library_albums();
+        self.assertGreater(len(albums), 0)
+
+    def test_get_library_artists(self):
+        artists = youtube_auth.get_library_artists();
+        self.assertGreater(len(artists), 0)
+
     def test_get_liked_songs(self):
         songs = youtube_auth.get_liked_songs(100)
         self.assertGreater(len(songs), 0)
@@ -68,10 +84,6 @@ class TestYTMusic(unittest.TestCase):
     ###############
     # PLAYLISTS
     ###############
-
-    def test_get_playlists(self):
-        playlists = youtube_auth.get_playlists()
-        self.assertGreater(len(playlists), 0)
 
     def test_get_foreign_playlist(self):
         songs = youtube.get_playlist_items("PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5")

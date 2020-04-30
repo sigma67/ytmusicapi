@@ -390,6 +390,66 @@ class YTMusic:
 
         return playlists
 
+    def get_library_songs(self, limit=100):
+        self.__check_auth()
+        body = {'browseId': 'FEmusic_liked_videos'}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        songs = parse_playlist_items(results['contents'][1:])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_playlist_items(contents)
+            songs.extend(get_continuations(results, 'musicShelfContinuation', 100, limit, request_func, parse_func))
+
+        return songs
+
+    def get_library_albums(self, upload=False):
+        self.__check_auth()
+        if not upload:
+            body = {'browseId': 'FEmusic_liked_albums'}
+
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['gridRenderer']['items']
+        albums = []
+        # skip first item ("New Playlist" button)
+        for result in results:
+            data = result['musicTwoRowItemRenderer']
+            album = {}
+            album['browseId'] = data['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+            album['title'] = nav(data, TITLE)
+            album['type'] = nav(data, SUBTITLE)
+            album['artist'] = nav(data, SUBTITLE2)
+            album['year'] = nav(data, SUBTITLE3)
+            albums.append(album)
+
+        #todo continuations
+
+        return albums
+
+    def get_library_artists(self):
+        self.__check_auth()
+        body = {'browseId': 'FEmusic_library_corpus_artists'}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        artists = []
+        for result in results['contents']:
+            data = result['musicResponsiveListItemRenderer']
+            browseId = data['navigationEndpoint']['browseEndpoint']['browseId']
+            artist = get_item_text(data, 0)
+            subscribers = get_item_text(data, 1).split(' ')[0]
+            artists.append({"browseId": browseId, "artist": artist, "subscribers": subscribers})
+
+        #todo continuations
+
+        return artists
+
     def get_liked_songs(self, limit=1000):
         """
         Gets playlist items for the 'Liked Songs' playlist
@@ -682,6 +742,18 @@ class YTMusic:
             songs.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_uploaded_items))
 
         return songs
+
+    def get_uploaded_albums(self):
+        self.__check_auth()
+        body = {'browseId': 'FEmusic_library_privately_owned_albums'}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+
+    def get_library_upload_artists(self):
+        self.__check_auth()
+        body = {'browseId': 'FEmusic_library_privately_owned_artists'}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
 
     def upload_song(self, filepath):
         """

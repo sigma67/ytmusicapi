@@ -11,6 +11,7 @@ FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
 TITLE = ['title', 'runs', 0, 'text']
 SUBTITLE = ['subtitle', 'runs', 0, 'text']
 SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
+SUBTITLE3 = ['subtitle', 'runs', 4, 'text']
 
 def parse_playlist_items(results, owned=False):
     songs = []
