@@ -10,37 +10,11 @@ such as retrieving your library content or creating large playlists.
 
 **This project is not supported nor endorsed by Google**
 
-Features
---------
--  **Browsing**: get artist information and releases (songs, videos, albums, singles), get albums
--  **Library management**:
+.. include:: ../../README.rst
+  :start-after: features
+  :end-before: end-features
 
-  * get the playlists, songs, artists, albums and subscriptions in your library
-  * rate songs, albums and playlists
-  * subscribe/unsubscribe artists
-
--  **Playlists**: create, delete, and modify playlists and playlist items
--  **Search**: Search for songs on YouTube Music
--  **Uploads**:
-
-  * Upload songs and remove them again
-  * List uploaded songs, artists and albums
-
-Usage Example
--------------
 For a complete documentation of available functions, refer to the :doc:`Reference <reference>`
-
-.. code-block:: python
-
-    from ytmusicapi import YTMusic
-
-    ytmusic = YTMusic('headers_auth.json')
-    playlistId = ytmusic.create_playlist("test", "test description")
-    search_results = ytmusic.search("Oasis Wonderwall")
-    ytmusic.add_playlist_items(playlistId, [search_results[0]['videoId']])
-
-The `tests <https://github.com/sigma67/ytmusicapi/blob/master/ytmusicapi/test.py/>`_ are also a great source of usage examples.
-
 
 Contents
 --------
