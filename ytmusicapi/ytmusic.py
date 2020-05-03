@@ -3,6 +3,7 @@ import json
 import pkg_resources
 import ntpath
 import os
+from typing import List, Dict, Union
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers import *
 from ytmusicapi.setup import setup
@@ -17,7 +18,7 @@ class YTMusic:
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
-    def __init__(self, auth=None):
+    def __init__(self, auth: str = None, user: str = None):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -26,6 +27,11 @@ class YTMusic:
           Should be an adjusted version of `headers_auth.json.example` in the project root.
           See :py:func:`setup` for how to fill in the correct credentials.
           Default: A default header is used without authentication.
+        :param user: Optional. Specify a user ID string to use in requests.
+          This is needed if you want to send requests on behalf of a brand account.
+          Otherwise the default account is used. You can retrieve the user ID
+          by going to https://myaccount.google.com and selecting your brand account.
+          The user ID will be in the URL: https://myaccount.google.com/b/user_id/
 
         """
         self.auth = auth
@@ -43,6 +49,8 @@ class YTMusic:
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
+            if user:
+                self.context['context']['user']['onBehalfOfUser'] = user
 
         # verify authentication credentials work
         if auth:
@@ -51,7 +59,7 @@ class YTMusic:
             if 'error' in response:
                 raise Exception("The provided credentials are invalid. Reason given by the server: " + response['error']['status'])
 
-    def __send_request(self, endpoint, body, additionalParams=""):
+    def __send_request(self, endpoint: str, body: Dict, additionalParams: str = ""):
         body.update(self.context)
         if self.auth:
             self.headers["Authorization"] = get_authorization(self.sapisid + ' ' + self.headers['x-origin'])
@@ -63,7 +71,7 @@ class YTMusic:
             raise Exception("Please provide authentication before using this function")
 
     @classmethod
-    def setup(cls, filepath=None):
+    def setup(cls, filepath: str = None):
         """
         Requests browser headers from the user via command line
         and returns a string that can be passed to YTMusic()
@@ -77,11 +85,10 @@ class YTMusic:
     # BROWSING
     ###############
 
-    def search(self, query, filter=None):
+    def search(self, query: str, filter: str = None) -> List[Dict]:
         """
         Search YouTube music
         Returns up to 20 results within the provided category.
-        By default only songs (audio-only) are returned
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
         :param filter: Filter for item types. Allowed values:
@@ -95,18 +102,22 @@ class YTMusic:
           Example list::
 
             [
-                {
-                    'videoId': 'ZrOKjDZOtkA',
-                    'artist': 'Oasis',
-                    'title': 'Wonderwall (Remastered)',
-                    'resultType': 'song'
+              {
+                "videoId": "ZrOKjDZOtkA",
+                "title": "Wonderwall (Remastered)",
+                "artists": [
+                  {
+                    "name": "Oasis",
+                    "id": "UCmMUZbaYdNH0bEd1PAlAqsA"
+                  }
+                ],
+                "album": {
+                  "name": "(What's The Story) Morning Glory? (Remastered)",
+                  "id": "MPREb_9nqEki4ZDpp"
                 },
-                {
-                    'videoId': 'Gvfgut8nAgw',
-                    'artist': 'Oasis',
-                    'title': 'Wonderwall',
-                    'resultType': 'song'
-                }
+                "duration": "4:19",
+                "resultType": "song"
+              }
             ]
 
 
@@ -168,12 +179,12 @@ class YTMusic:
 
         return search_results
 
-    def get_artist(self, channelId):
+    def get_artist(self, channelId: str) -> Dict:
         """
         Get information about an artist and their top releases (songs,
         albums, singles and videos). The top lists contain pointers
         for getting the full list of releases. For songs/videos, pass
-        the browseId to :py:func:`get_playlist_items`. For albums/singles,
+        the browseId to :py:func:`get_playlist`. For albums/singles,
         pass browseId and params to :py:func:`get_artist_albums`.
 
         :param channelId: channel id of the artist
@@ -238,12 +249,12 @@ class YTMusic:
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
         artist = {}
-        artist['name'] = nav(response['header']['musicImmersiveHeaderRenderer'], TITLE)
+        artist['name'] = nav(response['header']['musicImmersiveHeaderRenderer'], TITLE_TEXT)
         artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
         artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0]['text'].split(' ')[0]
         artist['songs'] = {}
         if 'musicShelfRenderer' in results[0]: # API sometimes does not return songs
-            artist['songs']['browseId'] = results[0]['musicShelfRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+            artist['songs']['browseId'] = nav(results[0]['musicShelfRenderer'], TITLE + NAVIGATION_BROWSE_ID)
             artist['songs']['results'] = parse_playlist_items(results[0]['musicShelfRenderer']['contents'])
 
         categories = ['albums', 'singles', 'videos']
@@ -253,27 +264,28 @@ class YTMusic:
             if len(data) > 0:
                 artist[category] = {"results": []}
                 if 'navigationEndpoint' in nav(data[0], CAROUSEL_TITLE):
-                    artist[category]['browseId'] = nav(data[0], CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['browseId']
+                    artist[category]['browseId'] = nav(data[0], CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
                     if category in ['albums', 'singles']:
                         artist[category]['params'] = nav(data[0], CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
 
                 for item in data[0]['contents']:
-                    result = {'title': nav(item['musicTwoRowItemRenderer'], TITLE)}
+                    item = item['musicTwoRowItemRenderer']
+                    result = {'title': nav(item, TITLE_TEXT)}
                     if category == 'albums':
-                        result['year'] = nav(item['musicTwoRowItemRenderer'], SUBTITLE2)
-                        result['browseId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+                        result['year'] = nav(item, SUBTITLE2)
+                        result['browseId'] = nav(item, TITLE + NAVIGATION_BROWSE_ID)
                     elif category == 'singles':
-                        result['year'] = nav(item['musicTwoRowItemRenderer'], SUBTITLE)
-                        result['browseId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
+                        result['year'] = nav(item, SUBTITLE)
+                        result['browseId'] = nav(item, TITLE + NAVIGATION_BROWSE_ID)
                     elif category == 'videos':
-                        result['views'] = nav(item['musicTwoRowItemRenderer'], SUBTITLE2).split(' ')[0]
-                        result['videoId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['watchEndpoint']['videoId']
-                        result['playlistId'] = item['musicTwoRowItemRenderer']['title']['runs'][0]['navigationEndpoint']['watchEndpoint']['playlistId']
+                        result['views'] = nav(item, SUBTITLE2).split(' ')[0]
+                        result['videoId'] = nav(item, TITLE + NAVIGATION_VIDEO_ID)
+                        result['playlistId'] = nav(item, TITLE + NAVIGATION_VIDEO_ID)
                     artist[category]['results'].append(result)
 
         return artist
 
-    def get_artist_albums(self, channelId, params):
+    def get_artist_albums(self, channelId: str, params: str) -> List[Dict]:
         """
         Get the full list of an artist's albums or singles
 
@@ -295,14 +307,14 @@ class YTMusic:
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        artist = nav(response['header']['musicHeaderRenderer'], TITLE)
+        artist = nav(response['header']['musicHeaderRenderer'], TITLE_TEXT)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         albums = []
         musicShelf = results[0]['musicShelfRenderer']
-        release_type = nav(musicShelf, TITLE).lower()
+        release_type = nav(musicShelf, TITLE_TEXT).lower()
         for result in musicShelf['contents']:
             data = result['musicResponsiveListItemRenderer']
-            browseId = data['navigationEndpoint']['browseEndpoint']['browseId']
+            browseId = nav(data, NAVIGATION_BROWSE_ID)
             title = get_item_text(data, 0)
             album_type = get_item_text(data, 1) if release_type == "albums" else "Single"
             year = get_item_text(data, 1, 2) if release_type == "albums" else get_item_text(data, 1)
@@ -310,7 +322,7 @@ class YTMusic:
 
         return albums
 
-    def get_album(self, browseId):
+    def get_album(self, browseId: str) -> Dict:
         """
         Get information and tracks of an album
 
@@ -332,12 +344,24 @@ class YTMusic:
         body = prepare_browse_endpoint("ALBUM", browseId)
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
+        data = nav(response, FRAMEWORK_MUTATIONS)
         album = {}
-        album['title'] = nav(response, FRAMEWORK_MUTATIONS)[0]['payload']['musicAlbumRelease']['title']
-        album['description'] = nav(response, FRAMEWORK_MUTATIONS)[1]['payload']['musicAlbumReleaseDetail']['description']
-        album['artist'] = nav(response, FRAMEWORK_MUTATIONS)[3]['payload']['musicArtist']['name']
+        album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload')['musicAlbumRelease']
+        album['title'] = album_data['title']
+        album['trackCount'] = album_data['trackCount']
+        album['durationMs'] = album_data['durationMs']
+        album['playlistId'] = album_data['audioPlaylistId']
+        album['releaseDate'] = album_data['releaseDate']
+        album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload')['musicAlbumReleaseDetail']['description']
+        album['artist'] = []
+        artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
+        for artist in artists_data:
+            album['artist'].append({
+                'name': artist['musicArtist']['name'],
+                'id': artist['musicArtist']['externalChannelId']
+            })
         album['tracks'] = []
-        for item in nav(response, FRAMEWORK_MUTATIONS)[4:]:
+        for item in data[4:]:
             if 'musicTrack' in item['payload']:
                 track = {}
                 track['index'] = item['payload']['musicTrack']['albumTrackIndex']
@@ -354,10 +378,11 @@ class YTMusic:
     # LIBRARY
     ###############
 
-    def get_playlists(self):
+    def get_library_playlists(self, limit: int = 25) -> List[Dict]:
         """
-        Retrieves the content of the 'Library' page
+        Retrieves the playlists in the user's library.
 
+        :param limit: Number of playlists to retrieve
         :return: List of owned playlists.
 
         Each item is in the following format::
@@ -375,22 +400,24 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
 
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['gridRenderer']['items']
-        playlists = []
-        # skip first item ("New Playlist" button)
-        for result in results[1:]:
-            data = result['musicTwoRowItemRenderer']
-            playlist = {}
-            playlist['playlistId'] = data['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId'][2:]
-            playlist['title'] = nav(data, TITLE)
-            if len(data['subtitle']['runs']) == 3:
-                playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
+        results = nav(results, ITEM_SECTION)['gridRenderer']
+        playlists = parse_playlists(results['items'][1:])
 
-            playlists.append(playlist)
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_playlists(contents)
+            playlists.extend(get_continuations(results, 'gridContinuation', 25, limit, request_func, parse_func))
 
         return playlists
 
-    def get_library_songs(self, limit=100):
+    def get_library_songs(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the songs in the user's library (liked videos are not included).
+        To get liked songs and videos, use :py:func:`get_liked_songs`
+
+        :param limit: Number of songs to retrieve
+        :return: List of songs. . Same format as :py:func:`get_playlist`
+        """
         self.__check_auth()
         body = {'browseId': 'FEmusic_liked_videos'}
         endpoint = 'browse'
@@ -402,68 +429,104 @@ class YTMusic:
         if 'continuations' in results:
             request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
             parse_func = lambda contents: parse_playlist_items(contents)
-            songs.extend(get_continuations(results, 'musicShelfContinuation', 100, limit, request_func, parse_func))
+            songs.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
 
         return songs
 
-    def get_library_albums(self, upload=False):
+    def get_library_albums(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the albums in the user's library.
+
+        :param limit: Number of albums to return
+        :return: List of albums
+        """
         self.__check_auth()
-        if not upload:
-            body = {'browseId': 'FEmusic_liked_albums'}
+        body = {'browseId': 'FEmusic_liked_albums'}
 
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['gridRenderer']['items']
-        albums = []
-        # skip first item ("New Playlist" button)
-        for result in results:
-            data = result['musicTwoRowItemRenderer']
-            album = {}
-            album['browseId'] = data['title']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId']
-            album['title'] = nav(data, TITLE)
-            album['type'] = nav(data, SUBTITLE)
-            album['artist'] = nav(data, SUBTITLE2)
-            album['year'] = nav(data, SUBTITLE3)
-            albums.append(album)
+        results = nav(results, ITEM_SECTION)
+        if 'gridRenderer' not in results:
+            return []
+        else:
+            results = results['gridRenderer']
+        albums = parse_albums(results['items'])
 
-        #todo continuations
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_albums(contents)
+            albums.extend(get_continuations(results, 'gridContinuation', 25, limit, request_func, parse_func))
 
         return albums
 
-    def get_library_artists(self):
+    def get_library_artists(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the artists of the songs in the user's library.
+
+        :param limit: Number of artists to return
+        :return: List of artists.
+
+        Each item is in the following format::
+
+            {
+              "browseId": "UCxEqaQWosMHaTih-tgzDqug",
+              "artist": "WildVibes",
+              "subscribers": "2.91K"
+            }
+
+        """
+        self.__check_auth()
+        body = {'browseId': 'FEmusic_library_corpus_track_artists'}
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        artists = parse_artists(results['contents'])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_artists(contents)
+            artists.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
+
+        return artists
+
+    def get_library_subscriptions(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the artists the user has subscribed to.
+
+        :param limit: Number of artists to return
+        :return: List of artists. Same format as :py:func:`get_library_artists`
+        """
         self.__check_auth()
         body = {'browseId': 'FEmusic_library_corpus_artists'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['musicShelfRenderer']
-        artists = []
-        for result in results['contents']:
-            data = result['musicResponsiveListItemRenderer']
-            browseId = data['navigationEndpoint']['browseEndpoint']['browseId']
-            artist = get_item_text(data, 0)
-            subscribers = get_item_text(data, 1).split(' ')[0]
-            artists.append({"browseId": browseId, "artist": artist, "subscribers": subscribers})
+        artists = parse_artists(results['contents'])
 
-        #todo continuations
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_artists(contents)
+            artists.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
 
         return artists
 
-    def get_liked_songs(self, limit=1000):
+    def get_liked_songs(self, limit: int = 100) -> Dict:
         """
         Gets playlist items for the 'Liked Songs' playlist
 
-        :param limit: How many items to return. Default: 1000
-        :return: List of playlistItem dictionaries. See :py:func:`get_playlist_items`
+        :param limit: How many items to return. Default: 100
+        :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
         """
-        return self.get_playlist_items('LM', limit)
+        return self.get_playlist('LM', limit)
 
-    def get_history(self):
+    def get_history(self) -> List[Dict]:
         """
         Gets your play history in reverse chronological order
 
-        :return: List of playlistItems, see :py:func:`get_playlist_items`
+        :return: List of playlistItems, see :py:func:`get_playlist`
           The additional property 'played' indicates when the playlistItem was played
         """
         self.__check_auth()
@@ -476,12 +539,12 @@ class YTMusic:
             data = content['musicShelfRenderer']['contents']
             songlist = parse_playlist_items(data)
             for song in songlist:
-                song['played'] = nav(content['musicShelfRenderer'], TITLE)
+                song['played'] = nav(content['musicShelfRenderer'], TITLE_TEXT)
             songs.extend(songlist)
 
         return songs
 
-    def rate_song(self, videoId, rating='INDIFFERENT'):
+    def rate_song(self, videoId: str, rating: str = 'INDIFFERENT') -> Dict:
         """
         Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
 
@@ -500,12 +563,12 @@ class YTMusic:
 
         return self.__send_request(endpoint, body)
 
-    def rate_playlist(self, playlistId, rating='INDIFFERENT'):
+    def rate_playlist(self, playlistId: str, rating: str = 'INDIFFERENT') -> Dict:
         """
         Rates a playlist/album ("Add to library"/"Remove from library" interactions on YouTube Music)
         You can also dislike a playlist/album, which has an effect on your recommendations
 
-        :param videoId: Video id
+        :param playlistId: Playlist id
         :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
 
           | 'INDIFFERENT' removes the playlist/album from the library
@@ -515,14 +578,11 @@ class YTMusic:
         self.__check_auth()
         body = {'target': {'playlistId': playlistId}}
         endpoint = prepare_like_endpoint(rating)
-        if endpoint is None:
-            return
+        return endpoint if not endpoint else self.__send_request(endpoint, body)
 
-        return self.__send_request(endpoint, body)
-
-    def subscribe_artists(self, channelIds: list) -> dict:
+    def subscribe_artists(self, channelIds: List[str]) -> Dict:
         """
-        Subscribe to artists. Adds the artists to your libary
+        Subscribe to artists. Adds the artists to your library
 
         :param channelIds: Artist channel ids
         :return: Full response
@@ -532,9 +592,9 @@ class YTMusic:
         endpoint = 'subscription/subscribe'
         return self.__send_request(endpoint, body)
 
-    def unsubscribe_artists(self, channelIds: list) -> dict:
+    def unsubscribe_artists(self, channelIds: List[str]) -> Dict:
         """
-        Unsubscribe from artists. Removes the artists from your libary
+        Unsubscribe from artists. Removes the artists from your library
 
         :param channelIds: Artist channel ids
         :return: Full response
@@ -548,22 +608,46 @@ class YTMusic:
     # PLAYLISTS
     ###############
 
-    def get_playlist_items(self, playlistId, limit=1000):
+    def get_playlist(self, playlistId: str, limit: int = 100) -> Dict:
         """
         Returns a list of playlist items
 
         :param playlistId: Playlist id
-        :param limit: How many songs to return. Default: 1000
+        :param limit: How many songs to return. Default: 100
         :return: List of playlistItem dictionaries
 
         Each item is in the following format::
 
             {
-                'videoId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
-                'artist': 'Artist',
-                'title': 'Song Title',
-                'album': None,
-                'setVideoId': '56B44F6D10557CC6'
+              "id": "PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_",
+              "privacy": "PUBLIC",
+              "title": "New EDM This Week 03/13/2020",
+              "description": "Weekly r/EDM new release roundup. Created with github.com/sigma67/spotifyplaylist_to_gmusic",
+              "author": "sigmatics",
+              "year": "2020",
+              "duration": "6+ hours",
+              "trackCount": 237,
+              "tracks": [
+                {
+                  "videoId": "bjGppZKiuFE",
+                  "title": "Lost",
+                  "artists": [
+                    {
+                      "name": "Guest Who",
+                      "id": "UCkgCRdnnqWnUeIH7EIc3dBg"
+                    },
+                    {
+                      "name": "Kate Wild",
+                      "id": "UCwR2l3JfJbvB6aq0RnnJfWg"
+                    }
+                  ],
+                  "album": {
+                    "name": "Lost",
+                    "id": "MPREb_PxmzvDuqOnC"
+                  },
+                  "duration": "2:58"
+                }
+              ]
             }
 
         The setVideoId is the unique id of this playlist item and
@@ -575,32 +659,46 @@ class YTMusic:
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)[0]['musicPlaylistShelfRenderer']
-        songs = []
-        if 'musicDetailHeaderRenderer' in response['header']: #playlist not owned
+        playlist = {'id': results['playlistId']}
+        own_playlist = 'musicEditablePlaylistDetailHeaderRenderer' in response['header']
+        if not own_playlist:
             header = response['header']['musicDetailHeaderRenderer']
+            playlist['privacy'] = 'PUBLIC'
         else:
-            header = response['header']['musicEditablePlaylistDetailHeaderRenderer']['header']['musicDetailHeaderRenderer']
+            header = response['header']['musicEditablePlaylistDetailHeaderRenderer']
+            playlist['privacy'] = header['editHeader']['musicPlaylistEditHeaderRenderer']['privacy']
+            header = header['header']['musicDetailHeaderRenderer']
+
+        playlist['title'] = nav(header, TITLE_TEXT)
+        playlist['description'] = header['description']['runs'][0]['text']
+        run_count = len(header['subtitle']['runs'])
+        if run_count > 1:
+            playlist['author'] = nav(header, SUBTITLE2)
+            if run_count > 3:
+                playlist['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
             song_count = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+            playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
+            playlist['duration'] = header['secondSubtitle']['runs'][0]['text']
             song_count = limit
 
-        if song_count == 0:
-            return songs
+        playlist['trackCount'] = song_count
+        playlist['tracks'] = []
 
-        own_playlist = 'musicEditablePlaylistDetailHeaderRenderer' in response['header']
-        songs.extend(parse_playlist_items(results['contents'], own_playlist))
-        songs_to_get = min(limit, song_count)
+        if song_count > 0:
+            playlist['tracks'].extend(parse_playlist_items(results['contents'], own_playlist))
+            songs_to_get = min(limit, song_count)
 
-        if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_playlist_items(contents, own_playlist)
-            songs.extend(get_continuations(results, 'musicPlaylistShelfContinuation', 100, songs_to_get, request_func, parse_func))
+            if 'continuations' in results:
+                request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+                parse_func = lambda contents: parse_playlist_items(contents, own_playlist)
+                playlist['tracks'].extend(get_continuations(results, 'musicPlaylistShelfContinuation', 100, songs_to_get, request_func, parse_func))
 
-        return songs
+        return playlist
 
-    def create_playlist(self, title, description, privacy_status="PRIVATE"):
+    def create_playlist(self, title: str, description: str, privacy_status: str = "PRIVATE") -> str:
         """
         Creates a new empty playlist and returns its id.
 
@@ -619,7 +717,7 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         return response['playlistId']
 
-    def edit_playlist(self, playlistId, title=None, description=None, privacyStatus=None):
+    def edit_playlist(self, playlistId: str, title: str = None, description: str = None, privacyStatus: str = None) -> Union[str, Dict]:
         """
         Edit title, description or privacyStatus of a playlist.
 
@@ -646,7 +744,7 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
 
-    def delete_playlist(self, playlistId):
+    def delete_playlist(self, playlistId: str) -> Union[str, Dict]:
         """
         Delete a playlist.
 
@@ -659,7 +757,7 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
 
-    def add_playlist_items(self, playlistId, videoIds):
+    def add_playlist_items(self, playlistId: str, videoIds: List[str]) -> Union[str, Dict]:
         """
         Add songs to an existing playlist
 
@@ -679,19 +777,18 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         return response['status'] if 'status' in response else response
 
-    def remove_playlist_items(self, playlistId, videos):
+    def remove_playlist_items(self, playlistId: str, videos: List[Dict]) -> Union[str, Dict]:
         """
         Remove songs from an existing playlist
 
         :param playlistId: Playlist id
-        :param videos: List of PlaylistItems, see :py:func:`get_playlist_items`.
+        :param videos: List of PlaylistItems, see :py:func:`get_playlist`.
             Must contain videoId and setVideoId
         :return: Status String or full response
         """
         self.__check_auth()
         if not videos[0]['setVideoId']:
-            print("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
-            return
+            raise Exception("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
 
         body = {'playlistId': playlistId, 'actions': []}
         for video in videos:
@@ -709,7 +806,7 @@ class YTMusic:
     # UPLOADS
     ###############
 
-    def get_uploaded_songs(self, limit=25):
+    def get_library_upload_songs(self, limit: int = 25) -> List[Dict]:
         """
         Returns a list of uploaded songs
 
@@ -743,19 +840,55 @@ class YTMusic:
 
         return songs
 
-    def get_uploaded_albums(self):
+    def get_library_upload_albums(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the albums of uploaded songs in the user's library.
+
+        :param limit: Number of albums to return
+        :returns List of albums as returned by :py:func:`get_library_albums`
+        """
         self.__check_auth()
-        body = {'browseId': 'FEmusic_library_privately_owned_albums'}
+        body = {'browseId': 'FEmusic_library_privately_owned_releases'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)
+        if 'gridRenderer' not in results:
+            return []
+        else:
+            results = results['gridRenderer']
+        albums = parse_albums(results['items'])
 
-    def get_library_upload_artists(self):
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_albums(contents)
+            albums.extend(get_continuations(results, 'gridContinuation', 25, limit, request_func, parse_func))
+
+        return albums
+
+    def get_library_upload_artists(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the artists of uploaded songs in the user's library.
+
+        :param limit:
+        :returns List of artists as returned by :py:func:`get_library_artists`
+        """
         self.__check_auth()
         body = {'browseId': 'FEmusic_library_privately_owned_artists'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        artists = parse_artists(results['contents'], True)
 
-    def upload_song(self, filepath):
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_artists(contents, True)
+            artists.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
+
+        return artists
+
+    def upload_song(self, filepath: str) -> Union[str, requests.Response]:
         """
         Uploads a song to YouTube Music
 
@@ -764,7 +897,7 @@ class YTMusic:
         """
         self.__check_auth()
         if not os.path.isfile(filepath):
-            return
+            raise Exception("The provided file does not exist.")
 
         supported_filetypes = ["mp3", "m4a", "wma", "flac", "ogg"]
         if os.path.splitext(filepath)[1][1:] not in supported_filetypes:
@@ -791,12 +924,12 @@ class YTMusic:
         else:
             return response
 
-    def delete_uploaded_song(self, uploaded_song):
+    def delete_uploaded_song(self, uploaded_song: Dict) -> Union[str, Dict]:
         """
         Deletes a previously uploaded song
 
         :param uploaded_song: The uploaded song to delete,
-            e.g. retrieved from :py:func:`get_uploaded_songs`
+            e.g. retrieved from :py:func:`get_library_upload_songs`
         :return: Status String or error
         """
         self.__check_auth()

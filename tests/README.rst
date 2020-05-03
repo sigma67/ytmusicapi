@@ -5,7 +5,9 @@ Sometimes there is a single unittest for multiple functions to ensure there are 
 
 Note that there must be a `headers_auth.json` in the project root to run authenticated tests.
 For testing the song upload, there also needs to be a file with the name specified in the code in the project root.
-For `test_get_owned_playlist` you need to modify the test to
+
+Copy `tests/test.cfg.example` to `test.cfg` in the project root to run tests with coverage.
+Adjust the file to contain appropriate information for your YouTube account and local setup.
 
 Coverage badge
 --------------
@@ -15,6 +17,6 @@ Install `coverage` and `coverage-badge` with pip. Run
 
 to generate a coverage report in the project root. With
 
-`coverage-badge -o coverage.svg`
+`coverage-badge -o tests/coverage.svg -f`
 
-you generate the badge. Move both files to the `tests` directory.
+you generate the badge.

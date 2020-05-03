@@ -1,14 +1,18 @@
 import unittest
-import os
+import configparser
 from ytmusicapi.ytmusic import YTMusic
 
+config = configparser.RawConfigParser()
+config.read('./test.cfg')
+
 youtube = YTMusic()
-youtube_auth = YTMusic('headers_auth.json')
+youtube_auth = YTMusic(config['auth']['headers_file'])
+youtube_brand = YTMusic(config['auth']['headers'], config['auth']['brand_account'])
 
 
 class TestYTMusic(unittest.TestCase):
     def test_setup(self):
-        YTMusic.setup()
+        YTMusic.setup(config['auth']['headers_file'])
 
     ###############
     # BROWSING
@@ -16,6 +20,12 @@ class TestYTMusic(unittest.TestCase):
 
     def test_search(self):
         results = youtube_auth.search("Oasis Wonderwall")
+        self.assertGreater(len(results), 0)
+        results = youtube_auth.search("Oasis Wonderwall", 'videos')
+        self.assertGreater(len(results), 0)
+        results = youtube_auth.search("Oasis Wonderwall", 'albums')
+        self.assertGreater(len(results), 0)
+        results = youtube_auth.search("Oasis Wonderwall", 'artists')
         self.assertGreater(len(results), 0)
 
     def test_get_artist(self):
@@ -34,32 +44,36 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_album(self):
         results = youtube.get_album("MPREb_BQZvl3BFGay")
-        self.assertEqual(len(results), 4)
+        self.assertEqual(len(results), 8)
         self.assertEqual(len(results['tracks']), 7)
 
     ###############
     # LIBRARY
     ###############
 
-    def test_get_playlists(self):
-        playlists = youtube_auth.get_playlists()
+    def test_get_library_playlists(self):
+        playlists = youtube_brand.get_library_playlists(50)
         self.assertGreater(len(playlists), 0)
 
     def test_get_library_songs(self):
-        songs = youtube_auth.get_library_songs();
+        songs = youtube_brand.get_library_songs(200)
         self.assertGreater(len(songs), 0)
 
     def test_get_library_albums(self):
-        albums = youtube_auth.get_library_albums();
+        albums = youtube_brand.get_library_albums(50)
         self.assertGreater(len(albums), 0)
 
     def test_get_library_artists(self):
-        artists = youtube_auth.get_library_artists();
+        artists = youtube_brand.get_library_artists(50)
+        self.assertGreater(len(artists), 0)
+
+    def test_get_library_subscriptions(self):
+        artists = youtube_brand.get_library_subscriptions(50)
         self.assertGreater(len(artists), 0)
 
     def test_get_liked_songs(self):
-        songs = youtube_auth.get_liked_songs(100)
-        self.assertGreater(len(songs), 0)
+        songs = youtube_brand.get_liked_songs(200)
+        self.assertGreater(len(songs['tracks']), 100)
 
     def test_get_history(self):
         songs = youtube_auth.get_history()
@@ -86,42 +100,59 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_foreign_playlist(self):
-        songs = youtube.get_playlist_items("PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5")
-        self.assertEqual(len(songs), 200)
+        playlist = youtube.get_playlist("PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_", 200)
+        self.assertEqual(len(playlist['tracks']), 200)
 
     def test_get_owned_playlist(self):
-        songs = youtube_auth.get_playlist_items('PL528pVfw3ao2VzfY6zE1TOZm1cBSdk7Q0')
-        self.assertEqual(len(songs), 287)
+        playlist = youtube_auth.get_playlist(config['playlists']['own'], 300)
+        self.assertEqual(len(playlist['tracks']), 284)
+
+    def test_edit_playlist(self):
+        playlist = youtube_auth.get_playlist(config['playlists']['own'])
+        response = youtube_auth.edit_playlist(playlist['id'], title='', description='', privacyStatus='PRIVATE')
+        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
+        youtube_auth.edit_playlist(
+            playlist['id'], title=playlist['title'],
+            description=playlist['description'], privacyStatus=playlist['privacy'])
+        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
+
+    # end to end test adding playlist, adding item, deleting item, deleting playlist
+    def test_end2end(self):
+        playlistId = youtube_auth.create_playlist("test", "test description")
+        self.assertEqual(len(playlistId), 34, "Playlist creation failed")
+        response = youtube_auth.add_playlist_items(playlistId, ['y0Hhvtmv0gk'])
+        self.assertEqual(response, 'STATUS_SUCCEEDED', "Adding playlist item failed")
+        playlist = youtube_auth.get_playlist(playlistId)
+        self.assertEqual(len(playlist['tracks']), 1, "Getting playlist items failed")
+        response = youtube_auth.remove_playlist_items(playlistId, playlist['tracks'])
+        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
+        response = youtube_auth.delete_playlist(playlistId)
+        self.assertEqual(response['command']['handlePlaylistDeletionCommand']['playlistId'], playlistId, "Playlist removal failed")
 
     ###############
     # UPLOADS
     ###############
 
-    def test_get_uploaded_songs(self):
-        results = youtube_auth.get_uploaded_songs(126)
+    def test_get_library_upload_songs(self):
+        results = youtube_auth.get_library_upload_songs(126)
         self.assertGreater(len(results), 100)
 
+    def test_get_library_upload_albums(self):
+        results = youtube_auth.get_library_upload_albums(50)
+        self.assertGreater(len(results), 25)
+
+    def test_get_library_upload_artists(self):
+        results = youtube_auth.get_library_upload_artists(50)
+        self.assertGreater(len(results), 25)
+
     def test_upload_song(self):
-        response = youtube_auth.upload_song('12 - Turning Point 자.mp3')
+        response = youtube_auth.upload_song(config['uploads']['file'])
         self.assertEqual(response.status_code, 409)
 
     def test_delete_uploaded_song(self):
-        results = youtube_auth.get_uploaded_songs()
+        results = youtube_auth.get_library_upload_songs()
         response = youtube_auth.delete_uploaded_song(results[0])
         self.assertEqual(response, 'STATUS_SUCCEEDED')
-
-    # end to end test adding playlist, adding item, deleting item, deleting playlist
-    def test_end2end(self):
-        playlist = youtube_auth.create_playlist("test", "test description")
-        self.assertEqual(len(playlist), 34, "Playlist creation failed")
-        response = youtube_auth.add_playlist_items(playlist, ['y0Hhvtmv0gk'])
-        self.assertEqual(response, 'STATUS_SUCCEEDED', "Adding playlist item failed")
-        items = youtube_auth.get_playlist_items(playlist)
-        self.assertEqual(len(items), 1, "Getting playlist items failed")
-        response = youtube_auth.remove_playlist_items(playlist, items)
-        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
-        response = youtube_auth.delete_playlist(playlist)
-        self.assertEqual(response['command']['handlePlaylistDeletionCommand']['playlistId'], playlist, "Playlist removal failed")
 
 
 if __name__ == '__main__':

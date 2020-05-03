@@ -1,0 +1,10 @@
+[auth]
+brand_account = 101234229123420379537
+headers = headers_auth_json_as_string
+headers_file = ./headers_auth.json
+
+[playlists]
+own = owned_playlist_id
+
+[uploads]
+file = song_in_project_root.mp3

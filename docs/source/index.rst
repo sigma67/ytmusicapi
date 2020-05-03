@@ -12,10 +12,19 @@ such as retrieving your library content or creating large playlists.
 
 Features
 --------
--  Browsing: get artist information and releases (songs, videos, albums, singles), get albums
--  Library management: list, create, delete, and modify playlists and playlist items
--  Search: Search for songs on YouTube Music
--  Uploads: Upload songs, list uploaded songs and delete uploaded songs
+-  **Browsing**: get artist information and releases (songs, videos, albums, singles), get albums
+-  **Library management**:
+
+  * get the playlists, songs, artists, albums and subscriptions in your library
+  * rate songs, albums and playlists
+  * subscribe/unsubscribe artists
+
+-  **Playlists**: create, delete, and modify playlists and playlist items
+-  **Search**: Search for songs on YouTube Music
+-  **Uploads**:
+
+  * Upload songs and remove them again
+  * List uploaded songs, artists and albums
 
 Usage Example
 -------------
