@@ -34,12 +34,14 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_artist_albums(self):
         artist = youtube.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
-        results = youtube.get_artist_albums(artist['albums']['browseId'], artist['albums']['params'])
+        results = youtube.get_artist_albums(artist['albums']['browseId'],
+                                            artist['albums']['params'])
         self.assertGreater(len(results), 0)
 
     def test_get_artist_singles(self):
         artist = youtube_auth.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
-        results = youtube_auth.get_artist_albums(artist['singles']['browseId'], artist['singles']['params'])
+        results = youtube_auth.get_artist_albums(artist['singles']['browseId'],
+                                                 artist['singles']['params'])
         self.assertGreater(len(results), 0)
 
     def test_get_album(self):
@@ -86,9 +88,11 @@ class TestYTMusic(unittest.TestCase):
         self.assertIn('actions', response)
 
     def test_rate_playlist(self):
-        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'DISLIKE')
+        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
+                                              'DISLIKE')
         self.assertIn('actions', response)
-        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'INDIFFERENT')
+        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
+                                              'INDIFFERENT')
         self.assertIn('actions', response)
 
     def test_subscribe_artists(self):
@@ -109,11 +113,15 @@ class TestYTMusic(unittest.TestCase):
 
     def test_edit_playlist(self):
         playlist = youtube_auth.get_playlist(config['playlists']['own'])
-        response = youtube_auth.edit_playlist(playlist['id'], title='', description='', privacyStatus='PRIVATE')
+        response = youtube_auth.edit_playlist(playlist['id'],
+                                              title='',
+                                              description='',
+                                              privacyStatus='PRIVATE')
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
-        youtube_auth.edit_playlist(
-            playlist['id'], title=playlist['title'],
-            description=playlist['description'], privacyStatus=playlist['privacy'])
+        youtube_auth.edit_playlist(playlist['id'],
+                                   title=playlist['title'],
+                                   description=playlist['description'],
+                                   privacyStatus=playlist['privacy'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
@@ -127,7 +135,8 @@ class TestYTMusic(unittest.TestCase):
         response = youtube_auth.remove_playlist_items(playlistId, playlist['tracks'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
         response = youtube_auth.delete_playlist(playlistId)
-        self.assertEqual(response['command']['handlePlaylistDeletionCommand']['playlistId'], playlistId, "Playlist removal failed")
+        self.assertEqual(response['command']['handlePlaylistDeletionCommand']['playlistId'],
+                         playlistId, "Playlist removal failed")
 
     ###############
     # UPLOADS

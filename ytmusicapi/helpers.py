@@ -6,12 +6,10 @@ import time
 
 def prepare_browse_endpoint(type, browseId):
     return {
-        'browseEndpointContextSupportedConfigs':
-        {
-            "browseEndpointContextMusicConfig":
-                {
-                    "pageType": "MUSIC_PAGE_TYPE_" + type
-                }
+        'browseEndpointContextSupportedConfigs': {
+            "browseEndpointContextMusicConfig": {
+                "pageType": "MUSIC_PAGE_TYPE_" + type
+            }
         },
         'browseId': browseId
     }
@@ -29,9 +27,9 @@ def prepare_like_endpoint(rating):
 
 
 def html_to_txt(html_text):
-    tags = re.findall("<[^>]+>",html_text)
+    tags = re.findall("<[^>]+>", html_text)
     for tag in tags:
-        html_text = html_text.replace(tag,'')
+        html_text = html_text.replace(tag, '')
     return html_text
 
 
