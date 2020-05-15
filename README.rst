@@ -68,3 +68,4 @@ Contributing
 ==============
 
 Pull requests are welcome. There are still some features that are not yet implemented.
+Please, refer to the `Contributing <https://github.com/sigma67/ytmusicapi/blob/master/CONTRIBUTING.rst>`_ for guidance
