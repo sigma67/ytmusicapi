@@ -1,11 +1,15 @@
-#commonly used navigation paths
-SINGLE_COLUMN_TAB = ['contents', 'singleColumnBrowseResultsRenderer', 'tabs', 0, 'tabRenderer', 'content']
+# commonly used navigation paths
+SINGLE_COLUMN_TAB = [
+    'contents', 'singleColumnBrowseResultsRenderer', 'tabs', 0, 'tabRenderer', 'content'
+]
 SECTION_LIST = ['sectionListRenderer', 'contents']
 ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
 CONTINUATION = ['continuations', 0, 'nextContinuationData', 'continuation']
 MENU_ITEMS = ['menu', 'menuRenderer', 'items']
 MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
-PLAY_BUTTON = ['overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer']
+PLAY_BUTTON = [
+    'overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer'
+]
 NAVIGATION_BROWSE_ID = ['navigationEndpoint', 'browseEndpoint', 'browseId']
 NAVIGATION_VIDEO_ID = ['navigationEndpoint', 'watchEndpoint', 'videoId']
 CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'runs', 0]
@@ -74,8 +78,10 @@ def parse_albums(results):
         if has_artists:
             for i in range(1, int(run_count / 2)):
                 album['artists'].append({
-                    'name': data['subtitle']['runs'][i * 2]['text'],
-                    'id': nav(data['subtitle']['runs'][i * 2], NAVIGATION_BROWSE_ID)
+                    'name':
+                    data['subtitle']['runs'][i * 2]['text'],
+                    'id':
+                    nav(data['subtitle']['runs'][i * 2], NAVIGATION_BROWSE_ID)
                 })
         albums.append(album)
 
@@ -96,14 +102,19 @@ def parse_playlist_items(results, owned=False):
             videoId = setVideoId = None
             if owned:
                 for item in nav(data, MENU_ITEMS):
-                    if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(item, MENU_SERVICE):
-                        setVideoId = nav(item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
-                        videoId = nav(item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
+                    if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
+                            item, MENU_SERVICE):
+                        setVideoId = nav(
+                            item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
+                        videoId = nav(
+                            item,
+                            MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
                         break
             else:
                 # if item is not playable, there is no videoId
                 if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
-                    videoId = nav(data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+                    videoId = nav(
+                        data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
 
             title = get_item_text(data, 0)
 
@@ -113,10 +124,13 @@ def parse_playlist_items(results, owned=False):
 
             duration = None
             if 'fixedColumns' in data:
-                if 'simpleText' in data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']:
-                    duration = data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']['simpleText']
+                if 'simpleText' in data['fixedColumns'][0][
+                        'musicResponsiveListItemFixedColumnRenderer']['text']:
+                    duration = data['fixedColumns'][0][
+                        'musicResponsiveListItemFixedColumnRenderer']['text']['simpleText']
                 else:
-                    duration = data['fixedColumns'][0]['musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
+                    duration = data['fixedColumns'][0][
+                        'musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
 
             song = {'videoId': videoId, 'title': title, 'artists': artists, 'album': album}
             if duration:
@@ -139,22 +153,29 @@ def parse_uploaded_items(results):
         if 'menu' not in data:
             continue
         entityId = nav(data, MENU_ITEMS)[-1]['menuNavigationItemRenderer']['navigationEndpoint'][
-            'confirmDialogEndpoint']['content']['confirmDialogRenderer']['confirmButton']['buttonRenderer']['command'][
-            'musicDeletePrivatelyOwnedEntityCommand']['entityId']
+            'confirmDialogEndpoint']['content']['confirmDialogRenderer']['confirmButton'][
+                'buttonRenderer']['command']['musicDeletePrivatelyOwnedEntityCommand']['entityId']
 
-        videoId = nav(data, MENU_ITEMS + [0] + MENU_SERVICE)['queueAddEndpoint']['queueTarget']['videoId']
+        videoId = nav(data, MENU_ITEMS + [0]
+                      + MENU_SERVICE)['queueAddEndpoint']['queueTarget']['videoId']
 
         title = get_item_text(data, 0)
         artist = get_item_text(data, 1)
         album = get_item_text(data, 2)
 
-        song = {'entityId': entityId, 'videoId': videoId, 'artist': artist, 'title': title, 'album': album}
+        song = {
+            'entityId': entityId,
+            'videoId': videoId,
+            'artist': artist,
+            'title': title,
+            'album': album
+        }
         songs.append(song)
 
     return songs
 
 
-def parse_search_result(data, resultType = None):
+def parse_search_result(data, resultType=None):
     search_result = {}
     default = not resultType
     if not resultType:
@@ -164,7 +185,8 @@ def parse_search_result(data, resultType = None):
             resultType = 'album'
 
     if resultType in ['song', 'video']:
-        search_result['videoId'] = nav(data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+        search_result['videoId'] = nav(
+            data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
         search_result['title'] = get_item_text(data, 0)
 
     if resultType in ['artist', 'album', 'playlist']:
@@ -258,7 +280,8 @@ def get_continuations(results, continuation_type, per_page, limit, request_func,
 
 def nav(root, items):
     """Access a nested object in root by item sequence."""
-    for k in items: root = root[k]
+    for k in items:
+        root = root[k]
     return root
 
 

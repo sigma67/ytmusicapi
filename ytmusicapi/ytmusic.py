@@ -38,14 +38,16 @@ class YTMusic:
 
         try:
             if auth is None or os.path.isfile(auth):
-                file = auth if auth else pkg_resources.resource_filename('ytmusicapi', 'headers.json')
+                file = auth if auth else pkg_resources.resource_filename(
+                    'ytmusicapi', 'headers.json')
                 with open(file) as json_file:
                     self.headers = json.load(json_file)
             else:
                 self.headers = json.loads(auth)
         except Exception as e:
-            print("Failed loading provided credentials. Make sure to provide a string or a file path. "
-                  "Reason: " + str(e))
+            print(
+                "Failed loading provided credentials. Make sure to provide a string or a file path. "
+                "Reason: " + str(e))
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
@@ -57,13 +59,18 @@ class YTMusic:
             self.sapisid = sapisid_from_cookie(self.headers['Cookie'])
             response = self.__send_request('guide', {})
             if 'error' in response:
-                raise Exception("The provided credentials are invalid. Reason given by the server: " + response['error']['status'])
+                raise Exception(
+                    "The provided credentials are invalid. Reason given by the server: "
+                    + response['error']['status'])
 
     def __send_request(self, endpoint: str, body: Dict, additionalParams: str = ""):
         body.update(self.context)
         if self.auth:
-            self.headers["Authorization"] = get_authorization(self.sapisid + ' ' + self.headers['x-origin'])
-        response = requests.post(base_url + endpoint + params + additionalParams, json=body, headers=self.headers)
+            self.headers["Authorization"] = get_authorization(self.sapisid + ' '
+                                                              + self.headers['x-origin'])
+        response = requests.post(base_url + endpoint + params + additionalParams,
+                                 json=body,
+                                 headers=self.headers)
         return json.loads(response.text)
 
     def __check_auth(self):
@@ -154,7 +161,8 @@ class YTMusic:
                 return search_results
 
             if 'tabbedSearchResultsRenderer' in response['contents']:
-                results = response['contents']['tabbedSearchResultsRenderer']['tabs'][0]['tabRenderer']['content']
+                results = response['contents']['tabbedSearchResultsRenderer']['tabs'][0][
+                    'tabRenderer']['content']
             else:
                 results = response['contents']
 
@@ -250,23 +258,33 @@ class YTMusic:
 
         artist = {}
         artist['name'] = nav(response['header']['musicImmersiveHeaderRenderer'], TITLE_TEXT)
-        artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
-        artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0]['text'].split(' ')[0]
+        artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description'][
+            'runs'][0]['text']
+        artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0][
+            'text'].split(' ')[0]
         artist['songs'] = {}
-        if 'musicShelfRenderer' in results[0]: # API sometimes does not return songs
-            artist['songs']['browseId'] = nav(results[0]['musicShelfRenderer'], TITLE + NAVIGATION_BROWSE_ID)
-            artist['songs']['results'] = parse_playlist_items(results[0]['musicShelfRenderer']['contents'])
+        if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
+            artist['songs']['browseId'] = nav(results[0]['musicShelfRenderer'],
+                                              TITLE + NAVIGATION_BROWSE_ID)
+            artist['songs']['results'] = parse_playlist_items(
+                results[0]['musicShelfRenderer']['contents'])
 
         categories = ['albums', 'singles', 'videos']
         for category in categories:
-            data = [r['musicCarouselShelfRenderer'] for r in results if 'musicCarouselShelfRenderer' in r
-                    and nav(r['musicCarouselShelfRenderer'], CAROUSEL_TITLE)['text'].lower() == category]
+            data = [
+                r['musicCarouselShelfRenderer']
+                for r in results if 'musicCarouselShelfRenderer' in r and nav(
+                    r['musicCarouselShelfRenderer'], CAROUSEL_TITLE)['text'].lower() == category
+            ]
             if len(data) > 0:
                 artist[category] = {"results": []}
                 if 'navigationEndpoint' in nav(data[0], CAROUSEL_TITLE):
-                    artist[category]['browseId'] = nav(data[0], CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
+                    artist[category]['browseId'] = nav(data[0],
+                                                       CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
                     if category in ['albums', 'singles']:
-                        artist[category]['params'] = nav(data[0], CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
+                        artist[category]['params'] = nav(
+                            data[0],
+                            CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
 
                 for item in data[0]['contents']:
                     item = item['musicTwoRowItemRenderer']
@@ -317,8 +335,15 @@ class YTMusic:
             browseId = nav(data, NAVIGATION_BROWSE_ID)
             title = get_item_text(data, 0)
             album_type = get_item_text(data, 1) if release_type == "albums" else "Single"
-            year = get_item_text(data, 1, 2) if release_type == "albums" else get_item_text(data, 1)
-            albums.append({"browseId": browseId, "artist": artist, "title": title, "type": album_type, "year": year})
+            year = get_item_text(data, 1, 2) if release_type == "albums" else get_item_text(
+                data, 1)
+            albums.append({
+                "browseId": browseId,
+                "artist": artist,
+                "title": title,
+                "type": album_type,
+                "year": year
+            })
 
         return albums
 
@@ -352,7 +377,8 @@ class YTMusic:
         album['durationMs'] = album_data['durationMs']
         album['playlistId'] = album_data['audioPlaylistId']
         album['releaseDate'] = album_data['releaseDate']
-        album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload')['musicAlbumReleaseDetail']['description']
+        album['description'] = find_object_by_key(
+            data, 'musicAlbumReleaseDetail', 'payload')['musicAlbumReleaseDetail']['description']
         album['artist'] = []
         artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
         for artist in artists_data:
@@ -368,7 +394,8 @@ class YTMusic:
                 track['title'] = item['payload']['musicTrack']['title']
                 track['artists'] = item['payload']['musicTrack']['artistNames']
                 # in case the song is unavailable, there is no videoId
-                track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item['payload']['musicTrack'] else None
+                track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item[
+                    'payload']['musicTrack'] else None
                 track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
                 album['tracks'].append(track)
 
@@ -399,14 +426,18 @@ class YTMusic:
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
 
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['gridRenderer']
         playlists = parse_playlists(results['items'][1:])
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_playlists(contents)
-            playlists.extend(get_continuations(results, 'gridContinuation', 25, limit, request_func, parse_func))
+            playlists.extend(
+                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return playlists
 
@@ -422,14 +453,18 @@ class YTMusic:
         body = {'browseId': 'FEmusic_liked_videos'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['musicShelfRenderer']
         songs = parse_playlist_items(results['contents'][1:])
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_playlist_items(contents)
-            songs.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
+            songs.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return songs
 
@@ -445,7 +480,8 @@ class YTMusic:
 
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)
         if 'gridRenderer' not in results:
             return []
@@ -454,9 +490,12 @@ class YTMusic:
         albums = parse_albums(results['items'])
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_albums(contents)
-            albums.extend(get_continuations(results, 'gridContinuation', 25, limit, request_func, parse_func))
+            albums.extend(
+                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return albums
 
@@ -480,14 +519,18 @@ class YTMusic:
         body = {'browseId': 'FEmusic_library_corpus_track_artists'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['musicShelfRenderer']
         artists = parse_artists(results['contents'])
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_artists(contents)
-            artists.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
+            artists.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return artists
 
@@ -502,14 +545,18 @@ class YTMusic:
         body = {'browseId': 'FEmusic_library_corpus_artists'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['musicShelfRenderer']
         artists = parse_artists(results['contents'])
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_artists(contents)
-            artists.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
+            artists.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return artists
 
@@ -666,7 +713,8 @@ class YTMusic:
             playlist['privacy'] = 'PUBLIC'
         else:
             header = response['header']['musicEditablePlaylistDetailHeaderRenderer']
-            playlist['privacy'] = header['editHeader']['musicPlaylistEditHeaderRenderer']['privacy']
+            playlist['privacy'] = header['editHeader']['musicPlaylistEditHeaderRenderer'][
+                'privacy']
             header = header['header']['musicDetailHeaderRenderer']
 
         playlist['title'] = nav(header, TITLE_TEXT)
@@ -692,13 +740,19 @@ class YTMusic:
             songs_to_get = min(limit, song_count)
 
             if 'continuations' in results:
-                request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+                request_func = lambda additionalParams: self.__send_request(
+                    endpoint, body, additionalParams)
                 parse_func = lambda contents: parse_playlist_items(contents, own_playlist)
-                playlist['tracks'].extend(get_continuations(results, 'musicPlaylistShelfContinuation', 100, songs_to_get, request_func, parse_func))
+                playlist['tracks'].extend(
+                    get_continuations(results, 'musicPlaylistShelfContinuation', 100, songs_to_get,
+                                      request_func, parse_func))
 
         return playlist
 
-    def create_playlist(self, title: str, description: str, privacy_status: str = "PRIVATE") -> str:
+    def create_playlist(self,
+                        title: str,
+                        description: str,
+                        privacy_status: str = "PRIVATE") -> str:
         """
         Creates a new empty playlist and returns its id.
 
@@ -717,7 +771,11 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         return response['playlistId']
 
-    def edit_playlist(self, playlistId: str, title: str = None, description: str = None, privacyStatus: str = None) -> Union[str, Dict]:
+    def edit_playlist(self,
+                      playlistId: str,
+                      title: str = None,
+                      description: str = None,
+                      privacyStatus: str = None) -> Union[str, Dict]:
         """
         Edit title, description or privacyStatus of a playlist.
 
@@ -734,10 +792,16 @@ class YTMusic:
             actions.append({'action': 'ACTION_SET_PLAYLIST_NAME', 'playlistName': title})
 
         if description:
-            actions.append({'action': 'ACTION_SET_PLAYLIST_DESCRIPTION', 'playlistDescription': description})
+            actions.append({
+                'action': 'ACTION_SET_PLAYLIST_DESCRIPTION',
+                'playlistDescription': description
+            })
 
         if privacyStatus:
-            actions.append({'action': 'ACTION_SET_PLAYLIST_PRIVACY', 'playlistPrivacy': privacyStatus})
+            actions.append({
+                'action': 'ACTION_SET_PLAYLIST_PRIVACY',
+                'playlistPrivacy': privacyStatus
+            })
 
         body['actions'] = actions
         endpoint = 'browse/edit_playlist'
@@ -768,10 +832,7 @@ class YTMusic:
         self.__check_auth()
         body = {'playlistId': playlistId, 'actions': []}
         for videoId in videoIds:
-            body['actions'].append({
-                'action': 'ACTION_ADD_VIDEO',
-                'addedVideoId': videoId
-            })
+            body['actions'].append({'action': 'ACTION_ADD_VIDEO', 'addedVideoId': videoId})
 
         endpoint = 'browse/edit_playlist'
         response = self.__send_request(endpoint, body)
@@ -788,7 +849,8 @@ class YTMusic:
         """
         self.__check_auth()
         if not videos[0]['setVideoId']:
-            raise Exception("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
+            raise Exception(
+                "Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
 
         body = {'playlistId': playlistId, 'actions': []}
         for video in videos:
@@ -828,15 +890,19 @@ class YTMusic:
         endpoint = 'browse'
         body = {"browseId": "FEmusic_library_privately_owned_tracks"}
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['musicShelfRenderer']
         songs = []
 
         songs.extend(parse_uploaded_items(results['contents'][1:]))
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
-            songs.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_uploaded_items))
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
+            songs.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_uploaded_items))
 
         return songs
 
@@ -851,7 +917,8 @@ class YTMusic:
         body = {'browseId': 'FEmusic_library_privately_owned_releases'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)
         if 'gridRenderer' not in results:
             return []
@@ -860,9 +927,12 @@ class YTMusic:
         albums = parse_albums(results['items'])
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_albums(contents)
-            albums.extend(get_continuations(results, 'gridContinuation', 25, limit, request_func, parse_func))
+            albums.extend(
+                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return albums
 
@@ -877,14 +947,18 @@ class YTMusic:
         body = {'browseId': 'FEmusic_library_privately_owned_artists'}
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST), 'itemSectionRenderer')
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
         results = nav(results, ITEM_SECTION)['musicShelfRenderer']
         artists = parse_artists(results['contents'], True)
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self.__send_request(endpoint, body, additionalParams)
+            request_func = lambda additionalParams: self.__send_request(
+                endpoint, body, additionalParams)
             parse_func = lambda contents: parse_artists(contents, True)
-            artists.extend(get_continuations(results, 'musicShelfContinuation', 25, limit, request_func, parse_func))
+            artists.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
 
         return artists
 
@@ -901,8 +975,9 @@ class YTMusic:
 
         supported_filetypes = ["mp3", "m4a", "wma", "flac", "ogg"]
         if os.path.splitext(filepath)[1][1:] not in supported_filetypes:
-            raise Exception("The provided file type is not supported by YouTube Music. Supported file types are " +
-                            ', '.join(supported_filetypes))
+            raise Exception(
+                "The provided file type is not supported by YouTube Music. Supported file types are "
+                + ', '.join(supported_filetypes))
 
         headers = self.headers
         upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=0"

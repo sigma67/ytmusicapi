@@ -32,8 +32,10 @@ def setup(filepath=None):
 
     if len(headers) != len(required_headers):
         missing = set(required_headers) - set(headers)
-        raise Exception("The following entries are missing in your headers: " + ", ".join(missing) +
-                        ". Please try a different request (such as /browse) and make sure you are logged in.")
+        raise Exception(
+            "The following entries are missing in your headers: " + ", ".join(missing)
+            + ". Please try a different request (such as /browse) and make sure you are logged in."
+        )
 
     with open(pkg_resources.resource_filename('ytmusicapi', 'headers.json')) as json_file:
         default_headers = json.load(json_file)
