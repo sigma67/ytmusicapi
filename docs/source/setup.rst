@@ -23,7 +23,7 @@ in the correct format in the current directory.
 Manual file creation
 --------------------
 
-Alternatively, you can paste the cookie to `headers_auth.json` below and create your own file:
+Alternatively, you can paste the cookie to ``headers_auth.json`` below and create your own file:
 
 .. literalinclude:: ../../headers_auth.json.example
   :language: JSON

@@ -28,6 +28,6 @@ Before committing, run style and linter checks using
 
 Code structure
 ---------------
-The folder `ytmusicapi` contains the main library which is distributed to the users.
-Each main library function in `ytmusic.py` is covered by a test in the `tests` folder.
+The folder ``ytmusicapi`` contains the main library which is distributed to the users.
+Each main library function in ``ytmusic.py`` is covered by a test in the ``tests`` folder.
 If you want to contribute a new function, please create a corresponding unittest.
