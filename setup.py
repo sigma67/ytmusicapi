@@ -23,6 +23,15 @@ setup(name='ytmusicapi',
       install_requires=[
             'requests >= 2.22'
       ],
+      extras_require={
+        'dev': [
+              'pre-commit',
+              'flake8',
+              'yapf',
+              'coverage',
+              'coverage-badge'
+        ]
+      },
       python_requires=">=3.5",
       include_package_data=True,
       zip_safe=False
