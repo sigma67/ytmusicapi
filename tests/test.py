@@ -3,7 +3,7 @@ import configparser
 from ytmusicapi.ytmusic import YTMusic
 
 config = configparser.RawConfigParser()
-config.read('./test.cfg')
+config.read('./test.cfg', 'utf-8')
 
 youtube = YTMusic()
 youtube_auth = YTMusic(config['auth']['headers_file'])
@@ -126,12 +126,15 @@ class TestYTMusic(unittest.TestCase):
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
     def test_end2end(self):
-        playlistId = youtube_auth.create_playlist("test", "test description")
+        playlistId = youtube_auth.create_playlist(
+            "test",
+            "test description",
+            source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y")
         self.assertEqual(len(playlistId), 34, "Playlist creation failed")
         response = youtube_auth.add_playlist_items(playlistId, ['y0Hhvtmv0gk'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Adding playlist item failed")
         playlist = youtube_auth.get_playlist(playlistId)
-        self.assertEqual(len(playlist['tracks']), 1, "Getting playlist items failed")
+        self.assertEqual(len(playlist['tracks']), 41, "Getting playlist items failed")
         response = youtube_auth.remove_playlist_items(playlistId, playlist['tracks'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
         response = youtube_auth.delete_playlist(playlistId)

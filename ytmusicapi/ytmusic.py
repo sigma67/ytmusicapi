@@ -752,13 +752,17 @@ class YTMusic:
     def create_playlist(self,
                         title: str,
                         description: str,
-                        privacy_status: str = "PRIVATE") -> str:
+                        privacy_status: str = "PRIVATE",
+                        video_ids: List = None,
+                        source_playlist: str = None) -> str:
         """
         Creates a new empty playlist and returns its id.
 
         :param title: Playlist title
         :param description: Playlist description
         :param privacy_status: Playlists can be 'PUBLIC', 'PRIVATE', or 'UNLISTED'. Default: 'PRIVATE'
+        :param video_ids: IDs of songs to create the playlist with
+        :param source_playlist: Another playlist whose songs should be added to the new playlist
         :return: ID of the YouTube playlist
         """
         self.__check_auth()
@@ -767,6 +771,12 @@ class YTMusic:
             'description': html_to_txt(description),  # YT does not allow HTML tags
             'privacyStatus': privacy_status
         }
+        if video_ids is not None:
+            body['videoIds'] = video_ids
+
+        if source_playlist is not None:
+            body['sourcePlaylistId'] = source_playlist
+
         endpoint = 'playlist/create'
         response = self.__send_request(endpoint, body)
         return response['playlistId']
