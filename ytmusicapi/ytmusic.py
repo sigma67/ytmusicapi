@@ -718,7 +718,8 @@ class YTMusic:
             header = header['header']['musicDetailHeaderRenderer']
 
         playlist['title'] = nav(header, TITLE_TEXT)
-        playlist['description'] = header['description']['runs'][0]['text']
+        if "description" in header:
+            playlist["description"] = header["description"]["runs"][0]["text"]
         run_count = len(header['subtitle']['runs'])
         if run_count > 1:
             playlist['author'] = nav(header, SUBTITLE2)
