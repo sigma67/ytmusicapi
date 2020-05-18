@@ -117,6 +117,8 @@ def parse_playlist_items(results, owned=False):
                         data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
 
             title = get_item_text(data, 0)
+            if title == 'Song deleted':
+                continue
 
             artists = parse_song_artists(data, 1)
 
