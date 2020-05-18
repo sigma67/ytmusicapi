@@ -4,3 +4,5 @@ headers_auth.json
 docs/build
 **.bat
 **.cfg
+**.mp3
+.coverage

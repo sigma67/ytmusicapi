@@ -11,6 +11,9 @@ youtube_brand = YTMusic(config['auth']['headers'], config['auth']['brand_account
 
 
 class TestYTMusic(unittest.TestCase):
+    def test_init(self):
+        self.assertRaises(Exception, YTMusic, "{}")
+
     def test_setup(self):
         YTMusic.setup(config['auth']['headers_file'])
 
@@ -19,13 +22,19 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_search(self):
-        results = youtube_auth.search("Oasis Wonderwall")
+        query = "Oasis Wonderwall"
+        self.assertRaises(Exception, youtube_auth.search, query, "song")
+        results = youtube_auth.search(query)
         self.assertGreater(len(results), 0)
-        results = youtube_auth.search("Oasis Wonderwall", 'videos')
+        results = youtube_auth.search(query, 'songs')
         self.assertGreater(len(results), 0)
-        results = youtube_auth.search("Oasis Wonderwall", 'albums')
+        results = youtube_auth.search(query, 'videos')
         self.assertGreater(len(results), 0)
-        results = youtube_auth.search("Oasis Wonderwall", 'artists')
+        results = youtube_auth.search(query, 'albums')
+        self.assertGreater(len(results), 0)
+        results = youtube_auth.search(query, 'artists')
+        self.assertGreater(len(results), 0)
+        results = youtube_auth.search(query, 'playlists')
         self.assertGreater(len(results), 0)
 
     def test_get_artist(self):
@@ -162,6 +171,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 25)
 
     def test_upload_song(self):
+        self.assertRaises(Exception, youtube_auth.upload_song, 'song.wav')
         response = youtube_auth.upload_song(config['uploads']['file'])
         self.assertEqual(response.status_code, 409)
 

@@ -132,6 +132,11 @@ class YTMusic:
         body = {'query': query}
         endpoint = 'search'
         search_results = []
+        filters = ['albums', 'artists', 'playlists', 'songs', 'videos']
+        if filter and filter not in filters:
+            raise Exception(
+                "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
+                + ', '.join(filters))
 
         if filter:
             param1 = 'Eg-KAQwIA'
@@ -149,9 +154,6 @@ class YTMusic:
                 param2 = 'RAAGAAgACgA'
 
             body['params'] = param1 + param2 + param3
-
-        elif filter not in ['albums', 'artists', 'playlists', 'songs', 'videos', None]:
-            return search_results
 
         response = self.__send_request(endpoint, body)
 

@@ -19,12 +19,14 @@ Before making changes to the code, install the development requirements using
 
     pip install -e .[dev]
 
-Before committing, run style and linter checks using
+Before committing, stage your files and run style and linter checks:
 
 .. code-block::
 
+    git add .
     pre-commit run
 
+pre-commit will unstage any files that do not pass. Fix the issues until all checks pass and commit.
 
 Code structure
 ---------------
