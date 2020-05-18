@@ -3,7 +3,7 @@ import json
 import pkg_resources
 import ntpath
 import os
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers import *
 from ytmusicapi.setup import setup
@@ -786,14 +786,16 @@ class YTMusic:
                       playlistId: str,
                       title: str = None,
                       description: str = None,
-                      privacyStatus: str = None) -> Union[str, Dict]:
+                      privacyStatus: str = None,
+                      moveItem: Tuple[str, str] = None) -> Union[str, Dict]:
         """
-        Edit title, description or privacyStatus of a playlist.
+        Edit title, description or privacyStatus of a playlist, or move an item within a playlist.
 
         :param playlistId: Playlist id
         :param title: Optional. New title for the playlist
         :param description: Optional. New description for the playlist
         :param privacyStatus: Optional. New privacy status for the playlist
+        :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, see :py:func:`get_playlist`
         :return: Status String or full response
         """
         self.__check_auth()
@@ -812,6 +814,13 @@ class YTMusic:
             actions.append({
                 'action': 'ACTION_SET_PLAYLIST_PRIVACY',
                 'playlistPrivacy': privacyStatus
+            })
+
+        if moveItem:
+            actions.append({
+                'action': 'ACTION_MOVE_VIDEO_BEFORE',
+                'setVideoId': moveItem[0],
+                'movedSetVideoIdSuccessor': moveItem[1]
             })
 
         body['actions'] = actions
