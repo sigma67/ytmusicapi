@@ -116,12 +116,16 @@ class TestYTMusic(unittest.TestCase):
         response = youtube_auth.edit_playlist(playlist['id'],
                                               title='',
                                               description='',
-                                              privacyStatus='PRIVATE')
+                                              privacyStatus='PRIVATE',
+                                              moveItem=(playlist['tracks'][1]['setVideoId'],
+                                                        playlist['tracks'][0]['setVideoId']))
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
         youtube_auth.edit_playlist(playlist['id'],
                                    title=playlist['title'],
                                    description=playlist['description'],
-                                   privacyStatus=playlist['privacy'])
+                                   privacyStatus=playlist['privacy'],
+                                   moveItem=(playlist['tracks'][0]['setVideoId'],
+                                             playlist['tracks'][1]['setVideoId']))
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
