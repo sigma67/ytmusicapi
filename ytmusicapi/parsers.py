@@ -88,7 +88,7 @@ def parse_albums(results):
     return albums
 
 
-def parse_playlist_items(results, owned=False):
+def parse_playlist_items(results):
     songs = []
     count = 1
     for result in results:
@@ -100,21 +100,21 @@ def parse_playlist_items(results, owned=False):
         try:
             # if playlist is not owned, the playlist item can't be interacted with
             videoId = setVideoId = None
-            if owned:
-                for item in nav(data, MENU_ITEMS):
-                    if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
-                            item, MENU_SERVICE):
-                        setVideoId = nav(
-                            item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
-                        videoId = nav(
-                            item,
-                            MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
-                        break
-            else:
-                # if item is not playable, there is no videoId
-                if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
+
+            # if item is not playable, there is no videoId
+            if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
+                videoId = nav(
+                    data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+
+            for item in nav(data, MENU_ITEMS):
+                if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
+                        item, MENU_SERVICE):
+                    setVideoId = nav(
+                        item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
                     videoId = nav(
-                        data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+                        item,
+                        MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
+                    break
 
             title = get_item_text(data, 0)
 
@@ -135,7 +135,7 @@ def parse_playlist_items(results, owned=False):
             song = {'videoId': videoId, 'title': title, 'artists': artists, 'album': album}
             if duration:
                 song['duration'] = duration
-            if owned:
+            if setVideoId:
                 song['setVideoId'] = setVideoId
 
             songs.append(song)
