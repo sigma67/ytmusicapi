@@ -7,4 +7,4 @@ headers_file = ./headers_auth.json
 own = owned_playlist_id
 
 [uploads]
-file = song_in_project_root.mp3
+file = song_in_tests_directory.mp3

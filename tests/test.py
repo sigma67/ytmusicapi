@@ -109,7 +109,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_owned_playlist(self):
         playlist = youtube_auth.get_playlist(config['playlists']['own'], 300)
-        self.assertEqual(len(playlist['tracks']), 284)
+        self.assertEqual(len(playlist['tracks']), 282)
 
     def test_edit_playlist(self):
         playlist = youtube_auth.get_playlist(config['playlists']['own'])

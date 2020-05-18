@@ -11,12 +11,18 @@ Adjust the file to contain appropriate information for your YouTube account and 
 
 Coverage badge
 --------------
-Install ``coverage`` and ``coverage-badge`` with pip. Run
+Make sure you installed the dev requirements as explained in `CONTRIBUTING.rst <https://github.com/sigma67/ytmusicapi/blob/master/CONTRIBUTING.rst>`_. Run
 
-``coverage run --source=ytmusicapi -m unittest discover tests``
+.. code-block:: bash
 
-to generate a coverage report in the project root. With
+    cd tests
+    coverage run --source=../ytmusicapi -m unittest test.py
 
-``coverage-badge -o tests/coverage.svg -f``
+
+to generate a coverage report. With
+
+.. code-block:: bash
+
+    coverage-badge -o coverage.svg -f
 
 you generate the badge.
