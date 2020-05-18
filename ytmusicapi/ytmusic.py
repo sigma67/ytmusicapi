@@ -789,15 +789,18 @@ class YTMusic:
                       title: str = None,
                       description: str = None,
                       privacyStatus: str = None,
-                      moveItem: Tuple[str, str] = None) -> Union[str, Dict]:
+                      moveItem: Tuple[str, str] = None,
+                      addPlaylistId: str = None) -> Union[str, Dict]:
         """
-        Edit title, description or privacyStatus of a playlist, or move an item within a playlist.
+        Edit title, description or privacyStatus of a playlist.
+        You may also move an item within a playlist or append another playlist to this playlist.
 
         :param playlistId: Playlist id
         :param title: Optional. New title for the playlist
         :param description: Optional. New description for the playlist
         :param privacyStatus: Optional. New privacy status for the playlist
         :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, see :py:func:`get_playlist`
+        :param addPlaylistId: Optional. Id of another playlist to add to this playlist
         :return: Status String or full response
         """
         self.__check_auth()
@@ -823,6 +826,12 @@ class YTMusic:
                 'action': 'ACTION_MOVE_VIDEO_BEFORE',
                 'setVideoId': moveItem[0],
                 'movedSetVideoIdSuccessor': moveItem[1]
+            })
+
+        if addPlaylistId:
+            actions.append({
+                'action': 'ACTION_ADD_PLAYLIST',
+                'addedFullListId': addPlaylistId
             })
 
         body['actions'] = actions
