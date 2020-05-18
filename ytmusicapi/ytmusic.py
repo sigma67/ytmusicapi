@@ -757,7 +757,7 @@ class YTMusic:
                         description: str,
                         privacy_status: str = "PRIVATE",
                         video_ids: List = None,
-                        source_playlist: str = None) -> str:
+                        source_playlist: str = None) -> Union[str, Dict]:
         """
         Creates a new empty playlist and returns its id.
 
@@ -766,7 +766,7 @@ class YTMusic:
         :param privacy_status: Playlists can be 'PUBLIC', 'PRIVATE', or 'UNLISTED'. Default: 'PRIVATE'
         :param video_ids: IDs of songs to create the playlist with
         :param source_playlist: Another playlist whose songs should be added to the new playlist
-        :return: ID of the YouTube playlist
+        :return: ID of the YouTube playlist or full response if there was an error
         """
         self.__check_auth()
         body = {
@@ -782,7 +782,7 @@ class YTMusic:
 
         endpoint = 'playlist/create'
         response = self.__send_request(endpoint, body)
-        return response['playlistId']
+        return response['playlistId'] if 'playlistId' in response else response
 
     def edit_playlist(self,
                       playlistId: str,
@@ -807,7 +807,10 @@ class YTMusic:
         body = {'playlistId': playlistId}
         actions = []
         if title:
-            actions.append({'action': 'ACTION_SET_PLAYLIST_NAME', 'playlistName': title})
+            actions.append({
+                'action': 'ACTION_SET_PLAYLIST_NAME',
+                'playlistName': title
+            })
 
         if description:
             actions.append({
@@ -831,8 +834,8 @@ class YTMusic:
         if addPlaylistId:
             actions.append({
                 'action': 'ACTION_ADD_PLAYLIST',
-                'addedFullListId': addPlaylistId
-            })
+                'addedFullListId': addPlaylistId}
+            )
 
         body['actions'] = actions
         endpoint = 'browse/edit_playlist'
