@@ -1,13 +1,22 @@
 ytmusicapi: Unofficial API for YouTube Music
 ############################################
 
-.. image:: https://img.shields.io/pypi/dw/ytmusicapi?style=flat-square
+.. image:: https://img.shields.io/pypi/dm/ytmusicapi?style=flat-square
     :alt: PyPI Downloads
     :target: https://pypi.org/project/ytmusicapi/
 
 .. image:: https://raw.githubusercontent.com/sigma67/ytmusicapi/master/tests/coverage.svg
     :alt: Code coverage
     :target: https://github.com/dbrgn/coverage-badge
+
+.. image:: https://img.shields.io/github/v/release/sigma67/ytmusicapi?style=flat-square
+    :alt: Latest release
+    :target: https://github.com/sigma67/ytmusicapi/releases/latest
+
+.. image:: https://img.shields.io/github/commits-since/sigma67/ytmusicapi/latest?style=flat-square
+    :alt: Commits since latest release
+    :target: https://github.com/sigma67/ytmusicapi/commits
+
 
 A work-in-progress API that emulates web requests from the YouTube Music web client.
 
@@ -68,4 +77,4 @@ Contributing
 ==============
 
 Pull requests are welcome. There are still some features that are not yet implemented.
-Please, refer to the `Contributing <https://github.com/sigma67/ytmusicapi/blob/master/CONTRIBUTING.rst>`_ for guidance
+Please, refer to `CONTRIBUTING.rst <https://github.com/sigma67/ytmusicapi/blob/master/CONTRIBUTING.rst>`_ for guidance.
