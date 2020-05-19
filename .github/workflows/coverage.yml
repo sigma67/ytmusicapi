@@ -1,0 +1,35 @@
+name: Code coverage
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.7
+    - name: Generate coverage report
+      env:
+        HEADERS_AUTH: ${{ secrets.HEADERS_AUTH }}
+        TEST_CFG: ${{ secrets.TEST_CFG }}
+      run: |
+        pip install -e .
+        pip install coverage
+        cd tests
+        curl -o test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
+        cat <<< "$HEADERS_AUTH" > headers_auth.json
+        cat <<< "$TEST_CFG" > test.cfg
+        coverage run --source=../ytmusicapi -m unittest test.py
+        coverage xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: tests/coverage.xml
+        flags: unittests
+        fail_ci_if_error: true

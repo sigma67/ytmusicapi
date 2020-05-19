@@ -1,5 +1,7 @@
 import unittest
 import configparser
+import sys
+sys.path.insert(0, '..')
 from ytmusicapi.ytmusic import YTMusic
 
 config = configparser.RawConfigParser()

@@ -18,7 +18,7 @@ def setup(filepath=None, headers_raw=None):
                 break
             contents.append(line)
     else:
-        contents = input.split('\n')
+        contents = headers_raw.split('\n')
 
     required_headers = ["Cookie"]
     try:
