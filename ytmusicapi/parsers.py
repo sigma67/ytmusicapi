@@ -107,15 +107,12 @@ def parse_playlist_items(results):
                 videoId = nav(
                     data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
 
-            for item in nav(data, MENU_ITEMS):
-                if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
-                        item, MENU_SERVICE):
-                    setVideoId = nav(
-                        item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
-                    videoId = nav(
-                        item,
-                        MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
-                    break
+                for item in nav(data, MENU_ITEMS):
+                    if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
+                            item, MENU_SERVICE):
+                        setVideoId = nav(
+                            item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
+                        break
 
             title = get_item_text(data, 0)
             if title == 'Song deleted':

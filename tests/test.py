@@ -113,12 +113,12 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_foreign_playlist(self):
-        playlist = youtube.get_playlist("PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_", 200)
-        self.assertEqual(len(playlist['tracks']), 200)
+        playlist = youtube.get_playlist("PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_", 300)
+        self.assertGreater(len(playlist['tracks']), 200)
 
     def test_get_owned_playlist(self):
         playlist = youtube_auth.get_playlist(config['playlists']['own'], 300)
-        self.assertEqual(len(playlist['tracks']), 282)
+        self.assertGreater(len(playlist['tracks']), 200)
 
     def test_edit_playlist(self):
         playlist = youtube_auth.get_playlist(config['playlists']['own'])
