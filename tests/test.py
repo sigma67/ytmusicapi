@@ -177,10 +177,26 @@ class TestYTMusic(unittest.TestCase):
         response = youtube_auth.upload_song(config['uploads']['file'])
         self.assertEqual(response.status_code, 409)
 
-    def test_delete_uploaded_song(self):
+    def test_delete_upload_entity(self):
         results = youtube_auth.get_library_upload_songs()
-        response = youtube_auth.delete_uploaded_song(results[0])
+        response = youtube_auth.delete_upload_entity(results[0]['entityId'])
         self.assertEqual(response, 'STATUS_SUCCEEDED')
+
+    def test_get_library_upload_album(self):
+        songs = youtube_auth.get_library_upload_songs()
+        for song in songs:
+            if song['album']:
+                album = youtube_auth.get_library_upload_album(song['album']['id'])
+                self.assertGreater(len(album['tracks']), 0)
+                break
+
+    def test_get_library_upload_artist(self):
+        songs = youtube_auth.get_library_upload_songs()
+        for song in songs:
+            if song['artist']:
+                tracks = youtube_auth.get_library_upload_artist(song['artist'][0]['id'])
+                self.assertGreater(len(tracks), 0)
+                break
 
 
 if __name__ == '__main__':

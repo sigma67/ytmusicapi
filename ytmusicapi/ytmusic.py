@@ -268,10 +268,9 @@ class YTMusic:
             'text'].split(' ')[0]
         artist['songs'] = {}
         if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
-            artist['songs']['browseId'] = nav(results[0]['musicShelfRenderer'],
-                                              TITLE + NAVIGATION_BROWSE_ID)
-            artist['songs']['results'] = parse_playlist_items(
-                results[0]['musicShelfRenderer']['contents'])
+            musicShelf = nav(results, MUSIC_SHELF)
+            artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
+            artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
 
         categories = ['albums', 'singles', 'videos']
         for category in categories:
@@ -330,11 +329,10 @@ class YTMusic:
         endpoint = 'browse'
         response = self.__send_request(endpoint, body)
         artist = nav(response['header']['musicHeaderRenderer'], TITLE_TEXT)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
         albums = []
-        musicShelf = results[0]['musicShelfRenderer']
-        release_type = nav(musicShelf, TITLE_TEXT).lower()
-        for result in musicShelf['contents']:
+        release_type = nav(results, TITLE_TEXT).lower()
+        for result in results['contents']:
             data = result['musicResponsiveListItemRenderer']
             browseId = nav(data, NAVIGATION_BROWSE_ID)
             title = get_item_text(data, 0)
@@ -362,12 +360,31 @@ class YTMusic:
           Each track is in the following format::
 
             {
-               "index": "1",
-               "title": "WIEE (feat. Mesto)",
-               "artists": "Martin Garrix",
-               "videoId": "8xMNeXI9wxI",
-               "lengthMs": "203406"
-            }
+              "title": "Seven",
+              "trackCount": "7",
+              "durationMs": "1439579",
+              "playlistId": "OLAK5uy_kGnhwT08mQMGw8fArBowdtlew3DpgUt9c",
+              "releaseDate": {
+                "year": 2016,
+                "month": 10,
+                "day": 28
+              },
+              "description": "Seven is ...",
+              "artist": [
+                {
+                  "name": "Martin Garrix",
+                  "id": "UCqJnSdHjKtfsrHi9aI-9d3g"
+                }
+              ],
+              "tracks": [
+                {
+                  "index": "1",
+                  "title": "WIEE (feat. Mesto)",
+                  "artists": "Martin Garrix",
+                  "videoId": "8xMNeXI9wxI",
+                  "lengthMs": "203406"
+                }
+              ]
 
         """
         body = prepare_browse_endpoint("ALBUM", browseId)
@@ -992,6 +1009,90 @@ class YTMusic:
 
         return artists
 
+    def get_library_upload_artist(self, browseId: str) -> List[Dict]:
+        """
+        Returns a list of uploaded tracks for the artist.
+
+        :param browseId:
+        :return: List of uploaded songs
+
+            Example List:
+            [
+              {
+                "entityId": "t_po_CICr2crg7OWpchDKwoakAQ",
+                "videoId": "Dtffhy8WJgw",
+                "title": "Hold Me (Original Mix)",
+                "artist": [
+                  {
+                    "name": "Jakko",
+                    "id": "FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIFamFra28"
+                  }
+                ],
+                "album": null
+              }
+            ]
+
+        """
+        self.__check_auth()
+        body = prepare_browse_endpoint("ARTIST", browseId)
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
+        if len(results['contents']) > 1:
+            results['contents'].pop(0)
+
+        return parse_uploaded_items(results['contents'])
+
+    def get_library_upload_album(self, browseId: str) -> Dict:
+        """
+        Get information and tracks of an album associated with uploaded tracks
+
+        :param browseId:
+        :returns Dictionary with title, description, artist and tracks.
+
+            {
+              "title": "Hard To Stop - Single",
+              "year": "2013",
+              "trackCount": 1,
+              "duration": "4 minutes, 2 seconds",
+              "tracks": [
+                {
+                  "entityId": "t_po_CICr2crg7OWpchDN6tnYBw",
+                  "videoId": "VBQVcjJM7ak",
+                  "title": "Hard To Stop (Vicetone x Ne-Yo x Daft Punk)"
+                }
+              ]
+            }
+        """
+        self.__check_auth()
+        body = prepare_browse_endpoint("ALBUM", browseId)
+        endpoint = 'browse'
+        response = self.__send_request(endpoint, body)
+        header = response['header']['musicDetailHeaderRenderer']
+        album = {'title': nav(header, TITLE_TEXT)}
+        if "description" in header:
+            album["description"] = header["description"]["runs"][0]["text"]
+        run_count = len(header['subtitle']['runs'])
+        if run_count == 3:
+            album['year'] = nav(header, SUBTITLE2)
+
+        if run_count == 5:
+            album['artist'] = {
+                'name': nav(header, SUBTITLE2),
+                'id': nav(header, SUBTITLE2 + NAVIGATION_BROWSE_ID)
+            }
+            album['year'] = nav(header, SUBTITLE3)
+
+        if len(header['secondSubtitle']['runs']) > 1:
+            album['trackCount'] = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+            album['duration'] = header['secondSubtitle']['runs'][2]['text']
+        else:
+            album['duration'] = header['secondSubtitle']['runs'][0]['text']
+
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
+        album['tracks'] = parse_uploaded_items(results['contents'])
+        return album
+
     def upload_song(self, filepath: str) -> Union[str, requests.Response]:
         """
         Uploads a song to YouTube Music
@@ -1029,17 +1130,20 @@ class YTMusic:
         else:
             return response
 
-    def delete_uploaded_song(self, uploaded_song: Dict) -> Union[str, Dict]:
+    def delete_upload_entity(self, entityId: str) -> Union[str, Dict]:
         """
-        Deletes a previously uploaded song
+        Deletes a previously uploaded song or album
 
-        :param uploaded_song: The uploaded song to delete,
+        :param entityId: The entity id of the uploaded song to delete,
             e.g. retrieved from :py:func:`get_library_upload_songs`
         :return: Status String or error
         """
         self.__check_auth()
         endpoint = 'music/delete_privately_owned_entity'
-        body = {"entityId": uploaded_song['entityId']}
+        if 'FEmusic_library_privately_owned_release_detail' in entityId:
+            entityId = entityId.replace('FEmusic_library_privately_owned_release_detail', '')
+
+        body = {"entityId": entityId}
         response = self.__send_request(endpoint, body)
 
         if 'error' not in response:

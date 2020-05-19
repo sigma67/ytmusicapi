@@ -4,6 +4,7 @@ SINGLE_COLUMN_TAB = [
 ]
 SECTION_LIST = ['sectionListRenderer', 'contents']
 ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
+MUSIC_SHELF = [0, 'musicShelfRenderer']
 CONTINUATION = ['continuations', 0, 'nextContinuationData', 'continuation']
 MENU_ITEMS = ['menu', 'menuRenderer', 'items']
 MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
@@ -104,8 +105,8 @@ def parse_playlist_items(results):
 
             # if item is not playable, there is no videoId
             if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
-                videoId = nav(
-                    data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+                videoId = nav(data,
+                              PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
 
                 for item in nav(data, MENU_ITEMS):
                     if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
@@ -160,16 +161,12 @@ def parse_uploaded_items(results):
                       + MENU_SERVICE)['queueAddEndpoint']['queueTarget']['videoId']
 
         title = get_item_text(data, 0)
-        artist = get_item_text(data, 1)
-        album = get_item_text(data, 2)
 
-        song = {
-            'entityId': entityId,
-            'videoId': videoId,
-            'artist': artist,
-            'title': title,
-            'album': album
-        }
+        song = {'entityId': entityId, 'videoId': videoId, 'title': title}
+        if get_flex_column_item(data, 1):
+            song['artist'] = parse_song_artists(data, 1)
+            song['album'] = parse_song_album(data, 2)
+
         songs.append(song)
 
     return songs
