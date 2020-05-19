@@ -6,17 +6,19 @@ import platform
 path = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
 
-def setup(filepath=None):
-    eof = "Ctrl-D" if platform.system() != "Windows" else "'Enter, Ctrl-Z, Enter'"
-    print("Please paste the request headers from Firefox and press " + eof + " to continue:")
-
+def setup(filepath=None, headers_raw=None):
     contents = []
-    while True:
-        try:
-            line = input()
-        except EOFError:
-            break
-        contents.append(line)
+    if not headers_raw:
+        eof = "Ctrl-D" if platform.system() != "Windows" else "'Enter, Ctrl-Z, Enter'"
+        print("Please paste the request headers from Firefox and press " + eof + " to continue:")
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            contents.append(line)
+    else:
+        contents = input.split('\n')
 
     required_headers = ["Cookie"]
     try:

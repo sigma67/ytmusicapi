@@ -15,7 +15,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertRaises(Exception, YTMusic, "{}")
 
     def test_setup(self):
-        YTMusic.setup(config['auth']['headers_file'])
+        YTMusic.setup(config['auth']['headers_file'], config['auth']['headers_raw'])
 
     ###############
     # BROWSING

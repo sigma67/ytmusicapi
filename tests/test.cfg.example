@@ -2,6 +2,7 @@
 brand_account = 101234229123420379537
 headers = headers_auth_json_as_string
 headers_file = ./headers_auth.json
+headers_raw = raw_headers_pasted_from_browser
 
 [playlists]
 own = owned_playlist_id
