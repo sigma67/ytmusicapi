@@ -299,8 +299,8 @@ class YTMusic:
                         result['browseId'] = nav(item, TITLE + NAVIGATION_BROWSE_ID)
                     elif category == 'videos':
                         result['views'] = nav(item, SUBTITLE2).split(' ')[0]
-                        result['videoId'] = nav(item, TITLE + NAVIGATION_VIDEO_ID)
-                        result['playlistId'] = nav(item, TITLE + NAVIGATION_VIDEO_ID)
+                        result['videoId'] = nav(item, NAVIGATION_VIDEO_ID)
+                        result['playlistId'] = nav(item, NAVIGATION_PLAYLIST_ID)
                     artist[category]['results'].append(result)
 
         return artist
