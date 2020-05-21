@@ -161,8 +161,8 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_library_upload_songs(self):
-        results = youtube_auth.get_library_upload_songs(126)
-        self.assertGreater(len(results), 100)
+        results = youtube_auth.get_library_upload_songs(100)
+        self.assertGreater(len(results), 25)
 
     def test_get_library_upload_albums(self):
         results = youtube_auth.get_library_upload_albums(50)

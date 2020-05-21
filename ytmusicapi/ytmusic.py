@@ -1079,7 +1079,7 @@ class YTMusic:
         if run_count == 5:
             album['artist'] = {
                 'name': nav(header, SUBTITLE2),
-                'id': nav(header, SUBTITLE2 + NAVIGATION_BROWSE_ID)
+                'id': nav(header, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID)
             }
             album['year'] = nav(header, SUBTITLE3)
 
