@@ -28,8 +28,7 @@ setup(name='ytmusicapi',
               'pre-commit',
               'flake8',
               'yapf',
-              'coverage',
-              'coverage-badge'
+              'coverage'
         ]
       },
       python_requires=">=3.5",
