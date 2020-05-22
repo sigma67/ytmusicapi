@@ -13,11 +13,10 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, '../..')
+from ytmusicapi import __version__  # noqa: E402
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-from ytmusicapi import __version__
-
 
 # -- Project information -----------------------------------------------------
 
@@ -50,7 +49,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
-
 
 # -- Options for HTML output -------------------------------------------------
 

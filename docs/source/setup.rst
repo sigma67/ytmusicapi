@@ -17,8 +17,13 @@ To do so, follow these steps:
     - Go to the developer tools (Ctrl-Shift-I) and find an authenticated POST request. You can filter for /browse to easily find a suitable request.
     - Copy the request headers (right click > copy > copy request headers)
 
-Now call :py:func:`YTMusic.setup()` and paste the request headers and it will create configuration file
-in the correct format in the current directory.
+Now call :py:func:`YTMusic.setup` with the parameter ``filepath=headers_auth.json`` and paste the request headers to the terminal input.
+If you don't want terminal interaction you can pass the request headers with the ``headers_raw`` parameter.
+
+The function returns a JSON string with the credentials needed for :doc:`Usage <usage>`. Alternatively, if you passed the filepath parameter as described above,
+a file called ``headers_auth.json`` will be created in the current directory, which you can pass to ``YTMusic()`` for authentication.
+
+These credentials remain valid as long as your YTMusic browser session is valid (about 2 years unless you log out).
 
 Manual file creation
 --------------------

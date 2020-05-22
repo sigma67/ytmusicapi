@@ -32,7 +32,6 @@ class YTMusic:
           Otherwise the default account is used. You can retrieve the user ID
           by going to https://myaccount.google.com and selecting your brand account.
           The user ID will be in the URL: https://myaccount.google.com/b/user_id/
-
         """
         self.auth = auth
 
@@ -85,7 +84,7 @@ class YTMusic:
 
         :param filepath: Optional filepath to store headers to.
         :param headers_raw: Optional request headers copied from browser.
-        Otherwise requested from terminal
+            Otherwise requested from terminal
         :return: configuration headers string
         """
         return setup(filepath, headers_raw)
@@ -128,8 +127,6 @@ class YTMusic:
                 "resultType": "song"
               }
             ]
-
-
         """
         body = {'query': query}
         endpoint = 'search'
@@ -202,58 +199,57 @@ class YTMusic:
         :param channelId: channel id of the artist
         :return: Dictionary with requested information.
 
-            Example::
+        Example::
 
-                {
-                    "name": "Oasis",
-                    "description": "Oasis were ...",
-                    "views": "1,838,795,605",
-                    "songs": {
-                        "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
-                        "results": [
-                            {
-                                "videoId": "ZrOKjDZOtkA",
-                                "title": "Wonderwall (Remastered)",
-                                "artist": "Oasis",
-                                "album": "(What's The Story) Morning Glory? (Remastered)"
-                            }
-                        ]
-                    },
-                    "albums": {
-                        "results": [
-                            {
-                                "title": "Familiar To Millions",
-                                "year": "2018",
-                                "browseId": "MPREb_AYetWMZunqA"
-                            }
-                        ],
-                        "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
-                        "params": "6gPTAUNwc0JDbndLYlFBQV..."
-                    },
-                    "singles": {
-                        "results": [
-                            {
-                                "title": "Stand By Me (Mustique Demo)",
-                                "year": "2016",
-                                "browseId": "MPREb_7MPKLhibN5G"
-                            }
-                        ],
-                        "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
-                        "params": "6gPTAUNwc0JDbndLYlFBQV..."
-                    },
-                    "videos": {
-                        "results": [
-                            {
-                                "title": "Wonderwall",
-                                "views": "358M",
-                                "videoId": "bx1Bh8ZvH84",
-                                "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
-                            }
-                        ],
-                        "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
-                    }
+            {
+                "name": "Oasis",
+                "description": "Oasis were ...",
+                "views": "1,838,795,605",
+                "songs": {
+                    "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
+                    "results": [
+                        {
+                            "videoId": "ZrOKjDZOtkA",
+                            "title": "Wonderwall (Remastered)",
+                            "artist": "Oasis",
+                            "album": "(What's The Story) Morning Glory? (Remastered)"
+                        }
+                    ]
+                },
+                "albums": {
+                    "results": [
+                        {
+                            "title": "Familiar To Millions",
+                            "year": "2018",
+                            "browseId": "MPREb_AYetWMZunqA"
+                        }
+                    ],
+                    "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                    "params": "6gPTAUNwc0JDbndLYlFBQV..."
+                },
+                "singles": {
+                    "results": [
+                        {
+                            "title": "Stand By Me (Mustique Demo)",
+                            "year": "2016",
+                            "browseId": "MPREb_7MPKLhibN5G"
+                        }
+                    ],
+                    "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                    "params": "6gPTAUNwc0JDbndLYlFBQV..."
+                },
+                "videos": {
+                    "results": [
+                        {
+                            "title": "Wonderwall",
+                            "views": "358M",
+                            "videoId": "bx1Bh8ZvH84",
+                            "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                        }
+                    ],
+                    "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
                 }
-
+            }
         """
         body = prepare_browse_endpoint("ARTIST", channelId)
         endpoint = 'browse'
@@ -314,16 +310,15 @@ class YTMusic:
         :param params: params obtained by :py:func:`get_artist`
         :return: List of albums or singles
 
-            Example::
+        Example::
 
-                {
-                    "browseId": "MPREb_0rtvKhqeCY0",
-                    "artist": "Armin van Buuren",
-                    "title": "This I Vow (feat. Mila Josef)",
-                    "type": "EP",
-                    "year": "2020"
-                }
-
+            {
+                "browseId": "MPREb_0rtvKhqeCY0",
+                "artist": "Armin van Buuren",
+                "title": "This I Vow (feat. Mila Josef)",
+                "type": "EP",
+                "year": "2020"
+            }
         """
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
@@ -357,7 +352,7 @@ class YTMusic:
             returned by :py:func:`search`
         :return: Dictionary with title, description, artist and tracks.
 
-          Each track is in the following format::
+        Each track is in the following format::
 
             {
               "title": "Seven",
@@ -385,7 +380,7 @@ class YTMusic:
                   "lengthMs": "203406"
                 }
               ]
-
+            }
         """
         body = prepare_browse_endpoint("ALBUM", browseId)
         endpoint = 'browse'
@@ -440,7 +435,6 @@ class YTMusic:
                 'title': 'Playlist title',
                 'count': 5
             }
-
         """
         self.__check_auth()
         body = {'browseId': 'FEmusic_liked_playlists'}
@@ -534,7 +528,6 @@ class YTMusic:
               "artist": "WildVibes",
               "subscribers": "2.91K"
             }
-
         """
         self.__check_auth()
         body = {'browseId': 'FEmusic_library_corpus_track_artists'}
@@ -720,7 +713,6 @@ class YTMusic:
 
         The setVideoId is the unique id of this playlist item and
         needed for moving/removing playlist items
-
         """
         browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
         body = prepare_browse_endpoint("PLAYLIST", browseId)
@@ -931,7 +923,6 @@ class YTMusic:
               "title": "A Sky Full Of Stars",
               "album": "Ghost Stories"
             }
-
         """
         self.__check_auth()
         endpoint = 'browse'
@@ -957,8 +948,8 @@ class YTMusic:
         """
         Gets the albums of uploaded songs in the user's library.
 
-        :param limit: Number of albums to return
-        :returns List of albums as returned by :py:func:`get_library_albums`
+        :param limit: Number of albums to return. Default: 25
+        :return: List of albums as returned by :py:func:`get_library_albums`
         """
         self.__check_auth()
         body = {'browseId': 'FEmusic_library_privately_owned_releases'}
@@ -987,8 +978,8 @@ class YTMusic:
         """
         Gets the artists of uploaded songs in the user's library.
 
-        :param limit:
-        :returns List of artists as returned by :py:func:`get_library_artists`
+        :param limit: Number of artists to return. Default: 25
+        :return: List of artists as returned by :py:func:`get_library_artists`
         """
         self.__check_auth()
         body = {'browseId': 'FEmusic_library_privately_owned_artists'}
@@ -1013,10 +1004,11 @@ class YTMusic:
         """
         Returns a list of uploaded tracks for the artist.
 
-        :param browseId:
-        :return: List of uploaded songs
+        :param browseId: Browse id of the upload artist, i.e. from :py:func:`get_library_upload_songs`
+        :return: List of uploaded songs.
 
-            Example List:
+        Example List::
+
             [
               {
                 "entityId": "t_po_CICr2crg7OWpchDKwoakAQ",
@@ -1031,7 +1023,6 @@ class YTMusic:
                 "album": null
               }
             ]
-
         """
         self.__check_auth()
         body = prepare_browse_endpoint("ARTIST", browseId)
@@ -1047,8 +1038,10 @@ class YTMusic:
         """
         Get information and tracks of an album associated with uploaded tracks
 
-        :param browseId:
-        :returns Dictionary with title, description, artist and tracks.
+        :param browseId: Browse id of the upload album, i.e. from i.e. from :py:func:`get_library_upload_songs`
+        :return: Dictionary with title, description, artist and tracks.
+
+        Example album::
 
             {
               "title": "Hard To Stop - Single",
@@ -1134,7 +1127,7 @@ class YTMusic:
         """
         Deletes a previously uploaded song or album
 
-        :param entityId: The entity id of the uploaded song to delete,
+        :param entityId: The entity id of the uploaded song or album,
             e.g. retrieved from :py:func:`get_library_upload_songs`
         :return: Status String or error
         """

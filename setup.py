@@ -7,9 +7,9 @@ version_line = open(VERSIONFILE).read()
 version_re = r"^__version__ = ['\"]([^'\"]*)['\"]"
 match = re.search(version_re, version_line, re.M)
 if match:
-      version = match.group(1)
+    version = match.group(1)
 else:
-      raise RuntimeError("Could not find version in '%s'" % VERSIONFILE)
+    raise RuntimeError("Could not find version in '%s'" % VERSIONFILE)
 
 setup(name='ytmusicapi',
       version=version,
@@ -20,18 +20,10 @@ setup(name='ytmusicapi',
       author_email='',
       license='MIT',
       packages=find_packages(),
-      install_requires=[
-            'requests >= 2.22'
-      ],
+      install_requires=['requests >= 2.22'],
       extras_require={
-        'dev': [
-              'pre-commit',
-              'flake8',
-              'yapf',
-              'coverage'
-        ]
+          'dev': ['pre-commit', 'flake8', 'yapf', 'coverage', 'sphinx', 'sphinx-rtd-theme']
       },
       python_requires=">=3.5",
       include_package_data=True,
-      zip_safe=False
-)
+      zip_safe=False)

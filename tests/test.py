@@ -2,7 +2,7 @@ import unittest
 import configparser
 import sys
 sys.path.insert(0, '..')
-from ytmusicapi.ytmusic import YTMusic
+from ytmusicapi.ytmusic import YTMusic  # noqa: E402
 
 config = configparser.RawConfigParser()
 config.read('./test.cfg', 'utf-8')
