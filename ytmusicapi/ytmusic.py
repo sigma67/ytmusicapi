@@ -754,7 +754,8 @@ class YTMusic:
                 playlist['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
-            song_count = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+            song_count = \
+                int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0].replace(',', ''))
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             playlist['duration'] = header['secondSubtitle']['runs'][0]['text']
