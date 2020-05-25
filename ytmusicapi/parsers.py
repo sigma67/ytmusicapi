@@ -133,7 +133,11 @@ def parse_playlist_items(results):
                     duration = data['fixedColumns'][0][
                         'musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
 
-            song = {'videoId': videoId, 'title': title, 'artists': artists, 'album': album}
+            like = None
+            if 'menu' in data:
+                like = data['menu']['menuRenderer']['topLevelButtons'][0]['likeButtonRenderer']['likeStatus']
+
+            song = {'videoId': videoId, 'title': title, 'artists': artists, 'album': album, 'likeStatus': like}
             if duration:
                 song['duration'] = duration
             if setVideoId:

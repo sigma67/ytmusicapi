@@ -706,7 +706,8 @@ class YTMusic:
                     "name": "Lost",
                     "id": "MPREb_PxmzvDuqOnC"
                   },
-                  "duration": "2:58"
+                  "duration": "2:58",
+                  "likeStatus": "INDIFFERENT"
                 }
               ]
             }
