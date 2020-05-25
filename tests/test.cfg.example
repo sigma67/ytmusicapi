@@ -9,3 +9,5 @@ own = owned_playlist_id
 
 [uploads]
 file = song_in_tests_directory.mp3
+private_album_id = sample_id_of_private_album
+private_artist_id = sample_id_of_private_artist

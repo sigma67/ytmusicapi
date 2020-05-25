@@ -183,20 +183,12 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response, 'STATUS_SUCCEEDED')
 
     def test_get_library_upload_album(self):
-        songs = youtube_auth.get_library_upload_songs()
-        for song in songs:
-            if song['album']:
-                album = youtube_auth.get_library_upload_album(song['album']['id'])
-                self.assertGreater(len(album['tracks']), 0)
-                break
+        album = youtube_auth.get_library_upload_album(config['uploads']['private_album_id'])
+        self.assertGreater(len(album['tracks']), 0)
 
     def test_get_library_upload_artist(self):
-        songs = youtube_auth.get_library_upload_songs()
-        for song in songs:
-            if song['artist']:
-                tracks = youtube_auth.get_library_upload_artist(song['artist'][0]['id'])
-                self.assertGreater(len(tracks), 0)
-                break
+        tracks = youtube_auth.get_library_upload_artist(config['uploads']['private_artist_id'])
+        self.assertGreater(len(tracks), 0)
 
 
 if __name__ == '__main__':

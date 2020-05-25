@@ -7,6 +7,7 @@ ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
 MUSIC_SHELF = [0, 'musicShelfRenderer']
 CONTINUATION = ['continuations', 0, 'nextContinuationData', 'continuation']
 MENU_ITEMS = ['menu', 'menuRenderer', 'items']
+MENU_LIKE_STATUS = ['menu', 'menuRenderer', 'topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus']
 MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
 PLAY_BUTTON = [
     'overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer'
@@ -135,8 +136,7 @@ def parse_playlist_items(results):
 
             like = None
             if 'menu' in data:
-                like = data['menu']['menuRenderer']['topLevelButtons'][0]['likeButtonRenderer'][
-                    'likeStatus']
+                like = nav(data, MENU_LIKE_STATUS)
 
             song = {
                 'videoId': videoId,
@@ -172,13 +172,14 @@ def parse_uploaded_items(results):
                       + MENU_SERVICE)['queueAddEndpoint']['queueTarget']['videoId']
 
         title = get_item_text(data, 0)
-
+        like = nav(data, MENU_LIKE_STATUS)
         song = {
             'entityId': entityId,
             'videoId': videoId,
             'title': title,
             'artist': None,
-            'album': None
+            'album': None,
+            'likeStatus': like
         }
         if get_flex_column_item(data, 1):
             song['artist'] = parse_song_artists(data, 1)
