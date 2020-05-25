@@ -135,9 +135,16 @@ def parse_playlist_items(results):
 
             like = None
             if 'menu' in data:
-                like = data['menu']['menuRenderer']['topLevelButtons'][0]['likeButtonRenderer']['likeStatus']
+                like = data['menu']['menuRenderer']['topLevelButtons'][0]['likeButtonRenderer'][
+                    'likeStatus']
 
-            song = {'videoId': videoId, 'title': title, 'artists': artists, 'album': album, 'likeStatus': like}
+            song = {
+                'videoId': videoId,
+                'title': title,
+                'artists': artists,
+                'album': album,
+                'likeStatus': like
+            }
             if duration:
                 song['duration'] = duration
             if setVideoId:
@@ -166,7 +173,13 @@ def parse_uploaded_items(results):
 
         title = get_item_text(data, 0)
 
-        song = {'entityId': entityId, 'videoId': videoId, 'title': title}
+        song = {
+            'entityId': entityId,
+            'videoId': videoId,
+            'title': title,
+            'artist': None,
+            'album': None
+        }
         if get_flex_column_item(data, 1):
             song['artist'] = parse_song_artists(data, 1)
             song['album'] = parse_song_album(data, 2)
