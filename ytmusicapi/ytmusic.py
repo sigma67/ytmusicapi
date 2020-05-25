@@ -377,7 +377,8 @@ class YTMusic:
                   "title": "WIEE (feat. Mesto)",
                   "artists": "Martin Garrix",
                   "videoId": "8xMNeXI9wxI",
-                  "lengthMs": "203406"
+                  "lengthMs": "203406",
+                  "likeStatus": "INDIFFERENT"
                 }
               ]
             }
@@ -403,6 +404,17 @@ class YTMusic:
                 'id': artist['musicArtist']['externalChannelId']
             })
         album['tracks'] = []
+
+        likes = {}
+        for item in data[4:]:
+            if 'musicTrackUserDetail' in item['payload']:
+                like_state = item['payload']['musicTrackUserDetail']['likeState'].split('_')[-1]
+                parent_track = item['payload']['musicTrackUserDetail']['parentTrack']
+                if like_state in ['NEUTRAL', 'UNKNOWN']:
+                    likes[parent_track] = 'INDIFFERENT'
+                else:
+                    likes[parent_track] = like_state[:-1]
+
         for item in data[4:]:
             if 'musicTrack' in item['payload']:
                 track = {}
@@ -413,6 +425,7 @@ class YTMusic:
                 track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item[
                     'payload']['musicTrack'] else None
                 track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
+                track['likeStatus'] = likes[item['entityKey']]
                 album['tracks'].append(track)
 
         return album

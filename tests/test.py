@@ -56,7 +56,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 0)
 
     def test_get_album(self):
-        results = youtube.get_album("MPREb_BQZvl3BFGay")
+        results = youtube_auth.get_album("MPREb_BQZvl3BFGay")
         self.assertEqual(len(results), 8)
         self.assertEqual(len(results['tracks']), 7)
 
