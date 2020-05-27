@@ -7,7 +7,9 @@ ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
 MUSIC_SHELF = [0, 'musicShelfRenderer']
 CONTINUATION = ['continuations', 0, 'nextContinuationData', 'continuation']
 MENU_ITEMS = ['menu', 'menuRenderer', 'items']
-MENU_LIKE_STATUS = ['menu', 'menuRenderer', 'topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus']
+MENU_LIKE_STATUS = [
+    'menu', 'menuRenderer', 'topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus'
+]
 MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
 PLAY_BUTTON = [
     'overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer'
@@ -300,12 +302,12 @@ def nav(root, items):
     return root
 
 
-def find_object_by_key(object_list, key, nested=None):
+def find_object_by_key(object_list, key, nested=None, is_key=False):
     for item in object_list:
         if nested:
             item = item[nested]
         if key in item:
-            return item
+            return item[key] if is_key else item
     return None
 
 

@@ -204,7 +204,7 @@ class YTMusic:
             {
                 "name": "Oasis",
                 "description": "Oasis were ...",
-                "views": "1,838,795,605",
+                "views": "1838795605",
                 "songs": {
                     "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
                     "results": [
@@ -256,16 +256,19 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
-        artist = {}
+        artist = {'description': None, 'views': None}
         artist['name'] = nav(response['header']['musicImmersiveHeaderRenderer'], TITLE_TEXT)
-        artist['description'] = results[-1]['musicDescriptionShelfRenderer']['description'][
-            'runs'][0]['text']
-        artist['views'] = results[-1]['musicDescriptionShelfRenderer']['subheader']['runs'][0][
-            'text'].split(' ')[0]
-        artist['songs'] = {}
+        descriptionShelf = find_object_by_key(results,
+                                              'musicDescriptionShelfRenderer',
+                                              is_key=True)
+        if descriptionShelf:
+            artist['description'] = descriptionShelf['description']['runs'][0]['text']
+            artist['views'] = to_int(descriptionShelf['subheader']['runs'][0]['text'])
+        artist['songs'] = {'browseId': None}
         if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
             musicShelf = nav(results, MUSIC_SHELF)
-            artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
+            if 'navigationEndpoint' in nav(musicShelf, TITLE):
+                artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
             artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
 
         categories = ['albums', 'singles', 'videos']
@@ -276,7 +279,7 @@ class YTMusic:
                     r['musicCarouselShelfRenderer'], CAROUSEL_TITLE)['text'].lower() == category
             ]
             if len(data) > 0:
-                artist[category] = {"results": []}
+                artist[category] = {'browseId': None, 'results': []}
                 if 'navigationEndpoint' in nav(data[0], CAROUSEL_TITLE):
                     artist[category]['browseId'] = nav(data[0],
                                                        CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
@@ -388,14 +391,14 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         data = nav(response, FRAMEWORK_MUTATIONS)
         album = {}
-        album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload')['musicAlbumRelease']
+        album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload', True)
         album['title'] = album_data['title']
         album['trackCount'] = album_data['trackCount']
         album['durationMs'] = album_data['durationMs']
         album['playlistId'] = album_data['audioPlaylistId']
         album['releaseDate'] = album_data['releaseDate']
-        album['description'] = find_object_by_key(
-            data, 'musicAlbumReleaseDetail', 'payload')['musicAlbumReleaseDetail']['description']
+        album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload',
+                                                  True)['description']
         album['artist'] = []
         artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
         for artist in artists_data:
@@ -754,8 +757,7 @@ class YTMusic:
                 playlist['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
-            song_count = \
-                int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0].replace(',', ''))
+            song_count = to_int(header['secondSubtitle']['runs'][0]['text'])
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             playlist['duration'] = header['secondSubtitle']['runs'][0]['text']
@@ -1092,7 +1094,7 @@ class YTMusic:
             album['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
-            album['trackCount'] = int(header['secondSubtitle']['runs'][0]['text'].split(' ')[0])
+            album['trackCount'] = to_int(header['secondSubtitle']['runs'][0]['text'])
             album['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             album['duration'] = header['secondSubtitle']['runs'][0]['text']
