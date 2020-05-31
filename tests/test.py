@@ -41,7 +41,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_artist(self):
         results = youtube.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")
-        self.assertEqual(len(results), 7)
+        self.assertEqual(len(results), 8)
 
     def test_get_artist_albums(self):
         artist = youtube.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
@@ -57,7 +57,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_album(self):
         results = youtube_auth.get_album("MPREb_BQZvl3BFGay")
-        self.assertEqual(len(results), 8)
+        self.assertEqual(len(results), 9)
         self.assertEqual(len(results['tracks']), 7)
 
     ###############

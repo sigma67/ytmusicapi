@@ -124,6 +124,7 @@ class YTMusic:
                   "id": "MPREb_9nqEki4ZDpp"
                 },
                 "duration": "4:19",
+                "thumbnails": [...],
                 "resultType": "song"
               }
             ]
@@ -205,12 +206,14 @@ class YTMusic:
                 "name": "Oasis",
                 "description": "Oasis were ...",
                 "views": "1838795605",
+                "thumbnails": [...],
                 "songs": {
                     "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
                     "results": [
                         {
                             "videoId": "ZrOKjDZOtkA",
                             "title": "Wonderwall (Remastered)",
+                            "thumbnails": [...],
                             "artist": "Oasis",
                             "album": "(What's The Story) Morning Glory? (Remastered)"
                         }
@@ -220,6 +223,7 @@ class YTMusic:
                     "results": [
                         {
                             "title": "Familiar To Millions",
+                            "thumbnails": [...],
                             "year": "2018",
                             "browseId": "MPREb_AYetWMZunqA"
                         }
@@ -231,6 +235,7 @@ class YTMusic:
                     "results": [
                         {
                             "title": "Stand By Me (Mustique Demo)",
+                            "thumbnails": [...],
                             "year": "2016",
                             "browseId": "MPREb_7MPKLhibN5G"
                         }
@@ -242,6 +247,7 @@ class YTMusic:
                     "results": [
                         {
                             "title": "Wonderwall",
+                            "thumbnails": [...],
                             "views": "358M",
                             "videoId": "bx1Bh8ZvH84",
                             "playlistId": "PLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
@@ -264,6 +270,7 @@ class YTMusic:
         if descriptionShelf:
             artist['description'] = descriptionShelf['description']['runs'][0]['text']
             artist['views'] = to_int(descriptionShelf['subheader']['runs'][0]['text'])
+        artist['thumbnails'] = nav(response['header']['musicImmersiveHeaderRenderer'], THUMBNAILS)
         artist['songs'] = {'browseId': None}
         if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
             musicShelf = nav(results, MUSIC_SHELF)
@@ -291,6 +298,7 @@ class YTMusic:
                 for item in data[0]['contents']:
                     item = item['musicTwoRowItemRenderer']
                     result = {'title': nav(item, TITLE_TEXT)}
+                    result['thumbnails'] = nav(item, THUMBNAIL_RENDERER)
                     if category == 'albums':
                         result['year'] = nav(item, SUBTITLE2)
                         result['browseId'] = nav(item, TITLE + NAVIGATION_BROWSE_ID)
@@ -319,6 +327,7 @@ class YTMusic:
                 "browseId": "MPREb_0rtvKhqeCY0",
                 "artist": "Armin van Buuren",
                 "title": "This I Vow (feat. Mila Josef)",
+                "thumbnails": [...],
                 "type": "EP",
                 "year": "2020"
             }
@@ -334,6 +343,7 @@ class YTMusic:
             data = result['musicResponsiveListItemRenderer']
             browseId = nav(data, NAVIGATION_BROWSE_ID)
             title = get_item_text(data, 0)
+            thumbnails = nav(data, THUMBNAILS)
             album_type = get_item_text(data, 1) if release_type == "albums" else "Single"
             year = get_item_text(data, 1, 2) if release_type == "albums" else get_item_text(
                 data, 1)
@@ -341,6 +351,7 @@ class YTMusic:
                 "browseId": browseId,
                 "artist": artist,
                 "title": title,
+                "thumbnails": thumbnails,
                 "type": album_type,
                 "year": year
             })
@@ -368,6 +379,7 @@ class YTMusic:
                 "day": 28
               },
               "description": "Seven is ...",
+              "thumbnails": [...],
               "artist": [
                 {
                   "name": "Martin Garrix",
@@ -399,6 +411,7 @@ class YTMusic:
         album['releaseDate'] = album_data['releaseDate']
         album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload',
                                                   True)['description']
+        album['thumbnails'] = album_data['thumbnailDetails']['thumbnails']
         album['artist'] = []
         artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
         for artist in artists_data:
@@ -423,6 +436,8 @@ class YTMusic:
                 track = {}
                 track['index'] = item['payload']['musicTrack']['albumTrackIndex']
                 track['title'] = item['payload']['musicTrack']['title']
+                track['thumbnails'] = item['payload']['musicTrack']['thumbnailDetails'][
+                    'thumbnails']
                 track['artists'] = item['payload']['musicTrack']['artistNames']
                 # in case the song is unavailable, there is no videoId
                 track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item[
@@ -449,6 +464,7 @@ class YTMusic:
             {
                 'playlistId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
                 'title': 'Playlist title',
+                'thumbnails: [...],
                 'count': 5
             }
         """
@@ -542,7 +558,8 @@ class YTMusic:
             {
               "browseId": "UCxEqaQWosMHaTih-tgzDqug",
               "artist": "WildVibes",
-              "subscribers": "2.91K"
+              "subscribers": "2.91K",
+              "thumbnails": [...]
             }
         """
         self.__check_auth()
@@ -699,6 +716,7 @@ class YTMusic:
               "id": "PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_",
               "privacy": "PUBLIC",
               "title": "New EDM This Week 03/13/2020",
+              "thumbnails": [...]
               "description": "Weekly r/EDM new release roundup. Created with github.com/sigma67/spotifyplaylist_to_gmusic",
               "author": "sigmatics",
               "year": "2020",
@@ -723,7 +741,8 @@ class YTMusic:
                     "id": "MPREb_PxmzvDuqOnC"
                   },
                   "duration": "2:58",
-                  "likeStatus": "INDIFFERENT"
+                  "likeStatus": "INDIFFERENT",
+                  "thumbnails": [...]
                 }
               ]
             }
@@ -748,6 +767,7 @@ class YTMusic:
             header = header['header']['musicDetailHeaderRenderer']
 
         playlist['title'] = nav(header, TITLE_TEXT)
+        playlist['thumbnails'] = nav(header, THUMBNAIL_CROPPED)
         if "description" in header:
             playlist["description"] = header["description"]["runs"][0]["text"]
         run_count = len(header['subtitle']['runs'])
@@ -938,7 +958,9 @@ class YTMusic:
               "videoId": "Uise6RPKoek",
               "artist": "Coldplay",
               "title": "A Sky Full Of Stars",
-              "album": "Ghost Stories"
+              "album": "Ghost Stories",
+              "likeStatus": "LIKE",
+              "thumbnails": [...]
             }
         """
         self.__check_auth()
@@ -1037,7 +1059,9 @@ class YTMusic:
                     "id": "FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIFamFra28"
                   }
                 ],
-                "album": null
+                "album": null,
+                "likeStatus": "LIKE",
+                "thumbnails": [...]
               }
             ]
         """
@@ -1062,6 +1086,7 @@ class YTMusic:
 
             {
               "title": "Hard To Stop - Single",
+              "thumbnails": [...]
               "year": "2013",
               "trackCount": 1,
               "duration": "4 minutes, 2 seconds",
@@ -1069,7 +1094,8 @@ class YTMusic:
                 {
                   "entityId": "t_po_CICr2crg7OWpchDN6tnYBw",
                   "videoId": "VBQVcjJM7ak",
-                  "title": "Hard To Stop (Vicetone x Ne-Yo x Daft Punk)"
+                  "title": "Hard To Stop (Vicetone x Ne-Yo x Daft Punk)",
+                  "likeStatus": "LIKE"
                 }
               ]
             }
@@ -1080,6 +1106,7 @@ class YTMusic:
         response = self.__send_request(endpoint, body)
         header = response['header']['musicDetailHeaderRenderer']
         album = {'title': nav(header, TITLE_TEXT)}
+        album['thumbnails'] = nav(header, THUMBNAIL_CROPPED)
         if "description" in header:
             album["description"] = header["description"]["runs"][0]["text"]
         run_count = len(header['subtitle']['runs'])

@@ -6,10 +6,9 @@ SECTION_LIST = ['sectionListRenderer', 'contents']
 ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
 MUSIC_SHELF = [0, 'musicShelfRenderer']
 CONTINUATION = ['continuations', 0, 'nextContinuationData', 'continuation']
-MENU_ITEMS = ['menu', 'menuRenderer', 'items']
-MENU_LIKE_STATUS = [
-    'menu', 'menuRenderer', 'topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus'
-]
+MENU = ['menu', 'menuRenderer']
+MENU_ITEMS = MENU + ['items']
+MENU_LIKE_STATUS = MENU + ['topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus']
 MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
 PLAY_BUTTON = [
     'overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer'
@@ -24,6 +23,9 @@ TITLE_TEXT = ['title', 'runs', 0, 'text']
 SUBTITLE = ['subtitle', 'runs', 0, 'text']
 SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
 SUBTITLE3 = ['subtitle', 'runs', 4, 'text']
+THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails']
+THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails']
+THUMBNAIL_CROPPED = ['thumbnail', 'croppedSquareThumbnailRenderer', 'thumbnail', 'thumbnails']
 
 
 def parse_playlists(results):
@@ -33,6 +35,7 @@ def parse_playlists(results):
         playlist = {}
         playlist['playlistId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:]
         playlist['title'] = nav(data, TITLE_TEXT)
+        playlist['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
         if len(data['subtitle']['runs']) == 3:
             playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
 
@@ -54,6 +57,7 @@ def parse_artists(results, uploaded=False):
             subtitle = get_item_text(data, 1)
             if subtitle:
                 artist['subscribers'] = subtitle.split(' ')[0]
+        artist['thumbnails'] = nav(data, THUMBNAILS)
         artists.append(artist)
 
     return artists
@@ -67,6 +71,7 @@ def parse_albums(results):
         album['browseId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)
         album['title'] = nav(data, TITLE_TEXT)
         album['type'] = nav(data, SUBTITLE)
+        album['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
         album['artists'] = []
         run_count = len(data['subtitle']['runs'])
         has_artists = False
@@ -137,15 +142,20 @@ def parse_playlist_items(results):
                         'musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
 
             like = None
-            if 'menu' in data:
+            if 'menu' in data and 'topLevelButtons' in nav(data, MENU):
                 like = nav(data, MENU_LIKE_STATUS)
+
+            thumbnails = None
+            if 'thumbnail' in data:
+                thumbnails = nav(data, THUMBNAILS)
 
             song = {
                 'videoId': videoId,
                 'title': title,
                 'artists': artists,
                 'album': album,
-                'likeStatus': like
+                'likeStatus': like,
+                'thumbnails': thumbnails
             }
             if duration:
                 song['duration'] = duration
@@ -175,13 +185,15 @@ def parse_uploaded_items(results):
 
         title = get_item_text(data, 0)
         like = nav(data, MENU_LIKE_STATUS)
+        thumbnails = nav(data, THUMBNAILS) if 'thumbnail' in data else None
         song = {
             'entityId': entityId,
             'videoId': videoId,
             'title': title,
             'artist': None,
             'album': None,
-            'likeStatus': like
+            'likeStatus': like,
+            'thumbnails': thumbnails
         }
         if get_flex_column_item(data, 1):
             song['artist'] = parse_song_artists(data, 1)
@@ -235,6 +247,7 @@ def parse_search_result(data, resultType=None):
         search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
         search_result['duration'] = get_item_text(data, 3 + default)
 
+    search_result['thumbnails'] = nav(data, THUMBNAILS)
     search_result['resultType'] = resultType
 
     return search_result
