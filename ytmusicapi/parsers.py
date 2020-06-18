@@ -110,6 +110,7 @@ def parse_playlist_items(results):
         try:
             # if playlist is not owned, the playlist item can't be interacted with
             videoId = setVideoId = None
+            like = None
 
             # if item is not playable, there is no videoId
             if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
@@ -122,6 +123,9 @@ def parse_playlist_items(results):
                         setVideoId = nav(
                             item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
                         break
+
+                if 'menu' in data:
+                    like = nav(data, MENU_LIKE_STATUS)
 
             title = get_item_text(data, 0)
             if title == 'Song deleted':
@@ -140,10 +144,6 @@ def parse_playlist_items(results):
                 else:
                     duration = data['fixedColumns'][0][
                         'musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
-
-            like = None
-            if 'menu' in data and 'topLevelButtons' in nav(data, MENU):
-                like = nav(data, MENU_LIKE_STATUS)
 
             thumbnails = None
             if 'thumbnail' in data:
@@ -255,6 +255,8 @@ def parse_search_result(data, resultType=None):
 
 def parse_song_artists(data, index):
     flex_item = get_flex_column_item(data, index)
+    if not flex_item:
+        return None
     artists = []
     for j in range(int(len(flex_item['text']['runs']) / 2) + 1):
         artists.append({
