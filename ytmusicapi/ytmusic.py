@@ -203,9 +203,12 @@ class YTMusic:
         Example::
 
             {
-                "name": "Oasis",
                 "description": "Oasis were ...",
                 "views": "1838795605",
+                "name": "Oasis",
+                "channelId": "UCUDVBtnOQi4c7E8jebpjc9Q",
+                "subscribers": "2.3M",
+                "subscribed": false,
                 "thumbnails": [...],
                 "songs": {
                     "browseId": "VLPLMpM3Z0118S42R1npOhcjoakLIv1aqnS1",
@@ -263,14 +266,20 @@ class YTMusic:
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
         artist = {'description': None, 'views': None}
-        artist['name'] = nav(response['header']['musicImmersiveHeaderRenderer'], TITLE_TEXT)
+        header = response['header']['musicImmersiveHeaderRenderer']
+        artist['name'] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results,
                                               'musicDescriptionShelfRenderer',
                                               is_key=True)
         if descriptionShelf:
             artist['description'] = descriptionShelf['description']['runs'][0]['text']
             artist['views'] = to_int(descriptionShelf['subheader']['runs'][0]['text'])
-        artist['thumbnails'] = nav(response['header']['musicImmersiveHeaderRenderer'], THUMBNAILS)
+        subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
+        artist['channelId'] = subscription_button['channelId']
+        artist['subscribers'] = nav(subscription_button,
+                                    ['subscriberCountText', 'runs', 0, 'text'])
+        artist['subscribed'] = subscription_button['subscribed']
+        artist['thumbnails'] = nav(header, THUMBNAILS)
         artist['songs'] = {'browseId': None}
         if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
             musicShelf = nav(results, MUSIC_SHELF)
@@ -422,7 +431,7 @@ class YTMusic:
         album['tracks'] = []
 
         likes = {}
-        for item in data[4:]:
+        for item in data:
             if 'musicTrackUserDetail' in item['payload']:
                 like_state = item['payload']['musicTrackUserDetail']['likeState'].split('_')[-1]
                 parent_track = item['payload']['musicTrackUserDetail']['parentTrack']

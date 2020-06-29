@@ -41,7 +41,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_artist(self):
         results = youtube.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")
-        self.assertEqual(len(results), 8)
+        self.assertEqual(len(results), 11)
 
     def test_get_artist_albums(self):
         artist = youtube.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
@@ -107,8 +107,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertIn('actions', response)
 
     def test_subscribe_artists(self):
-        youtube_auth.subscribe_artists(['UCmMUZbaYdNH0bEd1PAlAqsA', 'UCEPMVbUzImPl4p8k4LkGevA'])
-        youtube_auth.unsubscribe_artists(['UCmMUZbaYdNH0bEd1PAlAqsA', 'UCEPMVbUzImPl4p8k4LkGevA'])
+        youtube_auth.subscribe_artists(['UCUDVBtnOQi4c7E8jebpjc9Q', 'UCiMhD4jzUqG-IgPzUmmytRQ'])
+        youtube_auth.unsubscribe_artists(['UCUDVBtnOQi4c7E8jebpjc9Q', 'UCiMhD4jzUqG-IgPzUmmytRQ'])
 
     ###############
     # PLAYLISTS
