@@ -543,12 +543,12 @@ class YTMusic:
             return []
         else:
             results = results['gridRenderer']
-        albums = parse_albums(results['items'])
+        albums = parse_albums(results['items'], False)
 
         if 'continuations' in results:
             request_func = lambda additionalParams: self.__send_request(
                 endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_albums(contents)
+            parse_func = lambda contents: parse_albums(contents, False)
             albums.extend(
                 get_continuations(results, 'gridContinuation', 25, limit, request_func,
                                   parse_func))

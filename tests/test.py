@@ -100,7 +100,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_rate_playlist(self):
         response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
-                                              'DISLIKE')
+                                              'LIKE')
         self.assertIn('actions', response)
         response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
                                               'INDIFFERENT')

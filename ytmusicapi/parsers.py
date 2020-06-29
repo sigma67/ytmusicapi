@@ -63,7 +63,7 @@ def parse_artists(results, uploaded=False):
     return artists
 
 
-def parse_albums(results):
+def parse_albums(results, upload=True):
     albums = []
     for result in results:
         data = result['musicTwoRowItemRenderer']
@@ -75,24 +75,30 @@ def parse_albums(results):
         album['artists'] = []
         run_count = len(data['subtitle']['runs'])
         has_artists = False
-        if run_count == 3:
-            if nav(data, SUBTITLE2).isdigit():
-                album['year'] = nav(data, SUBTITLE2)
-            else:
+        if upload:
+            if run_count == 3:
+                if nav(data, SUBTITLE2).isdigit():
+                    album['year'] = nav(data, SUBTITLE2)
+                else:
+                    has_artists = True
+
+            elif run_count > 3:
+                album['year'] = nav(data, SUBTITLE3)
                 has_artists = True
 
-        elif run_count > 3:
-            album['year'] = nav(data, SUBTITLE3)
-            has_artists = True
-
-        if has_artists:
-            for i in range(1, int(run_count / 2)):
+            if has_artists:
+                subtitle = data['subtitle']['runs'][2]
                 album['artists'].append({
                     'name':
-                    data['subtitle']['runs'][i * 2]['text'],
+                        subtitle['text'],
                     'id':
-                    nav(data['subtitle']['runs'][i * 2], NAVIGATION_BROWSE_ID)
+                        nav(subtitle, NAVIGATION_BROWSE_ID)
                 })
+        else:
+            album['artists'] = nav(data, SUBTITLE)
+            album['year'] = nav(data, SUBTITLE2)
+            album['trackCount'] = nav(data, SUBTITLE3).split(' ')[0]
+
         albums.append(album)
 
     return albums
