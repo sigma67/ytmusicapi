@@ -273,7 +273,8 @@ class YTMusic:
                                               is_key=True)
         if descriptionShelf:
             artist['description'] = descriptionShelf['description']['runs'][0]['text']
-            artist['views'] = to_int(descriptionShelf['subheader']['runs'][0]['text'])
+            artist['views'] = None if 'subheader' not in descriptionShelf else descriptionShelf[
+                'subheader']['runs'][0]['text']
         subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
         artist['channelId'] = subscription_button['channelId']
         artist['subscribers'] = nav(subscription_button,
