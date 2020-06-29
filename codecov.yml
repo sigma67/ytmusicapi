@@ -1,0 +1,10 @@
+coverage:
+  range: 50..90
+
+  status:
+    project:
+      default: off
+    patch:
+      default: off
+    changes:
+      default: off
