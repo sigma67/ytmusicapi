@@ -33,8 +33,12 @@ def parse_playlists(results):
     for result in results:
         data = result['musicTwoRowItemRenderer']
         playlist = {}
-        playlist['playlistId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:]
-        playlist['title'] = nav(data, TITLE_TEXT)
+        if 'title' in data:
+            playlist['playlistId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:]
+        else: playlist['playlistId'] = nav(data, NAVIGATION_BROWSE_ID)[2:]
+        if 'title' in data:
+            playlist['title'] = nav(data, TITLE_TEXT)
+        else: playlist['title'] = 'No Title'
         playlist['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
         if len(data['subtitle']['runs']) == 3:
             playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
