@@ -504,7 +504,7 @@ class YTMusic:
         To get liked songs and videos, use :py:func:`get_liked_songs`
 
         :param limit: Number of songs to retrieve
-        :return: List of songs. . Same format as :py:func:`get_playlist`
+        :return: List of songs. Same format as :py:func:`get_playlist`
         """
         self.__check_auth()
         body = {'browseId': 'FEmusic_liked_videos'}
@@ -718,7 +718,8 @@ class YTMusic:
 
         :param playlistId: Playlist id
         :param limit: How many songs to return. Default: 100
-        :return: List of playlistItem dictionaries
+        :return: Dictionary with information about the playlist.
+            The key ``tracks`` contains a List of playlistItem dictionaries
 
         Each item is in the following format::
 
