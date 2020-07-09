@@ -18,7 +18,7 @@ class YTMusic:
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
-    def __init__(self, auth: str = None, user: str = None):
+    def __init__(self, auth: str = None, user: str = None, proxies: dict = {}):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -32,8 +32,13 @@ class YTMusic:
           Otherwise the default account is used. You can retrieve the user ID
           by going to https://myaccount.google.com and selecting your brand account.
           The user ID will be in the URL: https://myaccount.google.com/b/user_id/
+        :param proxies: Optional. Proxy configuration in requests_ format_.
+
+        .. _requests: https://requests.readthedocs.io/
+        .. _format: https://requests.readthedocs.io/en/master/user/advanced/#proxies
         """
         self.auth = auth
+        self.proxies = proxies
 
         try:
             if auth is None or os.path.isfile(auth):
@@ -69,7 +74,8 @@ class YTMusic:
                                                               + self.headers['x-origin'])
         response = requests.post(base_url + endpoint + params + additionalParams,
                                  json=body,
-                                 headers=self.headers)
+                                 headers=self.headers,
+                                 proxies=self.proxies)
         return json.loads(response.text)
 
     def __check_auth(self):
@@ -1166,12 +1172,12 @@ class YTMusic:
         headers['X-Goog-Upload-Command'] = 'start'
         headers['X-Goog-Upload-Header-Content-Length'] = str(filesize)
         headers['X-Goog-Upload-Protocol'] = 'resumable'
-        response = requests.post(upload_url, data=body, headers=headers)
+        response = requests.post(upload_url, data=body, headers=headers, proxies=self.proxies)
         headers['X-Goog-Upload-Command'] = 'upload, finalize'
         headers['X-Goog-Upload-Offset'] = '0'
         upload_url = response.headers['X-Goog-Upload-URL']
         with open(filepath, 'rb') as file:
-            response = requests.post(upload_url, data=file, headers=headers)
+            response = requests.post(upload_url, data=file, headers=headers, proxies=self.proxies)
 
         if response.status_code == 200:
             return 'STATUS_SUCCEEDED'
