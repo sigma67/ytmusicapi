@@ -2,6 +2,8 @@ import re
 from http.cookies import SimpleCookie
 from hashlib import sha1
 import time
+from functools import wraps
+import locale
 
 
 def prepare_browse_endpoint(type, browseId):
@@ -48,5 +50,16 @@ def get_authorization(auth):
     return "SAPISIDHASH " + unix_timestamp + "_" + sha_1.hexdigest()
 
 
-def to_int(string):
-    return int(string.split(' ')[0].replace(',', ''))
+def to_int(string, language):
+    locale.setlocale(locale.LC_ALL, language)
+    number = string.split(' ')[0]
+    return locale.atoi(number)
+
+
+def i18n(method):
+    @wraps(method)
+    def _impl(self, *method_args, **method_kwargs):
+        method.__globals__['_'] = self.lang.gettext
+        return method(self, *method_args, **method_kwargs)
+
+    return _impl

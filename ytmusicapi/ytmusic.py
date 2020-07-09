@@ -1,5 +1,7 @@
 import requests
 import json
+import unicodedata
+import gettext
 import pkg_resources
 import ntpath
 import os
@@ -18,7 +20,11 @@ class YTMusic:
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
-    def __init__(self, auth: str = None, user: str = None, proxies: dict = {}):
+    def __init__(self,
+                 auth: str = None,
+                 user: str = None,
+                 proxies: dict = None,
+                 language: str = 'en'):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -34,8 +40,12 @@ class YTMusic:
           The user ID will be in the URL: https://myaccount.google.com/b/user_id/
         :param proxies: Optional. Proxy configuration in requests_ format_.
 
-        .. _requests: https://requests.readthedocs.io/
-        .. _format: https://requests.readthedocs.io/en/master/user/advanced/#proxies
+            .. _requests: https://requests.readthedocs.io/
+            .. _format: https://requests.readthedocs.io/en/master/user/advanced/#proxies
+
+        :param language: Optional. Can be used to change the language of returned data.
+            English will be used by default. Available languages can be checked in
+            the ytmusicapi/locales directory.
         """
         self.auth = auth
         self.proxies = proxies
@@ -55,6 +65,20 @@ class YTMusic:
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
+            self.context['context']['client']['hl'] = language
+            supported_languages = [
+                f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')
+            ]
+            if language in supported_languages:
+                self.language = language
+                self.lang = gettext.translation('base',
+                                                localedir=pkg_resources.resource_filename(
+                                                    'ytmusicapi', 'locales'),
+                                                languages=[language])
+                self.parser = Parser(self.lang)
+            else:
+                raise Exception("Language not supported. Supported languages are ")
+
             if user:
                 self.context['context']['user']['onBehalfOfUser'] = user
 
@@ -187,7 +211,7 @@ class YTMusic:
                     for result in results:
                         data = result['musicResponsiveListItemRenderer']
                         type = filter[:-1] if filter else None
-                        search_result = parse_search_result(data, type)
+                        search_result = self.parser.parse_search_result(data, type)
                         search_results.append(search_result)
 
         except Exception as e:
@@ -195,6 +219,7 @@ class YTMusic:
 
         return search_results
 
+    @i18n
     def get_artist(self, channelId: str) -> Dict:
         """
         Get information about an artist and their top releases (songs,
@@ -295,11 +320,13 @@ class YTMusic:
             artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
 
         categories = ['albums', 'singles', 'videos']
-        for category in categories:
+        categories_local = [_('albums'), _('singles'), _('videos')]
+        for i, category in enumerate(categories):
             data = [
-                r['musicCarouselShelfRenderer']
-                for r in results if 'musicCarouselShelfRenderer' in r and nav(
-                    r['musicCarouselShelfRenderer'], CAROUSEL_TITLE)['text'].lower() == category
+                r['musicCarouselShelfRenderer'] for r in results
+                if 'musicCarouselShelfRenderer' in r
+                and nav(r['musicCarouselShelfRenderer'],
+                        CAROUSEL_TITLE)['text'].lower() == categories_local[i]
             ]
             if len(data) > 0:
                 artist[category] = {'browseId': None, 'results': []}
@@ -794,7 +821,9 @@ class YTMusic:
                 playlist['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
-            song_count = to_int(header['secondSubtitle']['runs'][0]['text'])
+            song_count = to_int(
+                unicodedata.normalize("NFKD", header['secondSubtitle']['runs'][0]['text']),
+                self.language)
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             playlist['duration'] = header['secondSubtitle']['runs'][0]['text']
@@ -1138,7 +1167,8 @@ class YTMusic:
             album['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
-            album['trackCount'] = to_int(header['secondSubtitle']['runs'][0]['text'])
+            album['trackCount'] = to_int(header['secondSubtitle']['runs'][0]['text'],
+                                         self.language)
             album['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             album['duration'] = header['secondSubtitle']['runs'][0]['text']
@@ -1184,7 +1214,7 @@ class YTMusic:
         else:
             return response
 
-    def delete_upload_entity(self, entityId: str) -> Union[str, Dict]:
+    def delete_upload_entity(self, entityId: str) -> Union[str, Dict]:  # pragma: no cover
         """
         Deletes a previously uploaded song or album
 

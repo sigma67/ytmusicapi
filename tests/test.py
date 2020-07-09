@@ -7,7 +7,7 @@ from ytmusicapi.ytmusic import YTMusic  # noqa: E402
 config = configparser.RawConfigParser()
 config.read('./test.cfg', 'utf-8')
 
-youtube = YTMusic()
+youtube = YTMusic(language='de')
 youtube_auth = YTMusic(config['auth']['headers_file'])
 youtube_brand = YTMusic(config['auth']['headers'], config['auth']['brand_account'])
 
@@ -99,8 +99,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertIn('actions', response)
 
     def test_rate_playlist(self):
-        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
-                                              'LIKE')
+        response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'LIKE')
         self.assertIn('actions', response)
         response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
                                               'INDIFFERENT')
@@ -177,6 +176,7 @@ class TestYTMusic(unittest.TestCase):
         response = youtube_auth.upload_song(config['uploads']['file'])
         self.assertEqual(response.status_code, 409)
 
+    @unittest.skip("Do not delete uploads")
     def test_delete_upload_entity(self):
         results = youtube_auth.get_library_upload_songs()
         response = youtube_auth.delete_upload_entity(results[0]['entityId'])

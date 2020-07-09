@@ -1,3 +1,4 @@
+from ytmusicapi.helpers import i18n
 # commonly used navigation paths
 SINGLE_COLUMN_TAB = [
     'contents', 'singleColumnBrowseResultsRenderer', 'tabs', 0, 'tabRenderer', 'content'
@@ -26,6 +27,64 @@ SUBTITLE3 = ['subtitle', 'runs', 4, 'text']
 THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails']
 THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails']
 THUMBNAIL_CROPPED = ['thumbnail', 'croppedSquareThumbnailRenderer', 'thumbnail', 'thumbnails']
+
+
+class Parser:
+    def __init__(self, language):
+        self.lang = language
+
+    @i18n
+    def parse_search_result(self, data, resultType=None):
+        search_result = {}
+        default = not resultType
+        if not resultType:
+            resultType = get_item_text(data, 1).lower()
+            result_types = ['artist', 'playlist', 'song', 'video']
+            result_types_local = [_('artist'), _('playlist'), _('song'), _('video')]
+            # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
+            if resultType not in result_types_local:
+                resultType = 'album'
+            else:
+                resultType = result_types[result_types_local.index(resultType)]
+
+        if resultType in ['song', 'video']:
+            search_result['videoId'] = nav(
+                data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+            search_result['title'] = get_item_text(data, 0)
+
+        if resultType in ['artist', 'album', 'playlist']:
+            search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
+
+        if resultType in ['artist']:
+            search_result['artist'] = get_item_text(data, 0)
+
+        elif resultType in ['album']:
+            search_result['title'] = get_item_text(data, 0)
+            search_result['type'] = get_item_text(data, 1)
+            search_result['artist'] = get_item_text(data, 2)
+            search_result['year'] = get_item_text(data, 3)
+
+        elif resultType in ['playlist']:
+            search_result['title'] = get_item_text(data, 0)
+            search_result['author'] = get_item_text(data, 1 + default)
+            search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
+
+        elif resultType in ['song']:
+            search_result['artists'] = parse_song_artists(data, 1 + default)
+            hasAlbum = len(data['flexColumns']) == 4 + default
+            if hasAlbum:
+                search_result['album'] = parse_song_album(data, 2 + default)
+            search_result['duration'] = get_item_text(data, 2 + hasAlbum + default)
+
+        elif resultType in ['video']:
+            search_result['artist'] = get_item_text(data, 1 + default)
+            search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
+            search_result['duration'] = get_item_text(data, 3 + default)
+
+        search_result['thumbnails'] = nav(data, THUMBNAILS)
+        search_result['resultType'] = resultType
+
+        return search_result
 
 
 def parse_playlists(results):
@@ -89,10 +148,8 @@ def parse_albums(results, upload=True):
             if has_artists:
                 subtitle = data['subtitle']['runs'][2]
                 album['artists'].append({
-                    'name':
-                        subtitle['text'],
-                    'id':
-                        nav(subtitle, NAVIGATION_BROWSE_ID)
+                    'name': subtitle['text'],
+                    'id': nav(subtitle, NAVIGATION_BROWSE_ID)
                 })
         else:
             album['artists'] = nav(data, SUBTITLE)
@@ -208,55 +265,6 @@ def parse_uploaded_items(results):
         songs.append(song)
 
     return songs
-
-
-def parse_search_result(data, resultType=None):
-    search_result = {}
-    default = not resultType
-    if not resultType:
-        resultType = get_item_text(data, 1).lower()
-        # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
-        if resultType not in ['artist', 'playlist', 'song', 'video']:
-            resultType = 'album'
-
-    if resultType in ['song', 'video']:
-        search_result['videoId'] = nav(
-            data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
-        search_result['title'] = get_item_text(data, 0)
-
-    if resultType in ['artist', 'album', 'playlist']:
-        search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
-
-    if resultType in ['artist']:
-        search_result['artist'] = get_item_text(data, 0)
-
-    elif resultType in ['album']:
-        search_result['title'] = get_item_text(data, 0)
-        search_result['type'] = get_item_text(data, 1)
-        search_result['artist'] = get_item_text(data, 2)
-        search_result['year'] = get_item_text(data, 3)
-
-    elif resultType in ['playlist']:
-        search_result['title'] = get_item_text(data, 0)
-        search_result['author'] = get_item_text(data, 1 + default)
-        search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
-
-    elif resultType in ['song']:
-        search_result['artists'] = parse_song_artists(data, 1 + default)
-        hasAlbum = len(data['flexColumns']) == 4 + default
-        if hasAlbum:
-            search_result['album'] = parse_song_album(data, 2 + default)
-        search_result['duration'] = get_item_text(data, 2 + hasAlbum + default)
-
-    elif resultType in ['video']:
-        search_result['artist'] = get_item_text(data, 1 + default)
-        search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
-        search_result['duration'] = get_item_text(data, 3 + default)
-
-    search_result['thumbnails'] = nav(data, THUMBNAILS)
-    search_result['resultType'] = resultType
-
-    return search_result
 
 
 def parse_song_artists(data, index):
