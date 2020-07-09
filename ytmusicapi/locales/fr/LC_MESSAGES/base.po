@@ -19,32 +19,32 @@ msgstr ""
 
 #: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:52 ytmusicapi/parsers.py:55
 msgid "artist"
-msgstr ""
+msgstr "artiste"
 
 #: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:52 ytmusicapi/parsers.py:64
 msgid "playlist"
-msgstr ""
+msgstr "playlist"
 
 #: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:47 ytmusicapi/parsers.py:69
 msgid "song"
-msgstr ""
+msgstr "titre"
 
 #: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:47 ytmusicapi/parsers.py:76
 msgid "video"
-msgstr ""
+msgstr "vidéo"
 
 #: ytmusicapi/parsers.py:45 ytmusicapi/parsers.py:52 ytmusicapi/parsers.py:58
 msgid "album"
-msgstr ""
+msgstr "album"
 
 #: ytmusicapi/ytmusic.py:307 ytmusicapi/ytmusic.py:328
 msgid "albums"
-msgstr ""
+msgstr "albums"
 
 #: ytmusicapi/ytmusic.py:307 ytmusicapi/ytmusic.py:331
 msgid "singles"
-msgstr ""
+msgstr "singles"
 
 #: ytmusicapi/ytmusic.py:307 ytmusicapi/ytmusic.py:334
 msgid "videos"
-msgstr ""
+msgstr "vidéos"
