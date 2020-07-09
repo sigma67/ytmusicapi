@@ -5,6 +5,7 @@ import gettext
 import pkg_resources
 import ntpath
 import os
+from contextlib import suppress
 from typing import List, Dict, Union, Tuple
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers import *
@@ -69,15 +70,20 @@ class YTMusic:
             supported_languages = [
                 f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')
             ]
-            if language in supported_languages:
-                self.language = language
-                self.lang = gettext.translation('base',
-                                                localedir=pkg_resources.resource_filename(
-                                                    'ytmusicapi', 'locales'),
-                                                languages=[language])
-                self.parser = Parser(self.lang)
-            else:
-                raise Exception("Language not supported. Supported languages are ")
+            if language not in supported_languages:
+                raise Exception("Language not supported. Supported languages are "
+                                ', '.join(supported_languages))
+
+            try:
+                locale.setlocale(locale.LC_ALL, language)
+            except locale.Error:
+                with suppress(locale.Error):
+                    locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+            self.lang = gettext.translation('base',
+                                            localedir=pkg_resources.resource_filename(
+                                                'ytmusicapi', 'locales'),
+                                            languages=[language])
+            self.parser = Parser(self.lang)
 
             if user:
                 self.context['context']['user']['onBehalfOfUser'] = user
@@ -822,8 +828,7 @@ class YTMusic:
 
         if len(header['secondSubtitle']['runs']) > 1:
             song_count = to_int(
-                unicodedata.normalize("NFKD", header['secondSubtitle']['runs'][0]['text']),
-                self.language)
+                unicodedata.normalize("NFKD", header['secondSubtitle']['runs'][0]['text']))
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             playlist['duration'] = header['secondSubtitle']['runs'][0]['text']
@@ -1167,8 +1172,7 @@ class YTMusic:
             album['year'] = nav(header, SUBTITLE3)
 
         if len(header['secondSubtitle']['runs']) > 1:
-            album['trackCount'] = to_int(header['secondSubtitle']['runs'][0]['text'],
-                                         self.language)
+            album['trackCount'] = to_int(header['secondSubtitle']['runs'][0]['text'])
             album['duration'] = header['secondSubtitle']['runs'][2]['text']
         else:
             album['duration'] = header['secondSubtitle']['runs'][0]['text']

@@ -50,8 +50,7 @@ def get_authorization(auth):
     return "SAPISIDHASH " + unix_timestamp + "_" + sha_1.hexdigest()
 
 
-def to_int(string, language):
-    locale.setlocale(locale.LC_ALL, language)
+def to_int(string):
     number = string.split(' ')[0]
     return locale.atoi(number)
 
