@@ -1,0 +1,251 @@
+from typing import List, Dict
+from ytmusicapi.helpers import *
+from ytmusicapi.parsers import *
+
+
+class LibraryMixin:
+    def get_library_playlists(self, limit: int = 25) -> List[Dict]:
+        """
+        Retrieves the playlists in the user's library.
+
+        :param limit: Number of playlists to retrieve
+        :return: List of owned playlists.
+
+        Each item is in the following format::
+
+            {
+                'playlistId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
+                'title': 'Playlist title',
+                'thumbnails: [...],
+                'count': 5
+            }
+        """
+        self._check_auth()
+        body = {'browseId': 'FEmusic_liked_playlists'}
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['gridRenderer']
+        playlists = parse_playlists(results['items'][1:])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_playlists(contents)
+            playlists.extend(
+                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                                  parse_func))
+
+        return playlists
+
+    def get_library_songs(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the songs in the user's library (liked videos are not included).
+        To get liked songs and videos, use :py:func:`get_liked_songs`
+
+        :param limit: Number of songs to retrieve
+        :return: List of songs. Same format as :py:func:`get_playlist`
+        """
+        self._check_auth()
+        body = {'browseId': 'FEmusic_liked_videos'}
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        songs = parse_playlist_items(results['contents'][1:])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_playlist_items(contents)
+            songs.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
+
+        return songs
+
+    def get_library_albums(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the albums in the user's library.
+
+        :param limit: Number of albums to return
+        :return: List of albums
+        """
+        self._check_auth()
+        body = {'browseId': 'FEmusic_liked_albums'}
+
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)
+        if 'gridRenderer' not in results:
+            return []
+        else:
+            results = results['gridRenderer']
+        albums = parse_albums(results['items'], False)
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_albums(contents, False)
+            albums.extend(
+                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                                  parse_func))
+
+        return albums
+
+    def get_library_artists(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the artists of the songs in the user's library.
+
+        :param limit: Number of artists to return
+        :return: List of artists.
+
+        Each item is in the following format::
+
+            {
+              "browseId": "UCxEqaQWosMHaTih-tgzDqug",
+              "artist": "WildVibes",
+              "subscribers": "2.91K",
+              "thumbnails": [...]
+            }
+        """
+        self._check_auth()
+        body = {'browseId': 'FEmusic_library_corpus_track_artists'}
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        artists = parse_artists(results['contents'])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_artists(contents)
+            artists.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
+
+        return artists
+
+    def get_library_subscriptions(self, limit: int = 25) -> List[Dict]:
+        """
+        Gets the artists the user has subscribed to.
+
+        :param limit: Number of artists to return
+        :return: List of artists. Same format as :py:func:`get_library_artists`
+        """
+        self._check_auth()
+        body = {'browseId': 'FEmusic_library_corpus_artists'}
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                     'itemSectionRenderer')
+        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        artists = parse_artists(results['contents'])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_artists(contents)
+            artists.extend(
+                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                                  parse_func))
+
+        return artists
+
+    def get_liked_songs(self, limit: int = 100) -> Dict:
+        """
+        Gets playlist items for the 'Liked Songs' playlist
+
+        :param limit: How many items to return. Default: 100
+        :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
+        """
+        return self.get_playlist('LM', limit)
+
+    def get_history(self) -> List[Dict]:
+        """
+        Gets your play history in reverse chronological order
+
+        :return: List of playlistItems, see :py:func:`get_playlist`
+          The additional property 'played' indicates when the playlistItem was played
+        """
+        self._check_auth()
+        body = {'browseId': 'FEmusic_history'}
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        songs = []
+        for content in results:
+            data = content['musicShelfRenderer']['contents']
+            songlist = parse_playlist_items(data)
+            for song in songlist:
+                song['played'] = nav(content['musicShelfRenderer'], TITLE_TEXT)
+            songs.extend(songlist)
+
+        return songs
+
+    def rate_song(self, videoId: str, rating: str = 'INDIFFERENT') -> Dict:
+        """
+        Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
+
+        :param videoId: Video id
+        :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
+
+          | 'INDIFFERENT' removes the previous rating and assigns no rating
+
+        :return: Full response
+        """
+        self._check_auth()
+        body = {'target': {'videoId': videoId}}
+        endpoint = prepare_like_endpoint(rating)
+        if endpoint is None:
+            return
+
+        return self._send_request(endpoint, body)
+
+    def rate_playlist(self, playlistId: str, rating: str = 'INDIFFERENT') -> Dict:
+        """
+        Rates a playlist/album ("Add to library"/"Remove from library" interactions on YouTube Music)
+        You can also dislike a playlist/album, which has an effect on your recommendations
+
+        :param playlistId: Playlist id
+        :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
+
+          | 'INDIFFERENT' removes the playlist/album from the library
+
+        :return: Full response
+        """
+        self._check_auth()
+        body = {'target': {'playlistId': playlistId}}
+        endpoint = prepare_like_endpoint(rating)
+        return endpoint if not endpoint else self._send_request(endpoint, body)
+
+    def subscribe_artists(self, channelIds: List[str]) -> Dict:
+        """
+        Subscribe to artists. Adds the artists to your library
+
+        :param channelIds: Artist channel ids
+        :return: Full response
+        """
+        self._check_auth()
+        body = {'channelIds': channelIds}
+        endpoint = 'subscription/subscribe'
+        return self._send_request(endpoint, body)
+
+    def unsubscribe_artists(self, channelIds: List[str]) -> Dict:
+        """
+        Unsubscribe from artists. Removes the artists from your library
+
+        :param channelIds: Artist channel ids
+        :return: Full response
+        """
+        self._check_auth()
+        body = {'channelIds': channelIds}
+        endpoint = 'subscription/unsubscribe'
+        return self._send_request(endpoint, body)
