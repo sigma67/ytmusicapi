@@ -75,7 +75,7 @@ class YTMusic(BrowsingMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
             if language not in supported_languages:
                 raise Exception("Language not supported. Supported languages are "
                                 ', '.join(supported_languages))
-
+            self.language = language
             try:
                 locale.setlocale(locale.LC_ALL, language)
             except locale.Error:
