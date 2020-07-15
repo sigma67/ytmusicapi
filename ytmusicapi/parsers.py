@@ -310,16 +310,14 @@ def get_browse_id(item, index):
 
 
 def get_continuations(results, continuation_type, per_page, limit, request_func, parse_func):
-    request_count = 1
     items = []
-    while 'continuations' in results and request_count * per_page < limit:
+    while 'continuations' in results and len(items) < limit - per_page:
         ctoken = nav(results, CONTINUATION)
         additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
         response = request_func(additionalParams)
         results = response['continuationContents'][continuation_type]
         continuation_contents = 'contents' if 'Shelf' in continuation_type else 'items'
         items.extend(parse_func(results[continuation_contents]))
-        request_count += 1
 
     return items
 

@@ -69,15 +69,15 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(playlists), 0)
 
     def test_get_library_songs(self):
-        songs = youtube_brand.get_library_songs(200)
+        songs = youtube_brand.get_library_songs(100)
         self.assertGreater(len(songs), 0)
 
     def test_get_library_albums(self):
-        albums = youtube_brand.get_library_albums(50)
+        albums = youtube_brand.get_library_albums(100)
         self.assertGreater(len(albums), 0)
 
     def test_get_library_artists(self):
-        artists = youtube_brand.get_library_artists(50)
+        artists = youtube_brand.get_library_artists(100)
         self.assertGreater(len(artists), 0)
 
     def test_get_library_subscriptions(self):
