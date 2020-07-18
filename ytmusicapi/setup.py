@@ -42,9 +42,9 @@ def setup(filepath=None, headers_raw=None):
     with open(pkg_resources.resource_filename('ytmusicapi', 'headers.json')) as json_file:
         default_headers = json.load(json_file)
 
-    headers.update(default_headers)
+    default_headers.update(headers)
     if filepath is not None:
         with open(filepath, 'w') as file:
-            json.dump(headers, file, ensure_ascii=True, indent=4, sort_keys=True)
+            json.dump(default_headers, file, ensure_ascii=True, indent=4, sort_keys=True)
 
-    return json.dumps(headers)
+    return json.dumps(default_headers)
