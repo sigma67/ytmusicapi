@@ -322,11 +322,17 @@ def get_continuations(results, continuation_type, per_page, limit, request_func,
     return items
 
 
-def nav(root, items):
+def nav(root, items, none_if_absent=False):
     """Access a nested object in root by item sequence."""
-    for k in items:
-        root = root[k]
-    return root
+    try:
+        for k in items:
+            root = root[k]
+        return root
+    except KeyError as err:
+        if none_if_absent:
+            return None
+        else:
+            raise err;   
 
 
 def find_object_by_key(object_list, key, nested=None, is_key=False):

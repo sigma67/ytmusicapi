@@ -190,7 +190,7 @@ class BrowsingMixin:
         subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
         artist['channelId'] = subscription_button['channelId']
         artist['subscribers'] = nav(subscription_button,
-                                    ['subscriberCountText', 'runs', 0, 'text'])
+                                    ['subscriberCountText', 'runs', 0, 'text'], True)
         artist['subscribed'] = subscription_button['subscribed']
         artist['thumbnails'] = nav(header, THUMBNAILS)
         artist['songs'] = {'browseId': None}
