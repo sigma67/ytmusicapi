@@ -188,8 +188,8 @@ def parse_playlist_items(results):
                         break
 
                 if 'menu' in data:
-                    like = nav(data, MENU_LIKE_STATUS)
-
+                    like = nav(data, MENU_LIKE_STATUS, True)
+    
             title = get_item_text(data, 0)
             if title == 'Song deleted':
                 continue
