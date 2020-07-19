@@ -194,7 +194,7 @@ class BrowsingMixin:
         artist['subscribers'] = nav(subscription_button,
                                     ['subscriberCountText', 'runs', 0, 'text'], True)
         artist['subscribed'] = subscription_button['subscribed']
-        artist['thumbnails'] = nav(header, THUMBNAILS)
+        artist['thumbnails'] = nav(header, THUMBNAILS, True)
         artist['songs'] = {'browseId': None}
         if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
             musicShelf = nav(results, MUSIC_SHELF)
