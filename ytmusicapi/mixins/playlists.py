@@ -76,7 +76,10 @@ class PlaylistsMixin:
             playlist["description"] = header["description"]["runs"][0]["text"]
         run_count = len(header['subtitle']['runs'])
         if run_count > 1:
-            playlist['author'] = nav(header, SUBTITLE2)
+            playlist['author'] = {
+                'name': nav(header, SUBTITLE2),
+                'id': nav(header, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID, True)
+            }
             if run_count > 3:
                 playlist['year'] = nav(header, SUBTITLE3)
 
