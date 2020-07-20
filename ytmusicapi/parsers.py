@@ -307,9 +307,13 @@ def parse_song_album(data, index):
     }
 
 
-def get_item_text(item, index, run_index=0):
+def get_item_text(item, index, run_index=0, none_if_absent=False):
     column = get_flex_column_item(item, index)
-    return column if not column else column['text']['runs'][run_index]['text']
+    if not column: 
+        return None    
+    if none_if_absent and len(column['text']['runs']) < run_index+1:
+        return None
+    return column['text']['runs'][run_index]['text']
 
 
 def get_flex_column_item(item, index):

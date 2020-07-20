@@ -269,8 +269,7 @@ class BrowsingMixin:
             title = get_item_text(data, 0)
             thumbnails = nav(data, THUMBNAILS)
             album_type = get_item_text(data, 1) if release_type == "albums" else "Single"
-            year = get_item_text(data, 1, 2) if release_type == "albums" else get_item_text(
-                data, 1)
+            year = get_item_text(data, 1, 2 if release_type == "albums" else 0, True)
             albums.append({
                 "browseId": browseId,
                 "artist": artist,
