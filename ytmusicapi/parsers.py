@@ -189,7 +189,7 @@ def parse_playlist_items(results):
 
                 if 'menu' in data:
                     like = nav(data, MENU_LIKE_STATUS, True)
-    
+
             title = get_item_text(data, 0)
             if title == 'Song deleted':
                 continue
@@ -267,6 +267,24 @@ def parse_uploaded_items(results):
     return songs
 
 
+def parse_library_artists(response, request_func, limit):
+    results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                 'itemSectionRenderer')
+    results = nav(results, ITEM_SECTION)
+    if 'musicShelfRenderer' not in results:
+        return []
+    results = results['musicShelfRenderer']
+    artists = parse_artists(results['contents'])
+
+    if 'continuations' in results:
+        parse_func = lambda contents: parse_artists(contents)
+        artists.extend(
+            get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
+                              parse_func))
+
+    return artists
+
+
 def parse_song_artists(data, index):
     flex_item = get_flex_column_item(data, index)
     if not flex_item:
@@ -332,7 +350,7 @@ def nav(root, items, none_if_absent=False):
         if none_if_absent:
             return None
         else:
-            raise err;   
+            raise err
 
 
 def find_object_by_key(object_list, key, nested=None, is_key=False):

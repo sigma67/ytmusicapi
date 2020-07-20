@@ -54,7 +54,10 @@ class LibraryMixin:
         response = self._send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
                                      'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        results = nav(results, ITEM_SECTION)
+        if 'musicShelfRenderer' not in results:
+            return []
+        results = results['musicShelfRenderer']
         songs = parse_playlist_items(results['contents'][1:])
 
         if 'continuations' in results:
@@ -84,8 +87,7 @@ class LibraryMixin:
         results = nav(results, ITEM_SECTION)
         if 'gridRenderer' not in results:
             return []
-        else:
-            results = results['gridRenderer']
+        results = results['gridRenderer']
         albums = parse_albums(results['items'], False)
 
         if 'continuations' in results:
@@ -118,20 +120,9 @@ class LibraryMixin:
         body = {'browseId': 'FEmusic_library_corpus_track_artists'}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                     'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
-        artists = parse_artists(results['contents'])
-
-        if 'continuations' in results:
-            request_func = lambda additionalParams: self._send_request(
-                endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_artists(contents)
-            artists.extend(
-                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
-                                  parse_func))
-
-        return artists
+        return parse_library_artists(
+            response,
+            lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit)
 
     def get_library_subscriptions(self, limit: int = 25) -> List[Dict]:
         """
@@ -144,20 +135,9 @@ class LibraryMixin:
         body = {'browseId': 'FEmusic_library_corpus_artists'}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                     'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
-        artists = parse_artists(results['contents'])
-
-        if 'continuations' in results:
-            request_func = lambda additionalParams: self._send_request(
-                endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_artists(contents)
-            artists.extend(
-                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
-                                  parse_func))
-
-        return artists
+        return parse_library_artists(
+            response,
+            lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit)
 
     def get_liked_songs(self, limit: int = 100) -> Dict:
         """
