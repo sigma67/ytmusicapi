@@ -91,6 +91,7 @@ class Parser:
     def parse_artist_contents(self, results: List) -> Dict:
         categories = ['albums', 'singles', 'videos', 'playlists']
         categories_local = [_('albums'), _('singles'), _('videos'), _('playlists')]
+        categories_parser = [parse_album, parse_single, parse_video, parse_playlist]
         artist = {}
         for i, category in enumerate(categories):
             data = [
@@ -109,14 +110,7 @@ class Parser:
                             data[0],
                             CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
 
-                if category == 'videos':
-                    parse_func = parse_video
-                elif category == 'playlists':
-                    parse_func = parse_playlist
-                else:
-                    parse_func = parse_album
-
-                artist[category]['results'] = parse_content_list(data[0]['contents'], parse_func)
+                artist[category]['results'] = parse_content_list(data[0]['contents'], categories_parser[i])
 
         return artist
 
@@ -130,11 +124,20 @@ def parse_content_list(results, parse_func):
 
 
 def parse_album(result):
-    location = SUBTITLE if len(result['subtitle']['runs']) == 1 else SUBTITLE2
     return {
         'title': nav(result, TITLE_TEXT),
-        'year': nav(result, location),
-        'browseId': nav(result, TITLE + NAVIGATION_BROWSE_ID)
+        'year': nav(result, SUBTITLE2, True),
+        'browseId': nav(result, TITLE + NAVIGATION_BROWSE_ID),
+        'thumbnails': nav(result, THUMBNAIL_RENDERER)
+    }
+
+
+def parse_single(result):
+    return {
+        'title': nav(result, TITLE_TEXT),
+        'year': nav(result, SUBTITLE, True),
+        'browseId': nav(result, TITLE + NAVIGATION_BROWSE_ID),
+        'thumbnails': nav(result, THUMBNAIL_RENDERER)
     }
 
 
@@ -408,7 +411,7 @@ def nav(root, items, none_if_absent=False):
         for k in items:
             root = root[k]
         return root
-    except KeyError as err:
+    except Exception as err:
         if none_if_absent:
             return None
         else:
