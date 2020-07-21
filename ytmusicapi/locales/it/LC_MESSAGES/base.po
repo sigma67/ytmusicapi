@@ -2,13 +2,13 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-09 14:10+0200\n"
+"POT-Creation-Date: 2020-07-21 09:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,34 +17,37 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:52 ytmusicapi/parsers.py:55
+#: ytmusicapi/parsers.py:44
 msgid "artist"
 msgstr "artista"
 
-#: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:52 ytmusicapi/parsers.py:64
+#: ytmusicapi/parsers.py:44
 msgid "playlist"
 msgstr "playlist"
 
-#: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:47 ytmusicapi/parsers.py:69
+#: ytmusicapi/parsers.py:44
 msgid "song"
 msgstr "brano"
 
-#: ytmusicapi/parsers.py:44 ytmusicapi/parsers.py:47 ytmusicapi/parsers.py:76
+#: ytmusicapi/parsers.py:44
 msgid "video"
 msgstr "video"
 
-#: ytmusicapi/parsers.py:45 ytmusicapi/parsers.py:52 ytmusicapi/parsers.py:58
-msgid "album"
-msgstr "album"
-
-#: ytmusicapi/ytmusic.py:307 ytmusicapi/ytmusic.py:328
+#: ytmusicapi/parsers.py:93
 msgid "albums"
 msgstr "album"
 
-#: ytmusicapi/ytmusic.py:307 ytmusicapi/ytmusic.py:331
+#: ytmusicapi/parsers.py:93
 msgid "singles"
 msgstr "singoli"
 
-#: ytmusicapi/ytmusic.py:307 ytmusicapi/ytmusic.py:334
+#: ytmusicapi/parsers.py:93
 msgid "videos"
 msgstr "video"
+
+#: ytmusicapi/parsers.py:93
+msgid "playlists"
+msgstr "playlist"
+
+#~ msgid "album"
+#~ msgstr "album"

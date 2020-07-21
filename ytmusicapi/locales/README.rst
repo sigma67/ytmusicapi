@@ -27,7 +27,7 @@ Copy the base template:
 Update translation
 ------------------
 
-``msgmerge --update locales/de/LC_MESSAGES/base.po locales/base.pot``
+``cd locales && sh update_po.sh``
 
 Edit translation
 ----------------
@@ -37,4 +37,4 @@ Finalize translation
 ---------------------
 To generate mo files, run
 
-``msgfmt -o locales/de/LC_MESSAGES/base.mo locales/de/LC_MESSAGES/base``
+``cd locales && sh update_mo.sh``

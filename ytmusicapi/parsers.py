@@ -1,4 +1,5 @@
 from ytmusicapi.helpers import i18n
+from typing import List, Dict
 # commonly used navigation paths
 SINGLE_COLUMN_TAB = [
     'contents', 'singleColumnBrowseResultsRenderer', 'tabs', 0, 'tabRenderer', 'content'
@@ -86,21 +87,78 @@ class Parser:
 
         return search_result
 
+    @i18n
+    def parse_artist_contents(self, results: List) -> Dict:
+        categories = ['albums', 'singles', 'videos', 'playlists']
+        categories_local = [_('albums'), _('singles'), _('videos'), _('playlists')]
+        artist = {}
+        for i, category in enumerate(categories):
+            data = [
+                r['musicCarouselShelfRenderer'] for r in results
+                if 'musicCarouselShelfRenderer' in r
+                and nav(r['musicCarouselShelfRenderer'],
+                        CAROUSEL_TITLE)['text'].lower() == categories_local[i]
+            ]
+            if len(data) > 0:
+                artist[category] = {'browseId': None, 'results': []}
+                if 'navigationEndpoint' in nav(data[0], CAROUSEL_TITLE):
+                    artist[category]['browseId'] = nav(data[0],
+                                                       CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
+                    if category in ['albums', 'singles', 'playlists']:
+                        artist[category]['params'] = nav(
+                            data[0],
+                            CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
 
-def parse_playlists(results):
-    playlists = []
+                if category == 'videos':
+                    parse_func = parse_video
+                elif category == 'playlists':
+                    parse_func = parse_playlist
+                else:
+                    parse_func = parse_album
+
+                artist[category]['results'] = parse_content_list(data[0]['contents'], parse_func)
+
+        return artist
+
+
+def parse_content_list(results, parse_func):
+    contents = []
     for result in results:
-        data = result['musicTwoRowItemRenderer']
-        playlist = {}
-        playlist['playlistId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:]
-        playlist['title'] = nav(data, TITLE_TEXT)
-        playlist['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
-        if len(data['subtitle']['runs']) == 3:
-            playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
+        contents.append(parse_func(result['musicTwoRowItemRenderer']))
 
-        playlists.append(playlist)
+    return contents
 
-    return playlists
+
+def parse_album(result):
+    location = SUBTITLE if len(result['subtitle']['runs']) == 1 else SUBTITLE2
+    return {
+        'title': nav(result, TITLE_TEXT),
+        'year': nav(result, location),
+        'browseId': nav(result, TITLE + NAVIGATION_BROWSE_ID)
+    }
+
+
+def parse_video(result):
+    video = {
+        'title': nav(result, TITLE_TEXT),
+        'videoId': nav(result, NAVIGATION_VIDEO_ID),
+        'playlistId': nav(result, NAVIGATION_PLAYLIST_ID),
+        'thumbnails': nav(result, THUMBNAIL_RENDERER)
+    }
+    if len(result['subtitle']['runs']) == 3:
+        video['views'] = nav(result, SUBTITLE2).split(' ')[0]
+    return video
+
+
+def parse_playlist(data):
+    playlist = {
+        'title': nav(data, TITLE_TEXT),
+        'playlistId': nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
+        'thumbnails': nav(data, THUMBNAIL_RENDERER)
+    }
+    if len(data['subtitle']['runs']) == 3:
+        playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
+    return playlist
 
 
 def parse_artists(results, uploaded=False):
@@ -309,9 +367,9 @@ def parse_song_album(data, index):
 
 def get_item_text(item, index, run_index=0, none_if_absent=False):
     column = get_flex_column_item(item, index)
-    if not column: 
-        return None    
-    if none_if_absent and len(column['text']['runs']) < run_index+1:
+    if not column:
+        return None
+    if none_if_absent and len(column['text']['runs']) < run_index + 1:
         return None
     return column['text']['runs'][run_index]['text']
 

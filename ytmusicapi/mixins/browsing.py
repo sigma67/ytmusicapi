@@ -100,7 +100,6 @@ class BrowsingMixin:
 
         return search_results
 
-    @i18n
     def get_artist(self, channelId: str) -> Dict:
         """
         Get information about an artist and their top releases (songs,
@@ -200,41 +199,7 @@ class BrowsingMixin:
                 artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
             artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
 
-        categories = ['albums', 'singles', 'videos']
-        categories_local = [_('albums'), _('singles'), _('videos')]
-        for i, category in enumerate(categories):
-            data = [
-                r['musicCarouselShelfRenderer'] for r in results
-                if 'musicCarouselShelfRenderer' in r
-                and nav(r['musicCarouselShelfRenderer'],
-                        CAROUSEL_TITLE)['text'].lower() == categories_local[i]
-            ]
-            if len(data) > 0:
-                artist[category] = {'browseId': None, 'results': []}
-                if 'navigationEndpoint' in nav(data[0], CAROUSEL_TITLE):
-                    artist[category]['browseId'] = nav(data[0],
-                                                       CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
-                    if category in ['albums', 'singles']:
-                        artist[category]['params'] = nav(
-                            data[0],
-                            CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
-
-                for item in data[0]['contents']:
-                    item = item['musicTwoRowItemRenderer']
-                    result = {'title': nav(item, TITLE_TEXT)}
-                    result['thumbnails'] = nav(item, THUMBNAIL_RENDERER)
-                    if category == 'albums':
-                        result['year'] = nav(item, SUBTITLE2)
-                        result['browseId'] = nav(item, TITLE + NAVIGATION_BROWSE_ID)
-                    elif category == 'singles':
-                        result['year'] = nav(item, SUBTITLE)
-                        result['browseId'] = nav(item, TITLE + NAVIGATION_BROWSE_ID)
-                    elif category == 'videos':
-                        result['views'] = nav(item, SUBTITLE2).split(' ')[0]
-                        result['videoId'] = nav(item, NAVIGATION_VIDEO_ID)
-                        result['playlistId'] = nav(item, NAVIGATION_PLAYLIST_ID)
-                    artist[category]['results'].append(result)
-
+        artist.update(self.parser.parse_artist_contents(results))
         return artist
 
     def get_artist_albums(self, channelId: str, params: str) -> List[Dict]:
@@ -370,3 +335,98 @@ class BrowsingMixin:
                 album['tracks'].append(track)
 
         return album
+
+    def get_user(self, channelId: str) -> Dict:
+        """
+        Retrieve a user's page. A user may own videos or playlists.
+
+        :param channelId: channelId of the user
+        :return: Dictionary with information about a user.
+
+        Example::
+
+            {
+              "name": "4Tune – No Copyright Music",
+              "videos": {
+                "browseId": "UC44hbeRoCZVVMVg5z0FfIww",
+                "results": [
+                  {
+                    "title": "Epic Music Soundtracks 2019",
+                    "videoId": "bJonJjgS2mM",
+                    "playlistId": "RDAMVMbJonJjgS2mM",
+                    "thumbnails": [
+                      {
+                        "url": "https://i.ytimg.com/vi/bJon...",
+                        "width": 800,
+                        "height": 450
+                      }
+                    ],
+                    "views": "19K"
+                  }
+                ]
+              },
+              "playlists": {
+                "browseId": "UC44hbeRoCZVVMVg5z0FfIww",
+                "results": [
+                  {
+                    "title": "♚ Machinimasound | Playlist",
+                    "playlistId": "PLRm766YvPiO9ZqkBuEzSTt6Bk4eWIr3gB",
+                    "thumbnails": [
+                      {
+                        "url": "https://i.ytimg.com/vi/...",
+                        "width": 400,
+                        "height": 225
+                      }
+                    ]
+                  }
+                ],
+                "params": "6gO3AUNvWU..."
+              }
+            }
+        """
+        endpoint = 'browse'
+        body = {"browseId": channelId}
+        response = self._send_request(endpoint, body)
+        user = {'name': nav(response, ['header', 'musicVisualHeaderRenderer'] + TITLE_TEXT)}
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        user.update(self.parser.parse_artist_contents(results))
+        return user
+
+    def get_user_playlists(self, channelId: str, params: str) -> List[Dict]:
+        """
+        Retrieve a list of playlists for a given user.
+        Call this function again with the returned ``params`` to get the full list.
+
+        :param channelId: channelId of the user.
+        :param params: params obtained by :py:func:`get_artist`
+        :return: List of user playlists.
+
+        Example::
+
+            [
+                {
+                  "browseId": "VLPLkqz3S84Tw-T4WwdS5EAMHegVhWH9vZIx",
+                  "title": "Top 10 vídeos del momento... hasta el momento! | Vevo Playlist",
+                  "thumbnails": [
+                    {
+                      "url": "https://i.ytimg.com/vi/...",
+                      "width": 400,
+                      "height": 225
+                    }
+                  ]
+                }
+            ]
+        """
+        endpoint = 'browse'
+        body = {"browseId": channelId, 'params': params}
+        response = self._send_request(endpoint, body)
+        data = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
+        user_playlists = []
+        for result in data['contents']:
+            data = result['musicResponsiveListItemRenderer']
+            user_playlists.append({
+                "browseId": nav(data, NAVIGATION_BROWSE_ID),
+                "title": get_item_text(data, 0),
+                "thumbnails": nav(data, THUMBNAILS),
+            })
+        return user_playlists

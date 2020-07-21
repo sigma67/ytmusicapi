@@ -55,6 +55,16 @@ class TestYTMusic(unittest.TestCase):
                                                  artist['singles']['params'])
         self.assertGreater(len(results), 0)
 
+    def test_get_user(self):
+        results = youtube.get_user("UC44hbeRoCZVVMVg5z0FfIww")
+        self.assertEqual(len(results), 3)
+
+    def test_get_user_playlists(self):
+        results = youtube.get_user("UCPVhZsC2od1xjGhgEc2NEPQ")
+        results = youtube.get_user_playlists("UCPVhZsC2od1xjGhgEc2NEPQ",
+                                             results['playlists']['params'])
+        self.assertGreater(len(results), 100)
+
     def test_get_album(self):
         results = youtube_auth.get_album("MPREb_BQZvl3BFGay")
         self.assertEqual(len(results), 9)

@@ -23,6 +23,8 @@ Browsing
 --------
 .. automethod:: YTMusic.get_artist
 .. automethod:: YTMusic.get_artist_albums
+.. automethod:: YTMusic.get_user
+.. automethod:: YTMusic.get_user_playlists
 .. automethod:: YTMusic.get_album
 
 Library
