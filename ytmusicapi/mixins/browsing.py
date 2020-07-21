@@ -1,4 +1,7 @@
-from typing import List, Dict
+import requests
+import json
+import codecs
+from urllib.parse import parse_qs
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers import *
 
@@ -246,96 +249,6 @@ class BrowsingMixin:
 
         return albums
 
-    def get_album(self, browseId: str) -> Dict:
-        """
-        Get information and tracks of an album
-
-        :param browseId: browseId of the album, for example
-            returned by :py:func:`search`
-        :return: Dictionary with title, description, artist and tracks.
-
-        Each track is in the following format::
-
-            {
-              "title": "Seven",
-              "trackCount": "7",
-              "durationMs": "1439579",
-              "playlistId": "OLAK5uy_kGnhwT08mQMGw8fArBowdtlew3DpgUt9c",
-              "releaseDate": {
-                "year": 2016,
-                "month": 10,
-                "day": 28
-              },
-              "description": "Seven is ...",
-              "thumbnails": [...],
-              "artist": [
-                {
-                  "name": "Martin Garrix",
-                  "id": "UCqJnSdHjKtfsrHi9aI-9d3g"
-                }
-              ],
-              "tracks": [
-                {
-                  "index": "1",
-                  "title": "WIEE (feat. Mesto)",
-                  "artists": "Martin Garrix",
-                  "videoId": "8xMNeXI9wxI",
-                  "lengthMs": "203406",
-                  "likeStatus": "INDIFFERENT"
-                }
-              ]
-            }
-        """
-        body = prepare_browse_endpoint("ALBUM", browseId)
-        endpoint = 'browse'
-        response = self._send_request(endpoint, body)
-        data = nav(response, FRAMEWORK_MUTATIONS)
-        album = {}
-        album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload', True)
-        album['title'] = album_data['title']
-        album['trackCount'] = album_data['trackCount']
-        album['durationMs'] = album_data['durationMs']
-        album['playlistId'] = album_data['audioPlaylistId']
-        album['releaseDate'] = album_data['releaseDate']
-        album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload',
-                                                  True)['description']
-        album['thumbnails'] = album_data['thumbnailDetails']['thumbnails']
-        album['artist'] = []
-        artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
-        for artist in artists_data:
-            album['artist'].append({
-                'name': artist['musicArtist']['name'],
-                'id': artist['musicArtist']['externalChannelId']
-            })
-        album['tracks'] = []
-
-        likes = {}
-        for item in data:
-            if 'musicTrackUserDetail' in item['payload']:
-                like_state = item['payload']['musicTrackUserDetail']['likeState'].split('_')[-1]
-                parent_track = item['payload']['musicTrackUserDetail']['parentTrack']
-                if like_state in ['NEUTRAL', 'UNKNOWN']:
-                    likes[parent_track] = 'INDIFFERENT'
-                else:
-                    likes[parent_track] = like_state[:-1]
-
-        for item in data[4:]:
-            if 'musicTrack' in item['payload']:
-                track = {}
-                track['index'] = item['payload']['musicTrack']['albumTrackIndex']
-                track['title'] = item['payload']['musicTrack']['title']
-                track['thumbnails'] = item['payload']['musicTrack']['thumbnailDetails'][
-                    'thumbnails']
-                track['artists'] = item['payload']['musicTrack']['artistNames']
-                # in case the song is unavailable, there is no videoId
-                track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item[
-                    'payload']['musicTrack'] else None
-                track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
-                track['likeStatus'] = likes[item['entityKey']]
-                album['tracks'].append(track)
-
-        return album
-
     def get_user(self, channelId: str) -> Dict:
         """
         Retrieve a user's page. A user may own videos or playlists.
@@ -430,3 +343,193 @@ class BrowsingMixin:
                 "thumbnails": nav(data, THUMBNAILS),
             })
         return user_playlists
+
+    def get_album(self, browseId: str) -> Dict:
+        """
+        Get information and tracks of an album
+
+        :param browseId: browseId of the album, for example
+            returned by :py:func:`search`
+        :return: Dictionary with title, description, artist and tracks.
+
+        Each track is in the following format::
+
+            {
+              "title": "Seven",
+              "trackCount": "7",
+              "durationMs": "1439579",
+              "playlistId": "OLAK5uy_kGnhwT08mQMGw8fArBowdtlew3DpgUt9c",
+              "releaseDate": {
+                "year": 2016,
+                "month": 10,
+                "day": 28
+              },
+              "description": "Seven is ...",
+              "thumbnails": [...],
+              "artist": [
+                {
+                  "name": "Martin Garrix",
+                  "id": "UCqJnSdHjKtfsrHi9aI-9d3g"
+                }
+              ],
+              "tracks": [
+                {
+                  "index": "1",
+                  "title": "WIEE (feat. Mesto)",
+                  "artists": "Martin Garrix",
+                  "videoId": "8xMNeXI9wxI",
+                  "lengthMs": "203406",
+                  "likeStatus": "INDIFFERENT"
+                }
+              ]
+            }
+        """
+        body = prepare_browse_endpoint("ALBUM", browseId)
+        endpoint = 'browse'
+        response = self._send_request(endpoint, body)
+        data = nav(response, FRAMEWORK_MUTATIONS)
+        album = {}
+        album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload', True)
+        album['title'] = album_data['title']
+        album['trackCount'] = album_data['trackCount']
+        album['durationMs'] = album_data['durationMs']
+        album['playlistId'] = album_data['audioPlaylistId']
+        album['releaseDate'] = album_data['releaseDate']
+        album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload',
+                                                  True)['description']
+        album['thumbnails'] = album_data['thumbnailDetails']['thumbnails']
+        album['artist'] = []
+        artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
+        for artist in artists_data:
+            album['artist'].append({
+                'name': artist['musicArtist']['name'],
+                'id': artist['musicArtist']['externalChannelId']
+            })
+        album['tracks'] = []
+
+        likes = {}
+        for item in data:
+            if 'musicTrackUserDetail' in item['payload']:
+                like_state = item['payload']['musicTrackUserDetail']['likeState'].split('_')[-1]
+                parent_track = item['payload']['musicTrackUserDetail']['parentTrack']
+                if like_state in ['NEUTRAL', 'UNKNOWN']:
+                    likes[parent_track] = 'INDIFFERENT'
+                else:
+                    likes[parent_track] = like_state[:-1]
+
+        for item in data[4:]:
+            if 'musicTrack' in item['payload']:
+                track = {}
+                track['index'] = item['payload']['musicTrack']['albumTrackIndex']
+                track['title'] = item['payload']['musicTrack']['title']
+                track['thumbnails'] = item['payload']['musicTrack']['thumbnailDetails'][
+                    'thumbnails']
+                track['artists'] = item['payload']['musicTrack']['artistNames']
+                # in case the song is unavailable, there is no videoId
+                track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item[
+                    'payload']['musicTrack'] else None
+                track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
+                track['likeStatus'] = likes[item['entityKey']]
+                album['tracks'].append(track)
+
+        return album
+
+    def get_song(self, video_id: str) -> Dict:
+        """
+        Returns metadata about a song or video.
+
+        :param videoId: Video id
+        :return: Dictionary with song metadata.
+
+        Example::
+
+            {
+              "videoId": "ZrOKjDZOtkA",
+              "title": "Wonderwall (Remastered)",
+              "lengthSeconds": "259",
+              "keywords": [
+                "Oasis",
+                "(What's",
+                "..."
+              ],
+              "channelId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+              "isOwnerViewing": false,
+              "shortDescription": "Provided to YouTube by Ignition...",
+              "isCrawlable": true,
+              "thumbnail": {
+                "thumbnails": [
+                  {
+                    "url": "https://i.ytimg.com/vi/ZrOKjDZOtkA/maxresdefault.jpg",
+                    "width": 1920,
+                    "height": 1080
+                  }
+                ]
+              },
+              "averageRating": 4.5673099,
+              "allowRatings": true,
+              "viewCount": "18136380",
+              "author": "Oasis - Topic",
+              "isPrivate": false,
+              "isUnpluggedCorpus": false,
+              "isLiveContent": false,
+              "provider": "Ignition",
+              "artists": [
+                "Oasis"
+              ],
+              "copyright": "℗ 2014 Big Brother Recordings ...",
+              "production": [
+                "Composer: Noel Gallagher",
+                "Lyricist: Noel Gallagher",
+                "Producer: Owen Morris & Noel Gallagher"
+              ],
+              "release": "2014-09-29",
+              "streamingData": {
+                "expiresInSeconds": "21540",
+                "formats": [
+                  {
+                    "itag": 18,
+                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                    "bitrate": 306477,
+                    "width": 360,
+                    "height": 360,
+                    "lastModified": "1574970034520502",
+                    "contentLength": "9913027",
+                    "quality": "medium",
+                    "fps": 25,
+                    "qualityLabel": "360p",
+                    "projectionType": "RECTANGULAR",
+                    "averageBitrate": 306419,
+                    "audioQuality": "AUDIO_QUALITY_LOW",
+                    "approxDurationMs": "258809",
+                    "audioSampleRate": "44100",
+                    "audioChannels": 2,
+                    "signatureCipher": "..."
+                  }
+                ],
+                "adaptiveFormats": []
+              }
+            }
+
+        """
+        endpoint = "https://www.youtube.com/get_video_info"
+        params = {"video_id": video_id, "hl": self.language, "el": "detailpage"}
+        response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
+        text = parse_qs(response.text)
+        if 'player_response' not in text:
+            return text
+        player_response = json.loads(text['player_response'][0])
+        song_meta = player_response['videoDetails']
+        if song_meta['shortDescription'].endswith("Auto-generated by YouTube."):
+            try:
+                description = song_meta['shortDescription'].split('\n\n')
+                for i, detail in enumerate(description):
+                    description[i] = codecs.escape_decode(detail)[0].decode('utf-8')
+                song_meta['provider'] = description[0].replace('Provided to YouTube by ', '')
+                song_meta['artists'] = [artist for artist in description[1].split(' · ')[1:]]
+                song_meta['copyright'] = description[3]
+                song_meta['production'] = [pub for pub in description[5].split('\n')]
+                song_meta['release'] = description[4].replace('Released on: ', '')
+            except KeyError:
+                pass
+        song_meta['streamingData'] = player_response['streamingData']
+        return song_meta

@@ -70,6 +70,10 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results), 9)
         self.assertEqual(len(results['tracks']), 7)
 
+    def test_get_song(self):
+        song = youtube.get_song("ZrOKjDZOtkA")
+        self.assertGreaterEqual(len(song), 17)
+
     ###############
     # LIBRARY
     ###############

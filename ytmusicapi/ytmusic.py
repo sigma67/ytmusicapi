@@ -4,7 +4,6 @@ import gettext
 import pkg_resources
 import os
 from contextlib import suppress
-from typing import Dict
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers import *
 from ytmusicapi.setup import setup
@@ -75,7 +74,7 @@ class YTMusic(BrowsingMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
             if language not in supported_languages:
                 raise Exception("Language not supported. Supported languages are "
                                 ', '.join(supported_languages))
-
+            self.language = language
             try:
                 locale.setlocale(locale.LC_ALL, language)
             except locale.Error:

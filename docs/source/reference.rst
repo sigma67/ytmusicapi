@@ -26,6 +26,7 @@ Browsing
 .. automethod:: YTMusic.get_user
 .. automethod:: YTMusic.get_user_playlists
 .. automethod:: YTMusic.get_album
+.. automethod:: YTMusic.get_song
 
 Library
 -------
