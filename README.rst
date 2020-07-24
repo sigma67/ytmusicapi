@@ -28,9 +28,12 @@ Features
 --------
 | **Browsing**:
 
-* get artist information and releases (songs, videos, albums, singles)
-* get albums
 * search (including all filters)
+* get artist information and releases (songs, videos, albums, singles)
+* get user information (videos, playlists)
+* get albums
+* get song metadata
+* get watch playlists (playlist that appears when you press play in YouTube Music)
 
 | **Library management**:
 
@@ -39,8 +42,9 @@ Features
 
 | **Playlists**:
 
-* create, delete, and modify playlists
-* get playlist contents, add/remove tracks
+* create and delete playlists
+* modify playlists: edit metadata, add/move/remove tracks
+* get playlist contents
 
 | **Uploads**:
 
