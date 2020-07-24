@@ -41,8 +41,8 @@ class UploadsMixin:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
             songs.extend(
-                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
-                                  parse_uploaded_items))
+                get_continuations(results, 'musicShelfContinuation', limit - len(songs),
+                                  request_func, parse_uploaded_items))
 
         return songs
 
@@ -71,7 +71,7 @@ class UploadsMixin:
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_albums(contents)
             albums.extend(
-                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                get_continuations(results, 'gridContinuation', limit - len(albums), request_func,
                                   parse_func))
 
         return albums
@@ -97,8 +97,8 @@ class UploadsMixin:
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_artists(contents, True)
             artists.extend(
-                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
-                                  parse_func))
+                get_continuations(results, 'musicShelfContinuation', limit - len(artists),
+                                  request_func, parse_func))
 
         return artists
 

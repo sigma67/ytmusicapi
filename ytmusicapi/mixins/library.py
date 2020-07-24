@@ -35,8 +35,8 @@ class LibraryMixin:
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_content_list(contents, parse_playlist)
             playlists.extend(
-                get_continuations(results, 'gridContinuation', 25, limit, request_func,
-                                  parse_func))
+                get_continuations(results, 'gridContinuation', limit - len(playlists),
+                                  request_func, parse_func))
 
         return playlists
 
@@ -65,8 +65,8 @@ class LibraryMixin:
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_playlist_items(contents)
             songs.extend(
-                get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
-                                  parse_func))
+                get_continuations(results, 'musicShelfContinuation', limit - len(songs),
+                                  request_func, parse_func))
 
         return songs
 
@@ -95,7 +95,7 @@ class LibraryMixin:
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_albums(contents, False)
             albums.extend(
-                get_continuations(results, 'gridContinuation', 25, limit, request_func,
+                get_continuations(results, 'gridContinuation', limit - len(albums), request_func,
                                   parse_func))
 
         return albums

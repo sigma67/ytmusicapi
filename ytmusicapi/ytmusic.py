@@ -8,6 +8,7 @@ from ytmusicapi.helpers import *
 from ytmusicapi.parsers import *
 from ytmusicapi.setup import setup
 from ytmusicapi.mixins.browsing import BrowsingMixin
+from ytmusicapi.mixins.watch import WatchMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
@@ -16,7 +17,7 @@ params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
 base_url = 'https://music.youtube.com/youtubei/v1/'
 
 
-class YTMusic(BrowsingMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
+class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
     """
     Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
     Permits both authenticated and non-authenticated requests.

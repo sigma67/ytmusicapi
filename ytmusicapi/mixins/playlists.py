@@ -103,8 +103,9 @@ class PlaylistsMixin:
                     endpoint, body, additionalParams)
                 parse_func = lambda contents: parse_playlist_items(contents)
                 playlist['tracks'].extend(
-                    get_continuations(results, 'musicPlaylistShelfContinuation', 100, songs_to_get,
-                                      request_func, parse_func))
+                    get_continuations(results, 'musicPlaylistShelfContinuation',
+                                      songs_to_get - len(playlist['tracks']), request_func,
+                                      parse_func))
 
         return playlist
 

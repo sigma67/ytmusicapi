@@ -80,6 +80,24 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(song), 17)
 
     ###############
+    # WATCH
+    ###############
+
+    def test_get_watch_playlist(self):
+        playlist = youtube.get_watch_playlist("4y33h81phKU", limit=50)
+        self.assertGreater(len(playlist), 50)
+
+    def test_get_watch_playlist_shuffle(self):
+        playlist = youtube.get_watch_playlist_shuffle(
+            playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc")
+        self.assertEqual(len(playlist), 12)
+
+    def test_get_watch_playlist_shuffle_playlist(self):
+        playlist = youtube.get_watch_playlist_shuffle(
+            playlistId="PL528pVfw3ao0x8jlW3kwdIx1FEMMeeghb", limit=99)
+        self.assertGreaterEqual(len(playlist), 99)
+
+    ###############
     # LIBRARY
     ###############
 

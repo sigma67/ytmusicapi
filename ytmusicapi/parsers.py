@@ -7,7 +7,6 @@ SINGLE_COLUMN_TAB = [
 SECTION_LIST = ['sectionListRenderer', 'contents']
 ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
 MUSIC_SHELF = [0, 'musicShelfRenderer']
-CONTINUATION = ['continuations', 0, 'nextContinuationData', 'continuation']
 MENU = ['menu', 'menuRenderer']
 MENU_ITEMS = MENU + ['items']
 MENU_LIKE_STATUS = MENU + ['topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus']
@@ -25,9 +24,10 @@ TITLE_TEXT = ['title', 'runs', 0, 'text']
 SUBTITLE = ['subtitle', 'runs', 0, 'text']
 SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
 SUBTITLE3 = ['subtitle', 'runs', 4, 'text']
-THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails']
-THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails']
-THUMBNAIL_CROPPED = ['thumbnail', 'croppedSquareThumbnailRenderer', 'thumbnail', 'thumbnails']
+THUMBNAIL = ['thumbnail', 'thumbnails']
+THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer'] + THUMBNAIL
+THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer'] + THUMBNAIL
+THUMBNAIL_CROPPED = ['thumbnail', 'croppedSquareThumbnailRenderer'] + THUMBNAIL
 
 
 class Parser:
@@ -110,7 +110,8 @@ class Parser:
                             data[0],
                             CAROUSEL_TITLE)['navigationEndpoint']['browseEndpoint']['params']
 
-                artist[category]['results'] = parse_content_list(data[0]['contents'], categories_parser[i])
+                artist[category]['results'] = parse_content_list(data[0]['contents'],
+                                                                 categories_parser[i])
 
         return artist
 
@@ -220,6 +221,29 @@ def parse_albums(results, upload=True):
         albums.append(album)
 
     return albums
+
+
+def parse_watch_playlist(results):
+    tracks = []
+    for result in results:
+        try:
+            if 'playlistPanelVideoRenderer' not in result:
+                continue
+            data = result['playlistPanelVideoRenderer']
+            if 'unplayableText' in data:
+                continue
+            track = {
+                'title': nav(data, TITLE_TEXT),
+                'byline': nav(data, ['longBylineText', 'runs', 0, 'text']),
+                'length': nav(data, ['lengthText', 'runs', 0, 'text']),
+                'videoId': data['videoId'],
+                'playlistId': nav(data, NAVIGATION_PLAYLIST_ID),
+                'thumbnail': nav(data, THUMBNAIL)
+            }
+            tracks.append(track)
+        except Exception:
+            print()
+    return tracks
 
 
 def parse_playlist_items(results):
@@ -340,8 +364,8 @@ def parse_library_artists(response, request_func, limit):
     if 'continuations' in results:
         parse_func = lambda contents: parse_artists(contents)
         artists.extend(
-            get_continuations(results, 'musicShelfContinuation', 25, limit, request_func,
-                              parse_func))
+            get_continuations(results, 'musicShelfContinuation', limit - len(artists),
+                              request_func, parse_func))
 
     return artists
 
@@ -392,14 +416,16 @@ def get_browse_id(item, index):
         return nav(item['text']['runs'][index], NAVIGATION_BROWSE_ID)
 
 
-def get_continuations(results, continuation_type, per_page, limit, request_func, parse_func):
+def get_continuations(results, continuation_type, limit, request_func, parse_func, ctoken_path=""):
     items = []
-    while 'continuations' in results and len(items) < limit - per_page:
-        ctoken = nav(results, CONTINUATION)
+    while 'continuations' in results and len(items) < limit:
+        ctoken = nav(
+            results,
+            ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
         additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
         response = request_func(additionalParams)
         results = response['continuationContents'][continuation_type]
-        continuation_contents = 'contents' if 'Shelf' in continuation_type else 'items'
+        continuation_contents = 'contents' if 'contents' in results else 'items'
         items.extend(parse_func(results[continuation_contents]))
 
     return items

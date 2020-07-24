@@ -28,6 +28,11 @@ Browsing
 .. automethod:: YTMusic.get_album
 .. automethod:: YTMusic.get_song
 
+Watch
+--------
+.. automethod:: YTMusic.get_watch_playlist
+.. automethod:: YTMusic.get_watch_playlist_shuffle
+
 Library
 -------
 .. automethod:: YTMusic.get_library_playlists
