@@ -4,8 +4,9 @@ import gettext
 import pkg_resources
 import os
 from contextlib import suppress
+from typing import Dict
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers import *
+from ytmusicapi.parsers import browsing
 from ytmusicapi.setup import setup
 from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.watch import WatchMixin
@@ -85,7 +86,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
                                             localedir=pkg_resources.resource_filename(
                                                 'ytmusicapi', 'locales'),
                                             languages=[language])
-            self.parser = Parser(self.lang)
+            self.parser = browsing.Parser(self.lang)
 
             if user:
                 self.context['context']['user']['onBehalfOfUser'] = user
@@ -99,7 +100,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
                     "The provided credentials are invalid. Reason given by the server: "
                     + response['error']['status'])
 
-    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = ""):
+    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
         body.update(self.context)
         if self.auth:
             self.headers["Authorization"] = get_authorization(self.sapisid + ' '
@@ -115,7 +116,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
             raise Exception("Please provide authentication before using this function")
 
     @classmethod
-    def setup(cls, filepath: str = None, headers_raw: str = None):
+    def setup(cls, filepath: str = None, headers_raw: str = None) -> Dict:
         """
         Requests browser headers from the user via command line
         and returns a string that can be passed to YTMusic()

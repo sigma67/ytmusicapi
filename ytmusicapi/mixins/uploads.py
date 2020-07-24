@@ -3,7 +3,8 @@ import ntpath
 import os
 from typing import List, Dict, Union
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers import *
+from ytmusicapi.parsers.library import *
+from ytmusicapi.parsers.uploads import *
 
 
 class UploadsMixin:

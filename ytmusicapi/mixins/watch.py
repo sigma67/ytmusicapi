@@ -1,4 +1,5 @@
-from ytmusicapi.parsers import *
+from typing import List, Dict
+from ytmusicapi.parsers.watch import *
 
 
 class WatchMixin:

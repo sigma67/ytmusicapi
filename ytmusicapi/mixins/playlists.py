@@ -1,7 +1,8 @@
 import unicodedata
 from typing import List, Dict, Union, Tuple
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers import *
+from ytmusicapi.parsers.utils import *
+from ytmusicapi.parsers.playlists import *
 
 
 class PlaylistsMixin:

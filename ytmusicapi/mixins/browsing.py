@@ -2,8 +2,9 @@ import requests
 import json
 import codecs
 from urllib.parse import parse_qs
+from typing import List, Dict
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers import *
+from ytmusicapi.parsers.playlists import *
 
 
 class BrowsingMixin:
@@ -434,7 +435,7 @@ class BrowsingMixin:
 
         return album
 
-    def get_song(self, video_id: str) -> Dict:
+    def get_song(self, videoId: str) -> Dict:
         """
         Returns metadata about a song or video.
 
@@ -512,7 +513,7 @@ class BrowsingMixin:
 
         """
         endpoint = "https://www.youtube.com/get_video_info"
-        params = {"video_id": video_id, "hl": self.language, "el": "detailpage"}
+        params = {"video_id": videoId, "hl": self.language, "el": "detailpage"}
         response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
         text = parse_qs(response.text)
         if 'player_response' not in text:
