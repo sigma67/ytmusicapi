@@ -62,6 +62,60 @@ def get_continuations(results, continuation_type, limit, request_func, parse_fun
     return items
 
 
+def get_validated_continuations(results,
+                                continuation_type,
+                                limit,
+                                per_page,
+                                request_func,
+                                parse_func,
+                                ctoken_path=""):
+    items = []
+    while 'continuations' in results and len(items) < limit:
+
+        ctoken = nav(
+            results,
+            ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
+        additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
+
+        wrapped_parse_func = lambda raw_response: get_parsed_continuation_items(
+            raw_response, parse_func, continuation_type)
+        validate_func = lambda parsed: validate_response(parsed, per_page, limit, len(items))
+
+        response = resend_request_until_parsed_response_is_valid(request_func, additionalParams,
+                                                                 wrapped_parse_func, validate_func,
+                                                                 3)
+        results = response['results']
+        items.extend(response['parsed'])
+
+    return items
+
+
+def get_parsed_continuation_items(response, parse_func, continuation_type):
+    results = response['continuationContents'][continuation_type]
+    continuation_contents = 'contents' if 'contents' in results else 'items'
+    return {'results': results, 'parsed': parse_func(results[continuation_contents])}
+
+
+def resend_request_until_parsed_response_is_valid(request_func, request_additional_params,
+                                                  parse_func, validate_func, max_retries):
+    response = request_func(request_additional_params)
+    parsed_object = parse_func(response)
+    retry_counter = 0
+    while not validate_func(parsed_object) and retry_counter < max_retries:
+        response = request_func(request_additional_params)
+        parsed_object = parse_func(response)
+        retry_counter += 1
+    return parsed_object
+
+
+def validate_response(response, per_page, limit, current_count):
+    remaining_items_count = limit - current_count
+    expected_items_count = min(per_page, remaining_items_count)
+
+    # response is invalid, if it has less items then minimal expected count
+    return len(response['parsed']) >= expected_items_count
+
+
 def nav(root, items, none_if_absent=False):
     """Access a nested object in root by item sequence."""
     try:

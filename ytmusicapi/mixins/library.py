@@ -52,22 +52,25 @@ class LibraryMixin:
         self._check_auth()
         body = {'browseId': 'FEmusic_liked_videos'}
         endpoint = 'browse'
-        response = self._send_request(endpoint, body)
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                     'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)
-        if 'musicShelfRenderer' not in results:
-            return []
-        results = results['musicShelfRenderer']
-        songs = parse_playlist_items(results['contents'][1:])
+        per_page = 25
+
+        request_func = lambda additionalParams: self._send_request(endpoint, body)
+        parse_func = lambda raw_response: parse_library_songs(raw_response)
+        validate_func = lambda parsed: validate_response(parsed, per_page, limit, 0)
+        response = resend_request_until_parsed_response_is_valid(request_func, None, parse_func,
+                                                                 validate_func, 3)
+
+        results = response['results']
+        songs = response['parsed']
 
         if 'continuations' in results:
-            request_func = lambda additionalParams: self._send_request(
+            request_continuations_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_playlist_items(contents)
+            parse_continuations_func = lambda contents: parse_playlist_items(contents)
             songs.extend(
-                get_continuations(results, 'musicShelfContinuation', limit - len(songs),
-                                  request_func, parse_func))
+                get_validated_continuations(results, 'musicShelfContinuation', limit - len(songs),
+                                            per_page, request_continuations_func,
+                                            parse_continuations_func))
 
         return songs
 

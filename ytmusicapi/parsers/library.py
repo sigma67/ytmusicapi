@@ -1,3 +1,4 @@
+from .playlists import parse_playlist_items
 from .utils import *
 
 
@@ -75,3 +76,13 @@ def parse_library_artists(response, request_func, limit):
                               request_func, parse_func))
 
     return artists
+
+
+def parse_library_songs(response):
+    results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                 'itemSectionRenderer')
+    results = nav(results, ITEM_SECTION)
+    if 'musicShelfRenderer' not in results:
+        return []
+    results = results['musicShelfRenderer']
+    return {'results': results, 'parsed': parse_playlist_items(results['contents'][1:])}
