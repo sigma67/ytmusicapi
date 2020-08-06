@@ -11,7 +11,7 @@ def parse_watch_playlist(results):
             continue
         track = {
             'title': nav(data, TITLE_TEXT),
-            'byline': nav(data, ['longBylineText', 'runs', 0, 'text']),
+            'byline': nav(data, ['shortBylineText', 'runs', 0, 'text'], True),
             'length': nav(data, ['lengthText', 'runs', 0, 'text']),
             'videoId': data['videoId'],
             'playlistId': nav(data, NAVIGATION_PLAYLIST_ID),
