@@ -528,9 +528,9 @@ class BrowsingMixin:
                 song_meta['provider'] = description[0].replace('Provided to YouTube by ', '')
                 song_meta['artists'] = [artist for artist in description[1].split(' · ')[1:]]
                 song_meta['copyright'] = description[3]
-                song_meta['production'] = [pub for pub in description[5].split('\n')]
-                song_meta['release'] = description[4].replace('Released on: ', '')
-            except KeyError:
+                song_meta['release'] = None if len(description) < 5 else description[4].replace('Released on: ', '')
+                song_meta['production'] = None if len(description) < 6 else [pub for pub in description[5].split('\n')]
+            except (KeyError, IndexError):
                 pass
         song_meta['streamingData'] = player_response['streamingData']
         return song_meta
