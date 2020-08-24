@@ -81,7 +81,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
                 locale.setlocale(locale.LC_ALL, language)
             except locale.Error:
                 with suppress(locale.Error):
-                    locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+                    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
             self.lang = gettext.translation('base',
                                             localedir=pkg_resources.resource_filename(
                                                 'ytmusicapi', 'locales'),
