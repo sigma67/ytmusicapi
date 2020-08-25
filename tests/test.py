@@ -182,10 +182,13 @@ class TestYTMusic(unittest.TestCase):
             "test description",
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y")
         self.assertEqual(len(playlistId), 34, "Playlist creation failed")
-        response = youtube_auth.add_playlist_items(playlistId, ['y0Hhvtmv0gk'])
+        response = youtube_auth.add_playlist_items(
+            playlistId, ['y0Hhvtmv0gk', 'y0Hhvtmv0gk'],
+            source_playlist='OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow',
+            duplicates=True)
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Adding playlist item failed")
         playlist = youtube_auth.get_playlist(playlistId)
-        self.assertEqual(len(playlist['tracks']), 41, "Getting playlist items failed")
+        self.assertEqual(len(playlist['tracks']), 46, "Getting playlist items failed")
         response = youtube_auth.remove_playlist_items(playlistId, playlist['tracks'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
         response = youtube_auth.delete_playlist(playlistId)
