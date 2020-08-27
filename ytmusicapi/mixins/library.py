@@ -155,7 +155,7 @@ class LibraryMixin:
 
         :return: List of playlistItems, see :py:func:`get_playlist`
           The additional property ``played`` indicates when the playlistItem was played
-          The additional property ``feedbackToken`` can be used to remove items with :py:func:`remove_history_item`
+          The additional property ``feedbackToken`` can be used to remove items with :py:func:`remove_history_items`
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_history'}
