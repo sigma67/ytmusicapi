@@ -129,6 +129,12 @@ class TestYTMusic(unittest.TestCase):
         songs = youtube_auth.get_history()
         self.assertGreater(len(songs), 0)
 
+    @unittest.skip
+    def test_remove_history_items(self):
+        songs = youtube_auth.get_history()
+        response = youtube_auth.remove_history_items([songs[0]['feedbackToken'], songs[1]['feedbackToken']])
+        self.assertIn('feedbackResponses', response)
+
     def test_rate_song(self):
         response = youtube_auth.rate_song('ZrOKjDZOtkA', 'LIKE')
         self.assertIn('actions', response)

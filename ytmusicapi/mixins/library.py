@@ -154,7 +154,8 @@ class LibraryMixin:
         Gets your play history in reverse chronological order
 
         :return: List of playlistItems, see :py:func:`get_playlist`
-          The additional property 'played' indicates when the playlistItem was played
+          The additional property ``played`` indicates when the playlistItem was played
+          The additional property ``feedbackToken`` can be used to remove items with :py:func:`remove_history_item`
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_history'}
@@ -164,12 +165,27 @@ class LibraryMixin:
         songs = []
         for content in results:
             data = content['musicShelfRenderer']['contents']
-            songlist = parse_playlist_items(data)
+            menu_entries = [[-1] + MENU_SERVICE + ['feedbackEndpoint', 'feedbackToken']]
+            songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:
                 song['played'] = nav(content['musicShelfRenderer'], TITLE_TEXT)
             songs.extend(songlist)
 
         return songs
+
+    def remove_history_items(self, feedbackTokens: List[str]) -> Dict:  # pragma: no cover
+        """
+        Remove an item from the account's history. This method does currently not work with brand accounts
+
+        :param feedbackTokens: Token to identify the item to remove, obtained from :py:func:`get_history`
+        :return: Full response
+        """
+        self._check_auth()
+        body = {'feedbackTokens': feedbackTokens}
+        endpoint = 'feedback'
+        response = self._send_request(endpoint, body)
+
+        return response
 
     def rate_song(self, videoId: str, rating: str = 'INDIFFERENT') -> Dict:
         """

@@ -1,7 +1,8 @@
 from .utils import *
+from typing import List
 
 
-def parse_playlist_items(results):
+def parse_playlist_items(results, menu_entries: List[List] = None):
     songs = []
     count = 1
     for result in results:
@@ -64,6 +65,10 @@ def parse_playlist_items(results):
                 song['duration'] = duration
             if setVideoId:
                 song['setVideoId'] = setVideoId
+
+            if menu_entries:
+                for menu_entry in menu_entries:
+                    song[menu_entry[-1]] = nav(data, MENU_ITEMS + menu_entry)
 
             songs.append(song)
 
