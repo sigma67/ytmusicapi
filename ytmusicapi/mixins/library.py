@@ -41,12 +41,14 @@ class LibraryMixin:
 
         return playlists
 
-    def get_library_songs(self, limit: int = 25) -> List[Dict]:
+    def get_library_songs(self, limit: int = 25, validate_responses: bool = False) -> List[Dict]:
         """
         Gets the songs in the user's library (liked videos are not included).
         To get liked songs and videos, use :py:func:`get_liked_songs`
 
         :param limit: Number of songs to retrieve
+        :param validate_responses: Flag indicating if responses from YTM should be validated and retried in case
+            when some songs are missing. Default: False
         :return: List of songs. Same format as :py:func:`get_playlist`
         """
         self._check_auth()
@@ -56,9 +58,13 @@ class LibraryMixin:
 
         request_func = lambda additionalParams: self._send_request(endpoint, body)
         parse_func = lambda raw_response: parse_library_songs(raw_response)
-        validate_func = lambda parsed: validate_response(parsed, per_page, limit, 0)
-        response = resend_request_until_parsed_response_is_valid(request_func, None, parse_func,
-                                                                 validate_func, 3)
+
+        if validate_responses:
+            validate_func = lambda parsed: validate_response(parsed, per_page, limit, 0)
+            response = resend_request_until_parsed_response_is_valid(request_func, None,
+                                                                     parse_func, validate_func, 3)
+        else:
+            response = parse_func(request_func(None))
 
         results = response['results']
         songs = response['parsed']
@@ -67,10 +73,17 @@ class LibraryMixin:
             request_continuations_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
             parse_continuations_func = lambda contents: parse_playlist_items(contents)
-            songs.extend(
-                get_validated_continuations(results, 'musicShelfContinuation', limit - len(songs),
-                                            per_page, request_continuations_func,
-                                            parse_continuations_func))
+
+            if validate_responses:
+                songs.extend(
+                    get_validated_continuations(results, 'musicShelfContinuation',
+                                                limit - len(songs), per_page,
+                                                request_continuations_func,
+                                                parse_continuations_func))
+            else:
+                songs.extend(
+                    get_continuations(results, 'musicShelfContinuation', limit - len(songs),
+                                      request_continuations_func, parse_continuations_func))
 
         return songs
 
