@@ -50,14 +50,11 @@ def get_browse_id(item, index):
 def get_continuations(results, continuation_type, limit, request_func, parse_func, ctoken_path=""):
     items = []
     while 'continuations' in results and len(items) < limit:
-        ctoken = nav(
-            results,
-            ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
-        additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
+        additionalParams = get_continuation_params(results, ctoken_path)
         response = request_func(additionalParams)
         results = response['continuationContents'][continuation_type]
-        continuation_contents = 'contents' if 'contents' in results else 'items'
-        items.extend(parse_func(results[continuation_contents]))
+        contents = get_continuation_contents(results, parse_func)
+        items.extend(contents)
 
     return items
 
@@ -71,12 +68,7 @@ def get_validated_continuations(results,
                                 ctoken_path=""):
     items = []
     while 'continuations' in results and len(items) < limit:
-
-        ctoken = nav(
-            results,
-            ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
-        additionalParams = "&ctoken=" + ctoken + "&continuation=" + ctoken
-
+        additionalParams = get_continuation_params(results, ctoken_path)
         wrapped_parse_func = lambda raw_response: get_parsed_continuation_items(
             raw_response, parse_func, continuation_type)
         validate_func = lambda parsed: validate_response(parsed, per_page, limit, len(items))
@@ -92,8 +84,21 @@ def get_validated_continuations(results,
 
 def get_parsed_continuation_items(response, parse_func, continuation_type):
     results = response['continuationContents'][continuation_type]
-    continuation_contents = 'contents' if 'contents' in results else 'items'
-    return {'results': results, 'parsed': parse_func(results[continuation_contents])}
+    return {'results': results, 'parsed': get_continuation_contents(results, parse_func)}
+
+
+def get_continuation_params(results, ctoken_path):
+    ctoken = nav(results,
+                 ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
+    return "&ctoken=" + ctoken + "&continuation=" + ctoken
+
+
+def get_continuation_contents(continuation, parse_func):
+    for term in ['contents', 'items']:
+        if term in continuation:
+            return parse_func(continuation[term])
+
+    return []
 
 
 def resend_request_until_parsed_response_is_valid(request_func, request_additional_params,
@@ -103,8 +108,11 @@ def resend_request_until_parsed_response_is_valid(request_func, request_addition
     retry_counter = 0
     while not validate_func(parsed_object) and retry_counter < max_retries:
         response = request_func(request_additional_params)
-        parsed_object = parse_func(response)
+        attempt = parse_func(response)
+        if len(attempt['parsed']) > len(parsed_object['parsed']):
+            parsed_object = attempt
         retry_counter += 1
+
     return parsed_object
 
 
