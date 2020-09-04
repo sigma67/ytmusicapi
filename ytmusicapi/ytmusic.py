@@ -127,3 +127,9 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         :return: configuration headers string
         """
         return setup(filepath, headers_raw)
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, execType = None, execValue = None, trackback = None):
+        pass
