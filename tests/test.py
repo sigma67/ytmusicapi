@@ -134,7 +134,8 @@ class TestYTMusic(unittest.TestCase):
     @unittest.skip
     def test_remove_history_items(self):
         songs = youtube_auth.get_history()
-        response = youtube_auth.remove_history_items([songs[0]['feedbackToken'], songs[1]['feedbackToken']])
+        response = youtube_auth.remove_history_items(
+            [songs[0]['feedbackToken'], songs[1]['feedbackToken']])
         self.assertIn('feedbackResponses', response)
 
     def test_rate_song(self):
@@ -211,9 +212,19 @@ class TestYTMusic(unittest.TestCase):
         results = youtube_auth.get_library_upload_songs(100)
         self.assertGreater(len(results), 25)
 
+    @unittest.skip("Must not have any uploaded songs to pass")
+    def test_get_library_upload_songs_empty(self):
+        results = youtube_auth.get_library_upload_songs(100)
+        self.assertEquals(len(results), 0)
+
     def test_get_library_upload_albums(self):
         results = youtube_auth.get_library_upload_albums(50)
         self.assertGreater(len(results), 25)
+
+    @unittest.skip("Must not have any uploaded albums to pass")
+    def test_get_library_upload_albums_empty(self):
+        results = youtube_auth.get_library_upload_albums(100)
+        self.assertEquals(len(results), 0)
 
     def test_get_library_upload_artists(self):
         results = youtube_auth.get_library_upload_artists(50)
