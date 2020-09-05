@@ -6,3 +6,5 @@ docs/build
 **.mp3
 .coverage
 **/__pycache__/
+venv*/
+*.egg-info/
