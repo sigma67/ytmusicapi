@@ -230,6 +230,11 @@ class TestYTMusic(unittest.TestCase):
         results = youtube_auth.get_library_upload_artists(50)
         self.assertGreater(len(results), 25)
 
+    @unittest.skip("Must not have any uploaded artsts to pass")
+    def test_get_library_upload_artists_empty(self):
+        results = youtube_auth.get_library_upload_artists(100)
+        self.assertEquals(len(results), 0)
+
     def test_upload_song(self):
         self.assertRaises(Exception, youtube_auth.upload_song, 'song.wav')
         response = youtube_auth.upload_song(config['uploads']['file'])

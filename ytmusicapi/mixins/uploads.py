@@ -95,7 +95,11 @@ class UploadsMixin:
         response = self._send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
                                      'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['musicShelfRenderer']
+        results = nav(results, ITEM_SECTION)
+        if 'musicShelfRenderer' not in results:
+            return []
+        else:
+            results = results['musicShelfRenderer']
         artists = parse_artists(results['contents'], True)
 
         if 'continuations' in results:
