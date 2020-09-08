@@ -418,7 +418,7 @@ class BrowsingMixin:
                 else:
                     likes[parent_track] = like_state[:-1]
 
-        for item in data[4:]:
+        for item in data[3:]:
             if 'musicTrack' in item['payload']:
                 track = {}
                 track['index'] = item['payload']['musicTrack']['albumTrackIndex']
