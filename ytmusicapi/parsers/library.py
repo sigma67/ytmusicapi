@@ -82,7 +82,9 @@ def parse_library_songs(response):
     results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
                                  'itemSectionRenderer')
     results = nav(results, ITEM_SECTION)
-    if 'musicShelfRenderer' not in results:
-        return []
-    results = results['musicShelfRenderer']
-    return {'results': results, 'parsed': parse_playlist_items(results['contents'][1:])}
+    songs = {'results': [], 'parsed': []}
+    if 'musicShelfRenderer' in results:
+        songs['results'] = results['musicShelfRenderer']
+        songs['parsed'] = parse_playlist_items(songs['results']['contents'][1:])
+
+    return songs
