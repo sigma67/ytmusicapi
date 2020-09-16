@@ -220,7 +220,7 @@ class UploadsMixin:
                 "The provided file type is not supported by YouTube Music. Supported file types are "
                 + ', '.join(supported_filetypes))
 
-        headers = self.headers
+        headers = self.headers.copy()
         upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=0"
         filesize = os.path.getsize(filepath)
         body = ("filename=" + ntpath.basename(filepath)).encode('utf-8')
