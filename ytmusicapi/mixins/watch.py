@@ -55,8 +55,10 @@ class WatchMixin:
             body['params'] = params
         endpoint = 'next'
         response = self._send_request(endpoint, body)
-        results = response['contents']['singleColumnMusicWatchNextResultsRenderer']['playlist'][
-            'playlistPanelRenderer']
+        results = nav(response, [
+            'contents', 'singleColumnMusicWatchNextResultsRenderer', 'tabbedRenderer',
+            'watchNextTabbedResultsRenderer'
+        ] + TAB_CONTENT + ['musicQueueRenderer', 'content', 'playlistPanelRenderer'])
         tracks = parse_watch_playlist(results['contents'])
 
         if 'continuations' in results:

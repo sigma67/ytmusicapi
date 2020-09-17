@@ -1,7 +1,6 @@
 # commonly used navigation paths
-SINGLE_COLUMN_TAB = [
-    'contents', 'singleColumnBrowseResultsRenderer', 'tabs', 0, 'tabRenderer', 'content'
-]
+TAB_CONTENT = ['tabs', 0, 'tabRenderer', 'content']
+SINGLE_COLUMN_TAB = ['contents', 'singleColumnBrowseResultsRenderer'] + TAB_CONTENT
 SECTION_LIST = ['sectionListRenderer', 'contents']
 ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
 MUSIC_SHELF = [0, 'musicShelfRenderer']
