@@ -21,6 +21,8 @@ class Parser:
             else:
                 resultType = result_types[result_types_local.index(resultType)]
 
+        search_result['resultType'] = resultType
+
         if resultType in ['song', 'video']:
             search_result['videoId'] = nav(
                 data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
@@ -55,8 +57,47 @@ class Parser:
             search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
             search_result['duration'] = get_item_text(data, 3 + default)
 
+        elif resultType in ['upload']:
+            search_result['title'] = get_item_text(data, 0)
+
+            browse_id = nav(data, NAVIGATION_BROWSE_ID, True)
+            if not browse_id: # song result
+                flex_items = [
+                    nav(get_flex_column_item(data, i), ['text', 'runs', 0], True) for i in range(3)
+                ]
+                if flex_items[0]:
+                    search_result['videoId'] = nav(flex_items[0], NAVIGATION_VIDEO_ID)
+                    search_result['playlistId'] = nav(flex_items[0], NAVIGATION_PLAYLIST_ID)
+                if flex_items[1]:
+                    search_result['artist'] = {
+                        'name': flex_items[1]['text'],
+                        'id': nav(flex_items[1], NAVIGATION_BROWSE_ID)
+                    }
+                if flex_items[2]:
+                    search_result['album'] = {
+                        'name': flex_items[2]['text'],
+                        'id': nav(flex_items[2], NAVIGATION_BROWSE_ID)
+                    }
+                search_result['duration'] = data['fixedColumns'][0][
+                    'musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
+                search_result['resultType'] = 'song'
+
+            else:  # artist or album result
+                search_result['browseId'] = browse_id
+                if 'artist' in search_result['browseId']:
+                    search_result['resultType'] = 'artist'
+                else:
+                    flex_item2 = get_flex_column_item(data, 1)
+                    runs = [
+                        run['text'] for i, run in enumerate(flex_item2['text']['runs'])
+                        if i % 2 == 0
+                    ]
+                    search_result['artist'] = runs[1]
+                    if len(runs) > 2:  # date may be missing
+                        search_result['releaseDate'] = runs[2]
+                    search_result['resultType'] = 'album'
+
         search_result['thumbnails'] = nav(data, THUMBNAILS)
-        search_result['resultType'] = resultType
 
         return search_result
 

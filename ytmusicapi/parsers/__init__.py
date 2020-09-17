@@ -19,6 +19,7 @@ CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'r
 FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
 TITLE = ['title', 'runs', 0]
 TITLE_TEXT = ['title', 'runs', 0, 'text']
+TEXT_RUN = ['text', 'runs', 0]
 SUBTITLE = ['subtitle', 'runs', 0, 'text']
 SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
 SUBTITLE3 = ['subtitle', 'runs', 4, 'text']

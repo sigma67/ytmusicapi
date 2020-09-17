@@ -15,7 +15,7 @@ class BrowsingMixin:
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
         :param filter: Filter for item types. Allowed values:
-          'songs', 'videos', 'albums', 'artists', 'playlists'.
+          'songs', 'videos', 'albums', 'artists', 'playlists', 'uploads'.
           Default: Default search, including all types of items.
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
@@ -47,7 +47,7 @@ class BrowsingMixin:
         body = {'query': query}
         endpoint = 'search'
         search_results = []
-        filters = ['albums', 'artists', 'playlists', 'songs', 'videos']
+        filters = ['albums', 'artists', 'playlists', 'songs', 'videos', 'uploads']
         if filter and filter not in filters:
             raise Exception(
                 "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
@@ -57,18 +57,25 @@ class BrowsingMixin:
             param1 = 'Eg-KAQwIA'
             param3 = 'MABqChAEEAMQCRAFEAo%3D'
 
-            if filter == 'videos':
-                param2 = 'BABGAAgACgA'
-            elif filter == 'albums':
-                param2 = 'BAAGAEgACgA'
-            elif filter == 'artists':
-                param2 = 'BAAGAAgASgA'
-            elif filter == 'playlists':
-                param2 = 'BAAGAAgACgB'
+            if filter == 'uploads':
+                params = 'agIYAw%3D%3D'
             else:
-                param2 = 'RAAGAAgACgA'
+                if filter == 'videos':
+                    param2 = 'BABGAAgACgA'
+                elif filter == 'albums':
+                    param2 = 'BAAGAEgACgA'
+                elif filter == 'artists':
+                    param2 = 'BAAGAAgASgA'
+                elif filter == 'playlists':
+                    param2 = 'BAAGAAgACgB'
+                elif filter == 'uploads':
+                    self.__check_auth()
+                    param2 = 'RABGAEgASgB'
+                else:
+                    param2 = 'RAAGAAgACgA'
+                params = param1 + param2 + param3
 
-            body['params'] = param1 + param2 + param3
+            body['params'] = params
 
         response = self._send_request(endpoint, body)
 
@@ -78,8 +85,8 @@ class BrowsingMixin:
                 return search_results
 
             if 'tabbedSearchResultsRenderer' in response['contents']:
-                results = response['contents']['tabbedSearchResultsRenderer']['tabs'][0][
-                    'tabRenderer']['content']
+                results = response['contents']['tabbedSearchResultsRenderer']['tabs'][int(
+                    filter == "uploads")]['tabRenderer']['content']
             else:
                 results = response['contents']
 
@@ -528,8 +535,11 @@ class BrowsingMixin:
                 song_meta['provider'] = description[0].replace('Provided to YouTube by ', '')
                 song_meta['artists'] = [artist for artist in description[1].split(' · ')[1:]]
                 song_meta['copyright'] = description[3]
-                song_meta['release'] = None if len(description) < 5 else description[4].replace('Released on: ', '')
-                song_meta['production'] = None if len(description) < 6 else [pub for pub in description[5].split('\n')]
+                song_meta['release'] = None if len(description) < 5 else description[4].replace(
+                    'Released on: ', '')
+                song_meta['production'] = None if len(description) < 6 else [
+                    pub for pub in description[5].split('\n')
+                ]
             except (KeyError, IndexError):
                 pass
         song_meta['streamingData'] = player_response['streamingData']

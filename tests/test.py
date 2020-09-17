@@ -26,7 +26,7 @@ class TestYTMusic(unittest.TestCase):
     def test_search(self):
         query = "Oasis Wonderwall"
         self.assertRaises(Exception, youtube_auth.search, query, "song")
-        results = youtube_auth.search(query)
+        results = youtube.search(query)
         self.assertGreater(len(results), 0)
         results = youtube_auth.search(query, 'songs')
         self.assertGreater(len(results), 0)
@@ -37,6 +37,10 @@ class TestYTMusic(unittest.TestCase):
         results = youtube_auth.search(query, 'artists')
         self.assertGreater(len(results), 0)
         results = youtube_auth.search(query, 'playlists')
+        self.assertGreater(len(results), 0)
+
+    def test_search_uploads(self):
+        results = youtube_auth.search('audiomachine', 'uploads')
         self.assertGreater(len(results), 0)
 
     def test_get_artist(self):
