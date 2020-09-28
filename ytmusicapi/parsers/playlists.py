@@ -12,21 +12,25 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
         data = result['musicResponsiveListItemRenderer']
 
         try:
-            # if playlist is not owned, the playlist item can't be interacted with
             videoId = setVideoId = None
             like = None
 
-            # if item is not playable, there is no videoId
-            if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
-                videoId = nav(data,
-                              PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
-
-                for item in nav(data, MENU_ITEMS):
+            # if the item has a menu, find its setVideoId
+            if 'menu' in data:
+                for item in reversed(nav(data, MENU_ITEMS)):
                     if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
                             item, MENU_SERVICE):
                         setVideoId = nav(
                             item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
+                        videoId = nav(
+                            item,
+                            MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
                         break
+
+            # if item is not playable, the videoId was retrieved above
+            if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
+                videoId = nav(data,
+                              PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
 
                 if 'menu' in data:
                     like = nav(data, MENU_LIKE_STATUS, True)
