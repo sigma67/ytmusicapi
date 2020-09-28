@@ -92,7 +92,21 @@ class LibraryMixin:
         Gets the albums in the user's library.
 
         :param limit: Number of albums to return
-        :return: List of albums
+        :return: List of albums.
+
+        Each item is in the following format:
+
+            {
+              "browseId": "MPREb_G8AiyN7RvFg",
+              "title": "Beautiful",
+              "type": "Album",
+              "thumbnails": [...],
+              "artists": {
+                "name": "Project 46",
+                "id": "UCXFv36m62USAN5rnVct9B4g"
+              },
+              "year": "2015"
+            }
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_liked_albums'}

@@ -51,9 +51,11 @@ def parse_albums(results, upload=True):
                     'id': nav(subtitle, NAVIGATION_BROWSE_ID)
                 })
         else:
-            album['artists'] = nav(data, SUBTITLE)
-            album['year'] = nav(data, SUBTITLE2)
-            album['trackCount'] = nav(data, SUBTITLE3).split(' ')[0]
+            album['artists'] = {
+                'name': nav(data, SUBTITLE2),
+                'id': nav(data, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID, True)
+            }
+            album['year'] = nav(data, SUBTITLE3)
 
         albums.append(album)
 
