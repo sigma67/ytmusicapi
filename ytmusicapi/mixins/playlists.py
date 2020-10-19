@@ -47,7 +47,8 @@ class PlaylistsMixin:
                   },
                   "duration": "2:58",
                   "likeStatus": "INDIFFERENT",
-                  "thumbnails": [...]
+                  "thumbnails": [...],
+                  "isAvailable": True
                 }
               ]
             }
