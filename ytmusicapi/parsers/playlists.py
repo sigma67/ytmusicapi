@@ -57,13 +57,19 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
             if 'thumbnail' in data:
                 thumbnails = nav(data, THUMBNAILS)
 
+            isAvailable = True
+            if 'musicItemRendererDisplayPolicy' in data:
+                isAvailable = data[
+                    'musicItemRendererDisplayPolicy'] != 'MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT'
+
             song = {
                 'videoId': videoId,
                 'title': title,
                 'artists': artists,
                 'album': album,
                 'likeStatus': like,
-                'thumbnails': thumbnails
+                'thumbnails': thumbnails,
+                'isAvailable': isAvailable
             }
             if duration:
                 song['duration'] = duration
