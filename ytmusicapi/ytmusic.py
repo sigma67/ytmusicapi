@@ -14,8 +14,7 @@ from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
 
-params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
-base_url = 'https://music.youtube.com/youtubei/v1/'
+base_url = "https://music.youtube.com/youtubei/v1/"
 
 
 class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
@@ -24,11 +23,16 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
-    def __init__(self,
-                 auth: str = None,
-                 user: str = None,
-                 proxies: dict = None,
-                 language: str = 'en'):
+
+    api_key = ""
+
+    def __init__(
+        self,
+        auth: str = None,
+        user: str = None,
+        proxies: dict = None,
+        language: str = "en",
+    ):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -56,8 +60,8 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
 
         try:
             if auth is None or os.path.isfile(auth):
-                file = auth if auth else pkg_resources.resource_filename(
-                    'ytmusicapi', 'headers.json')
+                file = (auth if auth else pkg_resources.resource_filename(
+                    "ytmusicapi", "headers.json"))
                 with open(file) as json_file:
                     self.headers = json.load(json_file)
             else:
@@ -67,53 +71,83 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
                 "Failed loading provided credentials. Make sure to provide a string or a file path. "
                 "Reason: " + str(e))
 
-        with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
+        with open(pkg_resources.resource_filename("ytmusicapi", "context.json")) as json_file:
             self.context = json.load(json_file)
-            self.context['context']['client']['hl'] = language
+            self.context["context"]["client"]["hl"] = language
             supported_languages = [
-                f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')
+                f for f in pkg_resources.resource_listdir("ytmusicapi", "locales")
             ]
             if language not in supported_languages:
                 raise Exception("Language not supported. Supported languages are "
-                                ', '.join(supported_languages))
+                                ", ".join(supported_languages))
             self.language = language
             try:
                 locale.setlocale(locale.LC_ALL, language)
             except locale.Error:
                 with suppress(locale.Error):
-                    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-            self.lang = gettext.translation('base',
-                                            localedir=pkg_resources.resource_filename(
-                                                'ytmusicapi', 'locales'),
-                                            languages=[language])
+                    locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+            self.lang = gettext.translation(
+                "base",
+                localedir=pkg_resources.resource_filename("ytmusicapi", "locales"),
+                languages=[language],
+            )
             self.parser = browsing.Parser(self.lang)
 
             if user:
-                self.context['context']['user']['onBehalfOfUser'] = user
+                self.context["context"]["user"]["onBehalfOfUser"] = user
 
         # verify authentication credentials work
         if auth:
-            self.sapisid = sapisid_from_cookie(self.headers['Cookie'])
-            response = self._send_request('guide', {})
-            if 'error' in response:
+            self.sapisid = sapisid_from_cookie(self.headers["Cookie"])
+            response = self._send_request("guide", {})
+            if "error" in response:
                 raise Exception(
                     "The provided credentials are invalid. Reason given by the server: "
-                    + response['error']['status'])
+                    + response["error"]["status"])
 
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+
+        query = {
+            "alt": "json",
+            "key": self.get_token(),
+        }
+
         body.update(self.context)
         if self.auth:
-            self.headers["Authorization"] = get_authorization(self.sapisid + ' '
-                                                              + self.headers['x-origin'])
-        response = requests.post(base_url + endpoint + params + additionalParams,
-                                 json=body,
-                                 headers=self.headers,
-                                 proxies=self.proxies)
+            self.headers["Authorization"] = get_authorization(self.sapisid + " "
+                                                              + self.headers["x-origin"])
+        response = requests.post(
+            base_url + endpoint,
+            params=query,
+            json=body,
+            headers=self.headers,
+            proxies=self.proxies,
+        )
+
         return json.loads(response.text)
 
     def _check_auth(self):
         if self.auth == "":
             raise Exception("Please provide authentication before using this function")
+
+    # Get YouTube Music Token
+    #
+    @classmethod
+    def get_token(cls):
+        if not YTMusic.api_key:
+            headers = {
+                "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0)"
+                " Gecko/20100101 Firefox/66.0",
+                "Cookie": "PREF=hl=en;",
+                "Accept-Language": "en;q=0.5",
+                "content_type": "application/json",
+            }
+            response = requests.get("https://music.youtube.com", headers=headers)
+            json_regex = r"ytcfg.set\((.*?)\);"
+            extracted_json = re.search(json_regex, response.text).group(1)
+
+            YTMusic.api_key = json.loads(extracted_json)["INNERTUBE_API_KEY"]
+        return YTMusic.api_key
 
     @classmethod
     def setup(cls, filepath: str = None, headers_raw: str = None) -> Dict:
@@ -127,9 +161,9 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         :return: configuration headers string
         """
         return setup(filepath, headers_raw)
-    
+
     def __enter__(self):
         return self
-    
-    def __exit__(self, execType = None, execValue = None, trackback = None):
+
+    def __exit__(self, execType=None, execValue=None, trackback=None):
         pass
