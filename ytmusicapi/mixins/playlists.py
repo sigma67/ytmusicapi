@@ -252,7 +252,8 @@ class PlaylistsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        if not videos[0]['setVideoId']:
+        videos = list(filter(lambda x: 'videoId' in x and 'setVideoId' in x, videos))
+        if len(videos) == 0:
             raise Exception(
                 "Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
 
