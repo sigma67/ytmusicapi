@@ -104,7 +104,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         body.update(self.context)
         if self.auth:
             self.headers["Authorization"] = get_authorization(self.sapisid + ' '
-                                                              + self.headers['x-origin'])
+                                                              + self.headers['origin'])
         response = requests.post(base_url + endpoint + params + additionalParams,
                                  json=body,
                                  headers=self.headers,
