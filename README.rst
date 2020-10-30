@@ -1,6 +1,10 @@
 ytmusicapi: Unofficial API for YouTube Music
 ############################################
 
+.. image:: https://badges.gitter.im/sigma67/ytmusicapi.svg
+   :alt: Join the chat at https://gitter.im/sigma67/ytmusicapi
+   :target: https://gitter.im/sigma67/ytmusicapi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://img.shields.io/pypi/dm/ytmusicapi?style=flat-square
     :alt: PyPI Downloads
     :target: https://pypi.org/project/ytmusicapi/
