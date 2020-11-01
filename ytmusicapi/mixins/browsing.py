@@ -4,19 +4,22 @@ import codecs
 from urllib.parse import parse_qs
 from typing import List, Dict
 from ytmusicapi.helpers import *
+from ytmusicapi.parsers.browsing import parse_continuation_content_list
 from ytmusicapi.parsers.playlists import *
 
 
 class BrowsingMixin:
-    def search(self, query: str, filter: str = None) -> List[Dict]:
+    def search(self, query: str, filter: str = None, limit: int = 20) -> List[Dict]:
         """
         Search YouTube music
-        Returns up to 20 results within the provided category.
+        Returns results within the provided category.
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
         :param filter: Filter for item types. Allowed values:
           'songs', 'videos', 'albums', 'artists', 'playlists', 'uploads'.
           Default: Default search, including all types of items.
+        :param limit: Number of search results to return
+          Default: 20
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
           albums, artists and playlists additionally contain a browseId, corresponding to
@@ -106,10 +109,21 @@ class BrowsingMixin:
                         search_result = self.parser.parse_search_result(data, type)
                         search_results.append(search_result)
 
+                if 'continuations' in res['musicShelfRenderer']:
+                    request_func = lambda additionalParams: self._send_request(
+                        endpoint, body, additionalParams)
+
+                    parse_func = lambda contents: parse_continuation_content_list(
+                        contents, self.parser.parse_search_result)
+
+                    search_results.extend(
+                        get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
+                                          limit - len(search_results), request_func, parse_func))
+
         except Exception as e:
             print(str(e))
 
-        return search_results
+        return search_results[:limit]
 
     def get_artist(self, channelId: str) -> Dict:
         """
@@ -436,7 +450,9 @@ class BrowsingMixin:
                 # in case the song is unavailable, there is no videoId
                 track['videoId'] = item['payload']['musicTrack']['videoId'] if 'videoId' in item[
                     'payload']['musicTrack'] else None
-                track['lengthMs'] = item['payload']['musicTrack']['lengthMs']
+                # very occasionally lengthMs is not returned
+                track['lengthMs'] = item['payload']['musicTrack'][
+                    'lengthMs'] if 'lengthMs' in item['payload']['musicTrack'] else None
                 track['likeStatus'] = likes[item['entityKey']]
                 album['tracks'].append(track)
 
