@@ -20,7 +20,7 @@ def setup(filepath=None, headers_raw=None):
     else:
         contents = headers_raw.split('\n')
 
-    required_headers = ["Cookie"]
+    required_headers = ["Cookie", "X-Goog-AuthUser"]
     required_headers_lower = {v.lower(): v for v in required_headers }
     try:
         headers = {}
