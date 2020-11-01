@@ -29,7 +29,46 @@ class Parser:
             search_result['title'] = get_item_text(data, 0)
 
         if resultType in ['artist', 'album', 'playlist']:
-            search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
+            browse_id = nav(data, NAVIGATION_BROWSE_ID, True)
+            if not browse_id:  # song result
+                search_result['videoId'] = nav(
+                    data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+                search_result['playlistId'] = nav(
+                    data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['playlistId']
+                flex_items = [
+                    nav(get_flex_column_item(data, i), ['text', 'runs'], True) for i in range(4)
+                ]
+                if flex_items[0]:
+                    search_result['title'] = {flex_items[0][0]['text']}
+                if flex_items[1]:
+                    search_result['artists'] = [{
+                        'name': flex_items[1][0]['text'],
+                        'id': nav(flex_items[1][0], NAVIGATION_BROWSE_ID)
+                    }]
+                if flex_items[2]:
+                    search_result['album'] = {
+                        'name': flex_items[2][0]['text'],
+                        'id': nav(flex_items[2][0], NAVIGATION_BROWSE_ID)
+                    }
+                if flex_items[3]:
+                    search_result['duration'] = flex_items[3][0]['text']
+                search_result['resultType'] = 'song'
+            else:  # artist or album result
+                search_result['browseId'] = browse_id
+                if 'artist' in search_result['browseId']:
+                    search_result['resultType'] = 'artist'
+                else:
+                    flex_items2 = [
+                        nav(get_flex_column_item(data, i), ['text', 'runs'], True)
+                        for i in range(4)
+                    ]
+                    if flex_items2[0]:
+                        search_result['title'] = flex_items2[0][0]['text']
+                    if flex_items2[2]:
+                        search_result['artist'] = {'name': flex_items2[2][0]['text'], 'id': None}
+                    if flex_items2[3]:
+                        search_result['releaseDate'] = flex_items2[3][0]['text']
+                    search_result['resultType'] = 'album'
 
         if resultType in ['artist']:
             search_result['artist'] = get_item_text(data, 0)
@@ -37,7 +76,9 @@ class Parser:
         elif resultType in ['album']:
             search_result['title'] = get_item_text(data, 0)
             search_result['type'] = get_item_text(data, 1)
-            search_result['artist'] = get_item_text(data, 2)
+            if 'artist' not in search_result:
+                search_result['artist'] = get_item_text(data, 2)
+
             search_result['year'] = get_item_text(data, 3)
 
         elif resultType in ['playlist']:
@@ -61,7 +102,7 @@ class Parser:
             search_result['title'] = get_item_text(data, 0)
 
             browse_id = nav(data, NAVIGATION_BROWSE_ID, True)
-            if not browse_id: # song result
+            if not browse_id:  # song result
                 flex_items = [
                     nav(get_flex_column_item(data, i), ['text', 'runs'], True) for i in range(2)
                 ]
@@ -96,7 +137,6 @@ class Parser:
                     search_result['resultType'] = 'album'
 
         search_result['thumbnails'] = nav(data, THUMBNAILS)
-
         return search_result
 
     @i18n
@@ -126,6 +166,12 @@ class Parser:
                                                                  categories_parser[i])
 
         return artist
+
+
+def parse_continuation_content_list(results, parse_func):
+    contents = [parse_func(result['musicResponsiveListItemRenderer']) for result in results]
+
+    return contents
 
 
 def parse_content_list(results, parse_func):
