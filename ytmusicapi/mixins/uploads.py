@@ -8,11 +8,12 @@ from ytmusicapi.parsers.uploads import *
 
 
 class UploadsMixin:
-    def get_library_upload_songs(self, limit: int = 25) -> List[Dict]:
+    def get_library_upload_songs(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Returns a list of uploaded songs
 
         :param limit: How many songs to return. Default: 25
+        :param order: Determine song order. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of uploaded songs.
 
         Each item is in the following format::
@@ -29,7 +30,16 @@ class UploadsMixin:
         """
         self._check_auth()
         endpoint = 'browse'
+        orders = ['a_to_z', 'z_to_a', 'recently_added']
+        if order and order not in orders:
+            raise Exception(
+                "Invalid order provided. Please use one of the following orders or leave out the parameter: "
+                + ', '.join(orders))
         body = {"browseId": "FEmusic_library_privately_owned_tracks"}
+        if order is not None:
+            # determine order_params via `.contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[1].itemSectionRenderer.header.itemSectionTabbedHeaderRenderer.endItems[1].dropdownRenderer.entries[].dropdownItemRenderer.onSelectCommand.browseEndpoint.params` of `/youtubei/v1/browse` response
+            order_params = ['ggMGKgQIARAA', 'ggMGKgQIARAB', 'ggMGKgQIABAB']
+            body["params"] = order_params[orders.index(order)]
         response = self._send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
                                      'itemSectionRenderer')
