@@ -52,7 +52,10 @@ def get_continuations(results, continuation_type, limit, request_func, parse_fun
     while 'continuations' in results and len(items) < limit:
         additionalParams = get_continuation_params(results, ctoken_path)
         response = request_func(additionalParams)
-        results = response['continuationContents'][continuation_type]
+        if 'continuationContents' in response:
+            results = response['continuationContents'][continuation_type]
+        else:
+            break
         contents = get_continuation_contents(results, parse_func)
         items.extend(contents)
 
