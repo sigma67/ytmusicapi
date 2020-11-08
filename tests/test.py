@@ -215,6 +215,12 @@ class TestYTMusic(unittest.TestCase):
     def test_get_library_upload_songs(self):
         results = youtube_auth.get_library_upload_songs(100)
         self.assertGreater(len(results), 25)
+        results = youtube_auth.get_library_upload_songs(100, 'a_to_z')
+        self.assertGreater(len(results), 25)
+        results = youtube_auth.get_library_upload_songs(100, 'z_to_a')
+        self.assertGreater(len(results), 25)
+        results = youtube_auth.get_library_upload_songs(100, 'recently_added')
+        self.assertGreater(len(results), 25)
 
     @unittest.skip("Must not have any uploaded songs to pass")
     def test_get_library_upload_songs_empty(self):
