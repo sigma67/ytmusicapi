@@ -45,13 +45,10 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
 
             duration = None
             if 'fixedColumns' in data:
-                if 'simpleText' in data['fixedColumns'][0][
-                        'musicResponsiveListItemFixedColumnRenderer']['text']:
-                    duration = data['fixedColumns'][0][
-                        'musicResponsiveListItemFixedColumnRenderer']['text']['simpleText']
+                if 'simpleText' in get_fixed_column_item(data, 0)['text']:
+                    duration = get_fixed_column_item(data, 0)['text']['simpleText']
                 else:
-                    duration = data['fixedColumns'][0][
-                        'musicResponsiveListItemFixedColumnRenderer']['text']['runs'][0]['text']
+                    duration = get_fixed_column_item(data, 0)['text']['runs'][0]['text']
 
             thumbnails = None
             if 'thumbnail' in data:

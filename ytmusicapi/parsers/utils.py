@@ -40,6 +40,14 @@ def get_flex_column_item(item, index):
     return item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']
 
 
+def get_fixed_column_item(item, index):
+    if 'text' not in item['fixedColumns'][index]['musicResponsiveListItemFixedColumnRenderer'] or \
+            'runs' not in item['fixedColumns'][index]['musicResponsiveListItemFixedColumnRenderer']['text']:
+        return None
+
+    return item['fixedColumns'][index]['musicResponsiveListItemFixedColumnRenderer']
+
+
 def get_browse_id(item, index):
     if 'navigationEndpoint' not in item['text']['runs'][index]:
         return None
