@@ -38,7 +38,7 @@ def html_to_txt(html_text):
 def sapisid_from_cookie(raw_cookie):
     cookie = SimpleCookie()
     cookie.load(raw_cookie)
-    return cookie['SAPISID'].value
+    return cookie['__Secure-3PAPISID'].value
 
 
 # SAPISID Hash reverse engineered by
