@@ -116,10 +116,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(songs), 200)
         songs = youtube_auth.get_library_songs(100, order='a_to_z')
         self.assertGreaterEqual(len(songs), 100)
-        self.assertTrue(songs[0]['title'] <= songs[1]['title'], "Song order is not A to Z")
         songs = youtube_auth.get_library_songs(100, order='z_to_a')
         self.assertGreaterEqual(len(songs), 100)
-        self.assertTrue(songs[0]['title'] >= songs[1]['title'], "Song order is not Z to A")
         songs = youtube_auth.get_library_songs(100, order='recently_added')
         self.assertGreaterEqual(len(songs), 100)
 
@@ -128,10 +126,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(albums), 0)
         albums = youtube_brand.get_library_albums(100, order='a_to_z')
         self.assertGreater(len(albums), 0)
-        self.assertTrue(albums[0]['title'] <= albums[1]['title'], "Album order is not A to Z")
         albums = youtube_brand.get_library_albums(100, order='z_to_a')
         self.assertGreater(len(albums), 0)
-        self.assertTrue(albums[0]['title'] >= albums[1]['title'], "Album order is not Z to A")
         albums = youtube_brand.get_library_albums(100, order='recently_added')
         self.assertGreater(len(albums), 0)
 
@@ -140,14 +136,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(artists), 0)
         artists = youtube_brand.get_library_artists(100, order='a_to_z')
         self.assertGreater(len(artists), 0)
-        self.assertGreaterEqual(artists[0]['artist'], artists[1]['artist'],
-                                "Artist order is not A to Z")
-        self.assertGreaterEqual(artists[1]['artist'], artists[0]['artist'],
-                                "Artist order is not A to Z")
-        self.assertTrue(artists[0]['artist'] <= artists[1]['artist'], "Artist order is not A to Z")
         artists = youtube_brand.get_library_artists(100, order='z_to_a')
         self.assertGreater(len(artists), 0)
-        self.assertTrue(artists[0]['artist'] >= artists[1]['artist'], "Artist order is not Z to A")
         artists = youtube_brand.get_library_artists(100, order='recently_added')
         self.assertGreater(len(artists), 0)
 
@@ -156,10 +146,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(artists), 0)
         artists = youtube_brand.get_library_subscriptions(50, order='a_to_z')
         self.assertGreater(len(artists), 0)
-        self.assertTrue(artists[0]['artist'] <= artists[1]['artist'], "Artist order is not A to Z")
         artists = youtube_brand.get_library_subscriptions(50, order='z_to_a')
         self.assertGreater(len(artists), 0)
-        self.assertTrue(artists[0]['artist'] >= artists[1]['artist'], "Artist order is not Z to A")
         artists = youtube_brand.get_library_subscriptions(50, order='recently_added')
         self.assertGreater(len(artists), 0)
 
@@ -253,10 +241,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 25)
         results = youtube_auth.get_library_upload_songs(100, 'a_to_z')
         self.assertGreater(len(results), 25)
-        self.assertTrue(results[0]['title'] <= results[1]['title'], "Song order is not A to Z")
         results = youtube_auth.get_library_upload_songs(100, 'z_to_a')
         self.assertGreater(len(results), 25)
-        self.assertTrue(results[0]['title'] >= results[1]['title'], "Song order is not Z to A")
         results = youtube_auth.get_library_upload_songs(100, 'recently_added')
         self.assertGreater(len(results), 25)
         # There is no way to check if the order is correct.
@@ -271,11 +257,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 25)
         results = youtube_auth.get_library_upload_albums(50, order='a_to_z')
         self.assertGreater(len(results), 25)
-        print((results[0]['title'], results[1]['title']))
-        self.assertTrue(results[0]['title'] <= results[1]['title'], "Album order is not A to Z")
         results = youtube_auth.get_library_upload_albums(50, order='z_to_a')
         self.assertGreater(len(results), 25)
-        self.assertTrue(results[0]['title'] >= results[1]['title'], "Album order is not Z to A")
         results = youtube_auth.get_library_upload_albums(50, order='recently_added')
         self.assertGreater(len(results), 25)
 
@@ -289,11 +272,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 25)
         results = youtube_auth.get_library_upload_artists(50, order='a_to_z')
         self.assertGreater(len(results), 25)
-        print((results[0]['artist'], results[1]['artist']))
-        self.assertTrue(results[0]['artist'] <= results[1]['artist'], "Artist order is not A to Z")
         results = youtube_auth.get_library_upload_artists(50, order='z_to_a')
         self.assertGreater(len(results), 25)
-        self.assertTrue(results[0]['artist'] >= results[1]['artist'], "Artist order is not Z to A")
         results = youtube_auth.get_library_upload_artists(50, order='recently_added')
         self.assertGreater(len(results), 25)
 
