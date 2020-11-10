@@ -217,10 +217,13 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 25)
         results = youtube_auth.get_library_upload_songs(100, 'a_to_z')
         self.assertGreater(len(results), 25)
+        self.assertTrue(results[0]['title'] <= results[1]['title'], "Song order is not A to Z")
         results = youtube_auth.get_library_upload_songs(100, 'z_to_a')
         self.assertGreater(len(results), 25)
+        self.assertTrue(results[0]['title'] >= results[1]['title'], "Song order is not Z to A")
         results = youtube_auth.get_library_upload_songs(100, 'recently_added')
         self.assertGreater(len(results), 25)
+        # There is no way to check if the order is correct.
 
     @unittest.skip("Must not have any uploaded songs to pass")
     def test_get_library_upload_songs_empty(self):
