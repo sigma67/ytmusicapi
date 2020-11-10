@@ -56,15 +56,19 @@ class UploadsMixin:
 
         return songs
 
-    def get_library_upload_albums(self, limit: int = 25) -> List[Dict]:
+    def get_library_upload_albums(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Gets the albums of uploaded songs in the user's library.
 
         :param limit: Number of albums to return. Default: 25
+        :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of albums as returned by :py:func:`get_library_albums`
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_library_privately_owned_releases'}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
@@ -86,15 +90,19 @@ class UploadsMixin:
 
         return albums
 
-    def get_library_upload_artists(self, limit: int = 25) -> List[Dict]:
+    def get_library_upload_artists(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Gets the artists of uploaded songs in the user's library.
 
         :param limit: Number of artists to return. Default: 25
+        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of artists as returned by :py:func:`get_library_artists`
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_library_privately_owned_artists'}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),

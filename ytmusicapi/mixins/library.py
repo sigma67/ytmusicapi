@@ -41,7 +41,10 @@ class LibraryMixin:
 
         return playlists
 
-    def get_library_songs(self, limit: int = 25, validate_responses: bool = False) -> List[Dict]:
+    def get_library_songs(self,
+                          limit: int = 25,
+                          validate_responses: bool = False,
+                          order: str = None) -> List[Dict]:
         """
         Gets the songs in the user's library (liked videos are not included).
         To get liked songs and videos, use :py:func:`get_liked_songs`
@@ -49,10 +52,14 @@ class LibraryMixin:
         :param limit: Number of songs to retrieve
         :param validate_responses: Flag indicating if responses from YTM should be validated and retried in case
             when some songs are missing. Default: False
+        :param order: Order of songs to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of songs. Same format as :py:func:`get_playlist`
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_liked_videos'}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
         endpoint = 'browse'
         per_page = 25
 
@@ -87,11 +94,12 @@ class LibraryMixin:
 
         return songs
 
-    def get_library_albums(self, limit: int = 25) -> List[Dict]:
+    def get_library_albums(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Gets the albums in the user's library.
 
         :param limit: Number of albums to return
+        :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of albums.
 
         Each item is in the following format:
@@ -110,6 +118,9 @@ class LibraryMixin:
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_liked_albums'}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
 
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
@@ -131,11 +142,12 @@ class LibraryMixin:
 
         return albums
 
-    def get_library_artists(self, limit: int = 25) -> List[Dict]:
+    def get_library_artists(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Gets the artists of the songs in the user's library.
 
         :param limit: Number of artists to return
+        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of artists.
 
         Each item is in the following format::
@@ -149,21 +161,28 @@ class LibraryMixin:
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_library_corpus_track_artists'}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         return parse_library_artists(
             response,
             lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit)
 
-    def get_library_subscriptions(self, limit: int = 25) -> List[Dict]:
+    def get_library_subscriptions(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Gets the artists the user has subscribed to.
 
         :param limit: Number of artists to return
+        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of artists. Same format as :py:func:`get_library_artists`
         """
         self._check_auth()
         body = {'browseId': 'FEmusic_library_corpus_artists'}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         return parse_library_artists(
