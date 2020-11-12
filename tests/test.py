@@ -32,7 +32,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 0)
         results = youtube_auth.search(query, 'videos')
         self.assertGreater(len(results), 0)
-        results = youtube_auth.search(query, 'albums')
+        results = youtube_auth.search(query, 'albums', limit=40)
         self.assertGreater(len(results), 0)
         results = youtube_auth.search(query, 'artists')
         self.assertGreater(len(results), 0)
@@ -40,8 +40,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 0)
 
     def test_search_uploads(self):
-        results = youtube_auth.search('audiomachine', 'uploads')
-        self.assertGreater(len(results), 10)
+        results = youtube_auth.search('audiomachine', 'uploads', limit=40)
+        self.assertGreater(len(results), 20)
 
     def test_get_artist(self):
         results = youtube.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")

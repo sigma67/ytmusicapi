@@ -4,7 +4,6 @@ import codecs
 from urllib.parse import parse_qs
 from typing import List, Dict
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers.browsing import parse_continuation_content_list
 from ytmusicapi.parsers.playlists import *
 
 
@@ -82,48 +81,40 @@ class BrowsingMixin:
 
         response = self._send_request(endpoint, body)
 
-        try:
-            # no results
-            if 'contents' not in response:
-                return search_results
+        # no results
+        if 'contents' not in response:
+            return search_results
 
-            if 'tabbedSearchResultsRenderer' in response['contents']:
-                results = response['contents']['tabbedSearchResultsRenderer']['tabs'][int(
-                    filter == "uploads")]['tabRenderer']['content']
-            else:
-                results = response['contents']
+        if 'tabbedSearchResultsRenderer' in response['contents']:
+            results = response['contents']['tabbedSearchResultsRenderer']['tabs'][int(
+                filter == "uploads")]['tabRenderer']['content']
+        else:
+            results = response['contents']
 
-            results = nav(results, SECTION_LIST)
+        results = nav(results, SECTION_LIST)
 
-            # no results
-            if len(results) == 1 and 'itemSectionRenderer' in results:
-                return search_results
+        # no results
+        if len(results) == 1 and 'itemSectionRenderer' in results:
+            return search_results
 
-            for res in results:
-                if 'musicShelfRenderer' in res:
-                    results = res['musicShelfRenderer']['contents']
+        for res in results:
+            if 'musicShelfRenderer' in res:
+                results = res['musicShelfRenderer']['contents']
 
-                    for result in results:
-                        data = result['musicResponsiveListItemRenderer']
-                        type = filter[:-1] if filter else None
-                        search_result = self.parser.parse_search_result(data, type)
-                        search_results.append(search_result)
+                type = filter[:-1] if filter else None
+                search_results = self.parser.parse_search_results(results, type)
 
-                if 'continuations' in res['musicShelfRenderer']:
-                    request_func = lambda additionalParams: self._send_request(
-                        endpoint, body, additionalParams)
+            if 'continuations' in res['musicShelfRenderer']:
+                request_func = lambda additionalParams: self._send_request(
+                    endpoint, body, additionalParams)
 
-                    parse_func = lambda contents: parse_continuation_content_list(
-                        contents, self.parser.parse_search_result)
+                parse_func = lambda contents: self.parser.parse_search_results(contents, type)
 
-                    search_results.extend(
-                        get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
-                                          limit - len(search_results), request_func, parse_func))
+                search_results.extend(
+                    get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
+                                      limit - len(search_results), request_func, parse_func))
 
-        except Exception as e:
-            print(str(e))
-
-        return search_results[:limit]
+        return search_results
 
     def get_artist(self, channelId: str) -> Dict:
         """
