@@ -550,4 +550,15 @@ class BrowsingMixin:
             except (KeyError, IndexError):
                 pass
         song_meta['streamingData'] = player_response['streamingData']
-        return song_meta
+        params.update({"c": "WEB_REMIX", "cver": "0.1"})
+        response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
+        text = parse_qs(response.text)
+        if 'player_response' not in text:
+            return text
+        player_response = json.loads(text['player_response'][0])
+        player_response['videoDetails']['provider'] = song_meta['provider']
+        player_response['videoDetails']['artists'] = song_meta['artists']
+        player_response['videoDetails']['copyright'] = song_meta['copyright']
+        player_response['videoDetails']['release'] = song_meta['release']
+        player_response['videoDetails']['production'] = song_meta['production']
+        return player_response
