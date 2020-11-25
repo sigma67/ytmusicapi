@@ -526,7 +526,7 @@ class BrowsingMixin:
                 pass
         return song_meta
 
-    def get_streamingData(self, videoId: str) -> Dict:
+    def get_streaming_data(self, videoId: str) -> Dict:
         """
         Returns the streaming data for a song or video.
 
