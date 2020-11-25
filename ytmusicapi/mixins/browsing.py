@@ -497,32 +497,7 @@ class BrowsingMixin:
                 "Lyricist: Noel Gallagher",
                 "Producer: Owen Morris & Noel Gallagher"
               ],
-              "release": "2014-09-29",
-              "streamingData": {
-                "expiresInSeconds": "21540",
-                "formats": [
-                  {
-                    "itag": 18,
-                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
-                    "bitrate": 306477,
-                    "width": 360,
-                    "height": 360,
-                    "lastModified": "1574970034520502",
-                    "contentLength": "9913027",
-                    "quality": "medium",
-                    "fps": 25,
-                    "qualityLabel": "360p",
-                    "projectionType": "RECTANGULAR",
-                    "averageBitrate": 306419,
-                    "audioQuality": "AUDIO_QUALITY_LOW",
-                    "approxDurationMs": "258809",
-                    "audioSampleRate": "44100",
-                    "audioChannels": 2,
-                    "signatureCipher": "..."
-                  }
-                ],
-                "adaptiveFormats": []
-              }
+              "release": "2014-09-29"
             }
 
         """
@@ -549,16 +524,102 @@ class BrowsingMixin:
                 ]
             except (KeyError, IndexError):
                 pass
-        song_meta['streamingData'] = player_response['streamingData']
-        params.update({"c": "WEB_REMIX", "cver": "0.1"})
+        return song_meta
+
+    def get_streamingData(self, videoId: str) -> Dict:
+        """
+        Returns the streaming data for a song or video.
+
+        :param videoId: Video id
+        :return: Dictionary with song streaming data.
+
+        Example::
+
+        {
+            "expiresInSeconds": "21540",
+            "formats": [
+                {
+                    "itag": 18,
+                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                    "bitrate": 306477,
+                    "width": 360,
+                    "height": 360,
+                    "lastModified": "1574970034520502",
+                    "contentLength": "9913027",
+                    "quality": "medium",
+                    "fps": 25,
+                    "qualityLabel": "360p",
+                    "projectionType": "RECTANGULAR",
+                    "averageBitrate": 306419,
+                    "audioQuality": "AUDIO_QUALITY_LOW",
+                    "approxDurationMs": "258809",
+                    "audioSampleRate": "44100",
+                    "audioChannels": 2,
+                    "signatureCipher": "s=..."
+                }
+            ],
+            "adaptiveFormats": [
+                {
+                    "itag": 137,
+                    "mimeType": "video/mp4; codecs=\"avc1.640020\"",
+                    "bitrate": 312234,
+                    "width": 1078,
+                    "height": 1080,
+                    "initRange": {
+                        "start": "0",
+                        "end": "738"
+                    },
+                    "indexRange": {
+                        "start": "739",
+                        "end": "1382"
+                    },
+                    "lastModified": "1574970033536914",
+                    "contentLength": "5674377",
+                    "quality": "hd1080",
+                    "fps": 25,
+                    "qualityLabel": "1080p",
+                    "projectionType": "RECTANGULAR",
+                    "averageBitrate": 175432,
+                    "approxDurationMs": "258760",
+                    "signatureCipher": "s=..."
+                },
+                {...},
+                {
+                    "itag": 140,
+                    "mimeType": "audio/mp4; codecs=\"mp4a.40.2\"",
+                    "bitrate": 131205,
+                    "initRange": {
+                        "start": "0",
+                        "end": "667"
+                    },
+                    "indexRange": {
+                        "start": "668",
+                        "end": "1011"
+                    },
+                    "lastModified": "1574969975805792",
+                    "contentLength": "4189579",
+                    "quality": "tiny",
+                    "projectionType": "RECTANGULAR",
+                    "averageBitrate": 129521,
+                    "highReplication": true,
+                    "audioQuality": "AUDIO_QUALITY_MEDIUM",
+                    "approxDurationMs": "258773",
+                    "audioSampleRate": "44100",
+                    "audioChannels": 2,
+                    "loudnessDb": 1.1422243,
+                    "signatureCipher": "s=..."
+                },
+                {...}
+            ]
+        }
+
+        """
+        endpoint = "https://www.youtube.com/get_video_info"
+        params = {"video_id": videoId, "hl": self.language, "el": "detailpage", "c": "WEB_REMIX", "cver": "0.1"}
         response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
         text = parse_qs(response.text)
         if 'player_response' not in text:
             return text
         player_response = json.loads(text['player_response'][0])
-        player_response['videoDetails']['provider'] = song_meta['provider']
-        player_response['videoDetails']['artists'] = song_meta['artists']
-        player_response['videoDetails']['copyright'] = song_meta['copyright']
-        player_response['videoDetails']['release'] = song_meta['release']
-        player_response['videoDetails']['production'] = song_meta['production']
-        return player_response
+        streamingData = player_response['streamingData']
+        return streamingData
