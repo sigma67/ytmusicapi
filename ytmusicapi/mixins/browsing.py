@@ -621,5 +621,5 @@ class BrowsingMixin:
         if 'player_response' not in text:
             return text
         player_response = json.loads(text['player_response'][0])
-        streamingData = player_response['streamingData']
-        return streamingData
+        streaming_data = player_response['streamingData']
+        return streaming_data
