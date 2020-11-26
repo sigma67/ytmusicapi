@@ -104,15 +104,15 @@ class BrowsingMixin:
                 type = filter[:-1] if filter else None
                 search_results = self.parser.parse_search_results(results, type)
 
-            if 'continuations' in res['musicShelfRenderer']:
-                request_func = lambda additionalParams: self._send_request(
-                    endpoint, body, additionalParams)
+                if 'continuations' in res['musicShelfRenderer']:
+                    request_func = lambda additionalParams: self._send_request(
+                        endpoint, body, additionalParams)
 
-                parse_func = lambda contents: self.parser.parse_search_results(contents, type)
+                    parse_func = lambda contents: self.parser.parse_search_results(contents, type)
 
-                search_results.extend(
-                    get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
-                                      limit - len(search_results), request_func, parse_func))
+                    search_results.extend(
+                        get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
+                                        limit - len(search_results), request_func, parse_func))
 
         return search_results
 
