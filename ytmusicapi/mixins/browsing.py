@@ -620,6 +620,9 @@ class BrowsingMixin:
         text = parse_qs(response.text)
         if 'player_response' not in text:
             return text
+
         player_response = json.loads(text['player_response'][0])
-        streaming_data = player_response['streamingData']
-        return streaming_data
+        if 'streamingData' not in player_response:
+            raise Exception('This video is not playable.')
+
+        return player_response['streamingData']
