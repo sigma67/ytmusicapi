@@ -535,83 +535,83 @@ class BrowsingMixin:
 
         Example::
 
-        {
-            "expiresInSeconds": "21540",
-            "formats": [
-                {
-                    "itag": 18,
-                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
-                    "bitrate": 306477,
-                    "width": 360,
-                    "height": 360,
-                    "lastModified": "1574970034520502",
-                    "contentLength": "9913027",
-                    "quality": "medium",
-                    "fps": 25,
-                    "qualityLabel": "360p",
-                    "projectionType": "RECTANGULAR",
-                    "averageBitrate": 306419,
-                    "audioQuality": "AUDIO_QUALITY_LOW",
-                    "approxDurationMs": "258809",
-                    "audioSampleRate": "44100",
-                    "audioChannels": 2,
-                    "signatureCipher": "s=..."
-                }
-            ],
-            "adaptiveFormats": [
-                {
-                    "itag": 137,
-                    "mimeType": "video/mp4; codecs=\"avc1.640020\"",
-                    "bitrate": 312234,
-                    "width": 1078,
-                    "height": 1080,
-                    "initRange": {
-                        "start": "0",
-                        "end": "738"
+            {
+                "expiresInSeconds": "21540",
+                "formats": [
+                    {
+                        "itag": 18,
+                        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                        "bitrate": 306477,
+                        "width": 360,
+                        "height": 360,
+                        "lastModified": "1574970034520502",
+                        "contentLength": "9913027",
+                        "quality": "medium",
+                        "fps": 25,
+                        "qualityLabel": "360p",
+                        "projectionType": "RECTANGULAR",
+                        "averageBitrate": 306419,
+                        "audioQuality": "AUDIO_QUALITY_LOW",
+                        "approxDurationMs": "258809",
+                        "audioSampleRate": "44100",
+                        "audioChannels": 2,
+                        "signatureCipher": "s=..."
+                    }
+                ],
+                "adaptiveFormats": [
+                    {
+                        "itag": 137,
+                        "mimeType": "video/mp4; codecs=\"avc1.640020\"",
+                        "bitrate": 312234,
+                        "width": 1078,
+                        "height": 1080,
+                        "initRange": {
+                            "start": "0",
+                            "end": "738"
+                        },
+                        "indexRange": {
+                            "start": "739",
+                            "end": "1382"
+                        },
+                        "lastModified": "1574970033536914",
+                        "contentLength": "5674377",
+                        "quality": "hd1080",
+                        "fps": 25,
+                        "qualityLabel": "1080p",
+                        "projectionType": "RECTANGULAR",
+                        "averageBitrate": 175432,
+                        "approxDurationMs": "258760",
+                        "signatureCipher": "s=..."
                     },
-                    "indexRange": {
-                        "start": "739",
-                        "end": "1382"
+                    {...},
+                    {
+                        "itag": 140,
+                        "mimeType": "audio/mp4; codecs=\"mp4a.40.2\"",
+                        "bitrate": 131205,
+                        "initRange": {
+                            "start": "0",
+                            "end": "667"
+                        },
+                        "indexRange": {
+                            "start": "668",
+                            "end": "1011"
+                        },
+                        "lastModified": "1574969975805792",
+                        "contentLength": "4189579",
+                        "quality": "tiny",
+                        "projectionType": "RECTANGULAR",
+                        "averageBitrate": 129521,
+                        "highReplication": true,
+                        "audioQuality": "AUDIO_QUALITY_MEDIUM",
+                        "approxDurationMs": "258773",
+                        "audioSampleRate": "44100",
+                        "audioChannels": 2,
+                        "loudnessDb": 1.1422243,
+                        "signatureCipher": "s=..."
                     },
-                    "lastModified": "1574970033536914",
-                    "contentLength": "5674377",
-                    "quality": "hd1080",
-                    "fps": 25,
-                    "qualityLabel": "1080p",
-                    "projectionType": "RECTANGULAR",
-                    "averageBitrate": 175432,
-                    "approxDurationMs": "258760",
-                    "signatureCipher": "s=..."
-                },
-                {...},
-                {
-                    "itag": 140,
-                    "mimeType": "audio/mp4; codecs=\"mp4a.40.2\"",
-                    "bitrate": 131205,
-                    "initRange": {
-                        "start": "0",
-                        "end": "667"
-                    },
-                    "indexRange": {
-                        "start": "668",
-                        "end": "1011"
-                    },
-                    "lastModified": "1574969975805792",
-                    "contentLength": "4189579",
-                    "quality": "tiny",
-                    "projectionType": "RECTANGULAR",
-                    "averageBitrate": 129521,
-                    "highReplication": true,
-                    "audioQuality": "AUDIO_QUALITY_MEDIUM",
-                    "approxDurationMs": "258773",
-                    "audioSampleRate": "44100",
-                    "audioChannels": 2,
-                    "loudnessDb": 1.1422243,
-                    "signatureCipher": "s=..."
-                },
-                {...}
-            ]
-        }
+                    {...}
+                ]
+            }
 
         """
         endpoint = "https://www.youtube.com/get_video_info"
