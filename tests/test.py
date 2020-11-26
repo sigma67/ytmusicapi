@@ -84,8 +84,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(song), 16)
 
     def test_get_streaming_data(self):
-        song = youtube.get_streaming_data("NRUVdGLf2GI")
-        self.assertEqual(len(song), 3)
+        streaming_data = youtube.get_streaming_data("NRUVdGLf2GI")
+        self.assertEqual(len(streaming_data), 3)
 
     ###############
     # WATCH
