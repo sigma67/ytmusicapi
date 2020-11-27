@@ -40,7 +40,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         :param user: Optional. Specify a user ID string to use in requests.
           This is needed if you want to send requests on behalf of a brand account.
           Otherwise the default account is used. You can retrieve the user ID
-          by going to https://myaccount.google.com and selecting your brand account.
+          by going to https://myaccount.google.com/brandaccounts and selecting your brand account.
           The user ID will be in the URL: https://myaccount.google.com/b/user_id/
         :param proxies: Optional. Proxy configuration in requests_ format_.
 
