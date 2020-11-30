@@ -27,17 +27,17 @@ class TestYTMusic(unittest.TestCase):
         query = "Oasis Wonderwall"
         self.assertRaises(Exception, youtube_auth.search, query, "song")
         results = youtube.search(query)
-        self.assertGreater(len(results), 0)
+        self.assertGreater(len(results), 10)
         results = youtube_auth.search(query, 'songs')
-        self.assertGreater(len(results), 0)
+        self.assertGreater(len(results), 10)
         results = youtube_auth.search(query, 'videos')
-        self.assertGreater(len(results), 0)
+        self.assertGreater(len(results), 10)
         results = youtube_auth.search(query, 'albums', limit=40)
-        self.assertGreater(len(results), 0)
+        self.assertGreater(len(results), 20)
         results = youtube_auth.search(query, 'artists')
         self.assertGreater(len(results), 0)
         results = youtube_auth.search(query, 'playlists')
-        self.assertGreater(len(results), 0)
+        self.assertGreater(len(results), 5)
 
     def test_search_ignore_spelling(self):
         query = "Martin Stig Andersen - Deteriation"
