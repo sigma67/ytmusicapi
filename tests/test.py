@@ -39,6 +39,11 @@ class TestYTMusic(unittest.TestCase):
         results = youtube_auth.search(query, 'playlists')
         self.assertGreater(len(results), 0)
 
+    def test_search_ignore_spelling(self):
+        query = "Martin Stig Andersen - Deteriation"
+        results = youtube_auth.search(query, ignore_spelling=True)
+        self.assertGreater(len(results), 0)
+
     def test_search_uploads(self):
         results = youtube_auth.search('audiomachine', 'uploads', limit=40)
         self.assertGreater(len(results), 20)

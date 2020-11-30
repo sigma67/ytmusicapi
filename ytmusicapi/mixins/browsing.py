@@ -8,7 +8,7 @@ from ytmusicapi.parsers.playlists import *
 
 
 class BrowsingMixin:
-    def search(self, query: str, filter: str = None, limit: int = 20) -> List[Dict]:
+    def search(self, query: str, filter: str = None, limit: int = 20, ignore_spelling: bool = False) -> List[Dict]:
         """
         Search YouTube music
         Returns results within the provided category.
@@ -19,6 +19,10 @@ class BrowsingMixin:
           Default: Default search, including all types of items.
         :param limit: Number of search results to return
           Default: 20
+        :param ignore_spelling: Whether to ignore YTM spelling suggestions.
+          If True, the exact search term will be searched for, and will not be corrected.
+          This does not have any effect when the filter is set to 'uploads'.
+          Default: False, will use YTM's default behavior of autocorrecting the search.
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
           albums, artists and playlists additionally contain a browseId, corresponding to
@@ -57,7 +61,11 @@ class BrowsingMixin:
 
         if filter:
             param1 = 'Eg-KAQwIA'
-            param3 = 'MABqChAEEAMQCRAFEAo%3D'
+
+            if not ignore_spelling:
+                param3 = 'MABqChAEEAMQCRAFEAo%3D'
+            else:
+                param3 = 'MABCAggBagoQBBADEAkQBRAK'
 
             if filter == 'uploads':
                 params = 'agIYAw%3D%3D'
@@ -78,6 +86,8 @@ class BrowsingMixin:
                 params = param1 + param2 + param3
 
             body['params'] = params
+        elif ignore_spelling:
+            body['params'] = "QgIIAQ%3D%3D"
 
         response = self._send_request(endpoint, body)
 
