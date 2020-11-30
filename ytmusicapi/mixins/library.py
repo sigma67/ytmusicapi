@@ -102,7 +102,7 @@ class LibraryMixin:
         :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of albums.
 
-        Each item is in the following format:
+        Each item is in the following format::
 
             {
               "browseId": "MPREb_G8AiyN7RvFg",
