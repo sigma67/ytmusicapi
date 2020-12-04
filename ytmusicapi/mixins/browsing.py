@@ -664,6 +664,11 @@ class BrowsingMixin:
                 body['browseId'] = tab['tabRenderer']['endpoint']['browseEndpoint']['browseId']
         if body['browseId'] != None:
             response = self._send_request('browse', body)
-            body['lyrics'] = (response['contents']['sectionListRenderer']['contents'][0]['musicDescriptionShelfRenderer']['description']['runs'][0]['text'])
+            if 'sectionListRenderer' in response['contents'].keys():
+                body['lyrics'] = response['contents']['sectionListRenderer']['contents'][0]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
+                body['source'] = response['contents']['sectionListRenderer']['contents'][0]['musicDescriptionShelfRenderer']['footer']['runs'][0]['text']
+            else:
+                body['lyrics'] = response['contents']['messageRenderer']['subtext']['messageSubtextRenderer']['text']['runs'][0]['text']
+                body['source'] = response['contents']['messageRenderer']['text']['runs'][0]['text']
             body.pop('context', None)
         return body
