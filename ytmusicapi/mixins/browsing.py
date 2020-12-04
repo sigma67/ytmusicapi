@@ -637,7 +637,7 @@ class BrowsingMixin:
 
         return player_response['streamingData']
 
-    def get_lyrics(self, videoId: str) -> None:
+    def get_lyrics(self, videoId: str) -> Dict:
         """
         Returns lyrics of a song or video.
 
