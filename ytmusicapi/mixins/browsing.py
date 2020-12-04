@@ -658,6 +658,7 @@ class BrowsingMixin:
             'videoId': videoId,
             'browseId': None,
             'lyrics': None,
+            'source': None,
         }
         browseIdResponse = self._send_request('next', body)
         for tab in browseIdResponse['contents']['singleColumnMusicWatchNextResultsRenderer']['tabbedRenderer']['watchNextTabbedResultsRenderer']['tabs']:
