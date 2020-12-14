@@ -93,15 +93,15 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(streaming_data), 3)
 
     def test_get_lyrics(self):
-        lyrics_song = youtube.get_lyrics("ZrOKjDZOtkA")
+        playlist = youtube.get_watch_playlist("ZrOKjDZOtkA")
+        lyrics_song = youtube.get_lyrics(playlist["lyrics"])
         self.assertTrue(lyrics_song["lyricsFound"])
-        self.assertIsNotNone(lyrics_song["browseId"])
         self.assertIsNotNone(lyrics_song["lyrics"])
         self.assertIsNotNone(lyrics_song["source"])
 
-        no_lyrics_song = youtube.get_lyrics("9TnpB8WgW4s")
-        self.assertFalse(lyrics_song["lyricsFound"])
-        self.assertIsNotNone(no_lyrics_song["browseId"])
+        playlist = youtube.get_watch_playlist("9TnpB8WgW4s")
+        no_lyrics_song = youtube.get_lyrics(playlist["lyrics"])
+        self.assertFalse(no_lyrics_song["lyricsFound"])
         self.assertIsNotNone(no_lyrics_song["lyrics"])
         self.assertIsNotNone(no_lyrics_song["source"])
 
@@ -111,17 +111,17 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_watch_playlist(self):
         playlist = youtube.get_watch_playlist("4y33h81phKU", limit=50)
-        self.assertGreater(len(playlist), 50)
+        self.assertGreater(len(playlist['tracks']), 50)
 
     def test_get_watch_playlist_shuffle(self):
         playlist = youtube.get_watch_playlist_shuffle(
             playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc")
-        self.assertEqual(len(playlist), 12)
+        self.assertEqual(len(playlist['tracks']), 12)
 
     def test_get_watch_playlist_shuffle_playlist(self):
         playlist = youtube.get_watch_playlist_shuffle(
             playlistId="PL528pVfw3ao0x8jlW3kwdIx1FEMMeeghb", limit=99)
-        self.assertGreaterEqual(len(playlist), 99)
+        self.assertGreaterEqual(len(playlist['tracks']), 99)
 
     ###############
     # LIBRARY
@@ -136,12 +136,12 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(songs), 100)
         songs = youtube_auth.get_library_songs(200, validate_responses=True)
         self.assertGreaterEqual(len(songs), 200)
-        songs = youtube_auth.get_library_songs(100, order='a_to_z')
-        self.assertGreaterEqual(len(songs), 100)
-        songs = youtube_auth.get_library_songs(100, order='z_to_a')
-        self.assertGreaterEqual(len(songs), 100)
-        songs = youtube_auth.get_library_songs(100, order='recently_added')
-        self.assertGreaterEqual(len(songs), 100)
+        songs = youtube_auth.get_library_songs(order='a_to_z')
+        self.assertGreaterEqual(len(songs), 25)
+        songs = youtube_auth.get_library_songs(order='z_to_a')
+        self.assertGreaterEqual(len(songs), 25)
+        songs = youtube_auth.get_library_songs(order='recently_added')
+        self.assertGreaterEqual(len(songs), 25)
 
     def test_get_library_albums(self):
         albums = youtube_brand.get_library_albums(100)
@@ -156,21 +156,21 @@ class TestYTMusic(unittest.TestCase):
     def test_get_library_artists(self):
         artists = youtube_brand.get_library_artists(100)
         self.assertGreater(len(artists), 0)
-        artists = youtube_brand.get_library_artists(100, order='a_to_z')
+        artists = youtube_brand.get_library_artists(order='a_to_z')
         self.assertGreater(len(artists), 0)
-        artists = youtube_brand.get_library_artists(100, order='z_to_a')
+        artists = youtube_brand.get_library_artists(order='z_to_a')
         self.assertGreater(len(artists), 0)
-        artists = youtube_brand.get_library_artists(100, order='recently_added')
+        artists = youtube_brand.get_library_artists(order='recently_added')
         self.assertGreater(len(artists), 0)
 
     def test_get_library_subscriptions(self):
         artists = youtube_brand.get_library_subscriptions(50)
         self.assertGreater(len(artists), 0)
-        artists = youtube_brand.get_library_subscriptions(50, order='a_to_z')
+        artists = youtube_brand.get_library_subscriptions(order='a_to_z')
         self.assertGreater(len(artists), 0)
-        artists = youtube_brand.get_library_subscriptions(50, order='z_to_a')
+        artists = youtube_brand.get_library_subscriptions(order='z_to_a')
         self.assertGreater(len(artists), 0)
-        artists = youtube_brand.get_library_subscriptions(50, order='recently_added')
+        artists = youtube_brand.get_library_subscriptions(order='recently_added')
         self.assertGreater(len(artists), 0)
 
     def test_get_liked_songs(self):

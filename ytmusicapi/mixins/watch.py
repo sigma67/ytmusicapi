@@ -7,7 +7,7 @@ class WatchMixin:
                            videoId: str = None,
                            playlistId: str = None,
                            limit=25,
-                           params: str = None) -> List[Dict]:
+                           params: str = None) -> Dict[List[Dict], str]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -20,22 +20,25 @@ class WatchMixin:
 
         Example::
 
-            [
-                {
-                  "title": "Interstellar (Main Theme) - Piano Version",
-                  "byline": "Patrik Pietschmann • 47M views",
-                  "length": "4:47",
-                  "videoId": "4y33h81phKU",
-                  "playlistId": "RDAMVM4y33h81phKU",
-                  "thumbnail": [
+            {
+                "tracks": [
                     {
-                      "url": "https://i.ytimg.com/vi/4y...",
-                      "width": 400,
-                      "height": 225
-                    }
-                  ]
-                },...
-            ]
+                      "title": "Interstellar (Main Theme) - Piano Version",
+                      "byline": "Patrik Pietschmann • 47M views",
+                      "length": "4:47",
+                      "videoId": "4y33h81phKU",
+                      "playlistId": "RDAMVM4y33h81phKU",
+                      "thumbnail": [
+                        {
+                          "url": "https://i.ytimg.com/vi/4y...",
+                          "width": 400,
+                          "height": 225
+                        }
+                      ]
+                    },...
+                ],
+                "lyrics": "MPLYt_HNNclO0Ddoc-17"
+            }
 
         """
         body = {'enablePersistentPlaylistPanel': True, 'isAudioOnly': True}
@@ -55,10 +58,18 @@ class WatchMixin:
             body['params'] = params
         endpoint = 'next'
         response = self._send_request(endpoint, body)
-        results = nav(response, [
+        watchNextRenderer = nav(response, [
             'contents', 'singleColumnMusicWatchNextResultsRenderer', 'tabbedRenderer',
             'watchNextTabbedResultsRenderer'
-        ] + TAB_CONTENT + ['musicQueueRenderer', 'content', 'playlistPanelRenderer'])
+        ])
+
+        lyrics_browse_id = None
+        if len(watchNextRenderer['tabs']) > 1:
+            lyrics_browse_id = watchNextRenderer['tabs'][1]['tabRenderer']['endpoint'][
+                'browseEndpoint']['browseId']
+
+        results = nav(watchNextRenderer,
+                      TAB_CONTENT + ['musicQueueRenderer', 'content', 'playlistPanelRenderer'])
         tracks = parse_watch_playlist(results['contents'])
 
         if 'continuations' in results:
@@ -69,9 +80,9 @@ class WatchMixin:
                 get_continuations(results, 'playlistPanelContinuation', limit - len(tracks),
                                   request_func, parse_func, '' if is_playlist else 'Radio'))
 
-        return tracks
+        return {'tracks': tracks, 'lyrics': lyrics_browse_id}
 
-    def get_watch_playlist_shuffle(self, playlistId: str = None, limit=50) -> List[Dict]:
+    def get_watch_playlist_shuffle(self, playlistId: str = None, limit=50) -> Dict[List[Dict], str]:
         """
         Shuffle any playlist
 

@@ -28,6 +28,7 @@ Browsing
 .. automethod:: YTMusic.get_album
 .. automethod:: YTMusic.get_song
 .. automethod:: YTMusic.get_streaming_data
+.. automethod:: YTMusic.get_lyrics
 
 Watch
 --------
