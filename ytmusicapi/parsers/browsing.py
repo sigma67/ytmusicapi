@@ -31,7 +31,7 @@ class Parser:
                     data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
                 search_result['title'] = get_item_text(data, 0)
 
-            if resultType in ['``artist', 'album', 'playlist']:
+            if resultType in ['artist', 'album', 'playlist']:
                 search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
 
             if resultType in ['artist']:
