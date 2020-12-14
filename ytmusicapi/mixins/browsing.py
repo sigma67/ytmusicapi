@@ -638,3 +638,46 @@ class BrowsingMixin:
             raise Exception('This video is not playable.')
 
         return player_response['streamingData']
+
+    def get_lyrics(self, videoId: str) -> Dict:
+        """
+        Returns lyrics of a song or video.
+
+        :param videoId: Video id
+        :return: Dictionary with song lyrics.
+
+        Example::
+
+            {
+                "videoId": "ZrOKjDZOtkA",
+                "browseId": "MPLYt_9nqEki4ZDpp-3",
+                "lyricsFound": true,
+                "lyrics": "Today is gonna be the day\nThat they're gonna throw it back to you\nBy now you should've somehow\nRealized what you gotta do\nI don't believe that anybody\nFeels the way I do, about you now\n\nBackbeat, the word was on the street\nThat the fire in your heart is out\nI'm sure you've heard it all before\nBut you never really had a doubt\nI don't believe that anybody\nFeels the way I do about you now\n\nAnd all the roads we have to walk are winding\nAnd all the lights that lead us there are blinding\nThere are many things that I\nWould like to say to you but I don't know how\n\nBecause maybe, you're gonna be the one that saves me\nAnd after all, you're my wonderwall\n\nToday was gonna be the day\nBut they'll never throw it back to you\nBy now you should've somehow\nRealized what you're not to do\nI don't believe that anybody\nFeels the way I do, about you now\n\nAnd all the roads that lead you there are winding\nAnd all the lights that light the way are blinding\nThere are many things that I\nWould like to say to you but I don't know how\n\nI said maybe, you're gonna be the one that saves me\nAnd after all, you're my wonderwall\n\nI said maybe, you're gonna be the one that saves me\nAnd after all, you're my wonderwall\n\nI said maybe, you're gonna be the one that saves me\nyou're gonna be the one that saves me\nyou're gonna be the one that saves me"
+                "source": "Source: LyricFind"
+            }
+
+        """
+        body = {
+            'videoId': videoId,
+            'browseId': None,
+            'lyricsFound': None,
+            'lyrics': None,
+            'source': None,
+        }
+        browseIdResponse = self._send_request('next', body)
+        for tab in browseIdResponse['contents']['singleColumnMusicWatchNextResultsRenderer']['tabbedRenderer']['watchNextTabbedResultsRenderer']['tabs']:
+            if tab['tabRenderer']['title'] == 'Lyrics':
+                body['browseId'] = tab['tabRenderer']['endpoint']['browseEndpoint']['browseId']
+                break
+        if body['browseId'] != None:
+            response = self._send_request('browse', body)
+            if 'sectionListRenderer' in response['contents'].keys():
+                body['lyricsFound'] = True
+                body['lyrics'] = response['contents']['sectionListRenderer']['contents'][0]['musicDescriptionShelfRenderer']['description']['runs'][0]['text']
+                body['source'] = response['contents']['sectionListRenderer']['contents'][0]['musicDescriptionShelfRenderer']['footer']['runs'][0]['text']
+            else:
+                body['lyricsFound'] = False
+                body['lyrics'] = response['contents']['messageRenderer']['subtext']['messageSubtextRenderer']['text']['runs'][0]['text']
+                body['source'] = response['contents']['messageRenderer']['text']['runs'][0]['text']
+            body.pop('context', None)
+        return body

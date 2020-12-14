@@ -92,6 +92,19 @@ class TestYTMusic(unittest.TestCase):
         streaming_data = youtube_auth.get_streaming_data("ZrOKjDZOtkA")
         self.assertEqual(len(streaming_data), 3)
 
+    def test_get_lyrics(self):
+        lyrics_song = youtube.get_lyrics("ZrOKjDZOtkA")
+        self.assertTrue(lyrics_song["lyricsFound"])
+        self.assertIsNotNone(lyrics_song["browseId"])
+        self.assertIsNotNone(lyrics_song["lyrics"])
+        self.assertIsNotNone(lyrics_song["source"])
+
+        no_lyrics_song = youtube.get_lyrics("9TnpB8WgW4s")
+        self.assertFalse(lyrics_song["lyricsFound"])
+        self.assertIsNotNone(no_lyrics_song["browseId"])
+        self.assertIsNotNone(no_lyrics_song["lyrics"])
+        self.assertIsNotNone(no_lyrics_song["source"])
+
     ###############
     # WATCH
     ###############
