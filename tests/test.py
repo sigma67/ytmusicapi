@@ -49,7 +49,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 20)
 
     def test_get_artist(self):
-        results = youtube.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")
+        results = youtube.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
         self.assertEqual(len(results), 11)
         results = youtube.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         self.assertGreaterEqual(len(results), 9)

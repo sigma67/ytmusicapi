@@ -201,6 +201,8 @@ class BrowsingMixin:
                 }
             }
         """
+        if channelId.startswith("MPLA"):
+            channelId = channelId[4:]
         body = prepare_browse_endpoint("ARTIST", channelId)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
