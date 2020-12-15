@@ -436,15 +436,20 @@ class BrowsingMixin:
             })
         album['tracks'] = []
 
-        likes = {}
+        track_library_details = {}
         for item in data:
             if 'musicTrackUserDetail' in item['payload']:
                 like_state = item['payload']['musicTrackUserDetail']['likeState'].split('_')[-1]
                 parent_track = item['payload']['musicTrackUserDetail']['parentTrack']
-                if like_state in ['NEUTRAL', 'UNKNOWN']:
-                    likes[parent_track] = 'INDIFFERENT'
-                else:
-                    likes[parent_track] = like_state[:-1]
+                like_state = 'INDIFFERENT' if like_state in ['NEUTRAL', 'UNKNOWN'] else like_state[:-1]
+                track_library_details[parent_track] = like_state
+
+            if 'musicLibraryEdit' in item['payload']:
+                entity_key = item['entityKey']
+                track_library_details[entity_key] = {
+                    'add': item['payload']['musicLibraryEdit']['addToLibraryFeedbackToken'],
+                    'remove': item['payload']['musicLibraryEdit']['removeFromLibraryFeedbackToken']
+                }
 
         for item in data[3:]:
             if 'musicTrack' in item['payload']:
@@ -460,7 +465,9 @@ class BrowsingMixin:
                 # very occasionally lengthMs is not returned
                 track['lengthMs'] = item['payload']['musicTrack'][
                     'lengthMs'] if 'lengthMs' in item['payload']['musicTrack'] else None
-                track['likeStatus'] = likes[item['entityKey']]
+                track['likeStatus'] = track_library_details[item['entityKey']]
+                if 'libraryEdit' in item['payload']['musicTrack']:
+                    track['feedbackTokens'] = track_library_details[item['payload']['musicTrack']['libraryEdit']]
                 album['tracks'].append(track)
 
         return album
