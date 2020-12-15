@@ -196,6 +196,15 @@ class TestYTMusic(unittest.TestCase):
         response = youtube_auth.rate_song('ZrOKjDZOtkA', 'INDIFFERENT')
         self.assertIn('actions', response)
 
+    def test_edit_song_library_status(self):
+        album = youtube_brand.get_album('MPREb_9nqEki4ZDpp')
+        response = youtube_brand.edit_song_library_status(
+            album['tracks'][2]['feedbackTokens']['add'])
+        self.assertTrue(response['feedbackResponses'][0]['isProcessed'])
+        response = youtube_brand.edit_song_library_status(
+            album['tracks'][2]['feedbackTokens']['remove'])
+        self.assertTrue(response['feedbackResponses'][0]['isProcessed'])
+
     def test_rate_playlist(self):
         response = youtube_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'LIKE')
         self.assertIn('actions', response)

@@ -45,6 +45,7 @@ Library
 .. automethod:: YTMusic.get_history
 .. automethod:: YTMusic.remove_history_items
 .. automethod:: YTMusic.rate_song
+.. automethod:: YTMusic.edit_song_library_status
 .. automethod:: YTMusic.rate_playlist
 .. automethod:: YTMusic.subscribe_artists
 .. automethod:: YTMusic.unsubscribe_artists

@@ -255,6 +255,19 @@ class LibraryMixin:
 
         return self._send_request(endpoint, body)
 
+    def edit_song_library_status(self, feedbackTokens: List[str] = None) -> Dict:
+        """
+        Adds or removes a song from your library depending on the token provided.
+
+        :param feedbackTokens: List of feedbackTokens obtained from authenticated requests
+            to endpoints that return songs (i.e. :py:func:`get_album`)
+        :return: Full response
+        """
+        self._check_auth()
+        body = {'feedbackTokens': feedbackTokens}
+        endpoint = 'feedback'
+        return endpoint if not endpoint else self._send_request(endpoint, body)
+
     def rate_playlist(self, playlistId: str, rating: str = 'INDIFFERENT') -> Dict:
         """
         Rates a playlist/album ("Add to library"/"Remove from library" interactions on YouTube Music)
