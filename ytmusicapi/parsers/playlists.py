@@ -14,7 +14,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
         try:
             videoId = setVideoId = None
             like = None
-            library_add_token = library_remove_token = None
+            feedback_tokens = None
 
             # if the item has a menu, find its setVideoId
             if 'menu' in data:
@@ -69,13 +69,14 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                 'album': album,
                 'likeStatus': like,
                 'thumbnails': thumbnails,
-                'isAvailable': isAvailable,
-                'feedbackTokens': feedback_tokens
+                'isAvailable': isAvailable
             }
             if duration:
                 song['duration'] = duration
             if setVideoId:
                 song['setVideoId'] = setVideoId
+            if feedback_tokens:
+                song['feedbackTokens'] = feedback_tokens
 
             if menu_entries:
                 for menu_entry in menu_entries:
