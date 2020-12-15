@@ -48,7 +48,10 @@ class PlaylistsMixin:
                   "duration": "2:58",
                   "likeStatus": "INDIFFERENT",
                   "thumbnails": [...],
-                  "isAvailable": True
+                  "isAvailable": True,
+                  "feedbackTokens": {
+                    "add": "AB9zfpJxtvrU...",
+                    "remove": "AB9zfpKTyZ..."
                 }
               ]
             }

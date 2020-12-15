@@ -54,6 +54,8 @@ class Parser:
                 if hasAlbum:
                     search_result['album'] = parse_song_album(data, 2 + default)
                 search_result['duration'] = get_item_text(data, 2 + hasAlbum + default)
+                toggle_menu = find_object_by_key(nav(data, MENU_ITEMS), 'toggleMenuServiceItemRenderer')
+                search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
                 search_result['artist'] = get_item_text(data, 1 + default)

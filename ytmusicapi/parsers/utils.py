@@ -23,6 +23,23 @@ def parse_song_album(data, index):
     }
 
 
+def parse_song_menu_tokens(item):
+    library_add_token = library_remove_token = None
+    toggle_menu = item['toggleMenuServiceItemRenderer']
+    service_type = toggle_menu['defaultIcon']['iconType']
+    if service_type == "LIBRARY_ADD":
+        library_add_token = nav(toggle_menu, ['defaultServiceEndpoint'] + FEEDBACK_TOKEN)
+        library_remove_token = nav(toggle_menu, ['toggledServiceEndpoint'] + FEEDBACK_TOKEN)
+
+    elif service_type == "LIBRARY_REMOVE":  # swap if already in library
+        library_add_token, library_remove_token = library_remove_token, library_add_token
+
+    return {
+        'add': library_add_token,
+        'remove': library_remove_token
+    }
+
+
 def get_item_text(item, index, run_index=0, none_if_absent=False):
     column = get_flex_column_item(item, index)
     if not column:

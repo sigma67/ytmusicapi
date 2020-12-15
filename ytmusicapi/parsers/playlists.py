@@ -14,18 +14,21 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
         try:
             videoId = setVideoId = None
             like = None
+            library_add_token = library_remove_token = None
 
             # if the item has a menu, find its setVideoId
             if 'menu' in data:
-                for item in reversed(nav(data, MENU_ITEMS)):
-                    if 'menuServiceItemRenderer' in item and 'playlistEditEndpoint' in nav(
-                            item, MENU_SERVICE):
-                        setVideoId = nav(
-                            item, MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['setVideoId']
-                        videoId = nav(
-                            item,
-                            MENU_SERVICE)['playlistEditEndpoint']['actions'][0]['removedVideoId']
-                        break
+                for item in nav(data, MENU_ITEMS):
+                    if 'menuServiceItemRenderer' in item:
+                        menu_service = nav(item, MENU_SERVICE)
+                        if 'playlistEditEndpoint' in menu_service:
+                            setVideoId = menu_service['playlistEditEndpoint']['actions'][0][
+                                'setVideoId']
+                            videoId = menu_service['playlistEditEndpoint']['actions'][0][
+                                'removedVideoId']
+
+                    if 'toggleMenuServiceItemRenderer' in item:
+                        feedback_tokens = parse_song_menu_tokens(item)
 
             # if item is not playable, the videoId was retrieved above
             if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
@@ -66,7 +69,8 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                 'album': album,
                 'likeStatus': like,
                 'thumbnails': thumbnails,
-                'isAvailable': isAvailable
+                'isAvailable': isAvailable,
+                'feedbackTokens': feedback_tokens
             }
             if duration:
                 song['duration'] = duration

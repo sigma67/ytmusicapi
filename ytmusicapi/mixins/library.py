@@ -214,7 +214,7 @@ class LibraryMixin:
         songs = []
         for content in results:
             data = content['musicShelfRenderer']['contents']
-            menu_entries = [[-1] + MENU_SERVICE + ['feedbackEndpoint', 'feedbackToken']]
+            menu_entries = [[-1] + MENU_SERVICE + FEEDBACK_TOKEN]
             songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:
                 song['played'] = nav(content['musicShelfRenderer'], TITLE_TEXT)
