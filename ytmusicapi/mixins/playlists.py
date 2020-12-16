@@ -88,13 +88,10 @@ class PlaylistsMixin:
             if run_count > 3:
                 playlist['year'] = nav(header, SUBTITLE3)
 
+        song_count = to_int(
+            unicodedata.normalize("NFKD", header['secondSubtitle']['runs'][0]['text']))
         if len(header['secondSubtitle']['runs']) > 1:
-            song_count = to_int(
-                unicodedata.normalize("NFKD", header['secondSubtitle']['runs'][0]['text']))
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
-        else:
-            playlist['duration'] = header['secondSubtitle']['runs'][0]['text']
-            song_count = limit
 
         playlist['trackCount'] = song_count
         playlist['tracks'] = []
