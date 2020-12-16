@@ -75,7 +75,8 @@ class Parser:
                 if 'menu' in data:
                     toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
                                                      'toggleMenuServiceItemRenderer')
-                    search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
+                    if toggle_menu:
+                        search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
                 search_result['artist'] = get_item_text(data, 1, 0 + default_offset)
