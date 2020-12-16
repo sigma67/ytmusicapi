@@ -10,10 +10,10 @@ class Parser:
     @i18n
     def parse_search_results(self, results, resultType=None):
         search_results = []
+        default_offset = (not resultType) * 2
         for result in results:
             data = result['musicResponsiveListItemRenderer']
             search_result = {}
-            default = not resultType
             if not resultType:
                 resultType = get_item_text(data, 1).lower()
                 result_types = ['artist', 'playlist', 'song', 'video']
@@ -40,27 +40,44 @@ class Parser:
             elif resultType in ['album']:
                 search_result['title'] = get_item_text(data, 0)
                 search_result['type'] = get_item_text(data, 1)
-                search_result['artist'] = get_item_text(data, 2)
-                search_result['year'] = get_item_text(data, 3)
+                search_result['artist'] = get_item_text(data, 1, 2)
+                search_result['year'] = get_item_text(data, 1, 4)
 
             elif resultType in ['playlist']:
                 search_result['title'] = get_item_text(data, 0)
-                search_result['author'] = get_item_text(data, 1 + default)
-                search_result['itemCount'] = get_item_text(data, 2 + default).split(' ')[0]
+                search_result['author'] = get_item_text(data, 1, default_offset)
+                search_result['itemCount'] = get_item_text(data, 1,
+                                                           default_offset + 2).split(' ')[0]
 
             elif resultType in ['song']:
-                search_result['artists'] = parse_song_artists(data, 1 + default)
-                hasAlbum = len(data['flexColumns']) == 4 + default
-                if hasAlbum:
-                    search_result['album'] = parse_song_album(data, 2 + default)
-                search_result['duration'] = get_item_text(data, 2 + hasAlbum + default)
-                toggle_menu = find_object_by_key(nav(data, MENU_ITEMS), 'toggleMenuServiceItemRenderer')
+                runs = get_flex_column_item(data, 1)['text']['runs']
+                # determine the number of artists
+                last_artist_index = default_offset
+                try:
+                    last_artist_index = next(
+                        len(runs) - i - 1 for i, run in enumerate(reversed(runs))
+                        if 'navigationEndpoint' in run
+                        and nav(run, NAVIGATION_BROWSE_ID).startswith('UC'))
+                except StopIteration:  # if single artist is missing the browseId
+                    pass
+
+                search_result['artists'] = parse_song_artists_runs(
+                    runs[default_offset:last_artist_index + 1])
+
+                if len(runs) - last_artist_index == 5:  # has album
+                    search_result['album'] = {
+                        'name': runs[last_artist_index + 2]['text'],
+                        'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID)
+                    }
+                search_result['duration'] = runs[-1]['text']
+                toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
+                                                 'toggleMenuServiceItemRenderer')
                 search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
-                search_result['artist'] = get_item_text(data, 1 + default)
-                search_result['views'] = get_item_text(data, 2 + default).split(' ')[0]
-                search_result['duration'] = get_item_text(data, 3 + default)
+                search_result['artist'] = get_item_text(data, 1, 0 + default_offset)
+                search_result['views'] = get_item_text(data, 1, 2 + default_offset).split(' ')[0]
+                search_result['duration'] = get_item_text(data, 1, 4 + default_offset)
 
             elif resultType in ['upload']:
                 search_result['title'] = get_item_text(data, 0)

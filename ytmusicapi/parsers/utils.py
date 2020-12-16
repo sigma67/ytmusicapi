@@ -5,11 +5,16 @@ def parse_song_artists(data, index):
     flex_item = get_flex_column_item(data, index)
     if not flex_item:
         return None
+    else:
+        return parse_song_artists_runs(flex_item['text']['runs'])
+
+
+def parse_song_artists_runs(runs):
     artists = []
-    for j in range(int(len(flex_item['text']['runs']) / 2) + 1):
+    for j in range(int(len(runs) / 2) + 1):
         artists.append({
-            'name': get_item_text(data, index, j * 2),
-            'id': get_browse_id(flex_item, j * 2)
+            'name': runs[j * 2]['text'],
+            'id': nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)
         })
 
     return artists
@@ -34,10 +39,7 @@ def parse_song_menu_tokens(item):
     elif service_type == "LIBRARY_REMOVE":  # swap if already in library
         library_add_token, library_remove_token = library_remove_token, library_add_token
 
-    return {
-        'add': library_add_token,
-        'remove': library_remove_token
-    }
+    return {'add': library_add_token, 'remove': library_remove_token}
 
 
 def get_item_text(item, index, run_index=0, none_if_absent=False):
