@@ -28,7 +28,8 @@ class Parser:
 
             if resultType in ['song', 'video']:
                 search_result['videoId'] = nav(
-                    data, PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+                    data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
+                    True)
                 search_result['title'] = get_item_text(data, 0)
 
             if resultType in ['artist', 'album', 'playlist']:
@@ -69,10 +70,12 @@ class Parser:
                         'name': runs[last_artist_index + 2]['text'],
                         'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID)
                     }
+
                 search_result['duration'] = runs[-1]['text']
-                toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
-                                                 'toggleMenuServiceItemRenderer')
-                search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
+                if 'menu' in data:
+                    toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
+                                                     'toggleMenuServiceItemRenderer')
+                    search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
                 search_result['artist'] = get_item_text(data, 1, 0 + default_offset)
