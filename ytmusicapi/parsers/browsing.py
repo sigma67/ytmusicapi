@@ -68,7 +68,7 @@ class Parser:
                 if len(runs) - last_artist_index == 5:  # has album
                     search_result['album'] = {
                         'name': runs[last_artist_index + 2]['text'],
-                        'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID)
+                        'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID, True)
                     }
 
                 search_result['duration'] = runs[-1]['text']
