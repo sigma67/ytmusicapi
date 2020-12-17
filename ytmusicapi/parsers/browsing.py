@@ -48,7 +48,9 @@ class Parser:
                     runs[default_offset:last_artist_index + 1])
 
             if resultType in ['artist', 'album', 'playlist']:
-                search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
+                search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID, True)
+                if not search_result['browseId']:
+                    continue
 
             if resultType in ['artist']:
                 search_result['artist'] = get_item_text(data, 0)
