@@ -25,12 +25,27 @@ class Parser:
                     resultType = result_types[result_types_local.index(resultType)]
 
             search_result['resultType'] = resultType
+            last_artist_index = default_offset
+            runs = []
 
             if resultType in ['song', 'video']:
                 search_result['videoId'] = nav(
                     data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
                     True)
                 search_result['title'] = get_item_text(data, 0)
+
+                runs = get_flex_column_item(data, 1)['text']['runs']
+                # determine the number of artists
+                try:
+                    last_artist_index = next(
+                        len(runs) - i - 1 for i, run in enumerate(reversed(runs))
+                        if 'navigationEndpoint' in run
+                        and nav(run, NAVIGATION_BROWSE_ID).startswith('UC'))
+                except StopIteration:  # if single artist is missing the browseId
+                    pass
+
+                search_result['artists'] = parse_song_artists_runs(
+                    runs[default_offset:last_artist_index + 1])
 
             if resultType in ['artist', 'album', 'playlist']:
                 search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
@@ -51,20 +66,6 @@ class Parser:
                                                            default_offset + 2).split(' ')[0]
 
             elif resultType in ['song']:
-                runs = get_flex_column_item(data, 1)['text']['runs']
-                # determine the number of artists
-                last_artist_index = default_offset
-                try:
-                    last_artist_index = next(
-                        len(runs) - i - 1 for i, run in enumerate(reversed(runs))
-                        if 'navigationEndpoint' in run
-                        and nav(run, NAVIGATION_BROWSE_ID).startswith('UC'))
-                except StopIteration:  # if single artist is missing the browseId
-                    pass
-
-                search_result['artists'] = parse_song_artists_runs(
-                    runs[default_offset:last_artist_index + 1])
-
                 if len(runs) - last_artist_index == 5:  # has album
                     search_result['album'] = {
                         'name': runs[last_artist_index + 2]['text'],
@@ -79,9 +80,8 @@ class Parser:
                         search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
-                search_result['artist'] = get_item_text(data, 1, 0 + default_offset)
-                search_result['views'] = get_item_text(data, 1, 2 + default_offset).split(' ')[0]
-                search_result['duration'] = get_item_text(data, 1, 4 + default_offset)
+                search_result['views'] = get_item_text(data, 1, -3).split(' ')[0]
+                search_result['duration'] = get_item_text(data, 1, -1)
 
             elif resultType in ['upload']:
                 search_result['title'] = get_item_text(data, 0)
