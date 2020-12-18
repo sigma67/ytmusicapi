@@ -66,6 +66,7 @@ class Parser:
                                                            default_offset + 2).split(' ')[0]
 
             elif resultType in ['song']:
+                search_result['album'] = None
                 if len(runs) - last_artist_index == 5:  # has album
                     search_result['album'] = {
                         'name': runs[last_artist_index + 2]['text'],
