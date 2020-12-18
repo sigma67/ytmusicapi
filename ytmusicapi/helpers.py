@@ -67,8 +67,13 @@ def get_authorization(auth):
 
 
 def to_int(string):
-    number = string.split(' ')[0]
-    return locale.atoi(number)
+    number_string = string.split(' ')[0]
+    try:
+        int_value = locale.atoi(number_string)
+    except ValueError:
+        number_string = number_string.replace(',', '')
+        int_value = int(number_string)
+    return int_value
 
 
 def i18n(method):
