@@ -59,7 +59,7 @@ class Parser:
                 search_result['title'] = get_item_text(data, 0)
                 search_result['type'] = get_item_text(data, 1)
                 search_result['artist'] = get_item_text(data, 1, 2)
-                search_result['year'] = get_item_text(data, 1, 4)
+                search_result['year'] = get_item_text(data, 1, 4, True)
 
             elif resultType in ['playlist']:
                 search_result['title'] = get_item_text(data, 0)
