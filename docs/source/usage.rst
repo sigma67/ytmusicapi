@@ -47,6 +47,6 @@ Example:
 .. code-block:: python
 
     from ytmusicapi import YTMusic
-    ytmusic = YTMusic('headers_auth.json', 101234161234936123473)
+    ytmusic = YTMusic('headers_auth.json', "101234161234936123473")
 
 
