@@ -84,6 +84,8 @@ def get_continuations(results, continuation_type, limit, request_func, parse_fun
         else:
             break
         contents = get_continuation_contents(results, parse_func)
+        if len(contents) == 0:
+            break
         items.extend(contents)
 
     return items
