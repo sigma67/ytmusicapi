@@ -124,11 +124,12 @@ class UploadsMixin:
 
         return artists
 
-    def get_library_upload_artist(self, browseId: str) -> List[Dict]:
+    def get_library_upload_artist(self, browseId: str, limit: int = 25) -> List[Dict]:
         """
         Returns a list of uploaded tracks for the artist.
 
         :param browseId: Browse id of the upload artist, i.e. from :py:func:`get_library_upload_songs`
+        :param limit: Number of songs to return (increments of 25).
         :return: List of uploaded songs.
 
         Example List::
@@ -158,7 +159,15 @@ class UploadsMixin:
         if len(results['contents']) > 1:
             results['contents'].pop(0)
 
-        return parse_uploaded_items(results['contents'])
+        items = parse_uploaded_items(results['contents'])
+
+        if 'continuations' in results:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_uploaded_items(contents)
+            items.extend(get_continuations(results, 'musicShelfContinuation', limit, request_func, parse_func))
+
+        return items
 
     def get_library_upload_album(self, browseId: str) -> Dict:
         """

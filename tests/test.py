@@ -331,7 +331,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(album['tracks']), 0)
 
     def test_get_library_upload_artist(self):
-        tracks = youtube_auth.get_library_upload_artist(config['uploads']['private_artist_id'])
+        tracks = youtube_auth.get_library_upload_artist(config['uploads']['private_artist_id'], 100)
         self.assertGreater(len(tracks), 0)
 
 
