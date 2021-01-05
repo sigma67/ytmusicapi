@@ -101,11 +101,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNotNone(lyrics_song["lyrics"])
         self.assertIsNotNone(lyrics_song["source"])
 
-        playlist = youtube.get_watch_playlist("9TnpB8WgW4s")
-        no_lyrics_song = youtube.get_lyrics(playlist["lyrics"])
-        self.assertFalse(no_lyrics_song["lyricsFound"])
-        self.assertIsNotNone(no_lyrics_song["lyrics"])
-        self.assertIsNotNone(no_lyrics_song["source"])
+        browseId = youtube.get_watch_playlist("9TnpB8WgW4s")
+        self.assertIsNone(browseId)
 
     ###############
     # WATCH

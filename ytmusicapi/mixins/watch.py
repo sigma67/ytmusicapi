@@ -64,7 +64,7 @@ class WatchMixin:
         ])
 
         lyrics_browse_id = None
-        if len(watchNextRenderer['tabs']) > 1:
+        if 'unselectable' not in watchNextRenderer['tabs'][1]['tabRenderer']:
             lyrics_browse_id = watchNextRenderer['tabs'][1]['tabRenderer']['endpoint'][
                 'browseEndpoint']['browseId']
 
@@ -82,7 +82,9 @@ class WatchMixin:
 
         return {'tracks': tracks, 'lyrics': lyrics_browse_id}
 
-    def get_watch_playlist_shuffle(self, playlistId: str = None, limit=50) -> Dict[List[Dict], str]:
+    def get_watch_playlist_shuffle(self,
+                                   playlistId: str = None,
+                                   limit=50) -> Dict[List[Dict], str]:
         """
         Shuffle any playlist
 

@@ -683,9 +683,5 @@ class BrowsingMixin:
                 'musicDescriptionShelfRenderer']['description']['runs'][0]['text']
             lyrics['source'] = response['contents']['sectionListRenderer']['contents'][0][
                 'musicDescriptionShelfRenderer']['footer']['runs'][0]['text']
-        else:
-            lyrics['lyricsFound'] = False
-            lyrics['lyrics'] = response['contents']['messageRenderer']['subtext'][
-                'messageSubtextRenderer']['text']['runs'][0]['text']
-            lyrics['source'] = response['contents']['messageRenderer']['text']['runs'][0]['text']
+
         return lyrics
