@@ -112,8 +112,10 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_watch_playlist(self):
-        playlist = youtube.get_watch_playlist("4y33h81phKU", limit=50)
+        playlist = youtube_auth.get_watch_playlist("9mWr4c_ig54", limit=50)
         self.assertGreater(len(playlist['tracks']), 50)
+        playlist = youtube_auth.get_watch_playlist("UoAf_y9Ok4k")  # private track
+        self.assertEqual(len(playlist['tracks']), 25)
 
     def test_get_watch_playlist_shuffle(self):
         playlist = youtube.get_watch_playlist_shuffle(
@@ -331,7 +333,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(album['tracks']), 0)
 
     def test_get_library_upload_artist(self):
-        tracks = youtube_auth.get_library_upload_artist(config['uploads']['private_artist_id'], 100)
+        tracks = youtube_auth.get_library_upload_artist(config['uploads']['private_artist_id'],
+                                                        100)
         self.assertGreater(len(tracks), 0)
 
 

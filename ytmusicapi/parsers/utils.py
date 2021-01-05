@@ -20,12 +20,36 @@ def parse_song_artists_runs(runs):
     return artists
 
 
+def get_last_artist_index(runs):
+    try:
+        return next(
+            len(runs) - i - 1 for i, run in enumerate(reversed(runs))
+            if 'navigationEndpoint' in run and
+            (nav(run, NAVIGATION_BROWSE_ID).startswith('UC') or
+             nav(run, NAVIGATION_BROWSE_ID).startswith('FEmusic_library_privately_owned_artist')))
+    except StopIteration:  # try to find album if no artist IDs available
+        if 'navigationEndpoint' in runs[-3]:  # has album
+            return len(runs) - 5
+        else:
+            return 0
+
+
 def parse_song_album(data, index):
     flex_item = get_flex_column_item(data, index)
     return None if not flex_item else {
         'name': get_item_text(data, index),
         'id': get_browse_id(flex_item, 0)
     }
+
+
+def parse_song_album_runs(runs, last_artist_index):
+    if len(runs) - last_artist_index == 5:  # has album
+        return {
+            'name': runs[last_artist_index + 2]['text'],
+            'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID, True)
+        }
+    else:
+        return None
 
 
 def parse_song_menu_tokens(item):

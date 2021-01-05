@@ -35,14 +35,7 @@ class Parser:
                 search_result['title'] = get_item_text(data, 0)
 
                 runs = get_flex_column_item(data, 1)['text']['runs']
-                # determine the number of artists
-                try:
-                    last_artist_index = next(
-                        len(runs) - i - 1 for i, run in enumerate(reversed(runs))
-                        if 'navigationEndpoint' in run
-                        and nav(run, NAVIGATION_BROWSE_ID).startswith('UC'))
-                except StopIteration:  # if single artist is missing the browseId
-                    pass
+                last_artist_index = get_last_artist_index(runs)
 
                 search_result['artists'] = parse_song_artists_runs(
                     runs[default_offset:last_artist_index + 1])
@@ -68,13 +61,7 @@ class Parser:
                                                            default_offset + 2).split(' ')[0]
 
             elif resultType in ['song']:
-                search_result['album'] = None
-                if len(runs) - last_artist_index == 5:  # has album
-                    search_result['album'] = {
-                        'name': runs[last_artist_index + 2]['text'],
-                        'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID, True)
-                    }
-
+                search_result['album'] = parse_song_album_runs(runs, last_artist_index)
                 search_result['duration'] = runs[-1]['text']
                 if 'menu' in data:
                     toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
