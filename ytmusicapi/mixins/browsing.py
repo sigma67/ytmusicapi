@@ -669,16 +669,17 @@ class BrowsingMixin:
         Example::
 
             {
-                "lyricsFound": True,
                 "lyrics": "Today is gonna be the day\\nThat they're gonna throw it back to you\\n",
                 "source": "Source: LyricFind"
             }
 
         """
         lyrics = {}
+        if not browseId:
+            raise Exception("Invalid browseId provided. This song might not have lyrics.")
+
         response = self._send_request('browse', {'browseId': browseId})
         if 'sectionListRenderer' in response['contents'].keys():
-            lyrics['lyricsFound'] = True
             lyrics['lyrics'] = response['contents']['sectionListRenderer']['contents'][0][
                 'musicDescriptionShelfRenderer']['description']['runs'][0]['text']
             lyrics['source'] = response['contents']['sectionListRenderer']['contents'][0][
