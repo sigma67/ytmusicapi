@@ -109,6 +109,9 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
                                  json=body,
                                  headers=self.headers,
                                  proxies=self.proxies)
+        if response.status_code >= 400:
+            raise Exception("Error: Server returned HTTP " + str(response.status_code) +
+                            ": " + response.reason + ". Please check your credentials.")
         return json.loads(response.text)
 
     def _check_auth(self):
