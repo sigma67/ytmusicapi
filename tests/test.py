@@ -80,8 +80,9 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 100)
 
     def test_get_album(self):
-        results = youtube_auth.get_album("MPREb_BQZvl3BFGay")
+        results = youtube_auth.get_album("MPREb_4pL8gzRtw1p")
         self.assertEqual(len(results), 9)
+        self.assertTrue(results['tracks'][0]['isExplicit'])
         self.assertIn('feedbackTokens', results['tracks'][0])
         results = youtube.get_album("MPREb_BQZvl3BFGay")
         self.assertEqual(len(results['tracks']), 7)
@@ -112,7 +113,7 @@ class TestYTMusic(unittest.TestCase):
         playlist = youtube_auth.get_watch_playlist("9mWr4c_ig54", limit=50)
         self.assertGreater(len(playlist['tracks']), 50)
         playlist = youtube_auth.get_watch_playlist("UoAf_y9Ok4k")  # private track
-        self.assertEqual(len(playlist['tracks']), 25)
+        self.assertGreaterEqual(len(playlist['tracks']), 25)
 
     def test_get_watch_playlist_shuffle(self):
         playlist = youtube.get_watch_playlist_shuffle(
