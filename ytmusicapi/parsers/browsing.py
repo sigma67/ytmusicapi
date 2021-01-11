@@ -63,6 +63,7 @@ class Parser:
             elif resultType in ['song']:
                 search_result['album'] = parse_song_album_runs(runs, last_artist_index)
                 search_result['duration'] = runs[-1]['text']
+                search_result['isExplicit'] = nav(data, BADGE_LABEL, True) == 'Explicit'
                 if 'menu' in data:
                     toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
                                                      'toggleMenuServiceItemRenderer')
