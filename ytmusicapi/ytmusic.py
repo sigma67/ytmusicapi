@@ -93,12 +93,11 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
 
         # verify authentication credentials work
         if auth:
-            self.sapisid = sapisid_from_cookie(self.headers['Cookie'])
-            response = self._send_request('guide', {})
-            if 'error' in response:
-                raise Exception(
-                    "The provided credentials are invalid. Reason given by the server: "
-                    + response['error']['status'])
+            try:
+                self.sapisid = sapisid_from_cookie(self.headers['Cookie'])
+            except KeyError:
+                raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
+            self._send_request('guide', {})
 
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
         body.update(self.context)
@@ -109,10 +108,13 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
                                  json=body,
                                  headers=self.headers,
                                  proxies=self.proxies)
+        response_text = json.loads(response.text)
         if response.status_code >= 400:
-            raise Exception("Error: Server returned HTTP " + str(response.status_code) +
-                            ": " + response.reason + ". Please check your credentials.")
-        return json.loads(response.text)
+            message = "Server returned HTTP " + str(
+                response.status_code) + ": " + response.reason + ".\n"
+            error = response_text.get('error', {}).get('message')
+            raise Exception(message + error)
+        return response_text
 
     def _check_auth(self):
         if self.auth == "":
