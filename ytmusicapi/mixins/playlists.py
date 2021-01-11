@@ -49,6 +49,7 @@ class PlaylistsMixin:
                   "likeStatus": "INDIFFERENT",
                   "thumbnails": [...],
                   "isAvailable": True,
+                  "isExplicit": False,
                   "feedbackTokens": {
                     "add": "AB9zfpJxtvrU...",
                     "remove": "AB9zfpKTyZ..."

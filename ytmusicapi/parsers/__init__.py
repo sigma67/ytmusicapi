@@ -27,3 +27,6 @@ THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer'] + THUMBNAIL
 THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer'] + THUMBNAIL
 THUMBNAIL_CROPPED = ['thumbnail', 'croppedSquareThumbnailRenderer'] + THUMBNAIL
 FEEDBACK_TOKEN = ['feedbackEndpoint', 'feedbackToken']
+BADGE_LABEL = [
+    'badges', 0, 'musicInlineBadgeRenderer', 'accessibilityData', 'accessibilityData', 'label'
+]

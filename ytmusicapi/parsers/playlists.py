@@ -62,6 +62,8 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                 isAvailable = data[
                     'musicItemRendererDisplayPolicy'] != 'MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT'
 
+            isExplicit = nav(data, BADGE_LABEL, True) == 'Explicit'
+
             song = {
                 'videoId': videoId,
                 'title': title,
@@ -69,7 +71,8 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                 'album': album,
                 'likeStatus': like,
                 'thumbnails': thumbnails,
-                'isAvailable': isAvailable
+                'isAvailable': isAvailable,
+                'isExplicit': isExplicit
             }
             if duration:
                 song['duration'] = duration
