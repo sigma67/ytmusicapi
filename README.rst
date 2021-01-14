@@ -18,9 +18,8 @@ ytmusicapi: Unofficial API for YouTube Music
     :target: https://github.com/sigma67/ytmusicapi/commits
 
 
-A work-in-progress API that emulates web requests from the YouTube Music web client.
-
-Currently you need to extract your authentication data from your web browser and provide it through a file for it to work.
+ytmusicapi is a Python 3 library to send requests to the YouTube Music API.
+It emulates YouTube Music web client requests using the user's cookie data for authentication.
 
 .. features
 
@@ -34,6 +33,7 @@ Features
 * get albums
 * get song metadata
 * get watch playlists (playlist that appears when you press play in YouTube Music)
+* get song lyrics
 
 | **Library management**:
 
@@ -59,8 +59,8 @@ Usage
     from ytmusicapi import YTMusic
 
     ytmusic = YTMusic('headers_auth.json')
-    playlistId = ytmusic.create_playlist("test", "test description")
-    search_results = ytmusic.search("Oasis Wonderwall")
+    playlistId = ytmusic.create_playlist('test', 'test description')
+    search_results = ytmusic.search('Oasis Wonderwall')
     ytmusic.add_playlist_items(playlistId, [search_results[0]['videoId']])
 
 The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/test.py>`_ are also a great source of usage examples.
