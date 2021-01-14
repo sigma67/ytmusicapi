@@ -55,7 +55,7 @@ def parse_albums(results, upload=True):
                 'name': nav(data, SUBTITLE2),
                 'id': nav(data, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID, True)
             }
-            album['year'] = nav(data, SUBTITLE3)
+            album['year'] = nav(data, SUBTITLE3, True)
 
         albums.append(album)
 
