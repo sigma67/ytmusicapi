@@ -10,11 +10,15 @@ def parse_watch_playlist(results):
         if 'unplayableText' in data:
             continue
 
-        feedback_tokens = None
+        feedback_tokens = like_status = None
         for item in nav(data, MENU_ITEMS):
             if 'toggleMenuServiceItemRenderer' in item:
-                feedback_tokens = parse_song_menu_tokens(item)
-                break
+                service = item['toggleMenuServiceItemRenderer']['defaultServiceEndpoint']
+                if 'feedbackEndpoint' in service:
+                    feedback_tokens = parse_song_menu_tokens(item)
+                if 'likeEndpoint' in service:
+                    status = ['LIKE', 'INDIFFERENT']
+                    like_status = status[status.index(service['likeEndpoint']['status']) - 1]
 
         runs = data['longBylineText']['runs']
         last_artist_index = get_last_artist_index(runs)
@@ -29,7 +33,8 @@ def parse_watch_playlist(results):
             'length': nav(data, ['lengthText', 'runs', 0, 'text']),
             'playlistId': nav(data, NAVIGATION_PLAYLIST_ID),
             'thumbnail': nav(data, THUMBNAIL),
-            'feedbackTokens': feedback_tokens
+            'feedbackTokens': feedback_tokens,
+            'likeStatus': like_status
         }
         tracks.append(track)
 
