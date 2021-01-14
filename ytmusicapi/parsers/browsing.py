@@ -71,8 +71,8 @@ class Parser:
                         search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
-                search_result['views'] = get_item_text(data, 1, -len(runs) + 2).split(' ')[0]
-                search_result['duration'] = get_item_text(data, 1, 4, True)
+                search_result['views'] = get_item_text(data, 1, 2 + last_artist_index).split(' ')[0]
+                search_result['duration'] = get_item_text(data, 1, 4 + last_artist_index, True)
 
             elif resultType in ['upload']:
                 search_result['title'] = get_item_text(data, 0)
