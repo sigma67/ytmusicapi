@@ -28,8 +28,10 @@ def get_last_artist_index(runs):
             (nav(run, NAVIGATION_BROWSE_ID).startswith('UC') or
              nav(run, NAVIGATION_BROWSE_ID).startswith('FEmusic_library_privately_owned_artist')))
     except StopIteration:  # try to find album if no artist IDs available
-        if 'navigationEndpoint' in runs[-3]:  # has album
+        if 'navigationEndpoint' in runs[-3] or runs[-3]['text'].endswith('views'):  # has album
             return len(runs) - 5
+        elif runs[-1]['text'].endswith('views'):
+            return len(runs) - 3
         else:
             return 0
 
