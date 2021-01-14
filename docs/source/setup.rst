@@ -71,6 +71,21 @@ a file called ``headers_auth.json`` will be created in the current directory, wh
 
 These credentials remain valid as long as your YTMusic browser session is valid (about 2 years unless you log out).
 
+.. raw:: html
+
+   <details>
+   <summary><a>MacOS special pasting instructions</a></summary>
+
+.. container::
+
+    - MacOS terminal application can only accept 1024 characters pasted to std input. To paste in terminal, a small utility called pbpaste must be used.
+    - In terminal just prefix the command used to run the script you created above with ``pbpaste | ``
+    - This will pipe the contents of the clipboard into the script just as if you had pasted it from the edit menu.
+
+.. raw:: html
+
+   </details><br>
+
 Manual file creation
 --------------------
 
