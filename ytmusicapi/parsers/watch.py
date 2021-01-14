@@ -30,7 +30,7 @@ def parse_watch_playlist(results):
             'title': nav(data, TITLE_TEXT),
             'artists': artists,
             'album': album,
-            'length': nav(data, ['lengthText', 'runs', 0, 'text']),
+            'length': nav(data, ['lengthText', 'runs', 0, 'text'], True),
             'playlistId': nav(data, NAVIGATION_PLAYLIST_ID),
             'thumbnail': nav(data, THUMBNAIL),
             'feedbackTokens': feedback_tokens,
