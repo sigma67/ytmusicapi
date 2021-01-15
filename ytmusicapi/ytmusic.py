@@ -117,7 +117,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         return response_text
 
     def _check_auth(self):
-        if self.auth == "":
+        if not self.auth:
             raise Exception("Please provide authentication before using this function")
 
     @classmethod
