@@ -24,9 +24,11 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
+
     def __init__(self,
                  auth: str = None,
                  user: str = None,
+                 requests_session=True,
                  proxies: dict = None,
                  language: str = 'en'):
         """
@@ -42,6 +44,10 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
           Otherwise the default account is used. You can retrieve the user ID
           by going to https://myaccount.google.com/brandaccounts and selecting your brand account.
           The user ID will be in the URL: https://myaccount.google.com/b/user_id/
+        :param requests_session: A Requests session object or a truthy value to create one.
+          A falsy value disables sessions.
+          It is generally a good idea to keep sessions enabled for
+          performance reasons (connection pooling).
         :param proxies: Optional. Proxy configuration in requests_ format_.
 
             .. _requests: https://requests.readthedocs.io/
@@ -52,6 +58,15 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
             the ytmusicapi/locales directory.
         """
         self.auth = auth
+
+        if isinstance(requests_session, requests.Session):
+            self._session = requests_session
+        else:
+            if requests_session:  # Build a new session.
+                self._session = requests.Session()
+            else:  # Use the Requests API module as a "session".
+                self._session = requests.api
+
         self.proxies = proxies
 
         try:
@@ -104,10 +119,10 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         if self.auth:
             origin = self.headers.get('origin', self.headers.get('x-origin'))
             self.headers["Authorization"] = get_authorization(self.sapisid + ' ' + origin)
-        response = requests.post(base_url + endpoint + params + additionalParams,
-                                 json=body,
-                                 headers=self.headers,
-                                 proxies=self.proxies)
+        response = self._session.post(base_url + endpoint + params + additionalParams,
+                                      json=body,
+                                      headers=self.headers,
+                                      proxies=self.proxies)
         response_text = json.loads(response.text)
         if response.status_code >= 400:
             message = "Server returned HTTP " + str(

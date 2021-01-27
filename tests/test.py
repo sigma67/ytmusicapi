@@ -7,7 +7,7 @@ from ytmusicapi.ytmusic import YTMusic  # noqa: E402
 config = configparser.RawConfigParser()
 config.read('./test.cfg', 'utf-8')
 
-youtube = YTMusic()
+youtube = YTMusic(requests_session=False)
 youtube_auth = YTMusic(config['auth']['headers_file'])
 youtube_brand = YTMusic(config['auth']['headers'], config['auth']['brand_account'])
 
