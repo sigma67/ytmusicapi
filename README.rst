@@ -5,6 +5,10 @@ ytmusicapi: Unofficial API for YouTube Music
     :alt: PyPI Downloads
     :target: https://pypi.org/project/ytmusicapi/
 
+.. image:: https://badges.gitter.im/sigma67/ytmusicapi.svg
+   :alt: Ask questions at https://gitter.im/sigma67/ytmusicapi
+   :target: https://gitter.im/sigma67/ytmusicapi
+
 .. image:: https://img.shields.io/codecov/c/github/sigma67/ytmusicapi?style=flat-square
     :alt: Code coverage
     :target: https://codecov.io/gh/sigma67/ytmusicapi
