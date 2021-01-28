@@ -20,26 +20,40 @@ class BrowsingMixin:
         Returns results within the provided category.
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
-        :param filter: Filter for item types. Allowed values:
-          'songs', 'videos', 'albums', 'artists', 'playlists', 'uploads'.
+        :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``uploads``.
           Default: Default search, including all types of items.
         :param limit: Number of search results to return
           Default: 20
         :param ignore_spelling: Whether to ignore YTM spelling suggestions.
           If True, the exact search term will be searched for, and will not be corrected.
-          This does not have any effect when the filter is set to 'uploads'.
+          This does not have any effect when the filter is set to ``uploads``.
           Default: False, will use YTM's default behavior of autocorrecting the search.
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
           albums, artists and playlists additionally contain a browseId, corresponding to
-          albumId, channelId and playlistId (browseId='VL'+playlistId)
+          albumId, channelId and playlistId (browseId=``VL``+playlistId)
 
-          Example list::
+          Example list for default search with one result per resultType for brevity. Normally
+          there are 3 results per resultType and an additional ``thumbnails`` key::
 
             [
               {
+                "resultType": "video",
+                "videoId": "vU05Eksc_iM",
+                "title": "Wonderwall",
+                "artists": [
+                  {
+                    "name": "Oasis",
+                    "id": "UCmMUZbaYdNH0bEd1PAlAqsA"
+                  }
+                ],
+                "views": "1.4M",
+                "duration": "4:38"
+              },
+              {
+                "resultType": "song",
                 "videoId": "ZrOKjDZOtkA",
-                "title": "Wonderwall (Remastered)",
+                "title": "Wonderwall",
                 "artists": [
                   {
                     "name": "Oasis",
@@ -51,10 +65,51 @@ class BrowsingMixin:
                   "id": "MPREb_9nqEki4ZDpp"
                 },
                 "duration": "4:19",
-                "thumbnails": [...],
-                "resultType": "song"
+                "isExplicit": false,
+                "feedbackTokens": {
+                  "add": null,
+                  "remove": null
+                }
+              },
+              {
+                "resultType": "album",
+                "browseId": "MPREb_9nqEki4ZDpp",
+                "title": "(What's The Story) Morning Glory? (Remastered)",
+                "type": "Album",
+                "artist": "Oasis",
+                "year": "1995",
+                "isExplicit": false
+              },
+              {
+                "resultType": "playlist",
+                "browseId": "VLPLK1PkWQlWtnNfovRdGWpKffO1Wdi2kvDx",
+                "title": "Wonderwall - Oasis",
+                "author": "Tate Henderson",
+                "itemCount": "174"
+              },
+              {
+                "resultType": "video",
+                "videoId": "bx1Bh8ZvH84",
+                "title": "Wonderwall",
+                "artists": [
+                  {
+                    "name": "Oasis",
+                    "id": "UCmMUZbaYdNH0bEd1PAlAqsA"
+                  }
+                ],
+                "views": "386M",
+                "duration": "4:38"
+              },
+              {
+                "resultType": "artist",
+                "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                "artist": "Oasis",
+                "shuffleId": "RDAOkjHYJjL1a3xspEyVkhHAsg",
+                "radioId": "RDEMkjHYJjL1a3xspEyVkhHAsg"
               }
             ]
+
+
         """
         body = {'query': query}
         endpoint = 'search'
@@ -224,8 +279,8 @@ class BrowsingMixin:
         artist['channelId'] = subscription_button['channelId']
         artist['shuffleId'] = nav(header,
                                   ['playButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID)
-        artist['radioId'] = nav(header,
-                                  ['startRadioButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID)
+        artist['radioId'] = nav(header, ['startRadioButton', 'buttonRenderer']
+                                + NAVIGATION_WATCH_PLAYLIST_ID)
         artist['subscribers'] = nav(subscription_button,
                                     ['subscriberCountText', 'runs', 0, 'text'], True)
         artist['subscribed'] = subscription_button['subscribed']

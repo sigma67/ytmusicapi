@@ -115,6 +115,9 @@ class Parser:
                             search_result['releaseDate'] = runs[2]
                         search_result['resultType'] = 'album'
 
+            if resultType in ['song', 'album']:
+                search_result['isExplicit'] = nav(data, BADGE_LABEL, True) == 'Explicit'
+
             search_result['thumbnails'] = nav(data, THUMBNAILS)
             search_results.append(search_result)
 
