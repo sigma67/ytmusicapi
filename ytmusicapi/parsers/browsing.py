@@ -37,6 +37,9 @@ class Parser:
                 runs = get_flex_column_item(data, 1)['text']['runs']
                 last_artist_index = get_last_artist_index(runs)
 
+                if not search_result['videoId'] and default_offset:  # unavailable song in default search edge case
+                    default_offset = 0
+
                 search_result['artists'] = parse_song_artists_runs(
                     runs[default_offset:last_artist_index + 1])
 
