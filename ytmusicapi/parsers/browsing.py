@@ -47,6 +47,7 @@ class Parser:
 
             if resultType in ['artist']:
                 search_result['artist'] = get_item_text(data, 0)
+                parse_menu_playlists(data, search_result)
 
             elif resultType in ['album']:
                 search_result['title'] = get_item_text(data, 0)
@@ -113,28 +114,6 @@ class Parser:
                         if len(runs) > 2:  # date may be missing
                             search_result['releaseDate'] = runs[2]
                         search_result['resultType'] = 'album'
-
-            watch_menu = find_objects_by_key(nav(data, MENU_ITEMS), 'menuNavigationItemRenderer')
-            for item in [_x['menuNavigationItemRenderer'] for _x in watch_menu]:
-                icon = nav(item, ['icon', 'iconType'])
-                if icon == 'MUSIC_SHUFFLE':
-                    watch_key = 'shuffleId'
-                elif icon == 'MIX':
-                    watch_key = 'radioId'
-                else:
-                    # ADD_TO_PLAYLIST
-                    # ALBUM
-                    # ARTIST
-                    # SHARE
-                    continue
-
-                watch_id = nav(item, ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId'],
-                               True)
-                if not watch_id:
-                    watch_id = nav(item, ['navigationEndpoint', 'watchEndpoint', 'playlistId'],
-                                   True)
-                if watch_id:
-                    search_result[watch_key] = watch_id
 
             search_result['thumbnails'] = nav(data, THUMBNAILS)
             search_results.append(search_result)

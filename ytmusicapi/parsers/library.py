@@ -9,6 +9,7 @@ def parse_artists(results, uploaded=False):
         artist = {}
         artist['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
         artist['artist'] = get_item_text(data, 0)
+        parse_menu_playlists(data, artist)
         if uploaded:
             artist['songs'] = get_item_text(data, 1).split(' ')[0]
         else:

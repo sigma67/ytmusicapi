@@ -68,6 +68,24 @@ def parse_song_menu_tokens(item):
     return {'add': library_add_token, 'remove': library_remove_token}
 
 
+def parse_menu_playlists(data, result):
+    watch_menu = find_objects_by_key(nav(data, MENU_ITEMS), 'menuNavigationItemRenderer')
+    for item in [_x['menuNavigationItemRenderer'] for _x in watch_menu]:
+        icon = nav(item, ['icon', 'iconType'])
+        if icon == 'MUSIC_SHUFFLE':
+            watch_key = 'shuffleId'
+        elif icon == 'MIX':
+            watch_key = 'radioId'
+        else:
+            continue
+
+        watch_id = nav(item, ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId'], True)
+        if not watch_id:
+            watch_id = nav(item, ['navigationEndpoint', 'watchEndpoint', 'playlistId'], True)
+        if watch_id:
+            result[watch_key] = watch_id
+
+
 def get_item_text(item, index, run_index=0, none_if_absent=False):
     column = get_flex_column_item(item, index)
     if not column:

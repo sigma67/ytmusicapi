@@ -222,6 +222,10 @@ class BrowsingMixin:
                 'subheader']['runs'][0]['text']
         subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
         artist['channelId'] = subscription_button['channelId']
+        artist['shuffleId'] = nav(header,
+                                  ['playButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID)
+        artist['radioId'] = nav(header,
+                                  ['startRadioButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID)
         artist['subscribers'] = nav(subscription_button,
                                     ['subscriberCountText', 'runs', 0, 'text'], True)
         artist['subscribed'] = subscription_button['subscribed']
