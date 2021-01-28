@@ -2,8 +2,10 @@
 TAB_CONTENT = ['tabs', 0, 'tabRenderer', 'content']
 SINGLE_COLUMN_TAB = ['contents', 'singleColumnBrowseResultsRenderer'] + TAB_CONTENT
 SECTION_LIST = ['sectionListRenderer', 'contents']
+SECTION_LIST_ITEM = ['sectionListRenderer', 'contents', 0]
 ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
-MUSIC_SHELF = [0, 'musicShelfRenderer']
+MUSIC_SHELF = ['musicShelfRenderer']
+GRID_ITEMS = ['gridRenderer', 'items']
 MENU = ['menu', 'menuRenderer']
 MENU_ITEMS = MENU + ['items']
 MENU_LIKE_STATUS = MENU + ['topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus']

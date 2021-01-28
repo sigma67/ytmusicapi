@@ -155,7 +155,7 @@ class UploadsMixin:
         body = prepare_browse_endpoint("ARTIST", browseId)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         if len(results['contents']) > 1:
             results['contents'].pop(0)
 
@@ -165,7 +165,9 @@ class UploadsMixin:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_uploaded_items(contents)
-            items.extend(get_continuations(results, 'musicShelfContinuation', limit, request_func, parse_func))
+            items.extend(
+                get_continuations(results, 'musicShelfContinuation', limit, request_func,
+                                  parse_func))
 
         return items
 
@@ -220,7 +222,7 @@ class UploadsMixin:
         else:
             album['duration'] = header['secondSubtitle']['runs'][0]['text']
 
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         album['tracks'] = parse_uploaded_items(results['contents'])
         return album
 

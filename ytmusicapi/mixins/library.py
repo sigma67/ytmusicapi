@@ -28,8 +28,8 @@ class LibraryMixin:
 
         results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
                                      'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION)['gridRenderer']
-        playlists = parse_content_list(results['items'][1:], parse_playlist)
+        results = nav(results, ITEM_SECTION + GRID_ITEMS)
+        playlists = parse_content_list(results[1:], parse_playlist)
 
         if 'continuations' in results:
             request_func = lambda additionalParams: self._send_request(
@@ -129,13 +129,13 @@ class LibraryMixin:
         results = nav(results, ITEM_SECTION)
         if 'gridRenderer' not in results:
             return []
-        results = results['gridRenderer']
-        albums = parse_albums(results['items'], False)
+        results = nav(results, GRID_ITEMS)
+        albums = parse_albums(results)
 
         if 'continuations' in results:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_albums(contents, False)
+            parse_func = lambda contents: parse_albums(contents)
             albums.extend(
                 get_continuations(results, 'gridContinuation', limit - len(albums), request_func,
                                   parse_func))

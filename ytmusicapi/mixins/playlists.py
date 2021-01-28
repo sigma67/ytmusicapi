@@ -64,7 +64,8 @@ class PlaylistsMixin:
         body = prepare_browse_endpoint("PLAYLIST", browseId)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)[0]['musicPlaylistShelfRenderer']
+        results = nav(response,
+                      SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + ['musicPlaylistShelfRenderer'])
         playlist = {'id': results['playlistId']}
         own_playlist = 'musicEditablePlaylistDetailHeaderRenderer' in response['header']
         if not own_playlist:

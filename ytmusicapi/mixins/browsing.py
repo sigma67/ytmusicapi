@@ -4,7 +4,9 @@ import codecs
 from urllib.parse import parse_qs
 from typing import List, Dict
 from ytmusicapi.helpers import *
+from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.playlists import *
+from ytmusicapi.parsers.library import parse_albums
 
 
 class BrowsingMixin:
@@ -226,7 +228,7 @@ class BrowsingMixin:
         artist['thumbnails'] = nav(header, THUMBNAILS, True)
         artist['songs'] = {'browseId': None}
         if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
-            musicShelf = nav(results, MUSIC_SHELF)
+            musicShelf = nav(results[0], MUSIC_SHELF)
             if 'navigationEndpoint' in nav(musicShelf, TITLE):
                 artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
             artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
@@ -240,41 +242,15 @@ class BrowsingMixin:
 
         :param channelId: channel Id of the artist
         :param params: params obtained by :py:func:`get_artist`
-        :return: List of albums or singles
+        :return: List of albums in the format of :py:func:`get_library_albums`,
+          except artist key is missing.
 
-        Example::
-
-            {
-                "browseId": "MPREb_0rtvKhqeCY0",
-                "artist": "Armin van Buuren",
-                "title": "This I Vow (feat. Mila Josef)",
-                "thumbnails": [...],
-                "type": "EP",
-                "year": "2020"
-            }
         """
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        artist = nav(response['header']['musicHeaderRenderer'], TITLE_TEXT)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
-        albums = []
-        release_type = nav(results, TITLE_TEXT).lower()
-        for result in results['contents']:
-            data = result['musicResponsiveListItemRenderer']
-            browseId = nav(data, NAVIGATION_BROWSE_ID)
-            title = get_item_text(data, 0)
-            thumbnails = nav(data, THUMBNAILS)
-            album_type = get_item_text(data, 1) if release_type == "albums" else "Single"
-            year = get_item_text(data, 1, 2 if release_type == "albums" else 0, True)
-            albums.append({
-                "browseId": browseId,
-                "artist": artist,
-                "title": title,
-                "thumbnails": thumbnails,
-                "type": album_type,
-                "year": year
-            })
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
+        albums = parse_albums(results)
 
         return albums
 
@@ -341,36 +317,15 @@ class BrowsingMixin:
 
         :param channelId: channelId of the user.
         :param params: params obtained by :py:func:`get_artist`
-        :return: List of user playlists.
+        :return: List of user playlists in the format of :py:func:`get_library_playlists`
 
-        Example::
-
-            [
-                {
-                  "browseId": "VLPLkqz3S84Tw-T4WwdS5EAMHegVhWH9vZIx",
-                  "title": "Top 10 vídeos del momento... hasta el momento! | Vevo Playlist",
-                  "thumbnails": [
-                    {
-                      "url": "https://i.ytimg.com/vi/...",
-                      "width": 400,
-                      "height": 225
-                    }
-                  ]
-                }
-            ]
         """
         endpoint = 'browse'
         body = {"browseId": channelId, 'params': params}
         response = self._send_request(endpoint, body)
-        data = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + MUSIC_SHELF)
-        user_playlists = []
-        for result in data['contents']:
-            data = result['musicResponsiveListItemRenderer']
-            user_playlists.append({
-                "browseId": nav(data, NAVIGATION_BROWSE_ID),
-                "title": get_item_text(data, 0),
-                "thumbnails": nav(data, THUMBNAILS),
-            })
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
+        user_playlists = parse_content_list(results, parse_playlist)
+
         return user_playlists
 
     def get_album(self, browseId: str) -> Dict:
