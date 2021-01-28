@@ -32,3 +32,4 @@ Contents
    setup
    usage
    reference
+   faq
