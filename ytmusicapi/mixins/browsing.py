@@ -302,7 +302,7 @@ class BrowsingMixin:
         :param channelId: channel Id of the artist
         :param params: params obtained by :py:func:`get_artist`
         :return: List of albums in the format of :py:func:`get_library_albums`,
-          except artist key is missing.
+          except artists key is missing.
 
         """
         body = {"browseId": channelId, "params": params}
