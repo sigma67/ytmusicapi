@@ -36,7 +36,7 @@ def parse_song_runs(runs):
             if text.endswith(' views'):
                 parsed['views'] = text.split(' ')[0]
 
-            elif re.match(r"^\d+:\d+$", text):
+            elif re.match(r"^(\d+:)*\d+:\d+$", text):
                 parsed['duration'] = text
 
             elif re.match(r"^\d{4}$", text):
