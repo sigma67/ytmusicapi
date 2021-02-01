@@ -1,3 +1,4 @@
+import re
 from typing import List, Dict
 from .utils import *
 from ytmusicapi.helpers import i18n
@@ -37,7 +38,8 @@ class Parser:
                 runs = get_flex_column_item(data, 1)['text']['runs']
                 last_artist_index = get_last_artist_index(runs)
 
-                if not search_result['videoId'] and default_offset:  # unavailable song in default search edge case
+                # unavailable song in default search
+                if not search_result['videoId'] and default_offset:
                     default_offset = 0
 
                 search_result['artists'] = parse_song_artists_runs(
@@ -66,7 +68,8 @@ class Parser:
 
             elif resultType in ['song']:
                 search_result['album'] = parse_song_album_runs(runs, last_artist_index)
-                search_result['duration'] = runs[-1]['text']
+                search_result['duration'] = None if not re.match(
+                    r"^\d+:\d+$", runs[-1]['text']) else runs[-1]['text']
                 search_result['isExplicit'] = nav(data, BADGE_LABEL, True) == 'Explicit'
                 if 'menu' in data:
                     toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
