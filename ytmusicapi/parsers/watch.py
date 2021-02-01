@@ -20,22 +20,18 @@ def parse_watch_playlist(results):
                     status = ['LIKE', 'INDIFFERENT']
                     like_status = status[status.index(service['likeEndpoint']['status']) - 1]
 
-        runs = data['longBylineText']['runs']
-        last_artist_index = get_last_artist_index(runs)
-        artists = parse_song_artists_runs(runs[:last_artist_index + 1])
-        album = parse_song_album_runs(runs, last_artist_index)
+        song_info = parse_song_runs(data['longBylineText']['runs'])
 
         track = {
             'videoId': data['videoId'],
             'title': nav(data, TITLE_TEXT),
-            'artists': artists,
-            'album': album,
             'length': nav(data, ['lengthText', 'runs', 0, 'text'], True),
             'playlistId': nav(data, NAVIGATION_PLAYLIST_ID),
             'thumbnail': nav(data, THUMBNAIL),
             'feedbackTokens': feedback_tokens,
             'likeStatus': like_status
         }
+        track.update(song_info)
         tracks.append(track)
 
     return tracks

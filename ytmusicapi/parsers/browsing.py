@@ -26,29 +26,6 @@ class Parser:
                     resultType = result_types[result_types_local.index(resultType)]
 
             search_result['resultType'] = resultType
-            last_artist_index = default_offset
-            runs = []
-
-            if resultType in ['song', 'video']:
-                search_result['videoId'] = nav(
-                    data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
-                    True)
-                search_result['title'] = get_item_text(data, 0)
-
-                runs = get_flex_column_item(data, 1)['text']['runs']
-                last_artist_index = get_last_artist_index(runs)
-
-                # unavailable song in default search
-                if not search_result['videoId'] and default_offset:
-                    default_offset = 0
-
-                search_result['artists'] = parse_song_artists_runs(
-                    runs[default_offset:last_artist_index + 1])
-
-            if resultType in ['artist', 'album', 'playlist']:
-                search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID, True)
-                if not search_result['browseId']:
-                    continue
 
             if resultType in ['artist']:
                 search_result['artist'] = get_item_text(data, 0)
@@ -67,10 +44,7 @@ class Parser:
                                                            default_offset + 2).split(' ')[0]
 
             elif resultType in ['song']:
-                search_result['album'] = parse_song_album_runs(runs, last_artist_index)
-                search_result['duration'] = None if not re.match(
-                    r"^\d+:\d+$", runs[-1]['text']) else runs[-1]['text']
-                search_result['isExplicit'] = nav(data, BADGE_LABEL, True) == 'Explicit'
+                search_result['duration'] = None
                 if 'menu' in data:
                     toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
                                                      'toggleMenuServiceItemRenderer')
@@ -78,9 +52,7 @@ class Parser:
                         search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
             elif resultType in ['video']:
-                search_result['views'] = get_item_text(data, 1,
-                                                       2 + last_artist_index).split(' ')[0]
-                search_result['duration'] = get_item_text(data, 1, 4 + last_artist_index, True)
+                search_result['views'] = None
 
             elif resultType in ['upload']:
                 search_result['title'] = get_item_text(data, 0)
@@ -120,6 +92,20 @@ class Parser:
                         if len(runs) > 2:  # date may be missing
                             search_result['releaseDate'] = runs[2]
                         search_result['resultType'] = 'album'
+
+            if resultType in ['song', 'video']:
+                search_result['videoId'] = nav(
+                    data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
+                    True)
+                search_result['title'] = get_item_text(data, 0)
+
+                song_info = parse_song_runs(get_flex_column_item(data, 1)['text']['runs'])
+                search_result.update(song_info)
+
+            if resultType in ['artist', 'album', 'playlist']:
+                search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID, True)
+                if not search_result['browseId']:
+                    continue
 
             if resultType in ['song', 'album']:
                 search_result['isExplicit'] = nav(data, BADGE_LABEL, True) == 'Explicit'

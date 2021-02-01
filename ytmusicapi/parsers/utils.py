@@ -1,4 +1,5 @@
 from . import *
+import re
 
 
 def parse_song_artists(data, index):
@@ -6,34 +7,42 @@ def parse_song_artists(data, index):
     if not flex_item:
         return None
     else:
-        return parse_song_artists_runs(flex_item['text']['runs'])
+        runs = flex_item['text']['runs']
+        artists = []
+        for j in range(int(len(runs) / 2) + 1):
+            artists.append({
+                'name': runs[j * 2]['text'],
+                'id': nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)
+            })
+        return artists
 
 
-def parse_song_artists_runs(runs):
-    artists = []
-    for j in range(int(len(runs) / 2) + 1):
-        artists.append({
-            'name': runs[j * 2]['text'],
-            'id': nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)
-        })
+def parse_song_runs(runs):
+    parsed = {'artists': []}
+    for run in runs:
+        text = run['text']
+        if 'navigationEndpoint' in run:  # artist or album
+            item = {
+                'name': text,
+                'id': nav(run, NAVIGATION_BROWSE_ID, True)
+            }
 
-    return artists
+            if item['id'] and item['id'].startswith('MPRE'):  # album
+                parsed['album'] = item
+            else:  # artist
+                parsed['artists'].append(item)
 
-
-def get_last_artist_index(runs):
-    try:
-        return next(
-            len(runs) - i - 1 for i, run in enumerate(reversed(runs))
-            if 'navigationEndpoint' in run and
-            (nav(run, NAVIGATION_BROWSE_ID).startswith('UC') or nav(
-                run, NAVIGATION_BROWSE_ID).startswith('FEmusic_library_privately_owned_artist')))
-    except StopIteration:  # try to find album if no artist IDs available
-        if 'navigationEndpoint' in runs[-3] or runs[-3]['text'].endswith('views'):  # has album
-            return len(runs) - 5
-        elif runs[-1]['text'].endswith('views'):
-            return len(runs) - 3
         else:
-            return 0
+            if text.endswith(' views'):
+                parsed['views'] = text.split(' ')[0]
+
+            elif re.match(r"^\d+:\d+$", text):
+                parsed['duration'] = text
+
+            elif re.match(r"^\d{4}$", text):
+                parsed['year'] = text
+
+    return parsed
 
 
 def parse_song_album(data, index):
@@ -42,17 +51,6 @@ def parse_song_album(data, index):
         'name': get_item_text(data, index),
         'id': get_browse_id(flex_item, 0)
     }
-
-
-def parse_song_album_runs(runs, last_artist_index):
-    if len(runs) > last_artist_index + 1 and type(
-            runs[last_artist_index + 2]) is dict:  # has album
-        return {
-            'name': runs[last_artist_index + 2]['text'],
-            'id': nav(runs[last_artist_index + 2], NAVIGATION_BROWSE_ID, True)
-        }
-    else:
-        return None
 
 
 def parse_song_menu_tokens(item):
