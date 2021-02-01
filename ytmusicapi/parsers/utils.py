@@ -22,10 +22,7 @@ def parse_song_runs(runs):
     for run in runs:
         text = run['text']
         if 'navigationEndpoint' in run:  # artist or album
-            item = {
-                'name': text,
-                'id': nav(run, NAVIGATION_BROWSE_ID, True)
-            }
+            item = {'name': text, 'id': nav(run, NAVIGATION_BROWSE_ID, True)}
 
             if item['id'] and item['id'].startswith('MPRE'):  # album
                 parsed['album'] = item
@@ -33,7 +30,8 @@ def parse_song_runs(runs):
                 parsed['artists'].append(item)
 
         else:
-            if text.endswith(' views'):
+            # note: YT uses non-breaking space \xa0 to separate number and magnitude
+            if re.match(r"^\d([^ ])* [^ ]*$", text):
                 parsed['views'] = text.split(' ')[0]
 
             elif re.match(r"^(\d+:)*\d+:\d+$", text):

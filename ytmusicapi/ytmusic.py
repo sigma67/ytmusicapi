@@ -24,7 +24,6 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
-
     def __init__(self,
                  auth: str = None,
                  user: str = None,
@@ -84,11 +83,9 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
-            
+
         self.context['context']['client']['hl'] = language
-        supported_languages = [
-            f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')
-        ]
+        supported_languages = [f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')]
         if language not in supported_languages:
             raise Exception("Language not supported. Supported languages are "
                             ', '.join(supported_languages))
@@ -96,8 +93,8 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         try:
             locale.setlocale(locale.LC_ALL, self.language)
         except locale.Error:
-             with suppress(locale.Error):
-                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+            with suppress(locale.Error):
+                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         self.lang = gettext.translation('base',
                                         localedir=pkg_resources.resource_filename(
                                             'ytmusicapi', 'locales'),
