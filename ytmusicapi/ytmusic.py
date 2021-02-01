@@ -84,27 +84,28 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
 
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
-            self.context['context']['client']['hl'] = language
-            supported_languages = [
-                f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')
-            ]
-            if language not in supported_languages:
-                raise Exception("Language not supported. Supported languages are "
-                                ', '.join(supported_languages))
-            self.language = language
-            try:
-                locale.setlocale(locale.LC_ALL, language)
-            except locale.Error:
-                with suppress(locale.Error):
-                    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-            self.lang = gettext.translation('base',
-                                            localedir=pkg_resources.resource_filename(
-                                                'ytmusicapi', 'locales'),
-                                            languages=[language])
-            self.parser = browsing.Parser(self.lang)
+            
+        self.context['context']['client']['hl'] = language
+        supported_languages = [
+            f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')
+        ]
+        if language not in supported_languages:
+            raise Exception("Language not supported. Supported languages are "
+                            ', '.join(supported_languages))
+        self.language = language
+        try:
+            locale.setlocale(locale.LC_ALL, self.language)
+        except locale.Error:
+             with suppress(locale.Error):
+                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        self.lang = gettext.translation('base',
+                                        localedir=pkg_resources.resource_filename(
+                                            'ytmusicapi', 'locales'),
+                                        languages=[language])
+        self.parser = browsing.Parser(self.lang)
 
-            if user:
-                self.context['context']['user']['onBehalfOfUser'] = user
+        if user:
+            self.context['context']['user']['onBehalfOfUser'] = user
 
         # verify authentication credentials work
         if auth:
