@@ -22,6 +22,24 @@ def parse_artists(results, uploaded=False):
     return artists
 
 
+def parse_library_albums(response, request_func, limit):
+    results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
+                                 'itemSectionRenderer')
+    results = nav(results, ITEM_SECTION)
+    if 'gridRenderer' not in results:
+        return []
+    results = nav(results, GRID)
+    albums = parse_albums(results['items'])
+
+    if 'continuations' in results:
+        parse_func = lambda contents: parse_albums(contents)
+        albums.extend(
+            get_continuations(results, 'gridContinuation', limit - len(albums), request_func,
+                              parse_func))
+
+    return albums
+
+
 def parse_albums(results):
     albums = []
     for result in results:
