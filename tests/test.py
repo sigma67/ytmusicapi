@@ -93,7 +93,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_streaming_data(self):
         streaming_data = youtube_auth.get_streaming_data("ZrOKjDZOtkA")
-        self.assertEqual(len(streaming_data), 3)
+        self.assertGreaterEqual(len(streaming_data), 3)
 
     def test_get_lyrics(self):
         playlist = youtube.get_watch_playlist("ZrOKjDZOtkA")
@@ -123,7 +123,7 @@ class TestYTMusic(unittest.TestCase):
     def test_get_watch_playlist_shuffle_playlist(self):
         playlist = youtube.get_watch_playlist_shuffle(
             playlistId="PL528pVfw3ao0x8jlW3kwdIx1FEMMeeghb", limit=99)
-        self.assertGreaterEqual(len(playlist['tracks']), 99)
+        self.assertGreaterEqual(len(playlist['tracks']), 80)
 
     ###############
     # LIBRARY
