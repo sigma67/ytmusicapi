@@ -40,8 +40,6 @@ class Parser:
 
             elif resultType == 'album':
                 search_result['type'] = get_item_text(data, 1)
-                search_result['artist'] = get_item_text(data, 1, 2)
-                search_result['year'] = get_item_text(data, 1, 4, True)
 
             elif resultType == 'playlist':
                 search_result['author'] = get_item_text(data, 1, default_offset)
@@ -106,6 +104,8 @@ class Parser:
                     data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
                     True)
 
+            if resultType in ['song', 'video', 'album']:
+                search_result['year'] = None
                 song_info = parse_song_runs(get_flex_column_item(data, 1)['text']['runs'])
                 search_result.update(song_info)
 
