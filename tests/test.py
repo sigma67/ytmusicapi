@@ -121,8 +121,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(playlist['tracks']), 12)
 
     def test_get_watch_playlist_shuffle_playlist(self):
-        playlist = youtube.get_watch_playlist_shuffle(
-            playlistId="PL528pVfw3ao0x8jlW3kwdIx1FEMMeeghb", limit=99)
+        playlist = youtube_auth.get_watch_playlist_shuffle(
+            videoId="u6XiiXJD0jg", playlistId="PL528pVfw3ao2VzfY6zE1TOZm1cBSdk7Q0", limit=99)
         self.assertGreaterEqual(len(playlist['tracks']), 80)
 
     ###############

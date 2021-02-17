@@ -50,12 +50,13 @@ class WatchMixin:
         body = {'enablePersistentPlaylistPanel': True, 'isAudioOnly': True}
         if videoId:
             body['videoId'] = videoId
-            body['watchEndpointMusicSupportedConfigs'] = {
-                'watchEndpointMusicConfig': {
-                    'hasPersistentPlaylistPanel': True,
-                    'musicVideoType': "MUSIC_VIDEO_TYPE_OMV",
+            if not params:
+                body['watchEndpointMusicSupportedConfigs'] = {
+                    'watchEndpointMusicConfig': {
+                        'hasPersistentPlaylistPanel': True,
+                        'musicVideoType': "MUSIC_VIDEO_TYPE_OMV",
+                    }
                 }
-            }
         is_playlist = False
         if playlistId:
             body['playlistId'] = playlistId
@@ -89,13 +90,15 @@ class WatchMixin:
         return {'tracks': tracks, 'lyrics': lyrics_browse_id}
 
     def get_watch_playlist_shuffle(self,
+                                   videoId: str = None,
                                    playlistId: str = None,
                                    limit=50) -> Dict[List[Dict], str]:
         """
         Shuffle any playlist
 
+        :param videoId: Optional video id of the first video in the shuffled playlist
         :param playlistId: Playlist id
         :param limit: The number of watch playlist items to return
         :return: A list of watch playlist items (see :py:func:`get_watch_playlist`)
         """
-        return self.get_watch_playlist(playlistId=playlistId, limit=limit, params='wAEB8gECGAE%3D')
+        return self.get_watch_playlist(videoId=videoId, playlistId=playlistId, limit=limit, params='wAEB8gECKAE%3D')
