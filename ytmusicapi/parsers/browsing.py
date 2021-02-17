@@ -41,7 +41,7 @@ class Parser:
             elif resultType == 'album':
                 search_result['type'] = get_item_text(data, 1)
                 search_result['artist'] = get_item_text(data, 1, 2)
-                search_result['year'] = get_item_text(data, 1, 4, True)
+                search_result['year'] = get_item_text(data, 1, -1, True)
 
             elif resultType == 'playlist':
                 search_result['author'] = get_item_text(data, 1, default_offset)
