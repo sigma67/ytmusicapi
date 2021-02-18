@@ -1,4 +1,5 @@
-from ytmusicapi.parsers.utils import *
+from .utils import *
+from .songs import *
 
 
 def parse_uploaded_items(results):

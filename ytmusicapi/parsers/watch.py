@@ -1,4 +1,5 @@
 from .utils import *
+from .songs import *
 
 
 def parse_watch_playlist(results):
