@@ -19,7 +19,7 @@ To do so, follow these steps:
 - Open a new tab
 - Open the developer tools (Ctrl-Shift-I) and select the "Network" tab
 - Go to https://music.youtube.com and ensure you are logged in
-- Find an authenticated POST request. The simplest way is to filter by ``/browse`` using the search bar
+- Find an authenticated POST request. The simplest way is to filter by ``/search`` using the search bar
 
 .. raw:: html
 
@@ -28,7 +28,7 @@ To do so, follow these steps:
 
 .. container::
 
-    - Verify that the request looks like this: **Status** 200, **Method** POST, **Domain** music.youtube.com, **File** ``browse?...``
+    - Verify that the request looks like this: **Status** 200, **Method** POST, **Domain** music.youtube.com, **File** ``search?...``
     - Copy the request headers (right click > copy > copy request headers)
 
 .. raw:: html
@@ -42,7 +42,7 @@ To do so, follow these steps:
 
 .. container::
 
-    - Verify that the request looks like this: **Status** 200, **Type** xhr, **Name** ``browse?...``
+    - Verify that the request looks like this: **Status** 200, **Type** xhr, **Name** ``search?...``
     - Click on the Name of any matching request. In the "Headers" tab, scroll to the section "Request headers" and copy everything starting from "accept: \*/\*" to the end of the section
 
 .. raw:: html
