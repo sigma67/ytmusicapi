@@ -19,7 +19,8 @@ To do so, follow these steps:
 - Open a new tab
 - Open the developer tools (Ctrl-Shift-I) and select the "Network" tab
 - Go to https://music.youtube.com and ensure you are logged in
-- Find an authenticated POST request. The simplest way is to filter by ``/browse`` using the search bar
+- Find an authenticated POST request. The simplest way is to filter by ``/browse`` using the search bar of the developer tools.
+  If you don't see the request, try scrolling down a bit or clicking on the library button in the top bar.
 
 .. raw:: html
 
