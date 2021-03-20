@@ -59,8 +59,8 @@ class WatchMixin:
                 }
         is_playlist = False
         if playlistId:
-            body['playlistId'] = playlistId
-            is_playlist = playlistId.startswith('PL')
+            body['playlistId'] = playlistId if not playlistId.startswith("VL") else playlistId[2:]
+            is_playlist = body['playlistId'].startswith('PL')
         if params:
             body['params'] = params
         endpoint = 'next'
