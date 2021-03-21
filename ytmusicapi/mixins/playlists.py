@@ -222,7 +222,7 @@ class PlaylistsMixin:
         :param videoIds: List of Video ids
         :param source_playlist: Playlist id of a playlist to add to the current playlist (no duplicate check)
         :param duplicates: If True, duplicates will be added. If False, an error will be returned if there are duplicates (no items are added to the playlist)
-        :return: Status String and a dict that maps the videoIds to their new setVideoIds or full response
+        :return: Status String and a dict containing the new setVideoId for each videoId or full response
         """
         self._check_auth()
         body = {'playlistId': playlistId, 'actions': []}
