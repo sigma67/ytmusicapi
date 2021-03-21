@@ -283,6 +283,8 @@ def get_add_to_playlist_results(response):
     :param response: the response from add_playlist_items
     :return: the response status and a dict that maps the videoIds to their new setVideoIds
     """
-    resp = [resultData.get("playlistEditVideoAddedResultData") for resultData in response.get("playlistEditResults", [])]
+    resp = [
+        resultData.get("playlistEditVideoAddedResultData")
+        for resultData in response.get("playlistEditResults", [])
+    ]
     return {"status": response["status"], "playlistEditResults": resp}
-
