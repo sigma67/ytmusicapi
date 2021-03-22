@@ -198,3 +198,12 @@ def parse_playlist(data):
     if len(data['subtitle']['runs']) == 3:
         playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
     return playlist
+
+
+def parse_related_artist(data):
+    item = data['musicTwoRowItemRenderer']
+    return {
+        'title': nav(item, TITLE_TEXT),
+        'browseId': nav(item, TITLE + NAVIGATION_BROWSE_ID),
+        'subscribers': nav(item, SUBTITLE)
+    }

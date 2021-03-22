@@ -83,3 +83,11 @@ def i18n(method):
         return method(self, *method_args, **method_kwargs)
 
     return _impl
+
+
+class YouTubeChannelIDIsNotArtistException(Exception):
+    """
+    Not all YouTube channel IDs have YouTube Music Content, this exception thrown when typical YT Channel ID given
+    to Browser Mixin get_artist method
+    """
+    pass

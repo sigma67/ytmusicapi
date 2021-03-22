@@ -2,7 +2,7 @@ import unittest
 import configparser
 import sys
 sys.path.insert(0, '..')
-from ytmusicapi.ytmusic import YTMusic  # noqa: E402
+from ytmusicapi.ytmusic import YTMusic, YouTubeChannelIDIsNotArtistException  # noqa: E402
 
 config = configparser.RawConfigParser()
 config.read('./test.cfg', 'utf-8')
@@ -50,12 +50,33 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_artist(self):
         results = youtube.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
-        self.assertEqual(len(results), 13)
+        self.assertEqual(len(results), 14)
+
+        # test correctness of related artists
+        related = results['related']['results']
+
+        # all should have 3 keys per item
+        self.assertEqual(
+            len([x for x in related if set(x.keys()) == {"browseId", "subscribers", "title"}]),
+            len(related))
+
+        # test names of some related artists
+        related_artist_names = {x['title'] for x in related}
+        self.assertTrue(
+            {"The Verve", "Liam Gallagher", "Noel Gallagher", "Beady Eye",
+             "The Stone Roses"}.issubset(related_artist_names))
+
         results = youtube.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         self.assertGreaterEqual(len(results), 11)
         results = youtube.get_artist(
             "UCDAPd3S5CBIEKXn-tvy57Lg")  # no thumbnail, albums, subscribe count
         self.assertGreaterEqual(len(results), 11)
+
+    def test_get_artist_for_non_youtube_music_channel(self):
+        # all YouTube channel IDs can be looked up in YouTube Music, but the page they return will not necessarily return any music content
+        non_music_channel_id = "UCUcpVoi5KkJmnE3bvEhHR0Q"  # e.g. https://music.youtube.com/channel/UCUcpVoi5KkJmnE3bvEhHR0Q
+        self.assertRaises(YouTubeChannelIDIsNotArtistException, youtube.get_artist,
+                          non_music_channel_id)
 
     def test_get_artist_albums(self):
         artist = youtube.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
