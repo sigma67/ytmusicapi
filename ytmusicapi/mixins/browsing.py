@@ -265,6 +265,11 @@ class BrowsingMixin:
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
+        if len(results) == 1:
+            # not a YouTube Music Channel, a standard YouTube Channel ID with no music content was given
+            raise YouTubeChannelIDIsNotArtistException(
+                f"The YouTube Channel ID: {channelId} has no music content.")
+
         artist = {'description': None, 'views': None}
         header = response['header']['musicImmersiveHeaderRenderer']
         artist['name'] = nav(header, TITLE_TEXT)
@@ -278,7 +283,8 @@ class BrowsingMixin:
         subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
         artist['channelId'] = subscription_button['channelId']
         artist['shuffleId'] = nav(header,
-                                  ['playButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID, True)
+                                  ['playButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID,
+                                  True)
         artist['radioId'] = nav(header, ['startRadioButton', 'buttonRenderer']
                                 + NAVIGATION_WATCH_PLAYLIST_ID, True)
         artist['subscribers'] = nav(subscription_button,
@@ -291,6 +297,13 @@ class BrowsingMixin:
             if 'navigationEndpoint' in nav(musicShelf, TITLE):
                 artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
             artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
+
+        artist['related'] = {}
+        if len(results) > 5 and 'musicCarouselShelfRenderer' in results[5]:
+            related_tab = nav(results[5], ['musicCarouselShelfRenderer'])
+            artist['related']['results'] = [
+                parse_related_artist(x) for x in related_tab['contents']
+            ]
 
         artist.update(self.parser.parse_artist_contents(results))
         return artist
