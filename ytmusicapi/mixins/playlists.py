@@ -233,7 +233,7 @@ class PlaylistsMixin:
             body['actions'].append(action)
 
         # add an empty ACTION_ADD_VIDEO because otherwise YTM doesn't return the dict that maps videoIds to their new setVideoIds
-        if not videoIds:
+        if source_playlist and not videoIds:
             body['actions'].append({'action': 'ACTION_ADD_VIDEO', 'addedVideoId': None})
 
         if source_playlist:
@@ -244,9 +244,14 @@ class PlaylistsMixin:
 
         endpoint = 'browse/edit_playlist'
         response = self._send_request(endpoint, body)
-        return get_add_to_playlist_results(response) \
-            if 'status' in response and 'SUCCEEDED' in response['status'] \
-            else response
+        if 'status' in response and 'SUCCEEDED' in response['status']:
+            result_dict = [
+                result_data.get("playlistEditVideoAddedResultData")
+                for result_data in response.get("playlistEditResults", [])
+            ]
+            return {"status": response["status"], "playlistEditResults": result_dict}
+        else:
+            return response
 
     def remove_playlist_items(self, playlistId: str, videos: List[Dict]) -> Union[str, Dict]:
         """
@@ -274,17 +279,3 @@ class PlaylistsMixin:
         endpoint = 'browse/edit_playlist'
         response = self._send_request(endpoint, body)
         return response['status'] if 'status' in response else response
-
-
-def get_add_to_playlist_results(response):
-    """
-    Get the response data after adding songs to a playlist
-
-    :param response: the response from add_playlist_items
-    :return: the response status and a dict that maps the videoIds to their new setVideoIds
-    """
-    resp = [
-        resultData.get("playlistEditVideoAddedResultData")
-        for resultData in response.get("playlistEditResults", [])
-    ]
-    return {"status": response["status"], "playlistEditResults": resp}
