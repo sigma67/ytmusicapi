@@ -190,10 +190,11 @@ class BrowsingMixin:
     def get_artist(self, channelId: str) -> Dict:
         """
         Get information about an artist and their top releases (songs,
-        albums, singles and videos). The top lists contain pointers
-        for getting the full list of releases. For songs/videos, pass
-        the browseId to :py:func:`get_playlist`. For albums/singles,
-        pass browseId and params to :py:func:`get_artist_albums`.
+        albums, singles, videos, and related artists). The top lists
+        contain pointers for getting the full list of releases. For
+        songs/videos, pass the browseId to :py:func:`get_playlist`.
+        For albums/singles, pass browseId and params to :py:func:
+        `get_artist_albums`.
 
         :param channelId: channel id of the artist
         :return: Dictionary with requested information.
@@ -255,6 +256,21 @@ class BrowsingMixin:
                         }
                     ],
                     "browseId": "VLPLMpM3Z0118S5xuNckw1HUcj1D021AnMEB"
+                },
+                "related": {
+                    "results": [
+                        {
+                            "browseId": "UCt2KxZpY5D__kapeQ8cauQw",
+                            "subscribers": "450K subscribers",
+                            "title": "The Verve"
+                        },
+                        {
+                            "browseId": "UCwK2Grm574W1u-sBzLikldQ",
+                            "subscribers": "341K subscribers",
+                            "title": "Liam Gallagher"
+                        },
+                        ...
+                    ]
                 }
             }
         """
