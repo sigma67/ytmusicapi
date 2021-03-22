@@ -32,7 +32,7 @@ Features
 | **Browsing**:
 
 * search (including all filters)
-* get artist information and releases (songs, videos, albums, singles)
+* get artist information and releases (songs, videos, albums, singles, related artists)
 * get user information (videos, playlists)
 * get albums
 * get song metadata
