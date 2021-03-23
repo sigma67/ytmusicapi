@@ -283,8 +283,7 @@ class BrowsingMixin:
 
         if len(results) == 1:
             # not a YouTube Music Channel, a standard YouTube Channel ID with no music content was given
-            raise YouTubeChannelIDIsNotArtistException(
-                f"The YouTube Channel ID: {channelId} has no music content.")
+            raise ValueError(f"The YouTube Channel ID: {channelId} has no music content.")
 
         artist = {'description': None, 'views': None}
         header = response['header']['musicImmersiveHeaderRenderer']
