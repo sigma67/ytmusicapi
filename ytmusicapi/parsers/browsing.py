@@ -205,5 +205,6 @@ def parse_related_artist(data):
     return {
         'title': nav(item, TITLE_TEXT),
         'browseId': nav(item, TITLE + NAVIGATION_BROWSE_ID),
-        'subscribers': nav(item, SUBTITLE)
+        'subscribers': nav(item, SUBTITLE).split(' ')[0],
+        'thumbnails': nav(item, THUMBNAIL_RENDERER),
     }
