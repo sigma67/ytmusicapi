@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 from ytmusicapi.parsers.watch import *
 
 
@@ -7,7 +7,7 @@ class WatchMixin:
                            videoId: str = None,
                            playlistId: str = None,
                            limit=25,
-                           params: str = None) -> Dict[List[Dict], str]:
+                           params: str = None) -> Dict[str, Union[List[Dict]]]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -31,7 +31,6 @@ class WatchMixin:
                       "byline": "Patrik Pietschmann • 47M views",
                       "length": "4:47",
                       "videoId": "4y33h81phKU",
-                      "playlistId": "RDAMVM4y33h81phKU",
                       "thumbnail": [
                         {
                           "url": "https://i.ytimg.com/vi/4y...",
@@ -43,6 +42,7 @@ class WatchMixin:
                       "likeStatus": "LIKE"
                     },...
                 ],
+                "playlist": "RDAMVM4y33h81phKU",
                 "lyrics": "MPLYt_HNNclO0Ddoc-17"
             }
 
@@ -77,6 +77,12 @@ class WatchMixin:
 
         results = nav(watchNextRenderer,
                       TAB_CONTENT + ['musicQueueRenderer', 'content', 'playlistPanelRenderer'])
+        playlist = next(
+            filter(
+                bool,
+                map(
+                    lambda x: nav(x, ['playlistPanelVideoRenderer'] + NAVIGATION_PLAYLIST_ID, True
+                                  ), results['contents'])), None)
         tracks = parse_watch_playlist(results['contents'])
 
         if 'continuations' in results:
@@ -87,12 +93,12 @@ class WatchMixin:
                 get_continuations(results, 'playlistPanelContinuation', limit - len(tracks),
                                   request_func, parse_func, '' if is_playlist else 'Radio'))
 
-        return {'tracks': tracks, 'lyrics': lyrics_browse_id}
+        return dict(tracks=tracks, playlistId=playlist, lyrics=lyrics_browse_id)
 
     def get_watch_playlist_shuffle(self,
                                    videoId: str = None,
                                    playlistId: str = None,
-                                   limit=50) -> Dict[List[Dict], str]:
+                                   limit=50) -> Dict[str, Union[List[Dict]]]:
         """
         Shuffle any playlist
 
@@ -101,4 +107,7 @@ class WatchMixin:
         :param limit: The number of watch playlist items to return
         :return: A list of watch playlist items (see :py:func:`get_watch_playlist`)
         """
-        return self.get_watch_playlist(videoId=videoId, playlistId=playlistId, limit=limit, params='wAEB8gECKAE%3D')
+        return self.get_watch_playlist(videoId=videoId,
+                                       playlistId=playlistId,
+                                       limit=limit,
+                                       params='wAEB8gECKAE%3D')
