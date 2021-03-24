@@ -10,7 +10,7 @@ This package uses the Linux command line utility xgettext, which you can install
 Add new translatable texts from code
 ----------------------------------------
 
-``xgettext -d base -o locales/base.pot *.py mixins/*.py parsers/*.py``
+``xgettext -d base -o locales/base.pot *.py mixins/*.py parsers/*.py  --from-code "utf-8"``
 
 ``sed --in-place locales/base.pot --expression=s/CHARSET/UTF-8/``
 

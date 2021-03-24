@@ -54,7 +54,6 @@ class TestYTMusic(unittest.TestCase):
 
         # test correctness of related artists
         related = results['related']['results']
-
         self.assertEqual(
             len([
                 x for x in related

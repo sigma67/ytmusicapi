@@ -124,9 +124,11 @@ class Parser:
 
     @i18n
     def parse_artist_contents(self, results: List) -> Dict:
-        categories = ['albums', 'singles', 'videos', 'playlists']
-        categories_local = [_('albums'), _('singles'), _('videos'), _('playlists')]
-        categories_parser = [parse_album, parse_single, parse_video, parse_playlist]
+        categories = ['albums', 'singles', 'videos', 'playlists', 'related']
+        categories_local = [_('albums'), _('singles'), _('videos'), _('playlists'), _('related')]
+        categories_parser = [
+            parse_album, parse_single, parse_video, parse_playlist, parse_related_artist
+        ]
         artist = {}
         for i, category in enumerate(categories):
             data = [
@@ -201,10 +203,9 @@ def parse_playlist(data):
 
 
 def parse_related_artist(data):
-    item = data['musicTwoRowItemRenderer']
     return {
-        'title': nav(item, TITLE_TEXT),
-        'browseId': nav(item, TITLE + NAVIGATION_BROWSE_ID),
-        'subscribers': nav(item, SUBTITLE).split(' ')[0],
-        'thumbnails': nav(item, THUMBNAIL_RENDERER),
+        'title': nav(data, TITLE_TEXT),
+        'browseId': nav(data, TITLE + NAVIGATION_BROWSE_ID),
+        'subscribers': nav(data, SUBTITLE).split(' ')[0],
+        'thumbnails': nav(data, THUMBNAIL_RENDERER),
     }
