@@ -57,8 +57,7 @@ class Parser:
                 search_result['duration'] = None
                 search_result['album'] = None
                 if 'menu' in data:
-                    toggle_menu = find_object_by_key(nav(data, MENU_ITEMS),
-                                                     'toggleMenuServiceItemRenderer')
+                    toggle_menu = find_object_by_key(nav(data, MENU_ITEMS), TOGGLE_MENU)
                     if toggle_menu:
                         search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 

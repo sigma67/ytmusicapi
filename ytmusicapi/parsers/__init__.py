@@ -11,6 +11,7 @@ MENU = ['menu', 'menuRenderer']
 MENU_ITEMS = MENU + ['items']
 MENU_LIKE_STATUS = MENU + ['topLevelButtons', 0, 'likeButtonRenderer', 'likeStatus']
 MENU_SERVICE = ['menuServiceItemRenderer', 'serviceEndpoint']
+TOGGLE_MENU = 'toggleMenuServiceItemRenderer'
 PLAY_BUTTON = [
     'overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer'
 ]
@@ -18,6 +19,7 @@ NAVIGATION_BROWSE_ID = ['navigationEndpoint', 'browseEndpoint', 'browseId']
 NAVIGATION_VIDEO_ID = ['navigationEndpoint', 'watchEndpoint', 'videoId']
 NAVIGATION_PLAYLIST_ID = ['navigationEndpoint', 'watchEndpoint', 'playlistId']
 NAVIGATION_WATCH_PLAYLIST_ID = ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId']
+HEADER_DETAIL = ['header', 'musicDetailHeaderRenderer']
 CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'runs', 0]
 FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
 TITLE = ['title', 'runs', 0]

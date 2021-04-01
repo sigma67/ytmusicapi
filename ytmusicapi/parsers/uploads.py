@@ -29,9 +29,8 @@ def parse_uploaded_items(results):
             'likeStatus': like,
             'thumbnails': thumbnails
         }
-        if get_flex_column_item(data, 1):
-            song['artist'] = parse_song_artists(data, 1)
-            song['album'] = parse_song_album(data, 2)
+        song['artist'] = parse_song_artists(data, 1)
+        song['album'] = parse_song_album(data, 2)
 
         songs.append(song)
 

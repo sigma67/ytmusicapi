@@ -4,6 +4,7 @@ import os
 from typing import List, Dict, Union
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers.library import *
+from ytmusicapi.parsers.albums import *
 from ytmusicapi.parsers.uploads import *
 
 
@@ -151,47 +152,32 @@ class UploadsMixin:
         Example album::
 
             {
-              "title": "Hard To Stop - Single",
-              "thumbnails": [...]
-              "year": "2013",
-              "trackCount": 1,
-              "duration": "4 minutes, 2 seconds",
+              "title": "18 Months",
+              "type": "Album",
+              "thumbnails": [...],
+              "trackCount": 7,
+              "duration": "24 minutes",
+              "audioPlaylistId": "MLPRb_po_55chars",
               "tracks": [
                 {
-                  "entityId": "t_po_CICr2crg7OWpchDN6tnYBw",
-                  "videoId": "VBQVcjJM7ak",
-                  "title": "Hard To Stop (Vicetone x Ne-Yo x Daft Punk)",
-                  "likeStatus": "LIKE"
-                }
-              ]
-            }
+                  "entityId": "t_po_22chars",
+                  "videoId": "FVo-UZoPygI",
+                  "title": "Feel So Close",
+                  "duration": "4:15",
+                  "artist": None,
+                  "album": {
+                    "name": "18 Months",
+                    "id": "FEmusic_library_privately_owned_release_detailb_po_55chars"
+                  },
+                  "likeStatus": "INDIFFERENT",
+                  "thumbnails": None
+                },
         """
         self._check_auth()
         body = prepare_browse_endpoint("ALBUM", browseId)
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        header = response['header']['musicDetailHeaderRenderer']
-        album = {'title': nav(header, TITLE_TEXT)}
-        album['thumbnails'] = nav(header, THUMBNAIL_CROPPED)
-        if "description" in header:
-            album["description"] = header["description"]["runs"][0]["text"]
-        run_count = len(header['subtitle']['runs'])
-        if run_count == 3:
-            album['year'] = nav(header, SUBTITLE2)
-
-        if run_count == 5:
-            album['artist'] = {
-                'name': nav(header, SUBTITLE2),
-                'id': nav(header, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID)
-            }
-            album['year'] = nav(header, SUBTITLE3)
-
-        if len(header['secondSubtitle']['runs']) > 1:
-            album['trackCount'] = to_int(header['secondSubtitle']['runs'][0]['text'])
-            album['duration'] = header['secondSubtitle']['runs'][2]['text']
-        else:
-            album['duration'] = header['secondSubtitle']['runs'][0]['text']
-
+        album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         album['tracks'] = parse_uploaded_items(results['contents'])
         return album

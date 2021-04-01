@@ -28,7 +28,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                             videoId = menu_service['playlistEditEndpoint']['actions'][0][
                                 'removedVideoId']
 
-                    if 'toggleMenuServiceItemRenderer' in item:
+                    if TOGGLE_MENU in item:
                         feedback_tokens = parse_song_menu_tokens(item)
 
             # if item is not playable, the videoId was retrieved above

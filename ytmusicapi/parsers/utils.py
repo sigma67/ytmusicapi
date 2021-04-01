@@ -29,7 +29,8 @@ def get_item_text(item, index, run_index=0, none_if_absent=False):
 
 
 def get_flex_column_item(item, index):
-    if 'text' not in item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer'] or \
+    if len(item['flexColumns']) <= index or \
+            'text' not in item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer'] or \
             'runs' not in item['flexColumns'][index]['musicResponsiveListItemFlexColumnRenderer']['text']:
         return None
 

@@ -53,7 +53,7 @@ def parse_song_album(data, index):
 
 def parse_song_menu_tokens(item):
     library_add_token = library_remove_token = None
-    toggle_menu = item['toggleMenuServiceItemRenderer']
+    toggle_menu = item[TOGGLE_MENU]
     service_type = toggle_menu['defaultIcon']['iconType']
     if service_type == "LIBRARY_ADD":
         library_add_token = nav(toggle_menu, ['defaultServiceEndpoint'] + FEEDBACK_TOKEN)
@@ -65,4 +65,6 @@ def parse_song_menu_tokens(item):
     return {'add': library_add_token, 'remove': library_remove_token}
 
 
-
+def parse_like_status(service):
+    status = ['LIKE', 'INDIFFERENT']
+    return status[status.index(service['likeEndpoint']['status']) - 1]
