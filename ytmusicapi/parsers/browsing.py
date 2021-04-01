@@ -42,9 +42,12 @@ class Parser:
                 search_result['type'] = get_item_text(data, 1)
 
             elif resultType == 'playlist':
-                search_result['author'] = get_item_text(data, 1, default_offset)
-                search_result['itemCount'] = get_item_text(data, 1,
-                                                           default_offset + 2).split('\xa0')[0]
+                flex_item = get_flex_column_item(data, 1)['text']['runs']
+                has_author = len(flex_item) == default_offset + 3
+                search_result['itemCount'] = nav(
+                    flex_item, [default_offset + has_author * 2, 'text']).split(' ')[0]
+                search_result['author'] = None if not has_author else nav(
+                    flex_item, [default_offset, 'text'])
 
             elif resultType == 'station':
                 search_result['videoId'] = nav(data, NAVIGATION_VIDEO_ID)
