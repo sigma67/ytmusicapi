@@ -11,6 +11,9 @@ youtube = YTMusic(requests_session=False)
 youtube_auth = YTMusic(config['auth']['headers_file'])
 youtube_brand = YTMusic(config['auth']['headers'], config['auth']['brand_account'])
 
+sample_album = "MPREb_4pL8gzRtw1p"  # Eminem - Revival
+sample_video = "ZrOKjDZOtkA"  # Oasis - Wonderwall (Remastered)
+
 
 class TestYTMusic(unittest.TestCase):
     def test_init(self):
@@ -93,8 +96,12 @@ class TestYTMusic(unittest.TestCase):
                                              results['playlists']['params'])
         self.assertGreater(len(results), 100)
 
+    def test_get_album_browse_id(self):
+        browse_id = youtube.get_album_browse_id("OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY")
+        self.assertEqual(browse_id, sample_album)
+
     def test_get_album(self):
-        results = youtube_auth.get_album("MPREb_4pL8gzRtw1p")
+        results = youtube_auth.get_album(sample_album)
         self.assertEqual(len(results), 9)
         self.assertTrue(results['tracks'][0]['isExplicit'])
         self.assertIn('feedbackTokens', results['tracks'][0])
@@ -102,15 +109,15 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results['tracks']), 7)
 
     def test_get_song(self):
-        song = youtube.get_song("ZrOKjDZOtkA")
+        song = youtube.get_song(sample_video)
         self.assertGreaterEqual(len(song), 16)
 
     def test_get_streaming_data(self):
-        streaming_data = youtube_auth.get_streaming_data("ZrOKjDZOtkA")
+        streaming_data = youtube_auth.get_streaming_data(sample_video)
         self.assertGreaterEqual(len(streaming_data), 3)
 
     def test_get_lyrics(self):
-        playlist = youtube.get_watch_playlist("ZrOKjDZOtkA")
+        playlist = youtube.get_watch_playlist(sample_video)
         lyrics_song = youtube.get_lyrics(playlist["lyrics"])
         self.assertIsNotNone(lyrics_song["lyrics"])
         self.assertIsNotNone(lyrics_song["source"])
@@ -205,13 +212,13 @@ class TestYTMusic(unittest.TestCase):
         self.assertIn('feedbackResponses', response)
 
     def test_rate_song(self):
-        response = youtube_auth.rate_song('ZrOKjDZOtkA', 'LIKE')
+        response = youtube_auth.rate_song(sample_video, 'LIKE')
         self.assertIn('actions', response)
-        response = youtube_auth.rate_song('ZrOKjDZOtkA', 'INDIFFERENT')
+        response = youtube_auth.rate_song(sample_video, 'INDIFFERENT')
         self.assertIn('actions', response)
 
     def test_edit_song_library_status(self):
-        album = youtube_brand.get_album('MPREb_9nqEki4ZDpp')
+        album = youtube_brand.get_album(sample_album)
         response = youtube_brand.edit_song_library_status(
             album['tracks'][2]['feedbackTokens']['add'])
         self.assertTrue(response['feedbackResponses'][0]['isProcessed'])
@@ -267,7 +274,7 @@ class TestYTMusic(unittest.TestCase):
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y")
         self.assertEqual(len(playlistId), 34, "Playlist creation failed")
         response = youtube_auth.add_playlist_items(
-            playlistId, ['y0Hhvtmv0gk', 'y0Hhvtmv0gk'],
+            playlistId, ['y0Hhvtmv0gk', sample_video],
             source_playlist='OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow',
             duplicates=True)
         self.assertEqual(response["status"], 'STATUS_SUCCEEDED', "Adding playlist item failed")

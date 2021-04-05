@@ -409,6 +409,21 @@ class BrowsingMixin:
 
         return user_playlists
 
+    def get_album_browse_id(self, audioPlaylistId: str):
+        """
+        Get an album's browseId based on its audioPlaylistId
+        :param audioPlaylistId: id of the audio playlist  (starting with `OLAK5uy_`)
+        :return: browseId (starting with `MPREb_`)
+        """
+        endpoint = "https://music.youtube.com/playlist"
+        params = {"list": audioPlaylistId}
+        response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
+        matches = re.findall(r"\"MPRE.+?\"", response.text)
+        browse_id = None
+        if len(matches) > 0:
+            browse_id = matches[0].encode('utf8').decode('unicode-escape').strip('"')
+        return browse_id
+
     def get_album(self, browseId: str, beta: bool = False) -> Dict:
         """
         Get information and tracks of an album
