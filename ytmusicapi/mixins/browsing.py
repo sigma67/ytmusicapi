@@ -424,15 +424,12 @@ class BrowsingMixin:
             browse_id = matches[0].encode('utf8').decode('unicode-escape').strip('"')
         return browse_id
 
-    def get_album(self, browseId: str, beta: bool = False) -> Dict:
+    def get_album(self, browseId: str) -> Dict:
         """
         Get information and tracks of an album
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
-        :param beta: Use this parameter if the method doesn't work because you
-            are part of a YouTube beta program that changed this function.
-            Will be removed in the future.
         :return: Dictionary with title, description, artist and tracks.
 
         Each track is in the following format::
@@ -471,12 +468,12 @@ class BrowsingMixin:
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         album = {}
-        if beta:
+        data = nav(response, FRAMEWORK_MUTATIONS, True)
+        if not data:
             album = parse_album_header(response)
             results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
             album['tracks'] = parse_playlist_items(results['contents'])
         else:
-            data = nav(response, FRAMEWORK_MUTATIONS)
             album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload', True)
             album['title'] = album_data['title']
             album['trackCount'] = album_data['trackCount']
