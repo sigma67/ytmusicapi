@@ -13,7 +13,7 @@ def parse_album_header(response):
     if "description" in header:
         album["description"] = header["description"]["runs"][0]["text"]
 
-    album_info = parse_song_runs(header['subtitle']['runs'])
+    album_info = parse_song_runs(header['subtitle']['runs'][2:])
     album.update(album_info)
 
     if len(header['secondSubtitle']['runs']) > 1:

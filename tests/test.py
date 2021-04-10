@@ -102,7 +102,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_album(self):
         results = youtube_auth.get_album(sample_album)
-        self.assertEqual(len(results), 9)
+        self.assertGreaterEqual(len(results), 9)
         self.assertTrue(results['tracks'][0]['isExplicit'])
         self.assertIn('feedbackTokens', results['tracks'][0])
         results = youtube.get_album("MPREb_BQZvl3BFGay")

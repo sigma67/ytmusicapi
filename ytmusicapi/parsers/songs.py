@@ -19,7 +19,9 @@ def parse_song_artists(data, index):
 
 def parse_song_runs(runs):
     parsed = {'artists': []}
-    for run in runs:
+    for i, run in enumerate(runs):
+        if i % 2:  # uneven items are always separators
+            continue
         text = run['text']
         if 'navigationEndpoint' in run:  # artist or album
             item = {'name': text, 'id': nav(run, NAVIGATION_BROWSE_ID, True)}
@@ -40,6 +42,9 @@ def parse_song_runs(runs):
             elif re.match(r"^\d{4}$", text):
                 parsed['year'] = text
 
+            else:  # artist without id
+                parsed['artists'].append({'name': text, 'id': None})
+
     return parsed
 
 
@@ -52,14 +57,12 @@ def parse_song_album(data, index):
 
 
 def parse_song_menu_tokens(item):
-    library_add_token = library_remove_token = None
     toggle_menu = item[TOGGLE_MENU]
     service_type = toggle_menu['defaultIcon']['iconType']
-    if service_type == "LIBRARY_ADD":
-        library_add_token = nav(toggle_menu, ['defaultServiceEndpoint'] + FEEDBACK_TOKEN)
-        library_remove_token = nav(toggle_menu, ['toggledServiceEndpoint'] + FEEDBACK_TOKEN)
+    library_add_token = nav(toggle_menu, ['defaultServiceEndpoint'] + FEEDBACK_TOKEN, True)
+    library_remove_token = nav(toggle_menu, ['toggledServiceEndpoint'] + FEEDBACK_TOKEN, True)
 
-    elif service_type == "LIBRARY_REMOVE":  # swap if already in library
+    if service_type == "LIBRARY_REMOVE":  # swap if already in library
         library_add_token, library_remove_token = library_remove_token, library_add_token
 
     return {'add': library_add_token, 'remove': library_remove_token}

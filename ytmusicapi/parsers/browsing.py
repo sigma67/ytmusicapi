@@ -108,7 +108,10 @@ class Parser:
 
             if resultType in ['song', 'video', 'album']:
                 search_result['year'] = None
-                song_info = parse_song_runs(get_flex_column_item(data, 1)['text']['runs'])
+                is_album = resultType == 'album'
+                flex_item = get_flex_column_item(data, 1)
+                runs = flex_item['text']['runs'][2 * (default_offset or is_album):]
+                song_info = parse_song_runs(runs)
                 search_result.update(song_info)
 
             if resultType in ['artist', 'album', 'playlist']:
