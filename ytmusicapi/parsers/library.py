@@ -48,30 +48,32 @@ def parse_albums(results):
         album['browseId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)
         album['title'] = nav(data, TITLE_TEXT)
         album['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
-        run_count = len(data['subtitle']['runs'])
-        has_artists = False
-        if run_count == 1:
-            album['year'] = nav(data, SUBTITLE)
-        else:
-            album['type'] = nav(data, SUBTITLE)
-
-        if run_count == 3:
-            if nav(data, SUBTITLE2).isdigit():
-                album['year'] = nav(data, SUBTITLE2)
+        
+        if 'runs' in data['subtitle']:
+            run_count = len(data['subtitle']['runs'])
+            has_artists = False
+            if run_count == 1:
+                album['year'] = nav(data, SUBTITLE)
             else:
+                album['type'] = nav(data, SUBTITLE)
+    
+            if run_count == 3:
+                if nav(data, SUBTITLE2).isdigit():
+                    album['year'] = nav(data, SUBTITLE2)
+                else:
+                    has_artists = True
+    
+            elif run_count > 3:
+                album['year'] = nav(data, SUBTITLE3)
                 has_artists = True
-
-        elif run_count > 3:
-            album['year'] = nav(data, SUBTITLE3)
-            has_artists = True
-
-        if has_artists:
-            subtitle = data['subtitle']['runs'][2]
-            album['artists'] = []
-            album['artists'].append({
-                'name': subtitle['text'],
-                'id': nav(subtitle, NAVIGATION_BROWSE_ID, True)
-            })
+    
+            if has_artists:
+                subtitle = data['subtitle']['runs'][2]
+                album['artists'] = []
+                album['artists'].append({
+                    'name': subtitle['text'],
+                    'id': nav(subtitle, NAVIGATION_BROWSE_ID, True)
+                })
 
         albums.append(album)
 
