@@ -54,7 +54,6 @@ class Parser:
                 search_result['playlistId'] = nav(data, NAVIGATION_PLAYLIST_ID)
 
             elif resultType == 'song':
-                search_result['duration'] = None
                 search_result['album'] = None
                 if 'menu' in data:
                     toggle_menu = find_object_by_key(nav(data, MENU_ITEMS), TOGGLE_MENU)
@@ -107,10 +106,12 @@ class Parser:
                     True)
 
             if resultType in ['song', 'video', 'album']:
+                search_result['duration'] = None
                 search_result['year'] = None
-                is_album = resultType == 'album'
+                has_offset = resultType == 'album' or (default_offset
+                                                       and bool(search_result['videoId']))
                 flex_item = get_flex_column_item(data, 1)
-                runs = flex_item['text']['runs'][2 * (default_offset or is_album):]
+                runs = flex_item['text']['runs'][2 * has_offset:]
                 song_info = parse_song_runs(runs)
                 search_result.update(song_info)
 
