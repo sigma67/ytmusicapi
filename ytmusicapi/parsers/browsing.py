@@ -81,8 +81,8 @@ class Parser:
                         search_result['album'] = {
                             'name': flex_items[1][2]['text'],
                             'id': nav(flex_items[1][2], NAVIGATION_BROWSE_ID)
-                        }
-                        search_result['duration'] = flex_items[1][4]['text']
+                        } if flex_items[1].count(2) else ''
+                        search_result['duration'] = flex_items[1][4]['text'] if flex_items[1].count(4) else ''
                     search_result['resultType'] = 'song'
 
                 else:  # artist or album result
@@ -95,7 +95,7 @@ class Parser:
                             run['text'] for i, run in enumerate(flex_item2['text']['runs'])
                             if i % 2 == 0
                         ]
-                        search_result['artist'] = runs[1]
+                        search_result['artist'] = runs[1] if runs.count(1) else ''
                         if len(runs) > 2:  # date may be missing
                             search_result['releaseDate'] = runs[2]
                         search_result['resultType'] = 'album'

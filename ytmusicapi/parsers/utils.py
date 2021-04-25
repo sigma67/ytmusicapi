@@ -144,7 +144,7 @@ def nav(root, items, none_if_absent=False):
         if none_if_absent:
             return None
         else:
-            raise err
+            return None
 
 
 def find_object_by_key(object_list, key, nested=None, is_key=False):
