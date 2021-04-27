@@ -71,18 +71,10 @@ class Parser:
                         for i in range(2)
                     ]
                     if flex_items[0]:
-                        search_result['videoId'] = nav(flex_items[0][0], NAVIGATION_VIDEO_ID)
-                        search_result['playlistId'] = nav(flex_items[0][0], NAVIGATION_PLAYLIST_ID)
+                        search_result['videoId'] = nav(flex_items[0][0], NAVIGATION_VIDEO_ID, True)
+                        search_result['playlistId'] = nav(flex_items[0][0], NAVIGATION_PLAYLIST_ID, True)
                     if flex_items[1]:
-                        search_result['artist'] = {
-                            'name': flex_items[1][0]['text'],
-                            'id': nav(flex_items[1][0], NAVIGATION_BROWSE_ID)
-                        }
-                        search_result['album'] = {
-                            'name': flex_items[1][2]['text'],
-                            'id': nav(flex_items[1][2], NAVIGATION_BROWSE_ID)
-                        }
-                        search_result['duration'] = flex_items[1][4]['text']
+                        search_result.update(parse_song_runs(flex_items[1]))
                     search_result['resultType'] = 'song'
 
                 else:  # artist or album result
@@ -95,7 +87,8 @@ class Parser:
                             run['text'] for i, run in enumerate(flex_item2['text']['runs'])
                             if i % 2 == 0
                         ]
-                        search_result['artist'] = runs[1]
+                        if len(runs) > 1:
+                            search_result['artist'] = runs[1]
                         if len(runs) > 2:  # date may be missing
                             search_result['releaseDate'] = runs[2]
                         search_result['resultType'] = 'album'

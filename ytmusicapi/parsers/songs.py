@@ -26,7 +26,7 @@ def parse_song_runs(runs):
         if 'navigationEndpoint' in run:  # artist or album
             item = {'name': text, 'id': nav(run, NAVIGATION_BROWSE_ID, True)}
 
-            if item['id'] and item['id'].startswith('MPRE'):  # album
+            if item['id'] and (item['id'].startswith('MPRE') or "release_detail" in item['id']):  # album
                 parsed['album'] = item
             else:  # artist
                 parsed['artists'].append(item)
