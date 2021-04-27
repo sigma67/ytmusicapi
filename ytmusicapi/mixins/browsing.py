@@ -1,8 +1,5 @@
-import requests
-import json
 import codecs
 from urllib.parse import parse_qs
-from typing import List, Dict
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.albums import *
@@ -140,9 +137,6 @@ class BrowsingMixin:
                     param2 = 'BAAGAAgASgA'
                 elif filter == 'playlists':
                     param2 = 'BAAGAAgACgB'
-                elif filter == 'uploads':
-                    self.__check_auth()
-                    param2 = 'RABGAEgASgB'
                 else:
                     param2 = 'RAAGAAgACgA'
                 params = param1 + param2 + param3
@@ -415,10 +409,9 @@ class BrowsingMixin:
         :param audioPlaylistId: id of the audio playlist  (starting with `OLAK5uy_`)
         :return: browseId (starting with `MPREb_`)
         """
-        endpoint = "https://music.youtube.com/playlist"
         params = {"list": audioPlaylistId}
-        response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
-        matches = re.findall(r"\"MPRE.+?\"", response.text)
+        response = self._send_get_request(YTM_DOMAIN + "playlist", params)
+        matches = re.findall(r"\"MPRE.+?\"", response)
         browse_id = None
         if len(matches) > 0:
             browse_id = matches[0].encode('utf8').decode('unicode-escape').strip('"')
@@ -588,8 +581,8 @@ class BrowsingMixin:
         """
         endpoint = "https://www.youtube.com/get_video_info"
         params = {"video_id": videoId, "hl": self.language, "el": "detailpage"}
-        response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
-        text = parse_qs(response.text)
+        response = self._send_get_request(endpoint, params)
+        text = parse_qs(response)
         if 'player_response' not in text:
             return text
         player_response = json.loads(text['player_response'][0])
@@ -709,8 +702,8 @@ class BrowsingMixin:
             "c": "WEB_REMIX",
             "cver": "0.1"
         }
-        response = requests.get(endpoint, params, headers=self.headers, proxies=self.proxies)
-        text = parse_qs(response.text)
+        response = self._send_get_request(endpoint, params)
+        text = parse_qs(response)
         if 'player_response' not in text:
             return text
 

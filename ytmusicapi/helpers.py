@@ -1,9 +1,11 @@
 import re
+import json
 from http.cookies import SimpleCookie
 from hashlib import sha1
 import time
 from functools import wraps
 import locale
+from ytmusicapi.constants import *
 
 
 def prepare_browse_endpoint(type, browseId):
@@ -42,6 +44,26 @@ def prepare_order_params(order):
         # determine order_params via `.contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[1].itemSectionRenderer.header.itemSectionTabbedHeaderRenderer.endItems[1].dropdownRenderer.entries[].dropdownItemRenderer.onSelectCommand.browseEndpoint.params` of `/youtubei/v1/browse` response
         order_params = ['ggMGKgQIARAA', 'ggMGKgQIARAB', 'ggMGKgQIABAB']
         return order_params[orders.index(order)]
+
+
+def initialize_headers():
+    return {
+        "User-Agent": USER_AGENT,
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "origin": YTM_DOMAIN,
+        "X-Goog-AuthUser": "0"
+    }
+
+
+def get_visitor_id(request_func):
+    response = request_func(YTM_DOMAIN)
+    matches = re.findall(r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;', response)
+    visitor_id = ""
+    if len(matches) > 0:
+        ytcfg = json.loads(matches[0])
+        visitor_id = ytcfg.get('VISITOR_DATA')
+    return {'X-Goog-Visitor-Id': visitor_id}
 
 
 def html_to_txt(html_text):

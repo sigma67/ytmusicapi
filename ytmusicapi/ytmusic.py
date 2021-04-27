@@ -1,5 +1,4 @@
 import requests
-import json
 import gettext
 import pkg_resources
 import os
@@ -13,9 +12,6 @@ from ytmusicapi.mixins.watch import WatchMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
-
-params = '?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30'
-base_url = 'https://music.youtube.com/youtubei/v1/'
 
 
 class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
@@ -68,19 +64,29 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
 
         self.proxies = proxies
 
-        try:
-            if auth is None or os.path.isfile(auth):
-                file = auth if auth else pkg_resources.resource_filename(
-                    'ytmusicapi', 'headers.json')
-                with open(file) as json_file:
-                    self.headers = json.load(json_file)
-            else:
-                self.headers = json.loads(auth)
-        except Exception as e:
-            print(
-                "Failed loading provided credentials. Make sure to provide a string or a file path. "
-                "Reason: " + str(e))
+        # prepare headers
+        self.headers = {}
+        if auth:
+            try:
+                if os.path.isfile(auth):
+                    file = auth
+                    with open(file) as json_file:
+                        self.headers = json.load(json_file)
+                else:
+                    self.headers = json.loads(auth)
 
+            except Exception as e:
+                print(
+                        "Failed loading provided credentials. Make sure to provide a string or a file path. "
+                        "Reason: " + str(e))
+
+        else:  # no authentication
+            self.headers = initialize_headers()
+
+        if 'X-Goog-Visitor-Id' not in self.headers:
+            self.headers.update(get_visitor_id(self._send_get_request))
+
+        # prepare context
         with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
             self.context = json.load(json_file)
 
@@ -117,7 +123,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         if self.auth:
             origin = self.headers.get('origin', self.headers.get('x-origin'))
             self.headers["Authorization"] = get_authorization(self.sapisid + ' ' + origin)
-        response = self._session.post(base_url + endpoint + params + additionalParams,
+        response = self._session.post(YTM_BASE_API + endpoint + YTM_PARAMS + additionalParams,
                                       json=body,
                                       headers=self.headers,
                                       proxies=self.proxies)
@@ -128,6 +134,10 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
             error = response_text.get('error', {}).get('message')
             raise Exception(message + error)
         return response_text
+
+    def _send_get_request(self, url: str, params: Dict = None):
+        response = requests.get(url, params, headers=self.headers, proxies=self.proxies)
+        return response.text
 
     def _check_auth(self):
         if not self.auth:
