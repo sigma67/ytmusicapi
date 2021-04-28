@@ -87,9 +87,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
             self.headers.update(get_visitor_id(self._send_get_request))
 
         # prepare context
-        with open(pkg_resources.resource_filename('ytmusicapi', 'context.json')) as json_file:
-            self.context = json.load(json_file)
-
+        self.context = initialize_context()
         self.context['context']['client']['hl'] = language
         supported_languages = [f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')]
         if language not in supported_languages:

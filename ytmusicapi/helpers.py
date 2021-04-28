@@ -58,6 +58,18 @@ def initialize_headers():
     }
 
 
+def initialize_context():
+    return {
+        'context': {
+            'client': {
+                'clientName': 'WEB_REMIX',
+                'clientVersion': '0.1'
+            },
+            'user': {}
+        }
+    }
+
+
 def get_visitor_id(request_func):
     response = request_func(YTM_DOMAIN)
     matches = re.findall(r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;', response)
