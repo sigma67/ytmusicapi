@@ -48,11 +48,13 @@ def prepare_order_params(order):
 
 def initialize_headers():
     return {
-        "User-Agent": USER_AGENT,
-        "Accept": "*/*",
-        "Content-Type": "application/json",
+        "user-agent": USER_AGENT,
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate",
+        "content-type": "application/json",
+        "content-encoding": "gzip",
         "origin": YTM_DOMAIN,
-        "X-Goog-AuthUser": "0"
+        "x-goog-authuser": "0"
     }
 
 

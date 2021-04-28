@@ -83,7 +83,7 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         else:  # no authentication
             self.headers = initialize_headers()
 
-        if 'X-Goog-Visitor-Id' not in self.headers:
+        if 'x-goog-visitor-id' not in self.headers:
             self.headers.update(get_visitor_id(self._send_get_request))
 
         # prepare context

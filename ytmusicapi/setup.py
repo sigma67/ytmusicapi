@@ -25,7 +25,7 @@ def setup(filepath=None, headers_raw=None):
             header = content.split(': ')
             if len(header) == 1:  # nothing was split
                 continue
-            user_headers[header[0]] = ': '.join(header[1:])
+            user_headers[header[0].lower()] = ': '.join(header[1:])
 
     except Exception as e:
         raise Exception("Error parsing your input, please try again. Full error: " + str(e))
@@ -36,6 +36,10 @@ def setup(filepath=None, headers_raw=None):
             "The following entries are missing in your headers: " + ", ".join(missing_headers)
             + ". Please try a different request (such as /browse) and make sure you are logged in."
         )
+
+    ignore_headers = {"host", "content-length", "accept-encoding"}
+    for i in ignore_headers:
+        user_headers.pop(i, None)
 
     headers = initialize_headers()
     headers.update(user_headers)
