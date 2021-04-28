@@ -113,7 +113,8 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
         # verify authentication credentials work
         if auth:
             try:
-                self.sapisid = sapisid_from_cookie(self.headers['Cookie'])
+                cookie = self.headers.get('cookie', self.headers.get('Cookie'))
+                self.sapisid = sapisid_from_cookie(cookie)
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
             self._send_request('guide', {})

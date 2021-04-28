@@ -23,6 +23,8 @@ def setup(filepath=None, headers_raw=None):
         user_headers = {}
         for content in contents:
             header = content.split(': ')
+            if len(header) == 1:  # nothing was split
+                continue
             user_headers[header[0]] = ': '.join(header[1:])
 
     except Exception as e:

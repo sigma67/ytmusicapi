@@ -410,7 +410,7 @@ class BrowsingMixin:
         :return: browseId (starting with `MPREb_`)
         """
         params = {"list": audioPlaylistId}
-        response = self._send_get_request(YTM_DOMAIN + "playlist", params)
+        response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
         matches = re.findall(r"\"MPRE.+?\"", response)
         browse_id = None
         if len(matches) > 0:
