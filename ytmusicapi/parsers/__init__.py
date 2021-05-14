@@ -36,3 +36,4 @@ FEEDBACK_TOKEN = ['feedbackEndpoint', 'feedbackToken']
 BADGE_LABEL = [
     'badges', 0, 'musicInlineBadgeRenderer', 'accessibilityData', 'accessibilityData', 'label'
 ]
+RELOAD_CONTINUATION = ['continuations', 0, 'reloadContinuationData', 'continuation']

@@ -96,8 +96,11 @@ class PlaylistsMixin:
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
 
         playlist['trackCount'] = song_count
-        playlist['tracks'] = []
+        playlist['suggestions_token'] = nav(
+            response, SINGLE_COLUMN_TAB + ['sectionListRenderer', 'contents', 1] + MUSIC_SHELF
+            + RELOAD_CONTINUATION, True)
 
+        playlist['tracks'] = []
         if song_count > 0:
             playlist['tracks'].extend(parse_playlist_items(results['contents']))
             songs_to_get = min(limit, song_count)
@@ -112,6 +115,25 @@ class PlaylistsMixin:
                                       parse_func))
 
         return playlist
+
+    def get_playlist_suggestions(self, suggestions_token: str) -> Dict:
+        """
+        Gets suggested tracks to add to a playlist. Suggestions are offered for playlists with less than 100 tracks
+
+        :param suggestions_token: Token returned by :py:func:`get_playlist` or this function
+        :return: Dictionary containing suggested `tracks` and a `refresh_token` to get another set of suggestions.
+            For data format of tracks, check :py:func:`get_playlist`
+        """
+        if not suggestions_token:
+            raise Exception('Suggestions token is None. '
+                            'Please ensure the playlist is small enough to receive suggestions.')
+        endpoint = 'browse'
+        additionalParams = get_continuation_string(suggestions_token)
+        response = self._send_request(endpoint, {}, additionalParams)
+        results = nav(response, ['continuationContents', 'musicShelfContinuation'])
+        refresh_token = nav(results, RELOAD_CONTINUATION)
+        suggestions = parse_playlist_items(results['contents'])
+        return {'tracks': suggestions, 'refresh_token': refresh_token}
 
     def create_playlist(self,
                         title: str,
@@ -212,7 +234,7 @@ class PlaylistsMixin:
 
     def add_playlist_items(self,
                            playlistId: str,
-                           videoIds: List[str],
+                           videoIds: List[str] = None,
                            source_playlist: str = None,
                            duplicates: bool = False) -> Union[str, Dict]:
         """
@@ -226,21 +248,27 @@ class PlaylistsMixin:
         """
         self._check_auth()
         body = {'playlistId': playlistId, 'actions': []}
-        for videoId in videoIds:
-            action = {'action': 'ACTION_ADD_VIDEO', 'addedVideoId': videoId}
-            if duplicates:
-                action['dedupeOption'] = 'DEDUPE_OPTION_SKIP'
-            body['actions'].append(action)
+        if not videoIds and not source_playlist:
+            raise Exception(
+                "You must provide either videoIds or a source_playlist to add to the playlist")
 
-        # add an empty ACTION_ADD_VIDEO because otherwise YTM doesn't return the dict that maps videoIds to their new setVideoIds
-        if source_playlist and not videoIds:
-            body['actions'].append({'action': 'ACTION_ADD_VIDEO', 'addedVideoId': None})
+        if videoIds:
+            for videoId in videoIds:
+                action = {'action': 'ACTION_ADD_VIDEO', 'addedVideoId': videoId}
+                if duplicates:
+                    action['dedupeOption'] = 'DEDUPE_OPTION_SKIP'
+                body['actions'].append(action)
 
         if source_playlist:
             body['actions'].append({
                 'action': 'ACTION_ADD_PLAYLIST',
                 'addedFullListId': source_playlist
             })
+
+            # add an empty ACTION_ADD_VIDEO because otherwise
+            # YTM doesn't return the dict that maps videoIds to their new setVideoIds
+            if not videoIds:
+                body['actions'].append({'action': 'ACTION_ADD_VIDEO', 'addedVideoId': None})
 
         endpoint = 'browse/edit_playlist'
         response = self._send_request(endpoint, body)

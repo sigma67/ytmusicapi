@@ -255,24 +255,28 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(playlist['tracks']), 200)
 
     def test_get_owned_playlist(self):
-        playlist = self.yt_auth.get_playlist(config['playlists']['own'], 300)
-        self.assertGreater(len(playlist['tracks']), 200)
+        playlist = self.yt_brand.get_playlist(config['playlists']['own'])
+        self.assertLess(len(playlist['tracks']), 100)
+        suggestions = self.yt_brand.get_playlist_suggestions(playlist['suggestions_token'])
+        self.assertGreater(len(suggestions['tracks']), 5)
+        refresh = self.yt_brand.get_playlist_suggestions(suggestions['refresh_token'])
+        self.assertGreater(len(refresh['tracks']), 5)
 
     def test_edit_playlist(self):
-        playlist = self.yt_auth.get_playlist(config['playlists']['own'])
-        response = self.yt_auth.edit_playlist(playlist['id'],
-                                              title='',
-                                              description='',
-                                              privacyStatus='PRIVATE',
-                                              moveItem=(playlist['tracks'][1]['setVideoId'],
-                                                        playlist['tracks'][0]['setVideoId']))
+        playlist = self.yt_brand.get_playlist(config['playlists']['own'])
+        response = self.yt_brand.edit_playlist(playlist['id'],
+                                               title='',
+                                               description='',
+                                               privacyStatus='PRIVATE',
+                                               moveItem=(playlist['tracks'][1]['setVideoId'],
+                                                         playlist['tracks'][0]['setVideoId']))
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
-        self.yt_auth.edit_playlist(playlist['id'],
-                                   title=playlist['title'],
-                                   description=playlist['description'],
-                                   privacyStatus=playlist['privacy'],
-                                   moveItem=(playlist['tracks'][0]['setVideoId'],
-                                             playlist['tracks'][1]['setVideoId']))
+        self.yt_brand.edit_playlist(playlist['id'],
+                                    title=playlist['title'],
+                                    description=playlist['description'],
+                                    privacyStatus=playlist['privacy'],
+                                    moveItem=(playlist['tracks'][0]['setVideoId'],
+                                              playlist['tracks'][1]['setVideoId']))
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist

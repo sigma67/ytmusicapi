@@ -100,6 +100,10 @@ def get_parsed_continuation_items(response, parse_func, continuation_type):
 def get_continuation_params(results, ctoken_path):
     ctoken = nav(results,
                  ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
+    return get_continuation_string(ctoken)
+
+
+def get_continuation_string(ctoken):
     return "&ctoken=" + ctoken + "&continuation=" + ctoken
 
 
