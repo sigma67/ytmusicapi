@@ -18,7 +18,7 @@ class BrowsingMixin:
         Returns results within the provided category.
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
-        :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``uploads``.
+        :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``community_playlists``, ``featured_playlists``, ``uploads``.
           Default: Default search, including all types of items.
         :param limit: Number of search results to return
           Default: 20
@@ -112,39 +112,59 @@ class BrowsingMixin:
         body = {'query': query}
         endpoint = 'search'
         search_results = []
-        filters = ['albums', 'artists', 'playlists', 'songs', 'videos', 'uploads']
+        filters = ['albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs', 'videos', 'uploads']
         if filter and filter not in filters:
             raise Exception(
                 "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
                 + ', '.join(filters))
 
+        params = None
         if filter:
-            param1 = 'Eg-KAQwIA'
-
-            if not ignore_spelling:
-                param3 = 'MABqChAEEAMQCRAFEAo%3D'
-            else:
-                param3 = 'MABCAggBagoQBBADEAkQBRAK'
-
             if filter == 'uploads':
                 params = 'agIYAw%3D%3D'
-            else:
-                if filter == 'videos':
-                    param2 = 'BABGAAgACgA'
-                elif filter == 'albums':
-                    param2 = 'BAAGAEgACgA'
-                elif filter == 'artists':
-                    param2 = 'BAAGAAgASgA'
-                elif filter == 'playlists':
-                    param2 = 'BAAGAAgACgB'
+
+            elif filter == 'playlists':
+                params = 'Eg-KAQwIABAAGAAgACgB'
+                if not ignore_spelling:
+                    params += 'MABqChAEEAMQCRAFEAo%3D'
                 else:
-                    param2 = 'RAAGAAgACgA'
-                params = param1 + param2 + param3
+                    params += 'MABCAggBagoQBBADEAkQBRAK'
 
-            body['params'] = params
+            elif 'playlists' in filter:
+                param1 = 'EgeKAQQoA'
+                if filter == 'featured_playlists':
+                    param2 = 'Dg'
+                else:  # community_playlists
+                    param2 = 'EA'
+
+                if not ignore_spelling:
+                    param3 = 'BagwQDhAKEAMQBBAJEAU%3D'
+                else:
+                    param3 = 'BQgIIAWoMEA4QChADEAQQCRAF'
+
+                filter = 'playlists'  # reset to playlists for parser
+
+            else:
+                param1 = 'EgWKAQI'
+                filter_params = {
+                    'songs': 'I',
+                    'videos': 'Q',
+                    'albums': 'Y',
+                    'artists': 'g'
+                }
+                param2 = filter_params[filter]
+                if not ignore_spelling:
+                    param3 = 'AWoMEA4QChADEAQQCRAF'
+                else:
+                    param3 = 'AUICCAFqDBAOEAoQAxAEEAkQBQ%3D%3D'
+
+            params = params if params else param1 + param2 + param3
+
         elif ignore_spelling:
-            body['params'] = "QgIIAQ%3D%3D"
+            params = 'EhGKAQ4IARABGAEgASgAOAFAAUICCAE%3D'
 
+        if params:
+            body['params'] = params
         response = self._send_request(endpoint, body)
 
         # no results

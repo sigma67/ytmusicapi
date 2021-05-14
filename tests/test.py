@@ -33,25 +33,28 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_search(self):
-        query = "Oasis Wonderwall"
+        query = "edm playlist"
         self.assertRaises(Exception, self.yt_auth.search, query, "song")
         results = self.yt.search(query)
         self.assertGreater(len(results), 10)
+        results = self.yt_auth.search('Martin Stig Andersen - Deteriation', ignore_spelling=True)
+        self.assertGreater(len(results), 0)
         results = self.yt_auth.search(query, 'songs')
         self.assertGreater(len(results), 10)
         results = self.yt_auth.search(query, 'videos')
         self.assertGreater(len(results), 10)
         results = self.yt_auth.search(query, 'albums', limit=40)
         self.assertGreater(len(results), 20)
-        results = self.yt_auth.search(query, 'artists')
+        results = self.yt_auth.search('oasiss', 'artists', ignore_spelling=True)
         self.assertGreater(len(results), 0)
-        results = self.yt_auth.search(query, 'playlists')
+        results = self.yt_auth.search("classical music", 'playlists')
         self.assertGreater(len(results), 5)
-
-    def test_search_ignore_spelling(self):
-        query = "Martin Stig Andersen - Deteriation"
-        results = self.yt_auth.search(query, ignore_spelling=True)
-        self.assertGreater(len(results), 0)
+        results = self.yt_auth.search("clasical music", 'playlists', ignore_spelling=True)
+        self.assertGreater(len(results), 5)
+        results = self.yt_auth.search("clasic rock", 'community_playlists', ignore_spelling=True)
+        self.assertGreater(len(results), 5)
+        results = self.yt_auth.search("hip hop", 'featured_playlists')
+        self.assertGreater(len(results), 5)
 
     def test_search_uploads(self):
         results = self.yt_auth.search('audiomachine', 'uploads', limit=40)
