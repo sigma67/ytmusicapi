@@ -5,6 +5,8 @@ from .songs import *
 def parse_watch_playlist(results):
     tracks = []
     for result in results:
+        if 'playlistPanelVideoWrapperRenderer' in result:
+            result = result['playlistPanelVideoWrapperRenderer']['primaryRenderer']
         if 'playlistPanelVideoRenderer' not in result:
             continue
         data = result['playlistPanelVideoRenderer']
