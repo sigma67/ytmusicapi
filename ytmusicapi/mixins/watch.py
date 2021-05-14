@@ -59,7 +59,7 @@ class WatchMixin:
                 }
         is_playlist = False
         if playlistId:
-            body['playlistId'] = playlistId if not playlistId.startswith("VL") else playlistId[2:]
+            body['playlistId'] = validate_playlist_id(playlistId)
             is_playlist = body['playlistId'].startswith('PL')
         if params:
             body['params'] = params

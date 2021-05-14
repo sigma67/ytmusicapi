@@ -138,6 +138,10 @@ def validate_response(response, per_page, limit, current_count):
     return len(response['parsed']) >= expected_items_count
 
 
+def validate_playlist_id(playlistId):
+    return playlistId if not playlistId.startswith("VL") else playlistId[2:]
+
+
 def nav(root, items, none_if_absent=False):
     """Access a nested object in root by item sequence."""
     try:

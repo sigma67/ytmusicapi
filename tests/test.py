@@ -10,6 +10,7 @@ config.read('./test.cfg', 'utf-8')
 
 sample_album = "MPREb_4pL8gzRtw1p"  # Eminem - Revival
 sample_video = "ZrOKjDZOtkA"  # Oasis - Wonderwall (Remastered)
+sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 
 
 class TestYTMusic(unittest.TestCase):
@@ -151,9 +152,9 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(playlist['tracks']), 12)
 
     def test_get_watch_playlist_shuffle_playlist(self):
-        playlist = self.yt_auth.get_watch_playlist_shuffle(
-            videoId="u6XiiXJD0jg", playlistId="PL528pVfw3ao2VzfY6zE1TOZm1cBSdk7Q0", limit=99)
-        self.assertGreaterEqual(len(playlist['tracks']), 80)
+        playlist = self.yt_brand.get_watch_playlist_shuffle(
+            playlistId=config['playlists']['own'])
+        self.assertEqual(len(playlist['tracks']), 4)
 
     ###############
     # LIBRARY
@@ -251,7 +252,7 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_foreign_playlist(self):
-        playlist = self.yt.get_playlist("PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u", 300)
+        playlist = self.yt.get_playlist(sample_playlist, 300)
         self.assertGreater(len(playlist['tracks']), 200)
 
     def test_get_owned_playlist(self):

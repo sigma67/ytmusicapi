@@ -112,7 +112,10 @@ class BrowsingMixin:
         body = {'query': query}
         endpoint = 'search'
         search_results = []
-        filters = ['albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs', 'videos', 'uploads']
+        filters = [
+            'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs',
+            'videos', 'uploads'
+        ]
         if filter and filter not in filters:
             raise Exception(
                 "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
@@ -146,12 +149,7 @@ class BrowsingMixin:
 
             else:
                 param1 = 'EgWKAQI'
-                filter_params = {
-                    'songs': 'I',
-                    'videos': 'Q',
-                    'albums': 'Y',
-                    'artists': 'g'
-                }
+                filter_params = {'songs': 'I', 'videos': 'Q', 'albums': 'Y', 'artists': 'g'}
                 param2 = filter_params[filter]
                 if not ignore_spelling:
                     param3 = 'AWoMEA4QChADEAQQCRAF'
@@ -307,7 +305,7 @@ class BrowsingMixin:
                                               'musicDescriptionShelfRenderer',
                                               is_key=True)
         if descriptionShelf:
-            artist['description'] = descriptionShelf['description']['runs'][0]['text']
+            artist['description'] = nav(descriptionShelf, DESCRIPTION)
             artist['views'] = None if 'subheader' not in descriptionShelf else descriptionShelf[
                 'subheader']['runs'][0]['text']
         subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
@@ -753,10 +751,9 @@ class BrowsingMixin:
             raise Exception("Invalid browseId provided. This song might not have lyrics.")
 
         response = self._send_request('browse', {'browseId': browseId})
-        if 'sectionListRenderer' in response['contents'].keys():
-            lyrics['lyrics'] = response['contents']['sectionListRenderer']['contents'][0][
-                'musicDescriptionShelfRenderer']['description']['runs'][0]['text']
-            lyrics['source'] = response['contents']['sectionListRenderer']['contents'][0][
-                'musicDescriptionShelfRenderer']['footer']['runs'][0]['text']
+        lyrics['lyrics'] = nav(response, ['contents'] + SECTION_LIST_ITEM
+                               + ['musicDescriptionShelfRenderer'] + DESCRIPTION, True)
+        lyrics['source'] = nav(response, ['contents'] + SECTION_LIST_ITEM
+                               + ['musicDescriptionShelfRenderer', 'footer'] + RUN_TEXT, True)
 
         return lyrics

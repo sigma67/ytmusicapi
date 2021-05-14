@@ -79,8 +79,7 @@ class PlaylistsMixin:
 
         playlist['title'] = nav(header, TITLE_TEXT)
         playlist['thumbnails'] = nav(header, THUMBNAIL_CROPPED)
-        if "description" in header:
-            playlist["description"] = header["description"]["runs"][0]["text"]
+        playlist["description"] = nav(header, DESCRIPTION, True)
         run_count = len(header['subtitle']['runs'])
         if run_count > 1:
             playlist['author'] = {
@@ -187,7 +186,7 @@ class PlaylistsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        body = {'playlistId': playlistId}
+        body = {'playlistId': validate_playlist_id(playlistId)}
         actions = []
         if title:
             actions.append({'action': 'ACTION_SET_PLAYLIST_NAME', 'playlistName': title})
@@ -227,7 +226,7 @@ class PlaylistsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        body = {'playlistId': playlistId}
+        body = {'playlistId': validate_playlist_id(playlistId)}
         endpoint = 'playlist/delete'
         response = self._send_request(endpoint, body)
         return response['status'] if 'status' in response else response
@@ -247,7 +246,7 @@ class PlaylistsMixin:
         :return: Status String and a dict containing the new setVideoId for each videoId or full response
         """
         self._check_auth()
-        body = {'playlistId': playlistId, 'actions': []}
+        body = {'playlistId': validate_playlist_id(playlistId), 'actions': []}
         if not videoIds and not source_playlist:
             raise Exception(
                 "You must provide either videoIds or a source_playlist to add to the playlist")
@@ -296,7 +295,7 @@ class PlaylistsMixin:
             raise Exception(
                 "Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
 
-        body = {'playlistId': playlistId, 'actions': []}
+        body = {'playlistId': validate_playlist_id(playlistId), 'actions': []}
         for video in videos:
             body['actions'].append({
                 'setVideoId': video['setVideoId'],
