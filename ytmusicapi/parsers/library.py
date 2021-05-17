@@ -16,7 +16,7 @@ def parse_artists(results, uploaded=False):
             subtitle = get_item_text(data, 1)
             if subtitle:
                 artist['subscribers'] = subtitle.split(' ')[0]
-        artist['thumbnails'] = nav(data, THUMBNAILS)
+        artist['thumbnails'] = nav(data, THUMBNAILS, True)
         artists.append(artist)
 
     return artists
