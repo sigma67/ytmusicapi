@@ -182,8 +182,8 @@ def parse_video(result):
     video = {
         'title': nav(result, TITLE_TEXT),
         'videoId': nav(result, NAVIGATION_VIDEO_ID),
-        'playlistId': nav(result, NAVIGATION_PLAYLIST_ID),
-        'thumbnails': nav(result, THUMBNAIL_RENDERER)
+        'playlistId': nav(result, NAVIGATION_PLAYLIST_ID, True),
+        'thumbnails': nav(result, THUMBNAIL_RENDERER, True)
     }
     if len(result['subtitle']['runs']) == 3:
         video['views'] = nav(result, SUBTITLE2).split(' ')[0]
