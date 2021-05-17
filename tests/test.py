@@ -26,7 +26,9 @@ class TestYTMusic(unittest.TestCase):
     def test_setup(self):
         headers = YTMusic.setup(config['auth']['headers_file'], config['auth']['headers_raw'])
         self.assertGreaterEqual(len(headers), 2)
-        with unittest.mock.patch('builtins.input', return_value=config['auth']['headers_raw']):
+        headers_raw = config['auth']['headers_raw'].split('\n')
+        with unittest.mock.patch('builtins.input', side_effect=(headers_raw + [EOFError()])):
+            headers = YTMusic.setup(config['auth']['headers_file'])
             self.assertGreaterEqual(len(headers), 2)
 
     ###############
@@ -306,7 +308,7 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_library_upload_songs(self):
-        results = self.yt_auth.get_library_upload_songs(50)
+        results = self.yt_auth.get_library_upload_songs(50, order='z_to_a')
         self.assertGreater(len(results), 25)
 
     @unittest.skip("Must not have any uploaded songs to pass")
@@ -315,7 +317,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEquals(len(results), 0)
 
     def test_get_library_upload_albums(self):
-        results = self.yt_auth.get_library_upload_albums(50)
+        results = self.yt_auth.get_library_upload_albums(50, order='a_to_z')
         self.assertGreater(len(results), 40)
 
     @unittest.skip("Must not have any uploaded albums to pass")
