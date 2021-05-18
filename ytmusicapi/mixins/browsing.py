@@ -544,7 +544,7 @@ class BrowsingMixin:
 
     def get_song(self, videoId: str) -> Dict:
         """
-        Returns metadata about a song or video.
+        Returns metadata and streaming information about a song or video.
 
         :param videoId: Video id
         :return: Dictionary with song metadata.
@@ -552,46 +552,152 @@ class BrowsingMixin:
         Example::
 
             {
-              "videoId": "ZrOKjDZOtkA",
-              "title": "Wonderwall (Remastered)",
-              "lengthSeconds": "259",
-              "keywords": [
-                "Oasis",
-                "(What's",
-                "..."
-              ],
-              "channelId": "UCmMUZbaYdNH0bEd1PAlAqsA",
-              "isOwnerViewing": false,
-              "shortDescription": "Provided to YouTube by Ignition...",
-              "isCrawlable": true,
-              "thumbnail": {
-                "thumbnails": [
+              "videoDetails": {
+                "allowRatings": true,
+                "author": "Oasis - Topic",
+                "averageRating": 4.5783687,
+                "channelId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                "isCrawlable": true,
+                "isLiveContent": false,
+                "isOwnerViewing": false,
+                "isPrivate": false,
+                "isUnpluggedCorpus": false,
+                "lengthSeconds": "259",
+                "musicVideoType": "MUSIC_VIDEO_TYPE_ATV",
+                "thumbnail": {
+                  "thumbnails": [...]
+                },
+                "title": "Wonderwall",
+                "videoId": "ZrOKjDZOtkA",
+                "viewCount": "27429003"
+              },
+              "microformat": {
+                "microformatDataRenderer": {
+                  "androidPackage": "com.google.android.apps.youtube.music",
+                  "appName": "YouTube Music",
+                  "availableCountries": ["AE",...],
+                  "category": "Music",
+                  "description": "Provided to YouTube by Ignition Wonderwall · Oasis ...",
+                  "familySafe": true,
+                  "iosAppArguments": "https://music.youtube.com/watch?v=ZrOKjDZOtkA",
+                  "iosAppStoreId": "1017492454",
+                  "linkAlternates": [
+                    {
+                      "hrefUrl": "android-app://com.google.android.youtube/http/youtube.com/watch?v=ZrOKjDZOtkA"
+                    },
+                    {
+                      "hrefUrl": "ios-app://544007664/http/youtube.com/watch?v=ZrOKjDZOtkA"
+                    },
+                    {
+                      "alternateType": "application/json+oembed",
+                      "hrefUrl": "https://www.youtube.com/oembed?format=json&url=...",
+                      "title": "Wonderwall (Remastered)"
+                    },
+                    {
+                      "alternateType": "text/xml+oembed",
+                      "hrefUrl": "https://www.youtube.com/oembed?format=xml&url=...",
+                      "title": "Wonderwall (Remastered)"
+                    }
+                  ],
+                  "noindex": false,
+                  "ogType": "video.other",
+                  "pageOwnerDetails": {
+                    "externalChannelId": "UCmMUZbaYdNH0bEd1PAlAqsA",
+                    "name": "Oasis - Topic",
+                    "youtubeProfileUrl": "http://www.youtube.com/channel/UCmMUZbaYdNH0bEd1PAlAqsA"
+                  },
+                  "paid": false,
+                  "publishDate": "2017-01-25",
+                  "schemaDotOrgType": "http://schema.org/VideoObject",
+                  "siteName": "YouTube Music",
+                  "tags": ["Oasis",...],
+                  "thumbnail": {
+                    "thumbnails": [
+                      {
+                        "height": 720,
+                        "url": "https://i.ytimg.com/vi/ZrOKjDZOtkA/maxresdefault.jpg",
+                        "width": 1280
+                      }
+                    ]
+                  },
+                  "title": "Wonderwall (Remastered) - YouTube Music",
+                  "twitterCardType": "player",
+                  "twitterSiteHandle": "@YouTubeMusic",
+                  "unlisted": false,
+                  "uploadDate": "2017-01-25",
+                  "urlApplinksAndroid": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=applinks",
+                  "urlApplinksIos": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=applinks",
+                  "urlCanonical": "https://music.youtube.com/watch?v=ZrOKjDZOtkA",
+                  "urlTwitterAndroid": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=twitter-deep-link",
+                  "urlTwitterIos": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=twitter-deep-link",
+                  "videoDetails": {
+                    "durationIso8601": "PT4M19S",
+                    "durationSeconds": "259",
+                    "externalVideoId": "ZrOKjDZOtkA"
+                  },
+                  "viewCount": "27429003"
+                }
+              },
+              "playabilityStatus": {
+                "contextParams": "Q0FFU0FnZ0I=",
+                "miniplayer": {
+                  "miniplayerRenderer": {
+                    "playbackMode": "PLAYBACK_MODE_ALLOW"
+                  }
+                },
+                "playableInEmbed": true,
+                "status": "OK"
+              },
+              "streamingData": {
+                "adaptiveFormats": [
                   {
-                    "url": "https://i.ytimg.com/vi/ZrOKjDZOtkA/maxresdefault.jpg",
-                    "width": 1920,
-                    "height": 1080
+                    "approxDurationMs": "258760",
+                    "averageBitrate": 178439,
+                    "bitrate": 232774,
+                    "contentLength": "5771637",
+                    "fps": 25,
+                    "height": 1080,
+                    "indexRange": {
+                      "end": "1398",
+                      "start": "743"
+                    },
+                    "initRange": {
+                      "end": "742",
+                      "start": "0"
+                    },
+                    "itag": 137,
+                    "lastModified": "1614620567944400",
+                    "mimeType": "video/mp4; codecs=\"avc1.640020\"",
+                    "projectionType": "RECTANGULAR",
+                    "quality": "hd1080",
+                    "qualityLabel": "1080p",
+                    "signatureCipher": "s=_xxxOq0QJ8...",
+                    "width": 1078
+                  }[...]
+                ],
+                "expiresInSeconds": "21540",
+                "formats": [
+                  {
+                    "approxDurationMs": "258809",
+                    "audioChannels": 2,
+                    "audioQuality": "AUDIO_QUALITY_LOW",
+                    "audioSampleRate": "44100",
+                    "averageBitrate": 179462,
+                    "bitrate": 179496,
+                    "contentLength": "5805816",
+                    "fps": 25,
+                    "height": 360,
+                    "itag": 18,
+                    "lastModified": "1614620870611066",
+                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                    "projectionType": "RECTANGULAR",
+                    "quality": "medium",
+                    "qualityLabel": "360p",
+                    "signatureCipher": "s=kXXXOq0QJ8...",
+                    "width": 360
                   }
                 ]
-              },
-              "averageRating": 4.5673099,
-              "allowRatings": true,
-              "viewCount": "18136380",
-              "author": "Oasis - Topic",
-              "isPrivate": false,
-              "isUnpluggedCorpus": false,
-              "isLiveContent": false,
-              "provider": "Ignition",
-              "artists": [
-                "Oasis"
-              ],
-              "copyright": "℗ 2014 Big Brother Recordings ...",
-              "production": [
-                "Composer: Noel Gallagher",
-                "Lyricist: Noel Gallagher",
-                "Producer: Owen Morris & Noel Gallagher"
-              ],
-              "release": "2014-09-29"
-              "category": "Music"
+              }
             }
 
         """
