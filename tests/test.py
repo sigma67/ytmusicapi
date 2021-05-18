@@ -121,12 +121,10 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results['tracks']), 7)
 
     def test_get_song(self):
+        song = self.yt_auth.get_song("AjXQiKP5kMs")  # private upload
+        self.assertEqual(len(song), 4)
         song = self.yt.get_song(sample_video)
-        self.assertGreaterEqual(len(song), 16)
-
-    def test_get_streaming_data(self):
-        streaming_data = self.yt_auth.get_streaming_data(sample_video)
-        self.assertGreaterEqual(len(streaming_data), 3)
+        self.assertGreaterEqual(len(song['streamingData']['adaptiveFormats']), 10)
 
     def test_get_lyrics(self):
         playlist = self.yt.get_watch_playlist(sample_video)
@@ -163,7 +161,7 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_library_playlists(self):
-        playlists = self.yt_brand.get_library_playlists(50)
+        playlists = self.yt_auth.get_library_playlists(50)
         self.assertGreater(len(playlists), 25)
 
     def test_get_library_songs(self):
