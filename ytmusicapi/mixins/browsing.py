@@ -702,7 +702,14 @@ class BrowsingMixin:
 
         """
         endpoint = 'player'
-        params = {"video_id": videoId}
+        params = {
+            "playbackContext": {
+                "contentPlaybackContext": {
+                    "signatureTimestamp": 18766
+                }
+            },
+            "video_id": videoId
+        }
         response = self._send_request(endpoint, params)
         keys = ['videoDetails', 'playabilityStatus', 'streamingData', 'microformat']
         for k in list(response.keys()):
