@@ -3,6 +3,7 @@ import json
 from http.cookies import SimpleCookie
 from hashlib import sha1
 import time
+from datetime import date
 from functools import wraps
 import locale
 from ytmusicapi.constants import *
@@ -100,6 +101,10 @@ def get_authorization(auth):
     unix_timestamp = str(int(time.time()))
     sha_1.update((unix_timestamp + ' ' + auth).encode('utf-8'))
     return "SAPISIDHASH " + unix_timestamp + "_" + sha_1.hexdigest()
+
+
+def get_datestamp():
+    return (date.today() - date.fromtimestamp(0)).days
 
 
 def to_int(string):

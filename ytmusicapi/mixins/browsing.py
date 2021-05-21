@@ -542,11 +542,13 @@ class BrowsingMixin:
 
         return album
 
-    def get_song(self, videoId: str) -> Dict:
+    def get_song(self, videoId: str, signatureTimestamp: int = None) -> Dict:
         """
         Returns metadata and streaming information about a song or video.
 
         :param videoId: Video id
+        :param signatureTimestamp: Provide the current YouTube signatureTimestamp.
+            If not provided a default value will be used, which might result in invalid streaming URLs
         :return: Dictionary with song metadata.
 
         Example::
@@ -702,10 +704,13 @@ class BrowsingMixin:
 
         """
         endpoint = 'player'
+        if not signatureTimestamp:
+            signatureTimestamp = get_datestamp() - 1
+
         params = {
             "playbackContext": {
                 "contentPlaybackContext": {
-                    "signatureTimestamp": 18766
+                    "signatureTimestamp": signatureTimestamp
                 }
             },
             "video_id": videoId
