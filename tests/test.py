@@ -48,7 +48,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 10)
         results = self.yt_auth.search(query, 'albums', limit=40)
         self.assertGreater(len(results), 20)
-        results = self.yt_auth.search('oasiss', 'artists', ignore_spelling=True)
+        results = self.yt_auth.search('oasos', 'artists', ignore_spelling=True)
         self.assertGreater(len(results), 0)
         results = self.yt_auth.search("classical music", 'playlists')
         self.assertGreater(len(results), 5)
@@ -258,6 +258,8 @@ class TestYTMusic(unittest.TestCase):
     def test_get_owned_playlist(self):
         playlist = self.yt_brand.get_playlist(config['playlists']['own'])
         self.assertLess(len(playlist['tracks']), 100)
+        if not playlist['suggestions_token']:
+            self.skipTest("Suggestions not available")
         suggestions = self.yt_brand.get_playlist_suggestions(playlist['suggestions_token'])
         self.assertGreater(len(suggestions['tracks']), 5)
         refresh = self.yt_brand.get_playlist_suggestions(suggestions['refresh_token'])
