@@ -752,7 +752,7 @@ class BrowsingMixin:
     def get_basejs_url(self):
         """
         Extract the URL for the `base.js` script from YouTube Music.
-  
+
         :return: URL to `base.js`
         """
         response = self._send_get_request(url=YTM_DOMAIN)
@@ -765,7 +765,7 @@ class BrowsingMixin:
         """
         Fetch the `base.js` script from YouTube Music and parse out the
         `signatureTimestamp` for use with :py:func:`get_song`.
-  
+
         :param url: Optional. Provide the URL of the `base.js` script. If this
           isn't specified a call will be made to :py:func:`get_basejs_url`.
         :return: `signatureTimestamp` string
