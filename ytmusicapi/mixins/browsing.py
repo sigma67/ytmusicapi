@@ -748,3 +748,32 @@ class BrowsingMixin:
                                + ['musicDescriptionShelfRenderer', 'footer'] + RUN_TEXT, True)
 
         return lyrics
+
+    def get_basejs_url(self):
+        """
+        Extract the URL for the `base.js` script from YouTube Music.
+  
+        :return: URL to `base.js`
+        """
+        response = self._send_get_request(url=YTM_DOMAIN)
+        match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response)
+        if match is None:
+           raise Exception("Could not identify the URL for base.js player.")
+        return YTM_DOMAIN + match.group(1)
+
+    def get_signatureTimestamp(self, url: str = None):
+        """
+        Fetch the `base.js` script from YouTube Music and parse out the
+        `signatureTimestamp` for use with :py:func:`get_song`.
+  
+        :param url: Optional. Provide the URL of the `base.js` script. If this
+          isn't specified a call will be made to :py:func:`get_basejs_url`.
+        :return: `signatureTimestamp` string
+        """
+        if url is None:
+           url = self.get_basejs_url()
+        response = self._send_get_request(url=url)
+        match = re.search(r"signatureTimestamp[:=](\d+)", response)
+        if match is None:
+           raise Exception("Unable to identify the signatureTimestamp.")
+        return match.group(1)

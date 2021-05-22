@@ -136,6 +136,10 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNone(playlist["lyrics"])
         self.assertRaises(Exception, self.yt.get_lyrics, playlist["lyrics"])
 
+    def test_get_signatureTimestamp(self):
+        signatureTimestamp = self.yt.get_signatureTimestamp()
+        self.assertIsNotNone(signatureTimestamp)
+
     ###############
     # WATCH
     ###############
