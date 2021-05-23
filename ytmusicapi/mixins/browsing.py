@@ -761,7 +761,7 @@ class BrowsingMixin:
            raise Exception("Could not identify the URL for base.js player.")
         return YTM_DOMAIN + match.group(1)
 
-    def get_signatureTimestamp(self, url: str = None):
+    def get_signatureTimestamp(self, url: str = None) -> int:
         """
         Fetch the `base.js` script from YouTube Music and parse out the
         `signatureTimestamp` for use with :py:func:`get_song`.
@@ -776,4 +776,4 @@ class BrowsingMixin:
         match = re.search(r"signatureTimestamp[:=](\d+)", response)
         if match is None:
            raise Exception("Unable to identify the signatureTimestamp.")
-        return match.group(1)
+        return int(match.group(1))
