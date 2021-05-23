@@ -48,7 +48,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 10)
         results = self.yt_auth.search(query, 'albums', limit=40)
         self.assertGreater(len(results), 20)
-        results = self.yt_auth.search('oasos', 'artists', ignore_spelling=True)
+        results = self.yt_auth.search('calvin haris', 'artists', ignore_spelling=True)
         self.assertGreater(len(results), 0)
         results = self.yt_auth.search("classical music", 'playlists')
         self.assertGreater(len(results), 5)
@@ -76,9 +76,6 @@ class TestYTMusic(unittest.TestCase):
             ]), len(related))
 
         results = self.yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
-        self.assertGreaterEqual(len(results), 11)
-        results = self.yt.get_artist(
-            "UCDAPd3S5CBIEKXn-tvy57Lg")  # no thumbnail, albums, subscribe count
         self.assertGreaterEqual(len(results), 11)
 
     def test_get_artist_for_non_youtube_music_channel(self):
