@@ -23,7 +23,8 @@ def setup(filepath=None, headers_raw=None):
         user_headers = {}
         for content in contents:
             header = content.split(': ')
-            if len(header) == 1:  # nothing was split
+            if len(header) == 1 or header[0].startswith(
+                    ":"):  # nothing was split or chromium headers
                 continue
             user_headers[header[0].lower()] = ': '.join(header[1:])
 
@@ -41,8 +42,9 @@ def setup(filepath=None, headers_raw=None):
     for i in ignore_headers:
         user_headers.pop(i, None)
 
-    headers = initialize_headers()
-    headers.update(user_headers)
+    init_headers = initialize_headers()
+    user_headers.update(init_headers)
+    headers = user_headers
 
     if filepath is not None:
         with open(filepath, 'w') as file:
