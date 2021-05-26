@@ -54,8 +54,7 @@ def initialize_headers():
         "accept-encoding": "gzip, deflate",
         "content-type": "application/json",
         "content-encoding": "gzip",
-        "origin": YTM_DOMAIN,
-        "x-goog-authuser": "0"
+        "origin": YTM_DOMAIN
     }
 
 
