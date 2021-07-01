@@ -48,7 +48,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 10)
         results = self.yt_auth.search(query, 'albums', limit=40)
         self.assertGreater(len(results), 20)
-        results = self.yt_auth.search('calvin haris', 'artists', ignore_spelling=True)
+        results = self.yt_auth.search('project-2', 'artists', ignore_spelling=True)
         self.assertGreater(len(results), 0)
         results = self.yt_auth.search("classical music", 'playlists')
         self.assertGreater(len(results), 5)
