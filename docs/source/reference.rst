@@ -28,6 +28,8 @@ Browsing
 .. automethod:: YTMusic.get_album
 .. automethod:: YTMusic.get_song
 .. automethod:: YTMusic.get_lyrics
+.. automethod:: YTMusic.get_mood_categories
+.. automethod:: YTMusic.get_mood_playlists
 
 Watch
 --------
