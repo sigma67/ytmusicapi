@@ -133,6 +133,14 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNone(playlist["lyrics"])
         self.assertRaises(Exception, self.yt.get_lyrics, playlist["lyrics"])
 
+    def test_get_mood_playlists(self):
+        categories = self.yt.get_mood_categories()
+        self.assertGreater(len(list(categories)), 0)
+        cat = list(categories)[0]
+        self.assertGreater(len(categories[cat]), 0)
+        playlists = self.yt.get_mood_playlists(categories[cat][0]["params"])
+        self.assertGreater(len(playlists), 0)
+
     def test_get_signatureTimestamp(self):
         signatureTimestamp = self.yt.get_signatureTimestamp()
         self.assertIsNotNone(signatureTimestamp)
@@ -153,8 +161,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(playlist['tracks']), 12)
 
     def test_get_watch_playlist_shuffle_playlist(self):
-        playlist = self.yt_brand.get_watch_playlist_shuffle(
-            playlistId=config['playlists']['own'])
+        playlist = self.yt_brand.get_watch_playlist_shuffle(playlistId=config['playlists']['own'])
         self.assertEqual(len(playlist['tracks']), 4)
 
     ###############
