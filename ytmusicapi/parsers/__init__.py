@@ -39,3 +39,5 @@ BADGE_LABEL = [
     'badges', 0, 'musicInlineBadgeRenderer', 'accessibilityData', 'accessibilityData', 'label'
 ]
 RELOAD_CONTINUATION = ['continuations', 0, 'reloadContinuationData', 'continuation']
+CATEGORY_TITLE = ['musicNavigationButtonRenderer', 'buttonText'] + RUN_TEXT
+CATEGORY_PARAMS = ['musicNavigationButtonRenderer', 'clickCommand', 'browseEndpoint', 'params']
