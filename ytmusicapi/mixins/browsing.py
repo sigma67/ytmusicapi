@@ -814,7 +814,7 @@ class BrowsingMixin:
         :param params: params obtained by :py:func:`get_mood_categories`
         :return: List of playlists in the format of :py:func:`get_library_playlists`
 
-      """
+        """
         playlists = []
         response = self._send_request('browse', {
             'browseId': 'FEmusic_moods_and_genres_category',
@@ -844,6 +844,7 @@ class BrowsingMixin:
         match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response)
         if match is None:
             raise Exception("Could not identify the URL for base.js player.")
+
         return YTM_DOMAIN + match.group(1)
 
     def get_signatureTimestamp(self, url: str = None) -> int:
@@ -861,4 +862,5 @@ class BrowsingMixin:
         match = re.search(r"signatureTimestamp[:=](\d+)", response)
         if match is None:
             raise Exception("Unable to identify the signatureTimestamp.")
+
         return int(match.group(1))
