@@ -13,7 +13,7 @@ class Parser:
         search_results = []
         default_offset = (not resultType) * 2
         for result in results:
-            data = result['musicResponsiveListItemRenderer']
+            data = result[MRLIR]
             search_result = {}
             if not resultType:
                 resultType = get_item_text(data, 1).lower()
@@ -72,7 +72,8 @@ class Parser:
                     ]
                     if flex_items[0]:
                         search_result['videoId'] = nav(flex_items[0][0], NAVIGATION_VIDEO_ID, True)
-                        search_result['playlistId'] = nav(flex_items[0][0], NAVIGATION_PLAYLIST_ID, True)
+                        search_result['playlistId'] = nav(flex_items[0][0], NAVIGATION_PLAYLIST_ID,
+                                                          True)
                     if flex_items[1]:
                         search_result.update(parse_song_runs(flex_items[1]))
                     search_result['resultType'] = 'song'
@@ -133,8 +134,7 @@ class Parser:
             data = [
                 r['musicCarouselShelfRenderer'] for r in results
                 if 'musicCarouselShelfRenderer' in r
-                and nav(r['musicCarouselShelfRenderer'],
-                        CAROUSEL_TITLE)['text'].lower() == categories_local[i]
+                and nav(r, CAROUSEL + CAROUSEL_TITLE)['text'].lower() == categories_local[i]
             ]
             if len(data) > 0:
                 artist[category] = {'browseId': None, 'results': []}
@@ -152,10 +152,10 @@ class Parser:
         return artist
 
 
-def parse_content_list(results, parse_func):
+def parse_content_list(results, parse_func, key=MTRIR):
     contents = []
     for result in results:
-        contents.append(parse_func(result['musicTwoRowItemRenderer']))
+        contents.append(parse_func(result[key]))
 
     return contents
 

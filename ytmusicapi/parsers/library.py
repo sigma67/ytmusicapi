@@ -5,7 +5,7 @@ from .utils import *
 def parse_artists(results, uploaded=False):
     artists = []
     for result in results:
-        data = result['musicResponsiveListItemRenderer']
+        data = result[MRLIR]
         artist = {}
         artist['browseId'] = nav(data, NAVIGATION_BROWSE_ID)
         artist['artist'] = get_item_text(data, 0)
@@ -43,7 +43,7 @@ def parse_library_albums(response, request_func, limit):
 def parse_albums(results):
     albums = []
     for result in results:
-        data = result['musicTwoRowItemRenderer']
+        data = result[MTRIR]
         album = {}
         album['browseId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)
         album['title'] = nav(data, TITLE_TEXT)

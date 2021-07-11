@@ -8,9 +8,9 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
     count = 1
     for result in results:
         count += 1
-        if 'musicResponsiveListItemRenderer' not in result:
+        if MRLIR not in result:
             continue
-        data = result['musicResponsiveListItemRenderer']
+        data = result[MRLIR]
 
         try:
             videoId = setVideoId = None

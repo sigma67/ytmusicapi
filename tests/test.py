@@ -133,6 +133,14 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNone(playlist["lyrics"])
         self.assertRaises(Exception, self.yt.get_lyrics, playlist["lyrics"])
 
+    def test_get_signatureTimestamp(self):
+        signatureTimestamp = self.yt.get_signatureTimestamp()
+        self.assertIsNotNone(signatureTimestamp)
+
+    ###############
+    # EXPLORE
+    ###############
+
     def test_get_mood_playlists(self):
         categories = self.yt.get_mood_categories()
         self.assertGreater(len(list(categories)), 0)
@@ -141,9 +149,11 @@ class TestYTMusic(unittest.TestCase):
         playlists = self.yt.get_mood_playlists(categories[cat][0]["params"])
         self.assertGreater(len(playlists), 0)
 
-    def test_get_signatureTimestamp(self):
-        signatureTimestamp = self.yt.get_signatureTimestamp()
-        self.assertIsNotNone(signatureTimestamp)
+    def test_get_charts(self):
+        charts = self.yt_auth.get_charts()
+        self.assertEqual(len(charts), 4)
+        charts = self.yt.get_charts(country='BE')
+        self.assertEqual(len(charts), 4)
 
     ###############
     # WATCH

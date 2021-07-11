@@ -9,12 +9,13 @@ from ytmusicapi.parsers import browsing
 from ytmusicapi.setup import setup
 from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.watch import WatchMixin
+from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
 
 
-class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
+class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
     """
     Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
     Permits both authenticated and non-authenticated requests.
@@ -77,8 +78,8 @@ class YTMusic(BrowsingMixin, WatchMixin, LibraryMixin, PlaylistsMixin, UploadsMi
 
             except Exception as e:
                 print(
-                        "Failed loading provided credentials. Make sure to provide a string or a file path. "
-                        "Reason: " + str(e))
+                    "Failed loading provided credentials. Make sure to provide a string or a file path. "
+                    "Reason: " + str(e))
 
         else:  # no authentication
             self.headers = initialize_headers()

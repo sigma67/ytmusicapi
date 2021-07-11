@@ -5,7 +5,7 @@ from .songs import *
 def parse_uploaded_items(results):
     songs = []
     for result in results:
-        data = result['musicResponsiveListItemRenderer']
+        data = result[MRLIR]
         if 'menu' not in data:
             continue
         entityId = nav(data, MENU_ITEMS)[-1]['menuNavigationItemRenderer']['navigationEndpoint'][
