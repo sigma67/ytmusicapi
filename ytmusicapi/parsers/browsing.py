@@ -196,7 +196,7 @@ def parse_playlist(data):
         'playlistId': nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
         'thumbnails': nav(data, THUMBNAIL_RENDERER)
     }
-    if len(data['subtitle']['runs']) == 3:
+    if len(data['subtitle']['runs']) == 3 and re.search(nav(data, SUBTITLE2), r'\d+ '):
         playlist['count'] = nav(data, SUBTITLE2).split(' ')[0]
     return playlist
 

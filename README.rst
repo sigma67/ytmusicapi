@@ -39,6 +39,10 @@ Features
 * get watch playlists (playlist that appears when you press play in YouTube Music)
 * get song lyrics
 
+| **Exploring music**:
+* get moods and genres playlists
+* get latest charts (globally and per country)
+
 | **Library management**:
 
 * get library contents: playlists, songs, artists, albums and subscriptions

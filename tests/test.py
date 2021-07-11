@@ -152,6 +152,8 @@ class TestYTMusic(unittest.TestCase):
     def test_get_charts(self):
         charts = self.yt_auth.get_charts()
         self.assertEqual(len(charts), 4)
+        charts = self.yt_auth.get_charts(country='US')
+        self.assertEqual(len(charts), 6)
         charts = self.yt.get_charts(country='BE')
         self.assertEqual(len(charts), 4)
 

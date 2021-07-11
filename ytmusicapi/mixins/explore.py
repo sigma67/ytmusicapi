@@ -89,11 +89,114 @@ class ExploreMixin:
 
     def get_charts(self, country: str = 'ZZ') -> Dict:
         """
-        Get latest charts data from YouTube Music.
+        Get latest charts data from YouTube Music: Top songs, top videos, top artists and top trending videos.
+        Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
 
-        :param country: ISO 3166-1 Alpha-2 country code
+        :param country: ISO 3166-1 Alpha-2 country code. Default: ZZ = Global
         :return: Dictionary containing chart songs (only if authenticated), chart videos, chart artists and
-            trending videos.
+        trending videos.
+
+        Example::
+
+            {
+                "countries": {
+                    "selected": {
+                        "text": "United States"
+                    },
+                    "options": ["DE",
+                        "ZZ",
+                        "ZW"]
+                },
+                "songs": {
+                    "playlist": "VLPL4fGSI1pDJn6O1LS0XSdF3RyO0Rq_LDeI",
+                    "items": [
+                        {
+                            "title": "Outside (Better Days)",
+                            "videoId": "oT79YlRtXDg",
+                            "artists": [
+                                {
+                                    "name": "MO3",
+                                    "id": "UCdFt4Cvhr7Okaxo6hZg5K8g"
+                                },
+                                {
+                                    "name": "OG Bobby Billions",
+                                    "id": "UCLusb4T2tW3gOpJS1fJ-A9g"
+                                }
+                            ],
+                            "thumbnails": [
+                                {
+                                    "url": "https://lh3.googleusercontent.com/HtT4fwjY_SC7F2reuC1F3pREiq0z5G1XnO_IvhkI0LvCmdz05c8mhuZ6k3MiROvwH52TSJNj33TxnQIo=w60-h60-l90-rj",
+                                    "width": 60,
+                                    "height": 60
+                                },
+                                {
+                                    "url": "https://lh3.googleusercontent.com/HtT4fwjY_SC7F2reuC1F3pREiq0z5G1XnO_IvhkI0LvCmdz05c8mhuZ6k3MiROvwH52TSJNj33TxnQIo=w120-h120-l90-rj",
+                                    "width": 120,
+                                    "height": 120
+                                }
+                            ],
+                            "isExplicit": true,
+                            "album": {
+                                "name": "Outside (Better Days)",
+                                "id": "MPREb_fX4Yv8frUNv"
+                            },
+                            "rank": "1",
+                            "trend": "up"
+                        }
+                    ]
+                },
+                "videos": {
+                    "playlist": "VLPL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc",
+                    "items": [
+                        {
+                            "title": "EVERY CHANCE I GET (Official Music Video) (feat. Lil Baby & Lil Durk)",
+                            "videoId": "BTivsHlVcGU",
+                            "playlistId": "PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc",
+                            "thumbnails": [],
+                            "views": "46M"
+                        }
+                    ]
+                },
+                "artists": {
+                    "playlist": null,
+                    "items": [
+                        {
+                            "title": "YoungBoy Never Broke Again",
+                            "browseId": "UCR28YDxjDE3ogQROaNdnRbQ",
+                            "subscribers": "9.62M",
+                            "thumbnails": [],
+                            "rank": "1",
+                            "trend": "neutral"
+                        }
+                    ]
+                },
+                "genres": [
+                    {
+                        "title": "Top 50 Pop Music Videos United States",
+                        "playlistId": "PL4fGSI1pDJn77aK7sAW2AT0oOzo5inWY8",
+                        "thumbnails": []
+                    }
+                ],
+                "trending": {
+                    "playlist": "VLPLrEnWoR732-DtKgaDdnPkezM_nDidBU9H",
+                    "items": [
+                        {
+                            "title": "Permission to Dance",
+                            "videoId": "CuklIb9d3fI",
+                            "playlistId": "PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H",
+                            "artists": [
+                                {
+                                    "name": "BTS",
+                                    "id": "UC9vrvNSL3xcWGSkV86REBSg"
+                                }
+                            ],
+                            "thumbnails": [],
+                            "views": "108M"
+                        }
+                    ]
+                }
+            }
+
         """
         body = {'browseId': 'FEmusic_charts'}
         if country:
@@ -116,9 +219,12 @@ class ExploreMixin:
         charts_categories = ['videos', 'artists']
 
         has_songs = bool(self.auth)
-        has_trending = bool(5 - len(results) - has_songs)
+        has_genres = country == 'US'
+        has_trending = country != 'ZZ'
         if has_songs:
             charts_categories.insert(0, 'songs')
+        if has_genres:
+            charts_categories.append('genres')
         if has_trending:
             charts_categories.append('trending')
 
@@ -131,12 +237,17 @@ class ExploreMixin:
             }
 
         if has_songs:
-            charts['songs'] = {
+            charts['songs'].update({
                 'items': parse_chart(0, parse_chart_song, MRLIR)
-            }
+            })
+
         charts['videos']['items'] = parse_chart(1, parse_video, MTRIR)
         charts['artists']['items'] = parse_chart(2, parse_chart_artist, MRLIR)
+
+        if has_genres:
+            charts['genres'] = parse_chart(3, parse_playlist, MTRIR)
+
         if has_trending:
-            charts['trending']['items'] = parse_chart(3, parse_chart_trending, MRLIR)
+            charts['trending']['items'] = parse_chart(3 + has_genres, parse_chart_trending, MRLIR)
 
         return charts
