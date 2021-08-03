@@ -455,7 +455,7 @@ class BrowsingMixin:
               },
               "description": "Seven is ...",
               "thumbnails": [...],
-              "artist": [
+              "artists": [
                 {
                   "name": "Martin Garrix",
                   "id": "UCqJnSdHjKtfsrHi9aI-9d3g"
@@ -492,10 +492,10 @@ class BrowsingMixin:
             album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload',
                                                       True)['description']
             album['thumbnails'] = album_data['thumbnailDetails']['thumbnails']
-            album['artist'] = []
+            album['artists'] = []
             artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
             for artist in artists_data:
-                album['artist'].append({
+                album['artists'].append({
                     'name': artist['musicArtist']['name'],
                     'id': artist['musicArtist']['externalChannelId']
                 })

@@ -24,12 +24,12 @@ def parse_uploaded_items(results):
             'videoId': videoId,
             'title': title,
             'duration': duration,
-            'artist': None,
+            'artists': None,
             'album': None,
             'likeStatus': like,
             'thumbnails': thumbnails
         }
-        song['artist'] = parse_song_artists(data, 1)
+        song['artists'] = parse_song_artists(data, 1)
         song['album'] = parse_song_album(data, 2)
 
         songs.append(song)

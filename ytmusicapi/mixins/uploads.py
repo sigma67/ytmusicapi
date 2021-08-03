@@ -22,7 +22,10 @@ class UploadsMixin:
             {
               "entityId": "t_po_CICr2crg7OWpchDpjPjrBA",
               "videoId": "Uise6RPKoek",
-              "artist": "Coldplay",
+              "artists": [{
+                'name': 'Coldplay',
+                'id': 'FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIIY29sZHBsYXk',
+              }],
               "title": "A Sky Full Of Stars",
               "album": "Ghost Stories",
               "likeStatus": "LIKE",
@@ -110,7 +113,7 @@ class UploadsMixin:
                 "entityId": "t_po_CICr2crg7OWpchDKwoakAQ",
                 "videoId": "Dtffhy8WJgw",
                 "title": "Hold Me (Original Mix)",
-                "artist": [
+                "artists": [
                   {
                     "name": "Jakko",
                     "id": "FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIFamFra28"
@@ -164,7 +167,7 @@ class UploadsMixin:
                   "videoId": "FVo-UZoPygI",
                   "title": "Feel So Close",
                   "duration": "4:15",
-                  "artist": None,
+                  "artists": None,
                   "album": {
                     "name": "18 Months",
                     "id": "FEmusic_library_privately_owned_release_detailb_po_55chars"
