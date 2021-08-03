@@ -1,5 +1,6 @@
 from ytmusicapi.helpers import *
 from ytmusicapi.parsers.browsing import *
+from ytmusicapi.parsers.search_params import *
 from ytmusicapi.parsers.albums import *
 from ytmusicapi.parsers.playlists import *
 from ytmusicapi.parsers.library import parse_albums
@@ -9,6 +10,7 @@ class BrowsingMixin:
     def search(self,
                query: str,
                filter: str = None,
+               scope: str = None,
                limit: int = 20,
                ignore_spelling: bool = False) -> List[Dict]:
         """
@@ -18,6 +20,8 @@ class BrowsingMixin:
         :param query: Query string, i.e. 'Oasis Wonderwall'
         :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``community_playlists``, ``featured_playlists``, ``uploads``.
           Default: Default search, including all types of items.
+        :param scope: Search scope. Allowed values: ``library``, ``uploads``.
+            Default: Search the public YouTube Music catalogue.
         :param limit: Number of search results to return
           Default: 20
         :param ignore_spelling: Whether to ignore YTM spelling suggestions.
@@ -111,56 +115,23 @@ class BrowsingMixin:
         endpoint = 'search'
         search_results = []
         filters = [
-            'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs',
-            'videos', 'uploads'
+            'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs', 'videos'
         ]
         if filter and filter not in filters:
             raise Exception(
                 "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
                 + ', '.join(filters))
 
-        params = None
-        if filter:
-            if filter == 'uploads':
-                params = 'agIYAw%3D%3D'
+        scopes = ['library', 'uploads']
+        if scope and scope not in scopes:
+            raise Exception(
+                "Invalid scope provided. Please use one of the following scopes or leave out the parameter: "
+                + ', '.join(scopes))
 
-            elif filter == 'playlists':
-                params = 'Eg-KAQwIABAAGAAgACgB'
-                if not ignore_spelling:
-                    params += 'MABqChAEEAMQCRAFEAo%3D'
-                else:
-                    params += 'MABCAggBagoQBBADEAkQBRAK'
-
-            elif 'playlists' in filter:
-                param1 = 'EgeKAQQoA'
-                if filter == 'featured_playlists':
-                    param2 = 'Dg'
-                else:  # community_playlists
-                    param2 = 'EA'
-
-                if not ignore_spelling:
-                    param3 = 'BagwQDhAKEAMQBBAJEAU%3D'
-                else:
-                    param3 = 'BQgIIAWoMEA4QChADEAQQCRAF'
-
-                filter = 'playlists'  # reset to playlists for parser
-
-            else:
-                param1 = 'EgWKAQI'
-                filter_params = {'songs': 'I', 'videos': 'Q', 'albums': 'Y', 'artists': 'g'}
-                param2 = filter_params[filter]
-                if not ignore_spelling:
-                    param3 = 'AWoMEA4QChADEAQQCRAF'
-                else:
-                    param3 = 'AUICCAFqDBAOEAoQAxAEEAkQBQ%3D%3D'
-
-            params = params if params else param1 + param2 + param3
-
-        elif ignore_spelling:
-            params = 'EhGKAQ4IARABGAEgASgAOAFAAUICCAE%3D'
-
+        params = get_search_params(filter, scope, ignore_spelling)
         if params:
             body['params'] = params
+
         response = self._send_request(endpoint, body)
 
         # no results
@@ -168,8 +139,8 @@ class BrowsingMixin:
             return search_results
 
         if 'tabbedSearchResultsRenderer' in response['contents']:
-            results = response['contents']['tabbedSearchResultsRenderer']['tabs'][int(
-                filter == "uploads")]['tabRenderer']['content']
+            tab_index = 0 if not scope or filter else scopes.index(scope) + 1
+            results = response['contents']['tabbedSearchResultsRenderer']['tabs'][tab_index]['tabRenderer']['content']
         else:
             results = response['contents']
 
@@ -179,12 +150,22 @@ class BrowsingMixin:
         if len(results) == 1 and 'itemSectionRenderer' in results:
             return search_results
 
+        # set filter for parser
+        if filter and 'playlists' in filter:
+            filter = 'playlists'
+        elif scope == scopes[1]:
+            filter = scopes[1]
+
         for res in results:
             if 'musicShelfRenderer' in res:
                 results = res['musicShelfRenderer']['contents']
+                original_filter = filter
+                if not filter:
+                    filter = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
 
-                type = filter[:-1] if filter else None
+                type = filter[:-1].lower() if filter else None
                 search_results.extend(self.parser.parse_search_results(results, type))
+                filter = original_filter
 
                 if 'continuations' in res['musicShelfRenderer']:
                     request_func = lambda additionalParams: self._send_request(
@@ -465,7 +446,7 @@ class BrowsingMixin:
                 {
                   "index": "1",
                   "title": "WIEE (feat. Mesto)",
-                  "artists": "Martin Garrix",
+                  "artist": "Martin Garrix",
                   "videoId": "8xMNeXI9wxI",
                   "lengthMs": "203406",
                   "likeStatus": "INDIFFERENT"
