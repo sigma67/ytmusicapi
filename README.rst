@@ -40,6 +40,7 @@ Features
 * get song lyrics
 
 | **Exploring music**:
+
 * get moods and genres playlists
 * get latest charts (globally and per country)
 
