@@ -58,14 +58,14 @@ To set up your project, open a Python console and call :py:func:`YTMusic.setup` 
 .. code-block:: python
 
     from ytmusicapi import YTMusic
-    YTMusic.setup(filepath=headers_auth.json)
+    YTMusic.setup(filepath="headers_auth.json")
 
 If you don't want terminal interaction in your project, you can pass the request headers with the ``headers_raw`` parameter:
 
 .. code-block:: python
 
     from ytmusicapi import YTMusic
-    YTMusic.setup(filepath=headers_auth.json, headers_raw="<headers copied above>")
+    YTMusic.setup(filepath="headers_auth.json", headers_raw="<headers copied above>")
     
 The function returns a JSON string with the credentials needed for :doc:`Usage <usage>`. Alternatively, if you passed the filepath parameter as described above,
 a file called ``headers_auth.json`` will be created in the current directory, which you can pass to ``YTMusic()`` for authentication.
