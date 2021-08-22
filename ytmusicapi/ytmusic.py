@@ -1,6 +1,6 @@
 import requests
 import gettext
-import pkg_resources
+import importlib_resources
 import os
 from contextlib import suppress
 from typing import Dict
@@ -90,7 +90,7 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
         # prepare context
         self.context = initialize_context()
         self.context['context']['client']['hl'] = language
-        supported_languages = [f for f in pkg_resources.resource_listdir('ytmusicapi', 'locales')]
+        supported_languages = [f.name for f in importlib_resources.files('ytmusicapi.locales').iterdir()]
         if language not in supported_languages:
             raise Exception("Language not supported. Supported languages are "
                             ', '.join(supported_languages))
@@ -101,8 +101,7 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
             with suppress(locale.Error):
                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         self.lang = gettext.translation('base',
-                                        localedir=pkg_resources.resource_filename(
-                                            'ytmusicapi', 'locales'),
+                                        localedir=importlib_resources.files('ytmusicapi') / 'locales',
                                         languages=[language])
         self.parser = browsing.Parser(self.lang)
 
