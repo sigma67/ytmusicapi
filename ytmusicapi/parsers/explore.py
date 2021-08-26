@@ -7,7 +7,7 @@ def parse_chart_song(data):
     flex_0 = get_flex_column_item(data, 0)
     parsed = {
         'title': nav(flex_0, TEXT_RUN_TEXT),
-        'videoId': nav(flex_0, TEXT_RUN + NAVIGATION_VIDEO_ID),
+        'videoId': nav(flex_0, TEXT_RUN + NAVIGATION_VIDEO_ID, True),
         'artists': parse_song_artists(data, 1),
         'thumbnails': nav(data, THUMBNAILS),
         'isExplicit': nav(data, BADGE_LABEL, True) == 'Explicit'
