@@ -8,13 +8,17 @@ def parse_song_artists(data, index):
         return None
     else:
         runs = flex_item['text']['runs']
-        artists = []
-        for j in range(int(len(runs) / 2) + 1):
-            artists.append({
-                'name': runs[j * 2]['text'],
-                'id': nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)
-            })
-        return artists
+        return parse_song_artists_runs(runs)
+
+
+def parse_song_artists_runs(runs):
+    artists = []
+    for j in range(int(len(runs) / 2) + 1):
+        artists.append({
+            'name': runs[j * 2]['text'],
+            'id': nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)
+        })
+    return artists
 
 
 def parse_song_runs(runs):

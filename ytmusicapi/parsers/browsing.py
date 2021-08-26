@@ -179,14 +179,15 @@ def parse_single(result):
 
 
 def parse_video(result):
+    runs = result['subtitle']['runs']
     video = {
         'title': nav(result, TITLE_TEXT),
         'videoId': nav(result, NAVIGATION_VIDEO_ID),
+        'artists': parse_song_artists_runs(runs[:-2]),
         'playlistId': nav(result, NAVIGATION_PLAYLIST_ID, True),
         'thumbnails': nav(result, THUMBNAIL_RENDERER, True)
     }
-    if len(result['subtitle']['runs']) == 3:
-        video['views'] = nav(result, SUBTITLE2).split(' ')[0]
+    video['views'] = runs[-1]['text'].split(' ')[0]
     return video
 
 
