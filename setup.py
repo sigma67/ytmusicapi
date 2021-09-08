@@ -24,6 +24,6 @@ setup(name='ytmusicapi',
       extras_require={
           'dev': ['pre-commit', 'flake8', 'yapf', 'coverage', 'sphinx', 'sphinx-rtd-theme']
       },
-      python_requires=">=3.5",
+      python_requires=">=3.6",
       include_package_data=True,
       zip_safe=False)
