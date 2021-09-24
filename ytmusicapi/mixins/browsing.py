@@ -160,7 +160,7 @@ class BrowsingMixin:
             if 'musicShelfRenderer' in res:
                 results = res['musicShelfRenderer']['contents']
                 original_filter = filter
-                if not filter:
+                if not filter and scope == scopes[0]:
                     filter = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
 
                 type = filter[:-1].lower() if filter else None
