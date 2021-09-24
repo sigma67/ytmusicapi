@@ -45,8 +45,9 @@ Library
 -------
 .. automethod:: YTMusic.get_library_playlists
 .. automethod:: YTMusic.get_library_songs
-.. automethod:: YTMusic.get_library_artists
 .. automethod:: YTMusic.get_library_albums
+.. automethod:: YTMusic.get_library_artists
+.. automethod:: YTMusic.get_library_subscriptions
 .. automethod:: YTMusic.get_liked_songs
 .. automethod:: YTMusic.get_history
 .. automethod:: YTMusic.remove_history_items
