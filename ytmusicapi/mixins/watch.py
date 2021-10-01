@@ -42,7 +42,7 @@ class WatchMixin:
                       "likeStatus": "LIKE"
                     },...
                 ],
-                "playlist": "RDAMVM4y33h81phKU",
+                "playlistId": "RDAMVM4y33h81phKU",
                 "lyrics": "MPLYt_HNNclO0Ddoc-17"
             }
 
