@@ -38,6 +38,7 @@ class BrowsingMixin:
 
             [
               {
+                "category": "Top result",
                 "resultType": "video",
                 "videoId": "vU05Eksc_iM",
                 "title": "Wonderwall",
@@ -51,6 +52,7 @@ class BrowsingMixin:
                 "duration": "4:38"
               },
               {
+                "category": "Songs",
                 "resultType": "song",
                 "videoId": "ZrOKjDZOtkA",
                 "title": "Wonderwall",
@@ -72,6 +74,7 @@ class BrowsingMixin:
                 }
               },
               {
+                "category": "Albums",
                 "resultType": "album",
                 "browseId": "MPREb_9nqEki4ZDpp",
                 "title": "(What's The Story) Morning Glory? (Remastered)",
@@ -81,6 +84,7 @@ class BrowsingMixin:
                 "isExplicit": false
               },
               {
+                "category": "Community playlists",
                 "resultType": "playlist",
                 "browseId": "VLPLK1PkWQlWtnNfovRdGWpKffO1Wdi2kvDx",
                 "title": "Wonderwall - Oasis",
@@ -88,6 +92,7 @@ class BrowsingMixin:
                 "itemCount": "174"
               },
               {
+                "category": "Videos",
                 "resultType": "video",
                 "videoId": "bx1Bh8ZvH84",
                 "title": "Wonderwall",
@@ -101,6 +106,7 @@ class BrowsingMixin:
                 "duration": "4:38"
               },
               {
+                "category": "Artists",
                 "resultType": "artist",
                 "browseId": "UCmMUZbaYdNH0bEd1PAlAqsA",
                 "artist": "Oasis",
@@ -160,18 +166,19 @@ class BrowsingMixin:
             if 'musicShelfRenderer' in res:
                 results = res['musicShelfRenderer']['contents']
                 original_filter = filter
+                category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
                 if not filter and scope == scopes[0]:
-                    filter = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
+                    filter = category
 
                 type = filter[:-1].lower() if filter else None
-                search_results.extend(self.parser.parse_search_results(results, type))
+                search_results.extend(self.parser.parse_search_results(results, type, category))
                 filter = original_filter
 
                 if 'continuations' in res['musicShelfRenderer']:
                     request_func = lambda additionalParams: self._send_request(
                         endpoint, body, additionalParams)
 
-                    parse_func = lambda contents: self.parser.parse_search_results(contents, type)
+                    parse_func = lambda contents: self.parser.parse_search_results(contents, type, category)
 
                     search_results.extend(
                         get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',

@@ -9,12 +9,12 @@ class Parser:
         self.lang = language
 
     @i18n
-    def parse_search_results(self, results, resultType=None):
+    def parse_search_results(self, results, resultType=None, category=None):
         search_results = []
         default_offset = (not resultType) * 2
         for result in results:
             data = result[MRLIR]
-            search_result = {}
+            search_result = {'category': category}
             if not resultType:
                 resultType = get_item_text(data, 1).lower()
                 result_types = ['artist', 'playlist', 'song', 'video', 'station']
