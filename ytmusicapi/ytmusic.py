@@ -1,6 +1,7 @@
 import requests
 import gettext
 import os
+from functools import partial
 from contextlib import suppress
 from typing import Dict
 from ytmusicapi.helpers import *
@@ -40,6 +41,13 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
           by going to https://myaccount.google.com/brandaccounts and selecting your brand account.
           The user ID will be in the URL: https://myaccount.google.com/b/user_id/
         :param requests_session: A Requests session object or a truthy value to create one.
+          Default sessions have a request timeout of 30s, which produces a requests.exceptions.ReadTimeout.
+          The timeout can be changed by passing your own Session object::
+
+            s = requests.Session()
+            s.request = functools.partial(s.request, timeout=3)
+            ytm = YTMusic(session=s)
+
           A falsy value disables sessions.
           It is generally a good idea to keep sessions enabled for
           performance reasons (connection pooling).
@@ -59,6 +67,7 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
         else:
             if requests_session:  # Build a new session.
                 self._session = requests.Session()
+                self._session.request = partial(self._session.request, timeout=30)
             else:  # Use the Requests API module as a "session".
                 self._session = requests.api
 
