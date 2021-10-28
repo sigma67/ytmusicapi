@@ -72,3 +72,11 @@ What is a browseId?
 ***********************************************************************
 A ``browseId`` is an internal, globally unique identifier used by YouTube Music for browsable content.
 
+
+Why is ytmusicapi returning more results than requested with the limit parameter?
+***********************************************************************
+YouTube Music always returns increments of a specific pagination value, usually between 20 and 100 items at a time.
+This is the case if a ytmusicapi method supports the ``limit`` parameter. The default value of the ``limit`` parameter
+indicates the server-side pagination increment. ytmusicapi will keep fetching continuations from the server until it has
+reached at least the ``limit`` parameter, and return all of these results.
+
