@@ -464,69 +464,9 @@ class BrowsingMixin:
         body = {'browseId': browseId}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        album = {}
-        data = nav(response, FRAMEWORK_MUTATIONS, True)
-        if not data:
-            album = parse_album_header(response)
-            results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
-            album['tracks'] = parse_playlist_items(results['contents'])
-        else:
-            album_data = find_object_by_key(data, 'musicAlbumRelease', 'payload', True)
-            album['title'] = album_data['title']
-            album['trackCount'] = album_data['trackCount']
-            album['durationMs'] = album_data['durationMs']
-            album['playlistId'] = album_data['audioPlaylistId']
-            album['releaseDate'] = album_data['releaseDate']
-            album['description'] = find_object_by_key(data, 'musicAlbumReleaseDetail', 'payload',
-                                                      True)['description']
-            album['thumbnails'] = album_data['thumbnailDetails']['thumbnails']
-            album['artists'] = []
-            artists_data = find_objects_by_key(data, 'musicArtist', 'payload')
-            for artist in artists_data:
-                album['artists'].append({
-                    'name': artist['musicArtist']['name'],
-                    'id': artist['musicArtist']['externalChannelId']
-                })
-            album['tracks'] = []
-
-            track_library_details = {}
-            for item in data:
-                if 'musicTrackUserDetail' in item['payload']:
-                    like_state = item['payload']['musicTrackUserDetail']['likeState'].split(
-                        '_')[-1]
-                    parent_track = item['payload']['musicTrackUserDetail']['parentTrack']
-                    like_state = 'INDIFFERENT' if like_state in ['NEUTRAL', 'UNKNOWN'
-                                                                 ] else like_state[:-1]
-                    track_library_details[parent_track] = like_state
-
-                if 'musicLibraryEdit' in item['payload']:
-                    entity_key = item['entityKey']
-                    track_library_details[entity_key] = {
-                        'add': item['payload']['musicLibraryEdit']['addToLibraryFeedbackToken'],
-                        'remove':
-                        item['payload']['musicLibraryEdit']['removeFromLibraryFeedbackToken']
-                    }
-
-            for item in data[3:]:
-                if 'musicTrack' in item['payload']:
-                    music_track = item['payload']['musicTrack']
-                    track = {}
-                    track['index'] = music_track['albumTrackIndex']
-                    track['title'] = music_track['title']
-                    track['thumbnails'] = music_track['thumbnailDetails']['thumbnails']
-                    track['artists'] = music_track['artistNames']
-                    # in case the song is unavailable, there is no videoId
-                    track['videoId'] = music_track['videoId'] if 'videoId' in item['payload'][
-                        'musicTrack'] else None
-                    # very occasionally lengthMs is not returned
-                    track['lengthMs'] = music_track[
-                        'lengthMs'] if 'lengthMs' in music_track else None
-                    track['likeStatus'] = track_library_details[item['entityKey']]
-                    track['isExplicit'] = music_track['contentRating'][
-                        'explicitType'] == 'MUSIC_ENTITY_EXPLICIT_TYPE_EXPLICIT'
-                    if 'libraryEdit' in music_track:
-                        track['feedbackTokens'] = track_library_details[music_track['libraryEdit']]
-                    album['tracks'].append(track)
+        album = parse_album_header(response)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
+        album['tracks'] = parse_playlist_items(results['contents'])
 
         return album
 
