@@ -126,7 +126,7 @@ class UploadsMixin:
             ]
         """
         self._check_auth()
-        body = prepare_browse_endpoint("ARTIST", browseId)
+        body = {'browseId': browseId}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
@@ -177,7 +177,7 @@ class UploadsMixin:
                 },
         """
         self._check_auth()
-        body = prepare_browse_endpoint("ALBUM", browseId)
+        body = {'browseId': browseId}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         album = parse_album_header(response)

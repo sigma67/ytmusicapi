@@ -61,7 +61,7 @@ class PlaylistsMixin:
         needed for moving/removing playlist items
         """
         browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
-        body = prepare_browse_endpoint("PLAYLIST", browseId)
+        body = {'browseId': browseId}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         results = nav(response,

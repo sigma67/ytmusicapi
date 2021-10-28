@@ -275,7 +275,7 @@ class BrowsingMixin:
         """
         if channelId.startswith("MPLA"):
             channelId = channelId[4:]
-        body = prepare_browse_endpoint("ARTIST", channelId)
+        body = {'browseId': channelId}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
@@ -461,7 +461,7 @@ class BrowsingMixin:
               ]
             }
         """
-        body = prepare_browse_endpoint("ALBUM", browseId)
+        body = {'browseId': browseId}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         album = {}

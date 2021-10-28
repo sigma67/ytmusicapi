@@ -9,17 +9,6 @@ import locale
 from ytmusicapi.constants import *
 
 
-def prepare_browse_endpoint(type, browseId):
-    return {
-        'browseEndpointContextSupportedConfigs': {
-            "browseEndpointContextMusicConfig": {
-                "pageType": "MUSIC_PAGE_TYPE_" + type
-            }
-        },
-        'browseId': browseId
-    }
-
-
 def prepare_like_endpoint(rating):
     if rating == 'LIKE':
         return 'like/like'
