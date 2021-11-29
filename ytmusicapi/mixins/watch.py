@@ -48,19 +48,21 @@ class WatchMixin:
 
         """
         body = {'enablePersistentPlaylistPanel': True, 'isAudioOnly': True}
+        if not videoId and not playlistId:
+            raise Exception("You must provide either a video id, a playlist id, or both")
         if videoId:
             body['videoId'] = videoId
+            if not playlistId:
+                playlistId = "RDAMVM" + videoId
             if not params:
                 body['watchEndpointMusicSupportedConfigs'] = {
                     'watchEndpointMusicConfig': {
                         'hasPersistentPlaylistPanel': True,
-                        'musicVideoType': "MUSIC_VIDEO_TYPE_OMV",
+                        'musicVideoType': "MUSIC_VIDEO_TYPE_ATV",
                     }
                 }
-        is_playlist = False
-        if playlistId:
-            body['playlistId'] = validate_playlist_id(playlistId)
-            is_playlist = body['playlistId'].startswith('PL')
+        body['playlistId'] = validate_playlist_id(playlistId)
+        is_playlist = body['playlistId'].startswith('PL')
         if params:
             body['params'] = params
         endpoint = 'next'
