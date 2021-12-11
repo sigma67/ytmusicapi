@@ -86,7 +86,7 @@ class PlaylistsMixin:
                 'name': nav(header, SUBTITLE2),
                 'id': nav(header, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID, True)
             }
-            if run_count > 3:
+            if run_count == 5:
                 playlist['year'] = nav(header, SUBTITLE3)
 
         song_count = to_int(
