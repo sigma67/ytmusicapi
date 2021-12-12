@@ -203,7 +203,7 @@ class UploadsMixin:
                 + ', '.join(supported_filetypes))
 
         headers = self.headers.copy()
-        upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=%s" % headers['X-Goog-AuthUser']
+        upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=%s" % headers['x-goog-authuser']
         filesize = os.path.getsize(filepath)
         body = ("filename=" + ntpath.basename(filepath)).encode('utf-8')
         headers.pop('content-encoding', None)

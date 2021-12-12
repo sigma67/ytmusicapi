@@ -1,6 +1,7 @@
 import requests
 import gettext
 import os
+from requests.structures import CaseInsensitiveDict
 from functools import partial
 from contextlib import suppress
 from typing import Dict
@@ -74,15 +75,14 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
         self.proxies = proxies
 
         # prepare headers
-        self.headers = {}
         if auth:
             try:
                 if os.path.isfile(auth):
                     file = auth
                     with open(file) as json_file:
-                        self.headers = json.load(json_file)
+                        self.headers = CaseInsensitiveDict(json.load(json_file))
                 else:
-                    self.headers = json.loads(auth)
+                    self.headers = CaseInsensitiveDict(json.loads(auth))
 
             except Exception as e:
                 print(
@@ -120,7 +120,7 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
         # verify authentication credentials work
         if auth:
             try:
-                cookie = self.headers.get('cookie', self.headers.get('Cookie'))
+                cookie = self.headers.get('cookie')
                 self.sapisid = sapisid_from_cookie(cookie)
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
