@@ -143,7 +143,7 @@ class YTMusic(BrowsingMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMi
         return response_text
 
     def _send_get_request(self, url: str, params: Dict = None):
-        response = requests.get(url, params, headers=self.headers, proxies=self.proxies)
+        response = self._session.get(url, params=params, headers=self.headers, proxies=self.proxies)
         return response.text
 
     def _check_auth(self):
