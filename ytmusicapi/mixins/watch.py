@@ -62,7 +62,8 @@ class WatchMixin:
                     }
                 }
         body['playlistId'] = validate_playlist_id(playlistId)
-        is_playlist = body['playlistId'].startswith('PL')
+        is_playlist = body['playlistId'].startswith('PL') or \
+                      body['playlistId'].startswith('OLA')
         if params:
             body['params'] = params
         endpoint = 'next'
