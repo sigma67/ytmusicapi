@@ -96,7 +96,7 @@ def get_datestamp():
 
 
 def to_int(string):
-    number_string = string.split(' ')[0]
+    number_string = re.split('[\x20\xa0]', string)[0]
     try:
         int_value = locale.atoi(number_string)
     except ValueError:
