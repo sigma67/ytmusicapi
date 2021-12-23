@@ -10,7 +10,7 @@ def parse_chart_song(data):
         'videoId': nav(flex_0, TEXT_RUN + NAVIGATION_VIDEO_ID, True),
         'artists': parse_song_artists(data, 1),
         'thumbnails': nav(data, THUMBNAILS),
-        'isExplicit': nav(data, BADGE_LABEL, True) == 'Explicit'
+        'isExplicit': nav(data, BADGE_LABEL, True) is not None
     }
     flex_2 = get_flex_column_item(data, 2)
     if flex_2 and 'navigationEndpoint' in nav(flex_2, TEXT_RUN):

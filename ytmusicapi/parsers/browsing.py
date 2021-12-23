@@ -115,7 +115,7 @@ class Parser:
                     continue
 
             if resultType in ['song', 'album']:
-                search_result['isExplicit'] = nav(data, BADGE_LABEL, True) == 'Explicit'
+                search_result['isExplicit'] = nav(data, BADGE_LABEL, True) is not None
 
             search_result['thumbnails'] = nav(data, THUMBNAILS, True)
             search_results.append(search_result)
