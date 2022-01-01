@@ -109,10 +109,10 @@ class LibraryMixin:
               "title": "Beautiful",
               "type": "Album",
               "thumbnails": [...],
-              "artists": {
+              "artists": [{
                 "name": "Project 46",
                 "id": "UCXFv36m62USAN5rnVct9B4g"
-              },
+              }],
               "year": "2015"
             }
         """

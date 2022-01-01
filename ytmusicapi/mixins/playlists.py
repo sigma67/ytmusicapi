@@ -26,6 +26,7 @@ class PlaylistsMixin:
               "author": "sigmatics",
               "year": "2020",
               "duration": "6+ hours",
+              "duration_seconds": 52651,
               "trackCount": 237,
               "tracks": [
                 {
@@ -113,6 +114,7 @@ class PlaylistsMixin:
                                       songs_to_get - len(playlist['tracks']), request_func,
                                       parse_func))
 
+        playlist['duration_seconds'] = sum_total_duration(playlist)
         return playlist
 
     def get_playlist_suggestions(self, suggestions_token: str) -> Dict:

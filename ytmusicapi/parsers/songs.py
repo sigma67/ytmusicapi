@@ -1,4 +1,5 @@
 from .utils import *
+from ..helpers import parse_duration
 import re
 
 
@@ -30,7 +31,8 @@ def parse_song_runs(runs):
         if 'navigationEndpoint' in run:  # artist or album
             item = {'name': text, 'id': nav(run, NAVIGATION_BROWSE_ID, True)}
 
-            if item['id'] and (item['id'].startswith('MPRE') or "release_detail" in item['id']):  # album
+            if item['id'] and (item['id'].startswith('MPRE')
+                               or "release_detail" in item['id']):  # album
                 parsed['album'] = item
             else:  # artist
                 parsed['artists'].append(item)
@@ -42,6 +44,7 @@ def parse_song_runs(runs):
 
             elif re.match(r"^(\d+:)*\d+:\d+$", text):
                 parsed['duration'] = text
+                parsed['duration_seconds'] = parse_duration(text)
 
             elif re.match(r"^\d{4}$", text):
                 parsed['year'] = text

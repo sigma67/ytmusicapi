@@ -49,7 +49,8 @@ class BrowsingMixin:
                   }
                 ],
                 "views": "1.4M",
-                "duration": "4:38"
+                "duration": "4:38",
+                "duration_seconds": 278
               },
               {
                 "category": "Songs",
@@ -67,6 +68,7 @@ class BrowsingMixin:
                   "id": "MPREb_9nqEki4ZDpp"
                 },
                 "duration": "4:19",
+                "duration_seconds": 259
                 "isExplicit": false,
                 "feedbackTokens": {
                   "add": null,
@@ -103,7 +105,8 @@ class BrowsingMixin:
                   }
                 ],
                 "views": "386M",
-                "duration": "4:38"
+                "duration": "4:38",
+                "duration_seconds": 278
               },
               {
                 "category": "Artists",
@@ -121,7 +124,8 @@ class BrowsingMixin:
         endpoint = 'search'
         search_results = []
         filters = [
-            'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs', 'videos'
+            'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs',
+            'videos'
         ]
         if filter and filter not in filters:
             raise Exception(
@@ -146,7 +150,8 @@ class BrowsingMixin:
 
         if 'tabbedSearchResultsRenderer' in response['contents']:
             tab_index = 0 if not scope or filter else scopes.index(scope) + 1
-            results = response['contents']['tabbedSearchResultsRenderer']['tabs'][tab_index]['tabRenderer']['content']
+            results = response['contents']['tabbedSearchResultsRenderer']['tabs'][tab_index][
+                'tabRenderer']['content']
         else:
             results = response['contents']
 
@@ -178,7 +183,8 @@ class BrowsingMixin:
                     request_func = lambda additionalParams: self._send_request(
                         endpoint, body, additionalParams)
 
-                    parse_func = lambda contents: self.parser.parse_search_results(contents, type, category)
+                    parse_func = lambda contents: self.parser.parse_search_results(
+                        contents, type, category)
 
                     search_results.extend(
                         get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
@@ -427,38 +433,42 @@ class BrowsingMixin:
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
-        :return: Dictionary with title, description, artist and tracks.
+        :return: Dictionary with album and track metadata.
 
         Each track is in the following format::
 
             {
-              "title": "Seven",
-              "trackCount": "7",
-              "durationMs": "1439579",
-              "playlistId": "OLAK5uy_kGnhwT08mQMGw8fArBowdtlew3DpgUt9c",
-              "releaseDate": {
-                "year": 2016,
-                "month": 10,
-                "day": 28
-              },
-              "description": "Seven is ...",
-              "thumbnails": [...],
-              "artists": [
-                {
-                  "name": "Martin Garrix",
-                  "id": "UCqJnSdHjKtfsrHi9aI-9d3g"
-                }
-              ],
-              "tracks": [
-                {
-                  "index": "1",
-                  "title": "WIEE (feat. Mesto)",
-                  "artist": "Martin Garrix",
-                  "videoId": "8xMNeXI9wxI",
-                  "lengthMs": "203406",
-                  "likeStatus": "INDIFFERENT"
-                }
-              ]
+                "title": "Revival",
+                "type": "Album",
+                "thumbnails": [],
+                "description": "Revival is the ninth studio album by American rapper Eminem. ...",
+                "artists": [{
+                        "name": "Eminem",
+                        "id": "UCedvOgsKFzcK3hA5taf3KoQ"
+                }],
+                "year": "2017",
+                "trackCount": 19,
+                "duration": "1 hour, 17 minutes",
+                "duration_seconds": 4657,
+                "audioPlaylistId": "OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY",
+                "tracks": [
+                    {
+                        "videoId": "iKLU7z_xdYQ",
+                        "title": "Walk On Water (feat. Beyoncé)",
+                        "artists": None,
+                        "album": None,
+                        "likeStatus": "INDIFFERENT",
+                        "thumbnails": None,
+                        "isAvailable": True,
+                        "isExplicit": True,
+                        "duration": "5:03",
+                        "feedbackTokens":
+                        {
+                            "add": "AB9zfpJww...",
+                            "remove": "AB9zfpI807..."
+                        }
+                    }
+                ]
             }
         """
         body = {'browseId': browseId}
@@ -467,6 +477,7 @@ class BrowsingMixin:
         album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         album['tracks'] = parse_playlist_items(results['contents'])
+        album['duration_seconds'] = sum_total_duration(album)
 
         return album
 
@@ -482,152 +493,135 @@ class BrowsingMixin:
         Example::
 
             {
-              "videoDetails": {
-                "allowRatings": true,
-                "author": "Oasis - Topic",
-                "averageRating": 4.5783687,
-                "channelId": "UCmMUZbaYdNH0bEd1PAlAqsA",
-                "isCrawlable": true,
-                "isLiveContent": false,
-                "isOwnerViewing": false,
-                "isPrivate": false,
-                "isUnpluggedCorpus": false,
-                "lengthSeconds": "259",
-                "musicVideoType": "MUSIC_VIDEO_TYPE_ATV",
-                "thumbnail": {
-                  "thumbnails": [...]
+                "playabilityStatus": {
+                    "status": "OK",
+                    "playableInEmbed": true,
+                    "audioOnlyPlayability": {
+                        "audioOnlyPlayabilityRenderer": {
+                            "trackingParams": "CAEQx2kiEwiuv9X5i5H1AhWBvlUKHRoZAHk=",
+                            "audioOnlyAvailability": "FEATURE_AVAILABILITY_ALLOWED"
+                        }
+                    },
+                    "miniplayer": {
+                        "miniplayerRenderer": {
+                            "playbackMode": "PLAYBACK_MODE_ALLOW"
+                        }
+                    },
+                    "contextParams": "Q0FBU0FnZ0M="
                 },
-                "title": "Wonderwall",
-                "videoId": "ZrOKjDZOtkA",
-                "viewCount": "27429003"
-              },
-              "microformat": {
-                "microformatDataRenderer": {
-                  "androidPackage": "com.google.android.apps.youtube.music",
-                  "appName": "YouTube Music",
-                  "availableCountries": ["AE",...],
-                  "category": "Music",
-                  "description": "Provided to YouTube by Ignition Wonderwall · Oasis ...",
-                  "familySafe": true,
-                  "iosAppArguments": "https://music.youtube.com/watch?v=ZrOKjDZOtkA",
-                  "iosAppStoreId": "1017492454",
-                  "linkAlternates": [
-                    {
-                      "hrefUrl": "android-app://com.google.android.youtube/http/youtube.com/watch?v=ZrOKjDZOtkA"
-                    },
-                    {
-                      "hrefUrl": "ios-app://544007664/http/youtube.com/watch?v=ZrOKjDZOtkA"
-                    },
-                    {
-                      "alternateType": "application/json+oembed",
-                      "hrefUrl": "https://www.youtube.com/oembed?format=json&url=...",
-                      "title": "Wonderwall (Remastered)"
-                    },
-                    {
-                      "alternateType": "text/xml+oembed",
-                      "hrefUrl": "https://www.youtube.com/oembed?format=xml&url=...",
-                      "title": "Wonderwall (Remastered)"
-                    }
-                  ],
-                  "noindex": false,
-                  "ogType": "video.other",
-                  "pageOwnerDetails": {
-                    "externalChannelId": "UCmMUZbaYdNH0bEd1PAlAqsA",
-                    "name": "Oasis - Topic",
-                    "youtubeProfileUrl": "http://www.youtube.com/channel/UCmMUZbaYdNH0bEd1PAlAqsA"
-                  },
-                  "paid": false,
-                  "publishDate": "2017-01-25",
-                  "schemaDotOrgType": "http://schema.org/VideoObject",
-                  "siteName": "YouTube Music",
-                  "tags": ["Oasis",...],
-                  "thumbnail": {
-                    "thumbnails": [
-                      {
-                        "height": 720,
-                        "url": "https://i.ytimg.com/vi/ZrOKjDZOtkA/maxresdefault.jpg",
-                        "width": 1280
-                      }
+                "streamingData": {
+                    "expiresInSeconds": "21540",
+                    "adaptiveFormats": [
+                        {
+                            "itag": 140,
+                            "url": "https://rr1---sn-h0jelnez.c.youtube.com/videoplayback?expire=1641080272...",
+                            "mimeType": "audio/mp4; codecs=\"mp4a.40.2\"",
+                            "bitrate": 131007,
+                            "initRange": {
+                                "start": "0",
+                                "end": "667"
+                            },
+                            "indexRange": {
+                                "start": "668",
+                                "end": "999"
+                            },
+                            "lastModified": "1620321966927796",
+                            "contentLength": "3967382",
+                            "quality": "tiny",
+                            "projectionType": "RECTANGULAR",
+                            "averageBitrate": 129547,
+                            "highReplication": true,
+                            "audioQuality": "AUDIO_QUALITY_MEDIUM",
+                            "approxDurationMs": "245000",
+                            "audioSampleRate": "44100",
+                            "audioChannels": 2,
+                            "loudnessDb": -1.3000002
+                        }
                     ]
-                  },
-                  "title": "Wonderwall (Remastered) - YouTube Music",
-                  "twitterCardType": "player",
-                  "twitterSiteHandle": "@YouTubeMusic",
-                  "unlisted": false,
-                  "uploadDate": "2017-01-25",
-                  "urlApplinksAndroid": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=applinks",
-                  "urlApplinksIos": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=applinks",
-                  "urlCanonical": "https://music.youtube.com/watch?v=ZrOKjDZOtkA",
-                  "urlTwitterAndroid": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=twitter-deep-link",
-                  "urlTwitterIos": "vnd.youtube.music://music.youtube.com/watch?v=ZrOKjDZOtkA&feature=twitter-deep-link",
-                  "videoDetails": {
-                    "durationIso8601": "PT4M19S",
-                    "durationSeconds": "259",
-                    "externalVideoId": "ZrOKjDZOtkA"
-                  },
-                  "viewCount": "27429003"
-                }
-              },
-              "playabilityStatus": {
-                "contextParams": "Q0FFU0FnZ0I=",
-                "miniplayer": {
-                  "miniplayerRenderer": {
-                    "playbackMode": "PLAYBACK_MODE_ALLOW"
-                  }
                 },
-                "playableInEmbed": true,
-                "status": "OK"
-              },
-              "streamingData": {
-                "adaptiveFormats": [
-                  {
-                    "approxDurationMs": "258760",
-                    "averageBitrate": 178439,
-                    "bitrate": 232774,
-                    "contentLength": "5771637",
-                    "fps": 25,
-                    "height": 1080,
-                    "indexRange": {
-                      "end": "1398",
-                      "start": "743"
+                "videoDetails": {
+                    "videoId": "AjXQiKP5kMs",
+                    "title": "Sparks",
+                    "lengthSeconds": "245",
+                    "channelId": "UCvCk2zFqkCYzpnSgWfx0qOg",
+                    "isOwnerViewing": false,
+                    "isCrawlable": false,
+                    "thumbnail": {
+                        "thumbnails": []
                     },
-                    "initRange": {
-                      "end": "742",
-                      "start": "0"
-                    },
-                    "itag": 137,
-                    "lastModified": "1614620567944400",
-                    "mimeType": "video/mp4; codecs=\"avc1.640020\"",
-                    "projectionType": "RECTANGULAR",
-                    "quality": "hd1080",
-                    "qualityLabel": "1080p",
-                    "signatureCipher": "s=_xxxOq0QJ8...",
-                    "width": 1078
-                  }[...]
-                ],
-                "expiresInSeconds": "21540",
-                "formats": [
-                  {
-                    "approxDurationMs": "258809",
-                    "audioChannels": 2,
-                    "audioQuality": "AUDIO_QUALITY_LOW",
-                    "audioSampleRate": "44100",
-                    "averageBitrate": 179462,
-                    "bitrate": 179496,
-                    "contentLength": "5805816",
-                    "fps": 25,
-                    "height": 360,
-                    "itag": 18,
-                    "lastModified": "1614620870611066",
-                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
-                    "projectionType": "RECTANGULAR",
-                    "quality": "medium",
-                    "qualityLabel": "360p",
-                    "signatureCipher": "s=kXXXOq0QJ8...",
-                    "width": 360
-                  }
-                ]
-              }
+                    "allowRatings": true,
+                    "viewCount": "12",
+                    "author": "Thomas Bergersen",
+                    "isPrivate": true,
+                    "isUnpluggedCorpus": false,
+                    "musicVideoType": "MUSIC_VIDEO_TYPE_PRIVATELY_OWNED_TRACK",
+                    "isLiveContent": false
+                },
+                "microformat": {
+                    "microformatDataRenderer": {
+                        "urlCanonical": "https://music.youtube.com/watch?v=AjXQiKP5kMs",
+                        "title": "Sparks - YouTube Music",
+                        "description": "Uploaded to YouTube via YouTube Music Sparks",
+                        "thumbnail": {
+                            "thumbnails": [
+                                {
+                                    "url": "https://i.ytimg.com/vi/AjXQiKP5kMs/hqdefault.jpg",
+                                    "width": 480,
+                                    "height": 360
+                                }
+                            ]
+                        },
+                        "siteName": "YouTube Music",
+                        "appName": "YouTube Music",
+                        "androidPackage": "com.google.android.apps.youtube.music",
+                        "iosAppStoreId": "1017492454",
+                        "iosAppArguments": "https://music.youtube.com/watch?v=AjXQiKP5kMs",
+                        "ogType": "video.other",
+                        "urlApplinksIos": "vnd.youtube.music://music.youtube.com/watch?v=AjXQiKP5kMs&feature=applinks",
+                        "urlApplinksAndroid": "vnd.youtube.music://music.youtube.com/watch?v=AjXQiKP5kMs&feature=applinks",
+                        "urlTwitterIos": "vnd.youtube.music://music.youtube.com/watch?v=AjXQiKP5kMs&feature=twitter-deep-link",
+                        "urlTwitterAndroid": "vnd.youtube.music://music.youtube.com/watch?v=AjXQiKP5kMs&feature=twitter-deep-link",
+                        "twitterCardType": "player",
+                        "twitterSiteHandle": "@YouTubeMusic",
+                        "schemaDotOrgType": "http://schema.org/VideoObject",
+                        "noindex": true,
+                        "unlisted": true,
+                        "paid": false,
+                        "familySafe": true,
+                        "pageOwnerDetails": {
+                            "name": "Music Library Uploads",
+                            "externalChannelId": "UCvCk2zFqkCYzpnSgWfx0qOg",
+                            "youtubeProfileUrl": "http://www.youtube.com/channel/UCvCk2zFqkCYzpnSgWfx0qOg"
+                        },
+                        "videoDetails": {
+                            "externalVideoId": "AjXQiKP5kMs",
+                            "durationSeconds": "246",
+                            "durationIso8601": "PT4M6S"
+                        },
+                        "linkAlternates": [
+                            {
+                                "hrefUrl": "android-app://com.google.android.youtube/http/youtube.com/watch?v=AjXQiKP5kMs"
+                            },
+                            {
+                                "hrefUrl": "ios-app://544007664/http/youtube.com/watch?v=AjXQiKP5kMs"
+                            },
+                            {
+                                "hrefUrl": "https://www.youtube.com/oembed?format=json&url=https%3A%2F%2Fmusic.youtube.com%2Fwatch%3Fv%3DAjXQiKP5kMs",
+                                "title": "Sparks",
+                                "alternateType": "application/json+oembed"
+                            },
+                            {
+                                "hrefUrl": "https://www.youtube.com/oembed?format=xml&url=https%3A%2F%2Fmusic.youtube.com%2Fwatch%3Fv%3DAjXQiKP5kMs",
+                                "title": "Sparks",
+                                "alternateType": "text/xml+oembed"
+                            }
+                        ],
+                        "viewCount": "12",
+                        "publishDate": "1969-12-31",
+                        "category": "Music",
+                        "uploadDate": "1969-12-31"
+                    }
+                }
             }
 
         """

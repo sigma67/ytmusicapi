@@ -167,6 +167,7 @@ class UploadsMixin:
                   "videoId": "FVo-UZoPygI",
                   "title": "Feel So Close",
                   "duration": "4:15",
+                  "duration_seconds": 255,
                   "artists": None,
                   "album": {
                     "name": "18 Months",
@@ -183,6 +184,7 @@ class UploadsMixin:
         album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         album['tracks'] = parse_uploaded_items(results['contents'])
+        album['duration_seconds'] = sum_total_duration(album)
         return album
 
     def upload_song(self, filepath: str) -> Union[str, requests.Response]:

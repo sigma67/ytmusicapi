@@ -1,4 +1,5 @@
 from .utils import *
+from ..helpers import parse_duration
 from .songs import *
 from typing import List
 
@@ -77,6 +78,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
             }
             if duration:
                 song['duration'] = duration
+                song['duration_seconds'] = parse_duration(duration)
             if setVideoId:
                 song['setVideoId'] = setVideoId
             if feedback_tokens:

@@ -94,7 +94,7 @@ class ExploreMixin:
 
         :param country: ISO 3166-1 Alpha-2 country code. Default: ZZ = Global
         :return: Dictionary containing chart songs (only if authenticated), chart videos, chart artists and
-        trending videos.
+            trending videos.
 
         Example::
 
@@ -123,18 +123,7 @@ class ExploreMixin:
                                     "id": "UCLusb4T2tW3gOpJS1fJ-A9g"
                                 }
                             ],
-                            "thumbnails": [
-                                {
-                                    "url": "https://lh3.googleusercontent.com/HtT4fwjY_SC7F2reuC1F3pREiq0z5G1XnO_IvhkI0LvCmdz05c8mhuZ6k3MiROvwH52TSJNj33TxnQIo=w60-h60-l90-rj",
-                                    "width": 60,
-                                    "height": 60
-                                },
-                                {
-                                    "url": "https://lh3.googleusercontent.com/HtT4fwjY_SC7F2reuC1F3pREiq0z5G1XnO_IvhkI0LvCmdz05c8mhuZ6k3MiROvwH52TSJNj33TxnQIo=w120-h120-l90-rj",
-                                    "width": 120,
-                                    "height": 120
-                                }
-                            ],
+                            "thumbnails": [...],
                             "isExplicit": true,
                             "album": {
                                 "name": "Outside (Better Days)",
@@ -237,9 +226,7 @@ class ExploreMixin:
             }
 
         if has_songs:
-            charts['songs'].update({
-                'items': parse_chart(0, parse_chart_song, MRLIR)
-            })
+            charts['songs'].update({'items': parse_chart(0, parse_chart_song, MRLIR)})
 
         charts['videos']['items'] = parse_chart(1, parse_video, MTRIR)
         charts['artists']['items'] = parse_chart(2, parse_chart_artist, MRLIR)

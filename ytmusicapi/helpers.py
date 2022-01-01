@@ -105,6 +105,20 @@ def to_int(string):
     return int_value
 
 
+def parse_duration(duration):
+    if duration is None:
+        return duration
+    mapped_increments = zip([1, 60, 3600], reversed(duration.split(":")))
+    seconds = sum(multiplier * int(time) for multiplier, time in mapped_increments)
+    return seconds
+
+
+def sum_total_duration(item):
+    return sum(
+        [track['duration_seconds'] if 'duration_seconds' in track else 0 for track in item['tracks']]
+    )
+
+
 def i18n(method):
     @wraps(method)
     def _impl(self, *method_args, **method_kwargs):
