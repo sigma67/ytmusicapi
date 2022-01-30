@@ -180,11 +180,7 @@ def parse_single(result):
 
 def parse_video(result):
     runs = result['subtitle']['runs']
-    artists_len = len(runs)
-    try:
-        artists_len = runs.index({'text': ' • '})
-    except ValueError:
-        pass
+    artists_len = get_dot_separator_index(runs)
     video = {
         'title': nav(result, TITLE_TEXT),
         'videoId': nav(result, NAVIGATION_VIDEO_ID),

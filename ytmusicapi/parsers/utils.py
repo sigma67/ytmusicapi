@@ -172,3 +172,12 @@ def find_objects_by_key(object_list, key, nested=None):
         if key in item:
             objects.append(item)
     return objects
+
+
+def get_dot_separator_index(runs):
+    index = len(runs)
+    try:
+        index = runs.index({'text': ' • '})
+    except ValueError:
+        len(runs)
+    return index
