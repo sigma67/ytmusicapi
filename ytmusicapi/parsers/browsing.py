@@ -180,10 +180,15 @@ def parse_single(result):
 
 def parse_video(result):
     runs = result['subtitle']['runs']
+    artists_len = len(runs)
+    try:
+        artists_len = runs.index({'text': ' • '})
+    except ValueError:
+        pass
     video = {
         'title': nav(result, TITLE_TEXT),
         'videoId': nav(result, NAVIGATION_VIDEO_ID),
-        'artists': parse_song_artists_runs(runs[:-2]),
+        'artists': parse_song_artists_runs(runs[:artists_len]),
         'playlistId': nav(result, NAVIGATION_PLAYLIST_ID, True),
         'thumbnails': nav(result, THUMBNAIL_RENDERER, True)
     }
