@@ -438,37 +438,44 @@ class BrowsingMixin:
         Each track is in the following format::
 
             {
-                "title": "Revival",
-                "type": "Album",
-                "thumbnails": [],
-                "description": "Revival is the ninth studio album by American rapper Eminem. ...",
-                "artists": [{
-                        "name": "Eminem",
-                        "id": "UCedvOgsKFzcK3hA5taf3KoQ"
-                }],
-                "year": "2017",
-                "trackCount": 19,
-                "duration": "1 hour, 17 minutes",
-                "duration_seconds": 4657,
-                "audioPlaylistId": "OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY",
-                "tracks": [
+              "title": "Revival",
+              "type": "Album",
+              "thumbnails": [],
+              "description": "Revival is the...",
+              "artists": [
+                {
+                  "name": "Eminem",
+                  "id": "UCedvOgsKFzcK3hA5taf3KoQ"
+                }
+              ],
+              "year": "2017",
+              "trackCount": 19,
+              "duration": "1 hour, 17 minutes",
+              "audioPlaylistId": "OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY",
+              "tracks": [
+                {
+                  "videoId": "iKLU7z_xdYQ",
+                  "title": "Walk On Water (feat. Beyoncé)",
+                  "artists": [
                     {
-                        "videoId": "iKLU7z_xdYQ",
-                        "title": "Walk On Water (feat. Beyoncé)",
-                        "artists": None,
-                        "album": None,
-                        "likeStatus": "INDIFFERENT",
-                        "thumbnails": None,
-                        "isAvailable": True,
-                        "isExplicit": True,
-                        "duration": "5:03",
-                        "feedbackTokens":
-                        {
-                            "add": "AB9zfpJww...",
-                            "remove": "AB9zfpI807..."
-                        }
+                      "name": "Eminem",
+                      "id": "UCedvOgsKFzcK3hA5taf3KoQ"
                     }
-                ]
+                  ],
+                  "album": "Revival",
+                  "likeStatus": "INDIFFERENT",
+                  "thumbnails": null,
+                  "isAvailable": true,
+                  "isExplicit": true,
+                  "duration": "5:03",
+                  "duration_seconds": 303,
+                  "feedbackTokens": {
+                    "add": "AB9zfpK...",
+                    "remove": "AB9zfpK..."
+                  }
+                }
+              ],
+              "duration_seconds": 4657
             }
         """
         body = {'browseId': browseId}
@@ -478,6 +485,9 @@ class BrowsingMixin:
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         album['tracks'] = parse_playlist_items(results['contents'])
         album['duration_seconds'] = sum_total_duration(album)
+        for i, track in enumerate(album['tracks']):
+            album['tracks'][i]['album'] = album['title']
+            album['tracks'][i]['artists'] = album['artists']
 
         return album
 
