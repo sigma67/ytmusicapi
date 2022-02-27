@@ -12,7 +12,12 @@ class Parser:
         items = []
         for row in rows:
             contents = []
-            results = nav(row, CAROUSEL)
+            if CAROUSEL[0] in row:
+                results = nav(row, CAROUSEL)
+            elif 'musicImmersiveCarouselShelfRenderer' in row:
+                results = row['musicImmersiveCarouselShelfRenderer']
+            else:
+                continue
             for result in results['contents']:
                 data = nav(result, [MTRIR], True)
                 content = None
@@ -34,17 +39,14 @@ class Parser:
                     content = {
                         'title': nav(columns[0], TEXT_RUN_TEXT),
                         'videoId': nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID),
-                        'artists': parse_song_artists_runs(nav(columns[1], TEXT_RUNS)),
                         'thumbnails': nav(data, THUMBNAILS)
                     }
+                    content.update(parse_song_runs(nav(columns[1], TEXT_RUNS)))
                     if len(columns) > 2 and columns[2] is not None:
                         content['album'] = {
                             'title': nav(columns[2], TEXT_RUN_TEXT),
                             'browseId': nav(columns[2], TEXT_RUN + NAVIGATION_BROWSE_ID)
                         }
-                    else:
-                        content['artists'].pop()
-                        content['views'] = nav(columns[1], TEXT_RUNS + [2, 'text'])
 
                 contents.append(content)
 
@@ -222,13 +224,14 @@ def parse_single(result):
 
 
 def parse_song(result):
-    return {
+    song = {
         'title': nav(result, TITLE_TEXT),
-        'artists': parse_song_artists_runs(result['subtitle']['runs'][2:]),
         'videoId': nav(result, NAVIGATION_VIDEO_ID),
         'playlistId': nav(result, NAVIGATION_PLAYLIST_ID, True),
         'thumbnails': nav(result, THUMBNAIL_RENDERER)
     }
+    song.update(parse_song_runs(result['subtitle']['runs']))
+    return song
 
 
 def parse_video(result):

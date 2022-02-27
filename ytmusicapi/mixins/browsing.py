@@ -86,7 +86,7 @@ class BrowsingMixin:
                                 }
                             ],
                             "thumbnails": [...],
-                            "views": "10M views"
+                            "views": "10M"
                         }
                     ]
                 }

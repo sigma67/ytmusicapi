@@ -36,6 +36,8 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_home(self):
+        result = self.yt.get_home(limit=6)
+        self.assertGreaterEqual(len(result), 6)
         result = self.yt_auth.get_home(limit=15)
         self.assertGreaterEqual(len(result), 15)
 
