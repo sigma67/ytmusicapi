@@ -16,7 +16,11 @@ TOGGLE_MENU = 'toggleMenuServiceItemRenderer'
 PLAY_BUTTON = [
     'overlay', 'musicItemThumbnailOverlayRenderer', 'content', 'musicPlayButtonRenderer'
 ]
-NAVIGATION_BROWSE_ID = ['navigationEndpoint', 'browseEndpoint', 'browseId']
+NAVIGATION_BROWSE = ['navigationEndpoint', 'browseEndpoint']
+NAVIGATION_BROWSE_ID = NAVIGATION_BROWSE + ['browseId']
+PAGE_TYPE = [
+    'browseEndpointContextSupportedConfigs', 'browseEndpointContextMusicConfig', 'pageType'
+]
 NAVIGATION_VIDEO_ID = ['navigationEndpoint', 'watchEndpoint', 'videoId']
 NAVIGATION_PLAYLIST_ID = ['navigationEndpoint', 'watchEndpoint', 'playlistId']
 NAVIGATION_WATCH_PLAYLIST_ID = ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId']
@@ -28,8 +32,9 @@ CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'r
 FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
 TITLE = ['title', 'runs', 0]
 TITLE_TEXT = ['title'] + RUN_TEXT
-TEXT_RUN = ['text', 'runs', 0]
-TEXT_RUN_TEXT = ['text', 'runs', 0, 'text']
+TEXT_RUNS = ['text', 'runs']
+TEXT_RUN = TEXT_RUNS + [0]
+TEXT_RUN_TEXT = TEXT_RUN + ['text']
 SUBTITLE = ['subtitle'] + RUN_TEXT
 SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
 SUBTITLE3 = ['subtitle', 'runs', 4, 'text']

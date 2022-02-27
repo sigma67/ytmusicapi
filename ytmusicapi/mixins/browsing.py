@@ -7,6 +7,112 @@ from ytmusicapi.parsers.library import parse_albums
 
 
 class BrowsingMixin:
+    def get_home(self, limit=3) -> List[Dict]:
+        """
+        Get the home page.
+        The home page is structured as titled rows, returning 3 rows of music suggestions at a time.
+        Content varies and may contain artist, album, song or playlist suggestions, sometimes mixed within the same row
+
+        :param limit: Number of rows to return
+        :return: List of dictionaries keyed with 'title' text and 'contents' list
+
+        Example list::
+
+            [
+                {
+                    "title": "Your morning music",
+                    "contents": [
+                        { //album result
+                            "title": "Sentiment",
+                            "year": "Said The Sky",
+                            "browseId": "MPREb_QtqXtd2xZMR",
+                            "thumbnails": [...]
+                        },
+                        { //playlist result
+                            "title": "r/EDM top submissions 01/28/2022",
+                            "playlistId": "PLz7-xrYmULdSLRZGk-6GKUtaBZcgQNwel",
+                            "thumbnails": [...],
+                            "description": "redditEDM • 161 songs",
+                            "count": "161",
+                            "author": [
+                                {
+                                    "name": "redditEDM",
+                                    "id": "UCaTrZ9tPiIGHrkCe5bxOGwA"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Your favorites",
+                    "contents": [
+                        { //artist result
+                            "title": "Chill Satellite",
+                            "browseId": "UCrPLFBWdOroD57bkqPbZJog",
+                            "subscribers": "374",
+                            "thumbnails": [...]
+                        }
+                        { //album result
+                            "title": "Dragon",
+                            "year": "Two Steps From Hell",
+                            "browseId": "MPREb_M9aDqLRbSeg",
+                            "thumbnails": [...]
+                        }
+                    ]
+                },
+                {
+                    "title": "Quick picks",
+                    "contents": [
+                        { //song quick pick
+                            "title": "Gravity",
+                            "videoId": "EludZd6lfts",
+                            "artists": [{
+                                    "name": "yetep",
+                                    "id": "UCSW0r7dClqCoCvQeqXiZBlg"
+                                }],
+                            "thumbnails": [...],
+                            "album": {
+                                "title": "Gravity",
+                                "browseId": "MPREb_D6bICFcuuRY"
+                            }
+                        },
+                        { //video quick pick
+                            "title": "Gryffin & Illenium (feat. Daya) - Feel Good (L3V3LS Remix)",
+                            "videoId": "bR5l0hJDnX8",
+                            "artists": [
+                                {
+                                    "name": "L3V3LS",
+                                    "id": "UCCVNihbOdkOWw_-ajIYhAbQ"
+                                }
+                            ],
+                            "thumbnails": [...],
+                            "views": "10M views"
+                        }
+                    ]
+                }
+            ]
+
+        """
+        endpoint = 'browse'
+        body = {"browseId": "FEmusic_home"}
+        response = self._send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        home = []
+        home.extend(self.parser.parse_home(results))
+
+        section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
+        if 'continuations' in section_list:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
+
+            parse_func = lambda contents: self.parser.parse_home(contents)
+
+            home.extend(
+                get_continuations(section_list, 'sectionListContinuation', limit - len(home),
+                                  request_func, parse_func))
+
+        return home
+
     def search(self,
                query: str,
                filter: str = None,
@@ -416,6 +522,7 @@ class BrowsingMixin:
     def get_album_browse_id(self, audioPlaylistId: str):
         """
         Get an album's browseId based on its audioPlaylistId
+
         :param audioPlaylistId: id of the audio playlist  (starting with `OLAK5uy_`)
         :return: browseId (starting with `MPREb_`)
         """

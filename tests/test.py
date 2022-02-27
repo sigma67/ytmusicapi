@@ -35,6 +35,10 @@ class TestYTMusic(unittest.TestCase):
     # BROWSING
     ###############
 
+    def test_get_home(self):
+        result = self.yt_auth.get_home(limit=15)
+        self.assertGreaterEqual(len(result), 15)
+
     def test_search(self):
         query = "edm playlist"
         self.assertRaises(Exception, self.yt_auth.search, query, filter="song")
@@ -55,7 +59,9 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 5)
         results = self.yt_auth.search("clasical music", filter='playlists', ignore_spelling=True)
         self.assertGreater(len(results), 5)
-        results = self.yt_auth.search("clasic rock", filter='community_playlists', ignore_spelling=True)
+        results = self.yt_auth.search("clasic rock",
+                                      filter='community_playlists',
+                                      ignore_spelling=True)
         self.assertGreater(len(results), 5)
         results = self.yt_auth.search("hip hop", filter='featured_playlists')
         self.assertGreater(len(results), 5)
@@ -175,7 +181,8 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_watch_playlist(self):
-        playlist = self.yt_auth.get_watch_playlist(playlistId="OLAK5uy_ln_o1YXFqK4nfiNuTfhJK2XcRNCxml0fY", limit=90)
+        playlist = self.yt_auth.get_watch_playlist(
+            playlistId="OLAK5uy_ln_o1YXFqK4nfiNuTfhJK2XcRNCxml0fY", limit=90)
         self.assertGreaterEqual(len(playlist['tracks']), 90)
         playlist = self.yt_auth.get_watch_playlist("9mWr4c_ig54", limit=50)
         self.assertGreater(len(playlist['tracks']), 45)
