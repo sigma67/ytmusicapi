@@ -155,6 +155,7 @@ class BrowsingMixin:
                   }
                 ],
                 "views": "1.4M",
+                "videoType": "MUSIC_VIDEO_TYPE_OMV",
                 "duration": "4:38",
                 "duration_seconds": 278
               },
