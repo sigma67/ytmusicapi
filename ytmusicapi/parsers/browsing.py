@@ -107,6 +107,7 @@ class Parser:
 
             elif resultType == 'video':
                 search_result['views'] = None
+                search_result['videoType'] = nav(data, PLAY_BUTTON + NAVIGATION_VIDEO_TYPE, True)
 
             elif resultType == 'upload':
                 browse_id = nav(data, NAVIGATION_BROWSE_ID, True)
