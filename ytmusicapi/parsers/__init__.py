@@ -24,6 +24,9 @@ PAGE_TYPE = [
 NAVIGATION_VIDEO_ID = ['navigationEndpoint', 'watchEndpoint', 'videoId']
 NAVIGATION_PLAYLIST_ID = ['navigationEndpoint', 'watchEndpoint', 'playlistId']
 NAVIGATION_WATCH_PLAYLIST_ID = ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId']
+NAVIGATION_VIDEO_TYPE = [
+    'watchEndpoint', 'watchEndpointMusicSupportedConfigs', 'watchEndpointMusicConfig', 'musicVideoType'
+]
 HEADER_DETAIL = ['header', 'musicDetailHeaderRenderer']
 DESCRIPTION = ['description'] + RUN_TEXT
 CAROUSEL = ['musicCarouselShelfRenderer']
