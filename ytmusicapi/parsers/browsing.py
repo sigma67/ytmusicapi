@@ -144,6 +144,9 @@ class Parser:
                 search_result['videoId'] = nav(
                     data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
                     True)
+                search_result['videoType'] = nav(
+                    data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE,
+                    True)
 
             if resultType in ['song', 'video', 'album']:
                 search_result['duration'] = None

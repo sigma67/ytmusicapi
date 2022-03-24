@@ -43,7 +43,8 @@ def parse_watch_track(data):
         'length': nav(data, ['lengthText', 'runs', 0, 'text'], True),
         'thumbnail': nav(data, THUMBNAIL),
         'feedbackTokens': feedback_tokens,
-        'likeStatus': like_status
+        'likeStatus': like_status,
+        'videoType': nav(data, ['navigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
     }
     track.update(song_info)
     return track
