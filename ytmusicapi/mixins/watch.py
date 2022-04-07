@@ -44,6 +44,7 @@ class WatchMixin:
                         "remove": "AB9zfpJdzWLcdZtC..."
                       },
                       "likeStatus": "INDIFFERENT",
+                      "videoType": "MUSIC_VIDEO_TYPE_ATV",
                       "artists": [
                         {
                           "name": "Seven Lions",
