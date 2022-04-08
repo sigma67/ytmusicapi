@@ -393,10 +393,6 @@ class BrowsingMixin:
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
-        if len(results) == 1:
-            # not a YouTube Music Channel, a standard YouTube Channel ID with no music content was given
-            raise ValueError(f"The YouTube Channel {channelId} has no music content.")
-
         artist = {'description': None, 'views': None}
         header = response['header']['musicImmersiveHeaderRenderer']
         artist['name'] = nav(header, TITLE_TEXT)
