@@ -120,10 +120,8 @@ class WatchMixin:
             'watchNextTabbedResultsRenderer'
         ])
 
-        lyrics_browse_id = None
-        if 'unselectable' not in watchNextRenderer['tabs'][1]['tabRenderer']:
-            lyrics_browse_id = watchNextRenderer['tabs'][1]['tabRenderer']['endpoint'][
-                'browseEndpoint']['browseId']
+        lyrics_browse_id = get_tab_browse_id(watchNextRenderer, 1)
+        related_browse_id = get_tab_browse_id(watchNextRenderer, 2)
 
         results = nav(watchNextRenderer,
                       TAB_CONTENT + ['musicQueueRenderer', 'content', 'playlistPanelRenderer'])
@@ -143,7 +141,10 @@ class WatchMixin:
                 get_continuations(results, 'playlistPanelContinuation', limit - len(tracks),
                                   request_func, parse_func, '' if is_playlist else 'Radio'))
 
-        return dict(tracks=tracks, playlistId=playlist, lyrics=lyrics_browse_id)
+        return dict(tracks=tracks,
+                    playlistId=playlist,
+                    lyrics=lyrics_browse_id,
+                    related=related_browse_id)
 
     def get_watch_playlist_shuffle(self,
                                    videoId: str = None,

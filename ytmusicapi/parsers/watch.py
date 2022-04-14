@@ -48,3 +48,11 @@ def parse_watch_track(data):
     }
     track.update(song_info)
     return track
+
+
+def get_tab_browse_id(watchNextRenderer, tab_id):
+    if 'unselectable' not in watchNextRenderer['tabs'][tab_id]['tabRenderer']:
+        return watchNextRenderer['tabs'][tab_id]['tabRenderer']['endpoint']['browseEndpoint'][
+            'browseId']
+    else:
+        return None
