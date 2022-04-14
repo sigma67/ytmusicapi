@@ -99,11 +99,6 @@ class TestYTMusic(unittest.TestCase):
         results = self.yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         self.assertGreaterEqual(len(results), 11)
 
-    def test_get_artist_for_non_youtube_music_channel(self):
-        # all YouTube channel IDs can be looked up in YouTube Music, but the page they return will not necessarily return any music content
-        non_music_channel_id = "UCUcpVoi5KkJmnE3bvEhHR0Q"  # e.g. https://music.youtube.com/channel/UCUcpVoi5KkJmnE3bvEhHR0Q
-        self.assertRaises(ValueError, self.yt.get_artist, non_music_channel_id)
-
     def test_get_artist_albums(self):
         artist = self.yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
         results = self.yt.get_artist_albums(artist['albums']['browseId'],
