@@ -25,7 +25,8 @@ NAVIGATION_VIDEO_ID = ['navigationEndpoint', 'watchEndpoint', 'videoId']
 NAVIGATION_PLAYLIST_ID = ['navigationEndpoint', 'watchEndpoint', 'playlistId']
 NAVIGATION_WATCH_PLAYLIST_ID = ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId']
 NAVIGATION_VIDEO_TYPE = [
-    'watchEndpoint', 'watchEndpointMusicSupportedConfigs', 'watchEndpointMusicConfig', 'musicVideoType'
+    'watchEndpoint', 'watchEndpointMusicSupportedConfigs', 'watchEndpointMusicConfig',
+    'musicVideoType'
 ]
 HEADER_DETAIL = ['header', 'musicDetailHeaderRenderer']
 DESCRIPTION = ['description'] + RUN_TEXT
@@ -54,3 +55,35 @@ CATEGORY_TITLE = ['musicNavigationButtonRenderer', 'buttonText'] + RUN_TEXT
 CATEGORY_PARAMS = ['musicNavigationButtonRenderer', 'clickCommand', 'browseEndpoint', 'params']
 MRLIR = 'musicResponsiveListItemRenderer'
 MTRIR = 'musicTwoRowItemRenderer'
+
+
+def nav(root, items, none_if_absent=False):
+    """Access a nested object in root by item sequence."""
+    try:
+        for k in items:
+            root = root[k]
+        return root
+    except Exception as err:
+        if none_if_absent:
+            return None
+        else:
+            raise err
+
+
+def find_object_by_key(object_list, key, nested=None, is_key=False):
+    for item in object_list:
+        if nested:
+            item = item[nested]
+        if key in item:
+            return item[key] if is_key else item
+    return None
+
+
+def find_objects_by_key(object_list, key, nested=None):
+    objects = []
+    for item in object_list:
+        if nested:
+            item = item[nested]
+        if key in item:
+            objects.append(item)
+    return objects

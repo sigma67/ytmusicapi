@@ -1,7 +1,6 @@
 from typing import List, Dict
-from .utils import *
 from .songs import *
-from ytmusicapi.helpers import i18n
+from ._utils import *
 
 
 class Parser:
@@ -145,8 +144,7 @@ class Parser:
                     data, PLAY_BUTTON + ['playNavigationEndpoint', 'watchEndpoint', 'videoId'],
                     True)
                 search_result['videoType'] = nav(
-                    data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE,
-                    True)
+                    data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
 
             if resultType in ['song', 'video', 'album']:
                 search_result['duration'] = None

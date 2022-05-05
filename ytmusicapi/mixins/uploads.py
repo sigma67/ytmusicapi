@@ -2,10 +2,14 @@ import requests
 import ntpath
 import os
 from typing import List, Dict, Union
+
+from ._utils import validate_order_parameter, prepare_order_params
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers.library import *
-from ytmusicapi.parsers.albums import *
-from ytmusicapi.parsers.uploads import *
+from ytmusicapi.navigation import *
+from ytmusicapi.continuations import get_continuations
+from ytmusicapi.parsers.library import parse_library_albums, parse_library_artists
+from ytmusicapi.parsers.albums import parse_album_header
+from ytmusicapi.parsers.uploads import parse_uploaded_items
 
 
 class UploadsMixin:
@@ -205,7 +209,8 @@ class UploadsMixin:
                 + ', '.join(supported_filetypes))
 
         headers = self.headers.copy()
-        upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=%s" % headers['x-goog-authuser']
+        upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=%s" % headers[
+            'x-goog-authuser']
         filesize = os.path.getsize(filepath)
         body = ("filename=" + ntpath.basename(filepath)).encode('utf-8')
         headers.pop('content-encoding', None)

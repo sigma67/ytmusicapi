@@ -1,7 +1,6 @@
-from .utils import *
-from ..helpers import parse_duration
-from .songs import *
 from typing import List
+from .songs import *
+from ._utils import *
 
 
 def parse_playlist_items(results, menu_entries: List[List] = None):
@@ -94,3 +93,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
             print("Item " + str(count) + ": " + str(e))
 
     return songs
+
+
+def validate_playlist_id(playlistId):
+    return playlistId if not playlistId.startswith("VL") else playlistId[2:]

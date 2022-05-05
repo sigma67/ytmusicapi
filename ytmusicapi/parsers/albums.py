@@ -1,4 +1,4 @@
-from .utils import *
+from ._utils import *
 from ytmusicapi.helpers import to_int
 from .songs import parse_song_runs, parse_like_status
 
@@ -25,9 +25,11 @@ def parse_album_header(response):
     # add to library/uploaded
     menu = nav(header, MENU)
     toplevel = menu['topLevelButtons']
-    album['audioPlaylistId'] = nav(toplevel, [0, 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID, True)
+    album['audioPlaylistId'] = nav(toplevel, [0, 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID,
+                                   True)
     if not album['audioPlaylistId']:
-        album['audioPlaylistId'] = nav(toplevel, [0, 'buttonRenderer'] + NAVIGATION_PLAYLIST_ID, True)
+        album['audioPlaylistId'] = nav(toplevel, [0, 'buttonRenderer'] + NAVIGATION_PLAYLIST_ID,
+                                       True)
     service = nav(toplevel, [1, 'buttonRenderer', 'defaultServiceEndpoint'], True)
     if service:
         album['likeStatus'] = parse_like_status(service)
