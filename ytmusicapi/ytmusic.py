@@ -17,7 +17,8 @@ from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
 
 
-class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin, UploadsMixin):
+class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
+              UploadsMixin):
     """
     Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
     Permits both authenticated and non-authenticated requests.
@@ -74,6 +75,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                 self._session = requests.api
 
         self.proxies = proxies
+        self.cookies = {'CONSENT': 'YES+1'}
 
         # prepare headers
         if auth:
@@ -110,9 +112,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         except locale.Error:
             with suppress(locale.Error):
                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        self.lang = gettext.translation('base',
-                                        localedir=locale_dir,
-                                        languages=[language])
+        self.lang = gettext.translation('base', localedir=locale_dir, languages=[language])
         self.parser = browsing.Parser(self.lang)
 
         if user:
@@ -134,7 +134,8 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         response = self._session.post(YTM_BASE_API + endpoint + YTM_PARAMS + additionalParams,
                                       json=body,
                                       headers=self.headers,
-                                      proxies=self.proxies)
+                                      proxies=self.proxies,
+                                      cookies=self.cookies)
         response_text = json.loads(response.text)
         if response.status_code >= 400:
             message = "Server returned HTTP " + str(
@@ -144,7 +145,11 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         return response_text
 
     def _send_get_request(self, url: str, params: Dict = None):
-        response = self._session.get(url, params=params, headers=self.headers, proxies=self.proxies)
+        response = self._session.get(url,
+                                     params=params,
+                                     headers=self.headers,
+                                     proxies=self.proxies,
+                                     cookies=self.cookies)
         return response.text
 
     def _check_auth(self):
