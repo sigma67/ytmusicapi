@@ -1,3 +1,4 @@
+from typing import Optional
 from ._utils import get_datestamp
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
@@ -239,23 +240,23 @@ class BrowsingMixin:
         artist.update(self.parser.parse_artist_contents(results))
         return artist
 
-    def get_artist_albums(self, channelId: str, params: str) -> List[Dict]:
+    def get_artist_albums(self, channelId: str, params: str) -> Optional[List[Dict]]:
         """
         Get the full list of an artist's albums or singles
 
         :param channelId: channel Id of the artist
         :param params: params obtained by :py:func:`get_artist`
-        :return: List of albums in the format of :py:func:`get_library_albums`,
+        :return: Optionally a List of albums in the format of :py:func:`get_library_albums`,
           except artists key is missing.
 
         """
         body = {"browseId": channelId, "params": params}
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
-        albums = parse_albums(results)
-
-        return albums
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS, True)
+        if results:
+            albums = parse_albums(results)
+            return albums
 
     def get_user(self, channelId: str) -> Dict:
         """
