@@ -4,23 +4,7 @@ TRENDS = {'ARROW_DROP_UP': 'up', 'ARROW_DROP_DOWN': 'down', 'ARROW_CHART_NEUTRAL
 
 
 def parse_chart_song(data):
-    flex_0 = get_flex_column_item(data, 0)
-    parsed = {
-        'title': nav(flex_0, TEXT_RUN_TEXT),
-        'videoId': nav(flex_0, TEXT_RUN + NAVIGATION_VIDEO_ID, True),
-        'artists': parse_song_artists(data, 1),
-        'thumbnails': nav(data, THUMBNAILS),
-        'isExplicit': nav(data, BADGE_LABEL, True) is not None
-    }
-    flex_2 = get_flex_column_item(data, 2)
-    if flex_2 and 'navigationEndpoint' in nav(flex_2, TEXT_RUN):
-        parsed['album'] = {
-            'name': nav(flex_2, TEXT_RUN_TEXT),
-            'id': nav(flex_2, TEXT_RUN + NAVIGATION_BROWSE_ID)
-        }
-    else:
-        flex_1 = get_flex_column_item(data, 1)
-        parsed['views'] = nav(flex_1, ['text', 'runs', -1, 'text']).split(' ')[0]
+    parsed = parse_song_flat(data)
     parsed.update(parse_ranking(data))
     return parsed
 

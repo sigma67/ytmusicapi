@@ -73,8 +73,8 @@ class BrowsingMixin:
                                 }],
                             "thumbnails": [...],
                             "album": {
-                                "title": "Gravity",
-                                "browseId": "MPREb_D6bICFcuuRY"
+                                "name": "Gravity",
+                                "id": "MPREb_D6bICFcuuRY"
                             }
                         },
                         { //video quick pick
@@ -99,14 +99,14 @@ class BrowsingMixin:
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         home = []
-        home.extend(self.parser.parse_home(results))
+        home.extend(self.parser.parse_mixed_content(results))
 
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
         if 'continuations' in section_list:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
 
-            parse_func = lambda contents: self.parser.parse_home(contents)
+            parse_func = lambda contents: self.parser.parse_mixed_content(contents)
 
             home.extend(
                 get_continuations(section_list, 'sectionListContinuation', limit - len(home),
@@ -212,7 +212,7 @@ class BrowsingMixin:
         header = response['header']['musicImmersiveHeaderRenderer']
         artist['name'] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results,
-                                              'musicDescriptionShelfRenderer',
+                                              DESCRIPTION_SHELF[0],
                                               is_key=True)
         if descriptionShelf:
             artist['description'] = nav(descriptionShelf, DESCRIPTION)
@@ -573,6 +573,87 @@ class BrowsingMixin:
                 del response[k]
         return response
 
+    def get_song_related(self, browseId: str):
+        """
+        Gets related content for a song. Equivalent to the content
+        shown in the "Related" tab of the watch panel.
+
+        :param browseId: The `related` key  in the `get_watch_playlist` response.
+
+        Example::
+
+            [
+              {
+                "title": "You might also like",
+                "contents": [
+                  {
+                    "title": "High And Dry",
+                    "videoId": "7fv84nPfTH0",
+                    "artists": [{
+                        "name": "Radiohead",
+                        "id": "UCr_iyUANcn9OX_yy9piYoLw"
+                      }],
+                    "thumbnails": [
+                      {
+                        "url": "https://lh3.googleusercontent.com/TWWT47cHLv3yAugk4h9eOzQ46FHmXc_g-KmBVy2d4sbg_F-Gv6xrPglztRVzp8D_l-yzOnvh-QToM8s=w60-h60-l90-rj",
+                        "width": 60,
+                        "height": 60
+                      }
+                    ],
+                    "isExplicit": false,
+                    "album": {
+                      "name": "The Bends",
+                      "id": "MPREb_xsmDKhqhQrG"
+                    }
+                  }
+                ]
+              },
+              {
+                "title": "Recommended playlists",
+                "contents": [
+                  {
+                    "title": "'90s Alternative Rock Hits",
+                    "playlistId": "RDCLAK5uy_m_h-nx7OCFaq9AlyXv78lG0AuloqW_NUA",
+                    "thumbnails": [...],
+                    "description": "Playlist • YouTube Music"
+                  }
+                ]
+              },
+              {
+                "title": "Similar artists",
+                "contents": [
+                  {
+                    "title": "Noel Gallagher",
+                    "browseId": "UCu7yYcX_wIZgG9azR3PqrxA",
+                    "subscribers": "302K",
+                    "thumbnails": [...]
+                  }
+                ]
+              },
+              {
+                "title": "Oasis",
+                "contents": [
+                  {
+                    "title": "Shakermaker",
+                    "year": "2014",
+                    "browseId": "MPREb_WNGQWp5czjD",
+                    "thumbnails": [...]
+                  }
+                ]
+              },
+              {
+                "title": "About the artist",
+                "contents": "Oasis were a rock band consisting of Liam Gallagher, Paul ... (full description shortened for documentation)"
+              }
+            ]
+        """
+        if not browseId:
+            raise Exception("Invalid browseId provided.")
+
+        response = self._send_request('browse', {'browseId': browseId})
+        sections = nav(response, ['contents'] + SECTION_LIST)
+        return self.parser.parse_mixed_content(sections)
+
     def get_lyrics(self, browseId: str) -> Dict:
         """
         Returns lyrics of a song or video.
@@ -594,9 +675,9 @@ class BrowsingMixin:
 
         response = self._send_request('browse', {'browseId': browseId})
         lyrics['lyrics'] = nav(response, ['contents'] + SECTION_LIST_ITEM
-                               + ['musicDescriptionShelfRenderer'] + DESCRIPTION, True)
+                               + DESCRIPTION_SHELF + DESCRIPTION, True)
         lyrics['source'] = nav(response, ['contents'] + SECTION_LIST_ITEM
-                               + ['musicDescriptionShelfRenderer', 'footer'] + RUN_TEXT, True)
+                               + DESCRIPTION_SHELF + ['footer'] + RUN_TEXT, True)
 
         return lyrics
 

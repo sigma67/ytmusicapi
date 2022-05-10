@@ -139,6 +139,11 @@ class TestYTMusic(unittest.TestCase):
         song = self.yt.get_song(sample_video)
         self.assertGreaterEqual(len(song['streamingData']['adaptiveFormats']), 10)
 
+    def test_get_song_related_content(self):
+        song = self.yt_auth.get_watch_playlist(sample_video)
+        song = self.yt_auth.get_song_related(song["related"])
+        self.assertEqual(len(song), 5)
+
     def test_get_lyrics(self):
         playlist = self.yt.get_watch_playlist(sample_video)
         lyrics_song = self.yt.get_lyrics(playlist["lyrics"])

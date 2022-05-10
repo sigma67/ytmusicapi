@@ -7,49 +7,39 @@ class Parser:
     def __init__(self, language):
         self.lang = language
 
-    def parse_home(self, rows):
+    def parse_mixed_content(self, rows):
         items = []
         for row in rows:
-            contents = []
-            if CAROUSEL[0] in row:
-                results = nav(row, CAROUSEL)
-            elif 'musicImmersiveCarouselShelfRenderer' in row:
-                results = row['musicImmersiveCarouselShelfRenderer']
+            if DESCRIPTION_SHELF[0] in row:
+                results = nav(row, DESCRIPTION_SHELF)
+                title = nav(results, ['header'] + RUN_TEXT)
+                contents = nav(results, DESCRIPTION)
             else:
-                continue
-            for result in results['contents']:
-                data = nav(result, [MTRIR], True)
-                content = None
-                if data:
-                    page_type = nav(data, TITLE + NAVIGATION_BROWSE + PAGE_TYPE, True)
-                    if page_type is None:  # song
-                        content = parse_song(data)
-                    elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
-                        content = parse_album(data)
-                    elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
-                        content = parse_related_artist(data)
-                    elif page_type == "MUSIC_PAGE_TYPE_PLAYLIST":
-                        content = parse_playlist(data)
-                else:
-                    data = nav(result, [MRLIR])
-                    columns = [
-                        get_flex_column_item(data, i) for i in range(0, len(data['flexColumns']))
-                    ]
-                    content = {
-                        'title': nav(columns[0], TEXT_RUN_TEXT),
-                        'videoId': nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID),
-                        'thumbnails': nav(data, THUMBNAILS)
-                    }
-                    content.update(parse_song_runs(nav(columns[1], TEXT_RUNS)))
-                    if len(columns) > 2 and columns[2] is not None:
-                        content['album'] = {
-                            'title': nav(columns[2], TEXT_RUN_TEXT),
-                            'browseId': nav(columns[2], TEXT_RUN + NAVIGATION_BROWSE_ID)
-                        }
+                results = next(iter(row.values()))
+                if 'contents' not in results:
+                    continue
+                title = nav(results, CAROUSEL_TITLE + ['text'])
+                contents = []
+                for result in results['contents']:
+                    data = nav(result, [MTRIR], True)
+                    content = None
+                    if data:
+                        page_type = nav(data, TITLE + NAVIGATION_BROWSE + PAGE_TYPE, True)
+                        if page_type is None:  # song
+                            content = parse_song(data)
+                        elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
+                            content = parse_album(data)
+                        elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
+                            content = parse_related_artist(data)
+                        elif page_type == "MUSIC_PAGE_TYPE_PLAYLIST":
+                            content = parse_playlist(data)
+                    else:
+                        data = nav(result, [MRLIR])
+                        content = parse_song_flat(data)
 
-                contents.append(content)
+                    contents.append(content)
 
-            items.append({'title': nav(results, CAROUSEL_TITLE + ['text']), 'contents': contents})
+            items.append({'title': title, 'contents': contents})
         return items
 
     @i18n
@@ -233,6 +223,28 @@ def parse_song(result):
         'thumbnails': nav(result, THUMBNAIL_RENDERER)
     }
     song.update(parse_song_runs(result['subtitle']['runs']))
+    return song
+
+
+def parse_song_flat(data):
+    columns = [
+        get_flex_column_item(data, i) for i in range(0, len(data['flexColumns']))
+    ]
+    song = {
+        'title': nav(columns[0], TEXT_RUN_TEXT),
+        'videoId': nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
+        'artists': parse_song_artists(data, 1),
+        'thumbnails': nav(data, THUMBNAILS),
+        'isExplicit': nav(data, BADGE_LABEL, True) is not None
+    }
+    if len(columns) > 2 and columns[2] is not None and 'navigationEndpoint' in nav(columns[2], TEXT_RUN):
+        song['album'] = {
+            'name': nav(columns[2], TEXT_RUN_TEXT),
+            'id': nav(columns[2], TEXT_RUN + NAVIGATION_BROWSE_ID)
+        }
+    else:
+        song['views'] = nav(columns[1], ['text', 'runs', -1, 'text']).split(' ')[0]
+
     return song
 
 

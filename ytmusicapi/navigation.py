@@ -29,8 +29,10 @@ NAVIGATION_VIDEO_TYPE = [
     'musicVideoType'
 ]
 HEADER_DETAIL = ['header', 'musicDetailHeaderRenderer']
+DESCRIPTION_SHELF = ['musicDescriptionShelfRenderer']
 DESCRIPTION = ['description'] + RUN_TEXT
 CAROUSEL = ['musicCarouselShelfRenderer']
+IMMERSIVE_CAROUSEL = ['musicImmersiveCarouselShelfRenderer']
 CAROUSEL_CONTENTS = CAROUSEL + ['contents']
 CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'runs', 0]
 FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
