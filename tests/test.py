@@ -208,6 +208,17 @@ class TestYTMusic(unittest.TestCase):
         playlists = self.yt_auth.get_library_playlists(50)
         self.assertGreater(len(playlists), 25)
 
+    def test_get_all_library_playlists(self):
+        current_length = len(self.yt_auth.get_library_playlists(25))
+        expected_length = current_length
+        while expected_length <= current_length:
+            expected_length = current_length + 1
+            current_length = len(self.yt_auth.get_library_playlists(expected_length))
+        expected_length -= 1
+
+        playlists = self.yt_auth.get_library_playlists(None)
+        self.assertEqual(len(playlists), expected_length)
+
     def test_get_library_songs(self):
         songs = self.yt_brand.get_library_songs(100)
         self.assertGreaterEqual(len(songs), 100)
