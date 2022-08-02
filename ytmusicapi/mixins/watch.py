@@ -97,7 +97,11 @@ class WatchMixin:
             }
 
         """
-        body = {'enablePersistentPlaylistPanel': True, 'isAudioOnly': True}
+        body = {
+            'enablePersistentPlaylistPanel': True,
+            'isAudioOnly': True,
+            'tunerSettingValue': 'AUTOMIX_SETTING_NORMAL'
+        }
         if not videoId and not playlistId:
             raise Exception("You must provide either a video id, a playlist id, or both")
         if videoId:
