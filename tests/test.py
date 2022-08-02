@@ -9,7 +9,7 @@ config = configparser.RawConfigParser()
 config.read('./test.cfg', 'utf-8')
 
 sample_album = "MPREb_4pL8gzRtw1p"  # Eminem - Revival
-sample_video = "ZrOKjDZOtkA"  # Oasis - Wonderwall (Remastered)
+sample_video = "tGWs0xKwhag"  # Oasis - Wonderwall (Remastered)
 sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 
 
@@ -142,7 +142,7 @@ class TestYTMusic(unittest.TestCase):
     def test_get_song_related_content(self):
         song = self.yt_auth.get_watch_playlist(sample_video)
         song = self.yt_auth.get_song_related(song["related"])
-        self.assertEqual(len(song), 5)
+        self.assertGreaterEqual(len(song), 5)
 
     def test_get_lyrics(self):
         playlist = self.yt.get_watch_playlist(sample_video)
