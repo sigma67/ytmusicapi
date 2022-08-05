@@ -69,6 +69,12 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 5)
 
     def test_search_uploads(self):
+        self.assertRaises(Exception,
+                          self.yt.search,
+                          'audiomachine',
+                          filter="songs",
+                          scope='uploads',
+                          limit=40)
         results = self.yt_auth.search('audiomachine', scope='uploads', limit=40)
         self.assertGreater(len(results), 20)
 

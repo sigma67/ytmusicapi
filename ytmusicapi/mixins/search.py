@@ -19,6 +19,7 @@ class SearchMixin:
         :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``community_playlists``, ``featured_playlists``, ``uploads``.
           Default: Default search, including all types of items.
         :param scope: Search scope. Allowed values: ``library``, ``uploads``.
+            For uploads, no filter can be set! An exception will be thrown if you attempt to do so.
             Default: Search the public YouTube Music catalogue.
         :param limit: Number of search results to return
           Default: 20
@@ -136,6 +137,12 @@ class SearchMixin:
             raise Exception(
                 "Invalid scope provided. Please use one of the following scopes or leave out the parameter: "
                 + ', '.join(scopes))
+
+        if scope == scopes[1] and filter:
+            raise Exception(
+                "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to "
+                "uploads. "
+            )
 
         params = get_search_params(filter, scope, ignore_spelling)
         if params:
