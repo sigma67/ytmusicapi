@@ -57,6 +57,8 @@ CATEGORY_TITLE = ['musicNavigationButtonRenderer', 'buttonText'] + RUN_TEXT
 CATEGORY_PARAMS = ['musicNavigationButtonRenderer', 'clickCommand', 'browseEndpoint', 'params']
 MRLIR = 'musicResponsiveListItemRenderer'
 MTRIR = 'musicTwoRowItemRenderer'
+TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
+TASTE_PROFILE_ARTIST = ["title", "runs"]
 
 
 def nav(root, items, none_if_absent=False):

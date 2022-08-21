@@ -227,9 +227,7 @@ def parse_song(result):
 
 
 def parse_song_flat(data):
-    columns = [
-        get_flex_column_item(data, i) for i in range(0, len(data['flexColumns']))
-    ]
+    columns = [get_flex_column_item(data, i) for i in range(0, len(data['flexColumns']))]
     song = {
         'title': nav(columns[0], TEXT_RUN_TEXT),
         'videoId': nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
@@ -237,7 +235,8 @@ def parse_song_flat(data):
         'thumbnails': nav(data, THUMBNAILS),
         'isExplicit': nav(data, BADGE_LABEL, True) is not None
     }
-    if len(columns) > 2 and columns[2] is not None and 'navigationEndpoint' in nav(columns[2], TEXT_RUN):
+    if len(columns) > 2 and columns[2] is not None and 'navigationEndpoint' in nav(
+            columns[2], TEXT_RUN):
         song['album'] = {
             'name': nav(columns[2], TEXT_RUN_TEXT),
             'id': nav(columns[2], TEXT_RUN + NAVIGATION_BROWSE_ID)
@@ -288,3 +287,17 @@ def parse_related_artist(data):
         'subscribers': subscribers,
         'thumbnails': nav(data, THUMBNAIL_RENDERER),
     }
+
+
+def parse_tasteprofiles(data):
+    profiles = nav(data, TASTE_PROFILE_ITEMS)
+
+    taste_profiles = {}
+    for itemList in profiles:
+        for item in itemList["tastebuilderItemListRenderer"]["contents"]:
+            artist = nav(item["tastebuilderItemRenderer"], TASTE_PROFILE_ARTIST)[0]["text"]
+            taste_profiles[artist] = {
+                "selectionValue": item["tastebuilderItemRenderer"]["selectionFormValue"],
+                "impressionValue": item["tastebuilderItemRenderer"]["impressionFormValue"]
+            }
+    return taste_profiles

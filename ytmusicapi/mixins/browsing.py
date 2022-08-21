@@ -211,9 +211,7 @@ class BrowsingMixin:
         artist = {'description': None, 'views': None}
         header = response['header']['musicImmersiveHeaderRenderer']
         artist['name'] = nav(header, TITLE_TEXT)
-        descriptionShelf = find_object_by_key(results,
-                                              DESCRIPTION_SHELF[0],
-                                              is_key=True)
+        descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
         if descriptionShelf:
             artist['description'] = nav(descriptionShelf, DESCRIPTION)
             artist['views'] = None if 'subheader' not in descriptionShelf else descriptionShelf[
@@ -674,10 +672,11 @@ class BrowsingMixin:
             raise Exception("Invalid browseId provided. This song might not have lyrics.")
 
         response = self._send_request('browse', {'browseId': browseId})
-        lyrics['lyrics'] = nav(response, ['contents'] + SECTION_LIST_ITEM
-                               + DESCRIPTION_SHELF + DESCRIPTION, True)
-        lyrics['source'] = nav(response, ['contents'] + SECTION_LIST_ITEM
-                               + DESCRIPTION_SHELF + ['footer'] + RUN_TEXT, True)
+        lyrics['lyrics'] = nav(response,
+                               ['contents'] + SECTION_LIST_ITEM + DESCRIPTION_SHELF + DESCRIPTION,
+                               True)
+        lyrics['source'] = nav(response, ['contents'] + SECTION_LIST_ITEM + DESCRIPTION_SHELF
+                               + ['footer'] + RUN_TEXT, True)
 
         return lyrics
 
@@ -711,3 +710,41 @@ class BrowsingMixin:
             raise Exception("Unable to identify the signatureTimestamp.")
 
         return int(match.group(1))
+
+    def get_tasteprofiles(self) -> Dict:
+        """
+        Fetches all artists from taste profile (music.youtube.com/tasteprofile)
+
+        :return: Dictionary with artist and their selection & impression value
+
+        Example::
+        {
+            "Drake": {
+                "selectionValue": "tastebuilder_selection=/m/05mt_q",
+                "impressionValue": "tastebuilder_impression=/m/05mt_q"
+            }
+        }
+        """
+        response = self._send_request('browse', {'browseId': "FEmusic_tastebuilder"})
+        return parse_tasteprofiles(response)
+
+    def set_tasteprofile(self, *artists: str) -> None:
+        """
+        Favorites artists to see more recommendations from the artist
+        """
+
+        taste_profiles = self.get_tasteprofiles()
+        formData = {
+            "impressionValues":
+            [taste_profiles[profile]["impressionValue"] for profile in taste_profiles],
+            "selectedValues": []
+        }
+
+        for artist in artists:
+            if artist not in taste_profiles:
+                raise Exception("The artist, {}, was not present in taste!".format(artist))
+            formData["selectedValues"].append(taste_profiles[artist]["selectionValue"])
+
+        body = {'browseId': "FEmusic_home", "formData": formData}
+
+        self._send_request('browse', body)

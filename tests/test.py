@@ -164,9 +164,16 @@ class TestYTMusic(unittest.TestCase):
         signatureTimestamp = self.yt.get_signatureTimestamp()
         self.assertIsNotNone(signatureTimestamp)
 
-    ###############
+    def test_set_tasteprofile(self):
+        self.assertRaises(self.yt.set_tasteprofile("Galactic"))
+
+    def test_get_tasteprofile(self):
+        result = self.yt.get_tasteprofiles()
+        self.assertGreaterEqual(len(result), 0)
+
+    ################
     # EXPLORE
-    ###############
+    ################
 
     def test_get_mood_playlists(self):
         categories = self.yt.get_mood_categories()
@@ -206,9 +213,9 @@ class TestYTMusic(unittest.TestCase):
         playlist = self.yt_brand.get_watch_playlist_shuffle(playlistId=config['playlists']['own'])
         self.assertEqual(len(playlist['tracks']), 4)
 
-    ###############
+    ################
     # LIBRARY
-    ###############
+    ################
 
     def test_get_library_playlists(self):
         playlists = self.yt_auth.get_library_playlists(50)
