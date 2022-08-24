@@ -714,7 +714,7 @@ class BrowsingMixin:
     def get_tasteprofile(self) -> Dict:
         """
         Fetches suggested artists from taste profile (music.youtube.com/tasteprofile).
-        Tasteprofile allows users to pick artists to update their reccomendations. 
+        Tasteprofile allows users to pick artists to update their recommendations.
         Only returns a list of suggested artists, not the actual list of selected entries
 
         :return: Dictionary with artist and their selection & impression value
@@ -725,11 +725,11 @@ class BrowsingMixin:
                 "Drake": {
                     "selectionValue": "tastebuilder_selection=/m/05mt_q"
                     "impressionValue": "tastebuilder_impression=/m/05mt_q"
-                } 
+                }
             }
 
         """
-        
+
         response = self._send_request('browse', {'browseId': "FEmusic_tastebuilder"})
         profiles = nav(response, TASTE_PROFILE_ITEMS)
 
@@ -743,26 +743,29 @@ class BrowsingMixin:
                 }
         return taste_profiles
 
-    def set_tasteprofile(self, artists: List[str]) -> None:
+    def set_tasteprofile(self, artists: List[str], taste_profile: Dict = None) -> None:
         """
         Favorites artists to see more recommendations from the artist.
         Use get_tasteprofile() to see which artists are available to be recommended
 
-        :param artists: A List with names of artists
-        
+        :param artists: A List with names of artists, must be contained in the tasteprofile
+        :param taste_profile: tasteprofile result from :py:func:`get_tasteprofile`.
+            Pass this if you call :py:func:`get_tasteprofile` anyway to save an extra request.
+        :return None if successful
         """
 
-        taste_profiles = self.get_tasteprofile()
+        if taste_profile is None:
+            taste_profile = self.get_tasteprofile()
         formData = {
             "impressionValues":
-            [taste_profiles[profile]["impressionValue"] for profile in taste_profiles],
+            [taste_profile[profile]["impressionValue"] for profile in taste_profile],
             "selectedValues": []
         }
 
         for artist in artists:
-            if artist not in taste_profiles:
+            if artist not in taste_profile:
                 raise Exception("The artist, {}, was not present in taste!".format(artist))
-            formData["selectedValues"].append(taste_profiles[artist]["selectionValue"])
+            formData["selectedValues"].append(taste_profile[artist]["selectionValue"])
 
         body = {'browseId': "FEmusic_home", "formData": formData}
         self._send_request('browse', body)
