@@ -287,17 +287,3 @@ def parse_related_artist(data):
         'subscribers': subscribers,
         'thumbnails': nav(data, THUMBNAIL_RENDERER),
     }
-
-
-def parse_tasteprofiles(data):
-    profiles = nav(data, TASTE_PROFILE_ITEMS)
-
-    taste_profiles = {}
-    for itemList in profiles:
-        for item in itemList["tastebuilderItemListRenderer"]["contents"]:
-            artist = nav(item["tastebuilderItemRenderer"], TASTE_PROFILE_ARTIST)[0]["text"]
-            taste_profiles[artist] = {
-                "selectionValue": item["tastebuilderItemRenderer"]["selectionFormValue"],
-                "impressionValue": item["tastebuilderItemRenderer"]["impressionFormValue"]
-            }
-    return taste_profiles

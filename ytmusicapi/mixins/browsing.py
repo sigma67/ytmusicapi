@@ -711,29 +711,48 @@ class BrowsingMixin:
 
         return int(match.group(1))
 
-    def get_tasteprofiles(self) -> Dict:
+    def get_tasteprofile(self) -> Dict:
         """
-        Fetches all artists from taste profile (music.youtube.com/tasteprofile)
+        Fetches suggested artists from taste profile (music.youtube.com/tasteprofile).
+        Tasteprofile allows users to pick artists to update their reccomendations. 
+        Only returns a list of suggested artists, not the actual list of selected entries
 
         :return: Dictionary with artist and their selection & impression value
 
         Example::
-        {
-            "Drake": {
-                "selectionValue": "tastebuilder_selection=/m/05mt_q",
-                "impressionValue": "tastebuilder_impression=/m/05mt_q"
+
+            {
+                "Drake": {
+                    "selectionValue": "tastebuilder_selection=/m/05mt_q"
+                    "impressionValue": "tastebuilder_impression=/m/05mt_q"
+                } 
             }
-        }
+
         """
+        
         response = self._send_request('browse', {'browseId': "FEmusic_tastebuilder"})
-        return parse_tasteprofiles(response)
+        profiles = nav(response, TASTE_PROFILE_ITEMS)
 
-    def set_tasteprofile(self, *artists: str) -> None:
+        taste_profiles = {}
+        for itemList in profiles:
+            for item in itemList["tastebuilderItemListRenderer"]["contents"]:
+                artist = nav(item["tastebuilderItemRenderer"], TASTE_PROFILE_ARTIST)[0]["text"]
+                taste_profiles[artist] = {
+                    "selectionValue": item["tastebuilderItemRenderer"]["selectionFormValue"],
+                    "impressionValue": item["tastebuilderItemRenderer"]["impressionFormValue"]
+                }
+        return taste_profiles
+
+    def set_tasteprofile(self, artists: List[str]) -> None:
         """
-        Favorites artists to see more recommendations from the artist
+        Favorites artists to see more recommendations from the artist.
+        Use get_tasteprofile() to see which artists are available to be recommended
+
+        :param artists: A List with names of artists
+        
         """
 
-        taste_profiles = self.get_tasteprofiles()
+        taste_profiles = self.get_tasteprofile()
         formData = {
             "impressionValues":
             [taste_profiles[profile]["impressionValue"] for profile in taste_profiles],
@@ -746,5 +765,4 @@ class BrowsingMixin:
             formData["selectedValues"].append(taste_profiles[artist]["selectionValue"])
 
         body = {'browseId': "FEmusic_home", "formData": formData}
-
         self._send_request('browse', body)

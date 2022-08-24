@@ -31,7 +31,8 @@ Browsing
 .. automethod:: YTMusic.get_song
 .. automethod:: YTMusic.get_song_related
 .. automethod:: YTMusic.get_lyrics
-
+.. automethod:: YTMusic.get_tasteprofile
+.. automethod:: YTMusic.set_tasteprofile
 
 Explore
 --------

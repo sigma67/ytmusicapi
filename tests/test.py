@@ -165,10 +165,19 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNotNone(signatureTimestamp)
 
     def test_set_tasteprofile(self):
-        self.assertRaises(self.yt.set_tasteprofile("Galactic"))
+        artists = [artist for artist in self.yt.get_tasteprofile()]
+
+        self.assertRaises(self.yt.set_tasteprofile(artists[:1]))
+        self.assertRaises(self.yt.set_tasteprofile(artists[:5]))
+
+        self.assertRaises(self.yt_auth.set_tasteprofile(artists[:1]))
+        self.assertRaises(self.yt_auth.set_tasteprofile(artists[:5]))
 
     def test_get_tasteprofile(self):
-        result = self.yt.get_tasteprofiles()
+        result = self.yt.get_tasteprofile()
+        self.assertGreaterEqual(len(result), 0)
+
+        result = self.yt_auth.get_tasteprofile()
         self.assertGreaterEqual(len(result), 0)
 
     ################
