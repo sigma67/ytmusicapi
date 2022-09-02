@@ -13,7 +13,7 @@ Authenticated requests
 Copy authentication headers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To run authenticated requests you need to set up you need to copy your request headers from a POST request in your browser.
+To run authenticated requests, set it up by firstly copying your request headers from an authenticated POST request in your browser.
 To do so, follow these steps:
 
 - Open a new tab
