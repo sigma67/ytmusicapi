@@ -23,7 +23,7 @@ def initialize_context():
         'context': {
             'client': {
                 'clientName': 'WEB_REMIX',
-                'clientVersion': '0.1'
+                'clientVersion': '1.' + time.strftime("%Y%m%d", time.gmtime()) + '.01.00'
             },
             'user': {}
         }
