@@ -1,3 +1,0 @@
-include README.md
-recursive-include ytmusicapi/locales *.mo
-recursive-include ytmusicapi *.py

@@ -79,7 +79,7 @@ The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/test.py>`_ a
 Requirements
 ==============
 
-- Python 3.6 or higher - https://www.python.org
+- Python 3.7 or higher - https://www.python.org
 
 Setup and Usage
 ===============

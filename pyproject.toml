@@ -1,0 +1,37 @@
+[project]
+name = "ytmusicapi"
+description = "Unofficial API for YouTube Music"
+requires-python = ">=3.7"
+authors=[{name = "sigma67", email= "ytmusicapi@gmail.com"}]
+license={file="LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "requests >= 2.22",
+]
+dynamic = ["version", "readme"]
+
+[project.optional-dependencies]
+dev = ['pre-commit', 'flake8', 'yapf', 'coverage', 'sphinx', 'sphinx-rtd-theme']
+
+[project.urls]
+homepage = "https://github.com/sigma67/ytmusicapi"
+documentation = "https://ytmusicapi.readthedocs.io"
+repository = "https://github.com/sigma67/ytmusicapi"
+
+[build-system]
+requires = ["setuptools>=65", "setuptools_scm[toml]>=7"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst"]}
+
+[tool.setuptools]
+include-package-data=false
+
+[tool.setuptools.package-data]
+"*" = ["**.rst", "**.py", "**.mo"]
