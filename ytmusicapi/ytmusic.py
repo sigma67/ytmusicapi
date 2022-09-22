@@ -102,10 +102,10 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         self.context = initialize_context()
         self.context['context']['client']['hl'] = language
         locale_dir = os.path.abspath(os.path.dirname(__file__)) + os.sep + 'locales'
-        supported_languages = [f for f in os.listdir(locale_dir)]
+        supported_languages = [f for f in next(os.walk(locale_dir))[1]]
         if language not in supported_languages:
-            raise Exception("Language not supported. Supported languages are "
-                            ', '.join(supported_languages))
+            raise Exception("Language not supported. Supported languages are " +
+                            (', '.join(supported_languages)) + ".")
         self.language = language
         try:
             locale.setlocale(locale.LC_ALL, self.language)
