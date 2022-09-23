@@ -32,12 +32,13 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                         feedback_tokens = parse_song_menu_tokens(item)
 
             # if item is not playable, the videoId was retrieved above
-            if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
-                videoId = nav(data,
-                              PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
+            if nav(data, PLAY_BUTTON, none_if_absent=True) != None:
+                if 'playNavigationEndpoint' in nav(data, PLAY_BUTTON):
+                    videoId = nav(data,
+                                  PLAY_BUTTON)['playNavigationEndpoint']['watchEndpoint']['videoId']
 
-                if 'menu' in data:
-                    like = nav(data, MENU_LIKE_STATUS, True)
+                    if 'menu' in data:
+                        like = nav(data, MENU_LIKE_STATUS, True)
 
             title = get_item_text(data, 0)
             if title == 'Song deleted':
