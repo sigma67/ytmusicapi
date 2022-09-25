@@ -3,7 +3,7 @@ from ytmusicapi.navigation import nav
 
 def get_continuations(results, continuation_type, limit, request_func, parse_func, ctoken_path=""):
     items = []
-    while 'continuations' in results and len(items) < limit:
+    while 'continuations' in results and (limit is None or len(items) < limit):
         additionalParams = get_continuation_params(results, ctoken_path)
         response = request_func(additionalParams)
         if 'continuationContents' in response:

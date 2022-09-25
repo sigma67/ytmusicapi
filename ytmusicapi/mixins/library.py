@@ -9,7 +9,7 @@ class LibraryMixin:
         """
         Retrieves the playlists in the user's library.
 
-        :param limit: Number of playlists to retrieve
+        :param limit: Number of playlists to retrieve. `None` retrieves them all.
         :return: List of owned playlists.
 
         Each item is in the following format::
@@ -35,8 +35,9 @@ class LibraryMixin:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_content_list(contents, parse_playlist)
+            remaining_limit = None if limit is None else (limit - len(playlists))
             playlists.extend(
-                get_continuations(results, 'gridContinuation', limit - len(playlists),
+                get_continuations(results, 'gridContinuation', remaining_limit,
                                   request_func, parse_func))
 
         return playlists
