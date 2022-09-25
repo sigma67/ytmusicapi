@@ -37,8 +37,8 @@ class LibraryMixin:
             parse_func = lambda contents: parse_content_list(contents, parse_playlist)
             remaining_limit = None if limit is None else (limit - len(playlists))
             playlists.extend(
-                get_continuations(results, 'gridContinuation', remaining_limit,
-                                  request_func, parse_func))
+                get_continuations(results, 'gridContinuation', remaining_limit, request_func,
+                                  parse_func))
 
         return playlists
 
