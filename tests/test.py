@@ -1,6 +1,7 @@
 import unittest
 import unittest.mock
 import configparser
+import time
 import sys
 sys.path.insert(0, '..')
 from ytmusicapi.ytmusic import YTMusic  # noqa: E402
@@ -140,7 +141,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results['tracks']), 7)
 
     def test_get_song(self):
-        song = self.yt_auth.get_song("AjXQiKP5kMs")  # private upload
+        song = self.yt_auth.get_song(config['uploads']['private_upload_id'])  # private upload
         self.assertEqual(len(song), 4)
         song = self.yt.get_song(sample_video)
         self.assertGreaterEqual(len(song['streamingData']['adaptiveFormats']), 10)
@@ -156,7 +157,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNotNone(lyrics_song["lyrics"])
         self.assertIsNotNone(lyrics_song["source"])
 
-        playlist = self.yt.get_watch_playlist("9TnpB8WgW4s")
+        playlist = self.yt.get_watch_playlist(config['uploads']['private_upload_id'])
         self.assertIsNone(playlist["lyrics"])
         self.assertRaises(Exception, self.yt.get_lyrics, playlist["lyrics"])
 
@@ -246,7 +247,7 @@ class TestYTMusic(unittest.TestCase):
         songs = self.yt_brand.get_library_songs(100)
         self.assertGreaterEqual(len(songs), 100)
         songs = self.yt_auth.get_library_songs(200, validate_responses=True)
-        self.assertGreaterEqual(len(songs), 200)
+        self.assertGreaterEqual(len(songs), config.getint('limits', 'library_songs'))
         songs = self.yt_auth.get_library_songs(order='a_to_z')
         self.assertGreaterEqual(len(songs), 25)
 
@@ -266,7 +267,7 @@ class TestYTMusic(unittest.TestCase):
         artists = self.yt_brand.get_library_artists(order='a_to_z', limit=50)
         self.assertGreater(len(artists), 40)
         artists = self.yt_brand.get_library_artists(limit=None)
-        self.assertGreater(len(artists), 300)
+        self.assertGreater(len(artists), config.getint('limits', 'library_artists'))
 
     def test_get_library_subscriptions(self):
         artists = self.yt_brand.get_library_subscriptions(50)
@@ -274,7 +275,7 @@ class TestYTMusic(unittest.TestCase):
         artists = self.yt_brand.get_library_subscriptions(order='z_to_a')
         self.assertGreater(len(artists), 20)
         artists = self.yt_brand.get_library_subscriptions(limit=None)
-        self.assertGreater(len(artists), 50)
+        self.assertGreater(len(artists), config.getint('limits', 'library_subscriptions'))
 
     def test_get_liked_songs(self):
         songs = self.yt_brand.get_liked_songs(200)
@@ -363,11 +364,12 @@ class TestYTMusic(unittest.TestCase):
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y")
         self.assertEqual(len(playlistId), 34, "Playlist creation failed")
         response = self.yt_auth.add_playlist_items(
-            playlistId, ['y0Hhvtmv0gk', sample_video],
+            playlistId, [sample_video, sample_video],
             source_playlist='OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow',
             duplicates=True)
         self.assertEqual(response["status"], 'STATUS_SUCCEEDED', "Adding playlist item failed")
         self.assertGreater(len(response["playlistEditResults"]), 0, "Adding playlist item failed")
+        time.sleep(2)
         playlist = self.yt_auth.get_playlist(playlistId)
         self.assertEqual(len(playlist['tracks']), 46, "Getting playlist items failed")
         response = self.yt_auth.remove_playlist_items(playlistId, playlist['tracks'])
@@ -397,7 +399,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 40)
 
         albums = self.yt_auth.get_library_upload_albums(None)
-        self.assertGreaterEqual(len(albums), 200)
+        self.assertGreaterEqual(len(albums), config.getint('limits', 'library_upload_albums'))
 
     @unittest.skip("Must not have any uploaded albums to pass")
     def test_get_library_upload_albums_empty(self):
@@ -406,12 +408,8 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_library_upload_artists(self):
         artists = self.yt_auth.get_library_upload_artists(None)
-        self.assertGreaterEqual(len(artists), 250)
+        self.assertGreaterEqual(len(artists), config.getint('limits', 'library_upload_artists'))
 
-        results = self.yt_auth.get_library_upload_artists(50, order='a_to_z')
-        self.assertGreaterEqual(len(results), 25)
-        results = self.yt_auth.get_library_upload_artists(50, order='z_to_a')
-        self.assertGreaterEqual(len(results), 25)
         results = self.yt_auth.get_library_upload_artists(50, order='recently_added')
         self.assertGreaterEqual(len(results), 25)
 
