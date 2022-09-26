@@ -14,7 +14,7 @@ class PlaylistsMixin:
         Returns a list of playlist items
 
         :param playlistId: Playlist id
-        :param limit: How many songs to return. Default: 100
+        :param limit: How many songs to return. `None` retrieves them all. Default: 100
         :return: Dictionary with information about the playlist.
             The key ``tracks`` contains a List of playlistItem dictionaries
 
@@ -106,6 +106,8 @@ class PlaylistsMixin:
         playlist['tracks'] = []
         if song_count > 0:
             playlist['tracks'].extend(parse_playlist_items(results['contents']))
+            if limit is None:
+                limit = song_count
             songs_to_get = min(limit, song_count)
 
             if 'continuations' in results:

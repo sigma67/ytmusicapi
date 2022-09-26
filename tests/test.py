@@ -329,8 +329,11 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_foreign_playlist(self):
-        playlist = self.yt.get_playlist(sample_playlist, 300)
+        playlist = self.yt.get_playlist(sample_playlist, limit=300)
         self.assertGreater(len(playlist['tracks']), 200)
+
+        playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4", limit=None)
+        self.assertGreater(len(playlist['tracks']), 100)
 
     def test_get_owned_playlist(self):
         playlist = self.yt_brand.get_playlist(config['playlists']['own'])
