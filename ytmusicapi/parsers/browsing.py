@@ -25,8 +25,11 @@ class Parser:
                     content = None
                     if data:
                         page_type = nav(data, TITLE + NAVIGATION_BROWSE + PAGE_TYPE, True)
-                        if page_type is None:  # song
-                            content = parse_song(data)
+                        if page_type is None:  # song or watch_playlist
+                            if nav(data, NAVIGATION_WATCH_PLAYLIST_ID, True) is not None:
+                                content = parse_watch_playlist(data)
+                            else:
+                                content = parse_song(data)
                         elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
                             content = parse_album(data)
                         elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
@@ -250,15 +253,14 @@ def parse_song_flat(data):
 def parse_video(result):
     runs = result['subtitle']['runs']
     artists_len = get_dot_separator_index(runs)
-    video = {
+    return {
         'title': nav(result, TITLE_TEXT),
         'videoId': nav(result, NAVIGATION_VIDEO_ID),
         'artists': parse_song_artists_runs(runs[:artists_len]),
         'playlistId': nav(result, NAVIGATION_PLAYLIST_ID, True),
-        'thumbnails': nav(result, THUMBNAIL_RENDERER, True)
+        'thumbnails': nav(result, THUMBNAIL_RENDERER, True),
+        'views': runs[-1]['text'].split(' ')[0]
     }
-    video['views'] = runs[-1]['text'].split(' ')[0]
-    return video
 
 
 def parse_playlist(data):
@@ -285,5 +287,13 @@ def parse_related_artist(data):
         'title': nav(data, TITLE_TEXT),
         'browseId': nav(data, TITLE + NAVIGATION_BROWSE_ID),
         'subscribers': subscribers,
+        'thumbnails': nav(data, THUMBNAIL_RENDERER),
+    }
+
+
+def parse_watch_playlist(data):
+    return {
+        'title': nav(data, TITLE_TEXT),
+        'playlistId': nav(data, TITLE + NAVIGATION_BROWSE_ID),
         'thumbnails': nav(data, THUMBNAIL_RENDERER),
     }
