@@ -17,7 +17,7 @@ class UploadsMixin:
         """
         Returns a list of uploaded songs
 
-        :param limit: How many songs to return. Default: 25
+        :param limit: How many songs to return. `None` retrieves them all. Default: 25
         :param order: Order of songs to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of uploaded songs.
 
@@ -58,9 +58,10 @@ class UploadsMixin:
         if 'continuations' in results:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
+            remaining_limit = None if limit is None else (limit - len(songs))
             songs.extend(
-                get_continuations(results, 'musicShelfContinuation', limit - len(songs),
-                                  request_func, parse_uploaded_items))
+                get_continuations(results, 'musicShelfContinuation', remaining_limit, request_func,
+                                  parse_uploaded_items))
 
         return songs
 
@@ -68,7 +69,7 @@ class UploadsMixin:
         """
         Gets the albums of uploaded songs in the user's library.
 
-        :param limit: Number of albums to return. Default: 25
+        :param limit: Number of albums to return. `None` retrives them all. Default: 25
         :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of albums as returned by :py:func:`get_library_albums`
         """
@@ -87,7 +88,7 @@ class UploadsMixin:
         """
         Gets the artists of uploaded songs in the user's library.
 
-        :param limit: Number of artists to return. Default: 25
+        :param limit: Number of artists to return. `None` retrieves them all. Default: 25
         :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of artists as returned by :py:func:`get_library_artists`
         """
@@ -143,8 +144,9 @@ class UploadsMixin:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
             parse_func = lambda contents: parse_uploaded_items(contents)
+            remaining_limit = None if limit is None else (limit - len(items))
             items.extend(
-                get_continuations(results, 'musicShelfContinuation', limit, request_func,
+                get_continuations(results, 'musicShelfContinuation', remaining_limit, request_func,
                                   parse_func))
 
         return items
