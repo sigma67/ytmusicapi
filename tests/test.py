@@ -385,15 +385,11 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_library_upload_songs(self):
-        current_length = len(self.yt_auth.get_library_upload_songs(25))
-        expected_length = current_length
-        while expected_length <= current_length:
-            expected_length = current_length + 1
-            current_length = len(self.yt_auth.get_library_upload_songs(expected_length))
-        expected_length -= 1
+        results = self.yt_auth.get_library_upload_songs(50, order='z_to_a')
+        self.assertGreater(len(results), 25)
 
-        songs = self.yt_auth.get_library_upload_songs(None)
-        self.assertEqual(len(songs), expected_length)
+        # songs = self.yt_auth.get_library_upload_songs(None)
+        # self.assertEqual(len(songs), 1000)
 
     @unittest.skip("Must not have any uploaded songs to pass")
     def test_get_library_upload_songs_empty(self):
@@ -401,15 +397,11 @@ class TestYTMusic(unittest.TestCase):
         self.assertEquals(len(results), 0)
 
     def test_get_library_upload_albums(self):
-        current_length = len(self.yt_auth.get_library_upload_album(25))
-        expected_length = current_length
-        while expected_length <= current_length:
-            expected_length = current_length + 1
-            current_length = len(self.yt_auth.get_library_upload_album(expected_length))
-        expected_length -= 1
+        results = self.yt_auth.get_library_upload_albums(50, order='a_to_z')
+        self.assertGreater(len(results), 40)
 
-        albums = self.yt_auth.get_library_upload_album(None)
-        self.assertEqual(len(albums), expected_length)
+        albums = self.yt_auth.get_library_upload_albums(None)
+        self.assertEqual(len(albums), 200)
 
     @unittest.skip("Must not have any uploaded albums to pass")
     def test_get_library_upload_albums_empty(self):
@@ -417,22 +409,15 @@ class TestYTMusic(unittest.TestCase):
         self.assertEquals(len(results), 0)
 
     def test_get_library_upload_artists(self):
-        current_length = len(self.yt_auth.get_library_upload_artists(25))
-        expected_length = current_length
-        while expected_length <= current_length:
-            expected_length = current_length + 1
-            current_length = len(self.yt_auth.get_library_upload_artists(expected_length))
-        expected_length -= 1
-
         artists = self.yt_auth.get_library_upload_artists(None)
-        self.assertEqual(len(artists), expected_length)
+        self.assertGreaterEqual(len(artists), 250)
 
         results = self.yt_auth.get_library_upload_artists(50, order='a_to_z')
-        self.assertGreaterEqual(len(results), current_length)
+        self.assertGreaterEqual(len(results), 25)
         results = self.yt_auth.get_library_upload_artists(50, order='z_to_a')
-        self.assertGreaterEqual(len(results), current_length)
+        self.assertGreaterEqual(len(results), 25)
         results = self.yt_auth.get_library_upload_artists(50, order='recently_added')
-        self.assertGreaterEqual(len(results), current_length)
+        self.assertGreaterEqual(len(results), 25)
 
     @unittest.skip("Must not have any uploaded artsts to pass")
     def test_get_library_upload_artists_empty(self):
