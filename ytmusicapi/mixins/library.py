@@ -26,9 +26,7 @@ class LibraryMixin:
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
 
-        results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                     'itemSectionRenderer')
-        results = nav(results, ITEM_SECTION + GRID)
+        results = get_library_contents(response, GRID)
         playlists = parse_content_list(results['items'][1:], parse_playlist)
 
         if 'continuations' in results:

@@ -24,12 +24,9 @@ def parse_artists(results, uploaded=False):
 
 
 def parse_library_albums(response, request_func, limit):
-    results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                 'itemSectionRenderer')
-    results = nav(results, ITEM_SECTION)
-    if 'gridRenderer' not in results:
+    results = get_library_contents(response, GRID)
+    if results is None:
         return []
-    results = nav(results, GRID)
     albums = parse_albums(results['items'])
 
     if 'continuations' in results:
@@ -83,12 +80,9 @@ def parse_albums(results):
 
 
 def parse_library_artists(response, request_func, limit):
-    results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                 'itemSectionRenderer')
-    results = nav(results, ITEM_SECTION)
-    if 'musicShelfRenderer' not in results:
+    results = get_library_contents(response, MUSIC_SHELF)
+    if results is None:
         return []
-    results = results['musicShelfRenderer']
     artists = parse_artists(results['contents'])
 
     if 'continuations' in results:
@@ -102,12 +96,17 @@ def parse_library_artists(response, request_func, limit):
 
 
 def parse_library_songs(response):
-    results = find_object_by_key(nav(response, SINGLE_COLUMN_TAB + SECTION_LIST),
-                                 'itemSectionRenderer')
-    results = nav(results, ITEM_SECTION)
-    songs = {'results': [], 'parsed': []}
-    if 'musicShelfRenderer' in results:
-        songs['results'] = results['musicShelfRenderer']
-        songs['parsed'] = parse_playlist_items(songs['results']['contents'][1:])
+    results = get_library_contents(response, MUSIC_SHELF)
+    return {'results': results, 'parsed': (parse_playlist_items(results['contents'][1:]))}
 
-    return songs
+
+def get_library_contents(response, renderer):
+    # first 3 lines are original path prior to #301
+    contents = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
+    if contents is None:  # empty library
+        return None
+    results = find_object_by_key(contents, 'itemSectionRenderer')
+    if results is None:
+        return nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + renderer, True)
+    else:
+        return nav(results, ITEM_SECTION + renderer)
