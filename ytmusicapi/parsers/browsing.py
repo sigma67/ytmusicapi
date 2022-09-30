@@ -294,6 +294,6 @@ def parse_related_artist(data):
 def parse_watch_playlist(data):
     return {
         'title': nav(data, TITLE_TEXT),
-        'playlistId': nav(data, TITLE + NAVIGATION_BROWSE_ID),
+        'playlistId': nav(data, NAVIGATION_WATCH_PLAYLIST_ID),
         'thumbnails': nav(data, THUMBNAIL_RENDERER),
     }
