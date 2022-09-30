@@ -315,21 +315,19 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_foreign_playlist(self):
-        playlist = self.yt.get_playlist(sample_playlist, limit=300)
+        playlist = self.yt.get_playlist(sample_playlist, limit=300, suggestions_limit=7)
         self.assertGreater(len(playlist['tracks']), 200)
+        self.assertNotIn('suggestions', playlist)
 
-        playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4", limit=None)
+        playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4", limit=None, related=True)
         self.assertGreater(len(playlist['tracks']), 100)
+        self.assertEqual(len(playlist['related']), 10)
 
     def test_get_owned_playlist(self):
-        playlist = self.yt_brand.get_playlist(config['playlists']['own'])
+        playlist = self.yt_brand.get_playlist(config['playlists']['own'], related=True, suggestions_limit=21)
         self.assertLess(len(playlist['tracks']), 100)
-        if not playlist['suggestions_token']:
-            self.skipTest("Suggestions not available")
-        suggestions = self.yt_brand.get_playlist_suggestions(playlist['suggestions_token'])
-        self.assertGreater(len(suggestions['tracks']), 5)
-        refresh = self.yt_brand.get_playlist_suggestions(suggestions['refresh_token'])
-        self.assertGreater(len(refresh['tracks']), 5)
+        self.assertEqual(len(playlist['suggestions']), 21)
+        self.assertEqual(len(playlist['related']), 10)
 
     def test_edit_playlist(self):
         playlist = self.yt_brand.get_playlist(config['playlists']['own'])
@@ -362,7 +360,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response["status"], 'STATUS_SUCCEEDED', "Adding playlist item failed")
         self.assertGreater(len(response["playlistEditResults"]), 0, "Adding playlist item failed")
         time.sleep(2)
-        playlist = self.yt_auth.get_playlist(playlistId)
+        playlist = self.yt_auth.get_playlist(playlistId, related=True)
         self.assertEqual(len(playlist['tracks']), 46, "Getting playlist items failed")
         response = self.yt_auth.remove_playlist_items(playlistId, playlist['tracks'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")

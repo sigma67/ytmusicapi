@@ -1,10 +1,17 @@
 from ytmusicapi.navigation import nav
 
 
-def get_continuations(results, continuation_type, limit, request_func, parse_func, ctoken_path=""):
+def get_continuations(results,
+                      continuation_type,
+                      limit,
+                      request_func,
+                      parse_func,
+                      ctoken_path="",
+                      reloadable=False):
     items = []
     while 'continuations' in results and (limit is None or len(items) < limit):
-        additionalParams = get_continuation_params(results, ctoken_path)
+        additionalParams = get_reloadable_continuation_params(results) if reloadable \
+            else get_continuation_params(results, ctoken_path)
         response = request_func(additionalParams)
         if 'continuationContents' in response:
             results = response['continuationContents'][continuation_type]
@@ -46,9 +53,14 @@ def get_parsed_continuation_items(response, parse_func, continuation_type):
     return {'results': results, 'parsed': get_continuation_contents(results, parse_func)}
 
 
-def get_continuation_params(results, ctoken_path):
+def get_continuation_params(results, ctoken_path=''):
     ctoken = nav(results,
                  ['continuations', 0, 'next' + ctoken_path + 'ContinuationData', 'continuation'])
+    return get_continuation_string(ctoken)
+
+
+def get_reloadable_continuation_params(results):
+    ctoken = nav(results, ['continuations', 0, 'reloadContinuationData', 'continuation'])
     return get_continuation_string(ctoken)
 
 

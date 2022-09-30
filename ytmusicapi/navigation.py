@@ -1,10 +1,11 @@
 # commonly used navigation paths
+CONTENT = ['contents', 0]
 RUN_TEXT = ['runs', 0, 'text']
 TAB_CONTENT = ['tabs', 0, 'tabRenderer', 'content']
 SINGLE_COLUMN_TAB = ['contents', 'singleColumnBrowseResultsRenderer'] + TAB_CONTENT
 SECTION_LIST = ['sectionListRenderer', 'contents']
-SECTION_LIST_ITEM = ['sectionListRenderer', 'contents', 0]
-ITEM_SECTION = ['itemSectionRenderer', 'contents', 0]
+SECTION_LIST_ITEM = ['sectionListRenderer'] + CONTENT
+ITEM_SECTION = ['itemSectionRenderer'] + CONTENT
 MUSIC_SHELF = ['musicShelfRenderer']
 GRID = ['gridRenderer']
 GRID_ITEMS = GRID + ['items']
@@ -52,13 +53,13 @@ FEEDBACK_TOKEN = ['feedbackEndpoint', 'feedbackToken']
 BADGE_LABEL = [
     'badges', 0, 'musicInlineBadgeRenderer', 'accessibilityData', 'accessibilityData', 'label'
 ]
-RELOAD_CONTINUATION = ['continuations', 0, 'reloadContinuationData', 'continuation']
 CATEGORY_TITLE = ['musicNavigationButtonRenderer', 'buttonText'] + RUN_TEXT
 CATEGORY_PARAMS = ['musicNavigationButtonRenderer', 'clickCommand', 'browseEndpoint', 'params']
 MRLIR = 'musicResponsiveListItemRenderer'
 MTRIR = 'musicTwoRowItemRenderer'
 TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
 TASTE_PROFILE_ARTIST = ["title", "runs"]
+SECTION_LIST_CONTINUATION = ['continuationContents', 'sectionListContinuation']
 
 
 def nav(root, items, none_if_absent=False):

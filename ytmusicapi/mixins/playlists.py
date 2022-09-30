@@ -2,19 +2,24 @@ import unicodedata
 from typing import Dict, Union, Tuple
 from ._utils import *
 
-from ytmusicapi.continuations import get_continuations, get_continuation_string
+from ytmusicapi.continuations import *
 from ytmusicapi.navigation import *
 from ytmusicapi.helpers import to_int, sum_total_duration
 from ytmusicapi.parsers.playlists import *
+from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 
 
 class PlaylistsMixin:
-    def get_playlist(self, playlistId: str, limit: int = 100) -> Dict:
+    def get_playlist(self, playlistId: str, limit: int = 100, related: bool = False, suggestions_limit: int = 0) -> Dict:
         """
         Returns a list of playlist items
 
         :param playlistId: Playlist id
         :param limit: How many songs to return. `None` retrieves them all. Default: 100
+        :param related: Whether to fetch 10 related playlists or not. Default: False
+        :param suggestions_limit: How many suggestions to return. The result is a list of
+            suggested playlist items (videos) contained in a "suggestions" key.
+            7 items are retrieved in each internal request. Default: 0
         :return: Dictionary with information about the playlist.
             The key ``tracks`` contains a List of playlistItem dictionaries
 
@@ -31,6 +36,35 @@ class PlaylistsMixin:
               "duration": "6+ hours",
               "duration_seconds": 52651,
               "trackCount": 237,
+              "suggestions": [
+                  {
+                    "videoId": "HLCsfOykA94",
+                    "title": "Mambo (GATTÜSO Remix)",
+                    "artists": [{
+                        "name": "Nikki Vianna",
+                        "id": "UCMW5eSIO1moVlIBLQzq4PnQ"
+                      }],
+                    "album": {
+                      "name": "Mambo (GATTÜSO Remix)",
+                      "id": "MPREb_jLeQJsd7U9w"
+                    },
+                    "likeStatus": "LIKE",
+                    "thumbnails": [...],
+                    "isAvailable": true,
+                    "isExplicit": false,
+                    "duration": "3:32",
+                    "duration_seconds": 212,
+                    "setVideoId": "to_be_updated_by_client"
+                  }
+              ],
+              "related": [
+                  {
+                    "title": "Presenting MYRNE",
+                    "playlistId": "RDCLAK5uy_mbdO3_xdD4NtU1rWI0OmvRSRZ8NH4uJCM",
+                    "thumbnails": [...],
+                    "description": "Playlist • YouTube Music"
+                  }
+              ],
               "tracks": [
                 {
                   "videoId": "bjGppZKiuFE",
@@ -99,21 +133,44 @@ class PlaylistsMixin:
             playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
 
         playlist['trackCount'] = song_count
-        playlist['suggestions_token'] = nav(
-            response, SINGLE_COLUMN_TAB + ['sectionListRenderer', 'contents', 1] + MUSIC_SHELF
-            + RELOAD_CONTINUATION, True)
 
-        playlist['tracks'] = []
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+
+        # suggestions and related are missing e.g. on liked songs
+        section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
+        if 'continuations' in section_list:
+            additionalParams = get_continuation_params(section_list)
+            if own_playlist and (suggestions_limit > 0 or related):
+                parse_func = lambda results: parse_playlist_items(results)
+                suggested = request_func(additionalParams)
+                continuation = nav(suggested, SECTION_LIST_CONTINUATION)
+                additionalParams = get_continuation_params(continuation)
+                suggestions_shelf = nav(continuation, CONTENT + MUSIC_SHELF)
+                playlist['suggestions'] = get_continuation_contents(suggestions_shelf, parse_func)
+
+                parse_func = lambda results: parse_playlist_items(results)
+                playlist['suggestions'].extend(get_continuations(suggestions_shelf,
+                                                            'musicShelfContinuation',
+                                                            suggestions_limit - len(playlist['suggestions']),
+                                                            request_func,
+                                                            parse_func,
+                                                            reloadable=True))
+
+            if related:
+                response = request_func(additionalParams)
+                continuation = nav(response, SECTION_LIST_CONTINUATION)
+                parse_func = lambda results: parse_content_list(results, parse_playlist)
+                playlist['related'] = get_continuation_contents(nav(continuation, CONTENT + CAROUSEL),
+                                                            parse_func)
+
         if song_count > 0:
-            playlist['tracks'].extend(parse_playlist_items(results['contents']))
+            playlist['tracks'] = parse_playlist_items(results['contents'])
             if limit is None:
                 limit = song_count
             songs_to_get = min(limit, song_count)
 
+            parse_func = lambda contents: parse_playlist_items(contents)
             if 'continuations' in results:
-                request_func = lambda additionalParams: self._send_request(
-                    endpoint, body, additionalParams)
-                parse_func = lambda contents: parse_playlist_items(contents)
                 playlist['tracks'].extend(
                     get_continuations(results, 'musicPlaylistShelfContinuation',
                                       songs_to_get - len(playlist['tracks']), request_func,
@@ -121,25 +178,6 @@ class PlaylistsMixin:
 
         playlist['duration_seconds'] = sum_total_duration(playlist)
         return playlist
-
-    def get_playlist_suggestions(self, suggestions_token: str) -> Dict:
-        """
-        Gets suggested tracks to add to a playlist. Suggestions are offered for playlists with less than 100 tracks
-
-        :param suggestions_token: Token returned by :py:func:`get_playlist` or this function
-        :return: Dictionary containing suggested `tracks` and a `refresh_token` to get another set of suggestions.
-            For data format of tracks, check :py:func:`get_playlist`
-        """
-        if not suggestions_token:
-            raise Exception('Suggestions token is None. '
-                            'Please ensure the playlist is small enough to receive suggestions.')
-        endpoint = 'browse'
-        additionalParams = get_continuation_string(suggestions_token)
-        response = self._send_request(endpoint, {}, additionalParams)
-        results = nav(response, ['continuationContents', 'musicShelfContinuation'])
-        refresh_token = nav(results, RELOAD_CONTINUATION)
-        suggestions = parse_playlist_items(results['contents'])
-        return {'tracks': suggestions, 'refresh_token': refresh_token}
 
     def create_playlist(self,
                         title: str,
