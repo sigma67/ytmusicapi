@@ -29,6 +29,9 @@ It emulates YouTube Music web client requests using the user's cookie data for a
 
 Features
 --------
+At this point ytmusicapi supports nearly all content interactions in the YouTube Music web app.
+If you find something missing or broken, feel free to create an `issue <https://github.com/sigma67/ytmusicapi/issues/new>`_
+
 | **Browsing**:
 
 * search (including all filters)
@@ -36,7 +39,7 @@ Features
 * get user information (videos, playlists)
 * get albums
 * get song metadata
-* get watch playlists (playlist that appears when you press play in YouTube Music)
+* get watch playlists (next songs when you press play/radio/shuffle in YouTube Music)
 * get song lyrics
 
 | **Exploring music**:
@@ -48,17 +51,19 @@ Features
 
 * get library contents: playlists, songs, artists, albums and subscriptions
 * add/remove library content: rate songs, albums and playlists, subscribe/unsubscribe artists
+* get and modify play history
 
 | **Playlists**:
 
 * create and delete playlists
 * modify playlists: edit metadata, add/move/remove tracks
 * get playlist contents
+* get playlist suggestions
 
 | **Uploads**:
 
-* Upload songs and remove them again
-* List uploaded songs, artists and albums
+* upload songs and remove them again
+* list uploaded songs, artists and albums
 
 
 Usage
@@ -67,10 +72,10 @@ Usage
 
     from ytmusicapi import YTMusic
 
-    ytmusic = YTMusic('headers_auth.json')
-    playlistId = ytmusic.create_playlist('test', 'test description')
-    search_results = ytmusic.search('Oasis Wonderwall')
-    ytmusic.add_playlist_items(playlistId, [search_results[0]['videoId']])
+    yt = YTMusic('headers_auth.json')
+    playlistId = yt.create_playlist('test', 'test description')
+    search_results = yt.search('Oasis Wonderwall')
+    yt.add_playlist_items(playlistId, [search_results[0]['videoId']])
 
 The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/test.py>`_ are also a great source of usage examples.
 
