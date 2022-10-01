@@ -43,7 +43,6 @@ Explore
 Watch
 --------
 .. automethod:: YTMusic.get_watch_playlist
-.. automethod:: YTMusic.get_watch_playlist_shuffle
 
 Library
 -------

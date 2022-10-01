@@ -10,7 +10,8 @@ class WatchMixin:
                            videoId: str = None,
                            playlistId: str = None,
                            limit=25,
-                           params: str = None) -> Dict[str, Union[List[Dict]]]:
+                           radio: bool = False,
+                           shuffle: bool = False) -> Dict[str, Union[List[Dict]]]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -22,7 +23,9 @@ class WatchMixin:
         :param videoId: videoId of the played video
         :param playlistId: playlistId of the played playlist or album
         :param limit: minimum number of watch playlist items to return
-        :param params: only used internally by :py:func:`get_watch_playlist_shuffle`
+        :param radio: get a radio playlist (changes each time)
+        :param shuffle: shuffle the input playlist. only works when the playlistId parameter
+            is set at the same time. does not work if radio=True
         :return: List of watch playlist items. The counterpart key is optional and only
             appears if a song has a corresponding video counterpart (UI song/video
             switcher).
@@ -108,7 +111,7 @@ class WatchMixin:
             body['videoId'] = videoId
             if not playlistId:
                 playlistId = "RDAMVM" + videoId
-            if not params:
+            if not (radio or shuffle):
                 body['watchEndpointMusicSupportedConfigs'] = {
                     'watchEndpointMusicConfig': {
                         'hasPersistentPlaylistPanel': True,
@@ -118,8 +121,10 @@ class WatchMixin:
         body['playlistId'] = validate_playlist_id(playlistId)
         is_playlist = body['playlistId'].startswith('PL') or \
                       body['playlistId'].startswith('OLA')
-        if params:
-            body['params'] = params
+        if shuffle and playlistId is not None:
+            body['params'] = "wAEB8gECKAE%3D"
+        if radio:
+            body['params'] = "wAEB"
         endpoint = 'next'
         response = self._send_request(endpoint, body)
         watchNextRenderer = nav(response, [
@@ -152,20 +157,3 @@ class WatchMixin:
                     playlistId=playlist,
                     lyrics=lyrics_browse_id,
                     related=related_browse_id)
-
-    def get_watch_playlist_shuffle(self,
-                                   videoId: str = None,
-                                   playlistId: str = None,
-                                   limit=50) -> Dict[str, Union[List[Dict]]]:
-        """
-        Shuffle any playlist
-
-        :param videoId: Optional video id of the first video in the shuffled playlist
-        :param playlistId: Playlist id
-        :param limit: The number of watch playlist items to return
-        :return: A list of watch playlist items (see :py:func:`get_watch_playlist`)
-        """
-        return self.get_watch_playlist(videoId=videoId,
-                                       playlistId=playlistId,
-                                       limit=limit,
-                                       params='wAEB8gECKAE%3D')

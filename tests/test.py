@@ -207,21 +207,17 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_watch_playlist(self):
-        playlist = self.yt_auth.get_watch_playlist(
-            playlistId="OLAK5uy_ln_o1YXFqK4nfiNuTfhJK2XcRNCxml0fY", limit=90)
+        playlist = self.yt_auth.get_watch_playlist(playlistId="RDAMPLOLAK5uy_l_fKDQGOUsk8kbWsm9s86n4-nZNd2JR8Q",
+                                                   radio=True, limit=90)
         self.assertGreaterEqual(len(playlist['tracks']), 90)
         playlist = self.yt_auth.get_watch_playlist("9mWr4c_ig54", limit=50)
         self.assertGreater(len(playlist['tracks']), 45)
         playlist = self.yt_auth.get_watch_playlist("UoAf_y9Ok4k")  # private track
         self.assertGreaterEqual(len(playlist['tracks']), 25)
-
-    def test_get_watch_playlist_shuffle(self):
-        playlist = self.yt.get_watch_playlist_shuffle(
-            playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc")
+        playlist = self.yt.get_watch_playlist(
+            playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc", shuffle=True)
         self.assertEqual(len(playlist['tracks']), 12)
-
-    def test_get_watch_playlist_shuffle_playlist(self):
-        playlist = self.yt_brand.get_watch_playlist_shuffle(playlistId=config['playlists']['own'])
+        playlist = self.yt_brand.get_watch_playlist(playlistId=config['playlists']['own'], shuffle=True)
         self.assertEqual(len(playlist['tracks']), 4)
 
     ################
