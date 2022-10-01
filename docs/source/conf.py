@@ -21,7 +21,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # -- Project information -----------------------------------------------------
 
 project = 'ytmusicapi'
-copyright = '2020, sigma67'
+copyright = '2022, sigma67'
 author = 'sigma67'
 
 # The full version, including alpha/beta/rc tags
