@@ -50,9 +50,9 @@ THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer'] + THUMBNAIL
 THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer'] + THUMBNAIL
 THUMBNAIL_CROPPED = ['thumbnail', 'croppedSquareThumbnailRenderer'] + THUMBNAIL
 FEEDBACK_TOKEN = ['feedbackEndpoint', 'feedbackToken']
-BADGE_LABEL = [
-    'badges', 0, 'musicInlineBadgeRenderer', 'accessibilityData', 'accessibilityData', 'label'
-]
+BADGE_PATH = [0, 'musicInlineBadgeRenderer', 'accessibilityData', 'accessibilityData', 'label']
+BADGE_LABEL = ['badges'] + BADGE_PATH
+SUBTITLE_BADGE_LABEL = ['subtitleBadges'] + BADGE_PATH
 CATEGORY_TITLE = ['musicNavigationButtonRenderer', 'buttonText'] + RUN_TEXT
 CATEGORY_PARAMS = ['musicNavigationButtonRenderer', 'clickCommand', 'browseEndpoint', 'params']
 MRLIR = 'musicResponsiveListItemRenderer'

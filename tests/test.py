@@ -137,6 +137,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(results), 9)
         self.assertTrue(results['tracks'][0]['isExplicit'])
         self.assertIn('feedbackTokens', results['tracks'][0])
+        self.assertEqual(len(results['other_versions']), 2)
         results = self.yt.get_album("MPREb_BQZvl3BFGay")
         self.assertEqual(len(results['tracks']), 7)
 
@@ -319,12 +320,16 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(playlist['tracks']), 200)
         self.assertNotIn('suggestions', playlist)
 
-        playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4", limit=None, related=True)
+        playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4",
+                                        limit=None,
+                                        related=True)
         self.assertGreater(len(playlist['tracks']), 100)
         self.assertEqual(len(playlist['related']), 10)
 
     def test_get_owned_playlist(self):
-        playlist = self.yt_brand.get_playlist(config['playlists']['own'], related=True, suggestions_limit=21)
+        playlist = self.yt_brand.get_playlist(config['playlists']['own'],
+                                              related=True,
+                                              suggestions_limit=21)
         self.assertLess(len(playlist['tracks']), 100)
         self.assertEqual(len(playlist['suggestions']), 21)
         self.assertEqual(len(playlist['related']), 10)

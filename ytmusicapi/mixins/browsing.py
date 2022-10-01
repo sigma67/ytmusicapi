@@ -392,6 +392,15 @@ class BrowsingMixin:
                   }
                 }
               ],
+              "other_versions": [
+                {
+                  "title": "Revival",
+                  "year": "Eminem",
+                  "browseId": "MPREb_fefKFOTEZSp",
+                  "thumbnails": [...],
+                  "isExplicit": false
+                },
+              ],
               "duration_seconds": 4657
             }
         """
@@ -401,6 +410,9 @@ class BrowsingMixin:
         album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
         album['tracks'] = parse_playlist_items(results['contents'])
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + CAROUSEL, True)
+        if results is not None:
+            album['other_versions'] = parse_content_list(results['contents'], parse_album)
         album['duration_seconds'] = sum_total_duration(album)
         for i, track in enumerate(album['tracks']):
             album['tracks'][i]['album'] = album['title']

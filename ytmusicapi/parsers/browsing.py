@@ -205,7 +205,8 @@ def parse_album(result):
         'title': nav(result, TITLE_TEXT),
         'year': nav(result, SUBTITLE2, True),
         'browseId': nav(result, TITLE + NAVIGATION_BROWSE_ID),
-        'thumbnails': nav(result, THUMBNAIL_RENDERER)
+        'thumbnails': nav(result, THUMBNAIL_RENDERER),
+        'isExplicit': nav(result, SUBTITLE_BADGE_LABEL, True) is not None
     }
 
 
