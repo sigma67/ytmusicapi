@@ -43,7 +43,7 @@ To do so, follow these steps:
 
 .. container::
 
-    - Verify that the request looks like this: **Status** 200, **Type** xhr, **Name** ``browse?...``
+    - Verify that the request looks like this: **Status** 200, **Name** ``browse?...``
     - Click on the Name of any matching request. In the "Headers" tab, scroll to the section "Request headers" and copy everything starting from "accept: \*/\*" to the end of the section
 
 .. raw:: html
@@ -92,5 +92,5 @@ Manual file creation
 
 Alternatively, you can paste the cookie to ``headers_auth.json`` below and create your own file:
 
-.. literalinclude:: ../../headers_auth.json.example
+.. literalinclude:: headers_auth.json.example
   :language: JSON
