@@ -1,7 +1,7 @@
 [project]
 name = "ytmusicapi"
 description = "Unofficial API for YouTube Music"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors=[{name = "sigma67", email= "ytmusicapi@gmail.com"}]
 license={file="LICENSE"}
 classifiers = [
