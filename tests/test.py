@@ -243,6 +243,8 @@ class TestYTMusic(unittest.TestCase):
     def test_get_library_albums(self):
         albums = self.yt_auth.get_library_albums(100)
         self.assertGreater(len(albums), 50)
+        for album in albums:
+            self.assertIn('playlistId',album)
         albums = self.yt_brand.get_library_albums(100, order='a_to_z')
         self.assertGreater(len(albums), 50)
         albums = self.yt_brand.get_library_albums(100, order='z_to_a')
