@@ -60,7 +60,7 @@ MTRIR = 'musicTwoRowItemRenderer'
 TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
 TASTE_PROFILE_ARTIST = ["title", "runs"]
 SECTION_LIST_CONTINUATION = ['continuationContents', 'sectionListContinuation']
-MENU_PLAYLIST_ID = MENU_ITEMS + [0 + 'menuNavigationItemRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID
+MENU_PLAYLIST_ID = MENU_ITEMS + [0, 'menuNavigationItemRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID
 
 
 def nav(root, items, none_if_absent=False):
