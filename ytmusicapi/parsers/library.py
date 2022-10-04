@@ -45,7 +45,7 @@ def parse_albums(results):
         data = result[MTRIR]
         album = {}
         album['browseId'] = nav(data, TITLE + NAVIGATION_BROWSE_ID)
-        album['playlistId'] = nav(data, MENU_PLAYLIST_ID)
+        album['playlistId'] = nav(data, MENU_PLAYLIST_ID, none_if_absent=True)
         album['title'] = nav(data, TITLE_TEXT)
         album['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
 
