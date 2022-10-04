@@ -109,6 +109,7 @@ class LibraryMixin:
 
             {
               "browseId": "MPREb_G8AiyN7RvFg",
+              "playlistId": "OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc",
               "title": "Beautiful",
               "type": "Album",
               "thumbnails": [...],
