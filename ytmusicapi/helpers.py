@@ -42,7 +42,7 @@ def get_visitor_id(request_func):
 
 def sapisid_from_cookie(raw_cookie):
     cookie = SimpleCookie()
-    cookie.load(raw_cookie)
+    cookie.load(raw_cookie.replace("\"", ""))
     return cookie['__Secure-3PAPISID'].value
 
 
