@@ -88,6 +88,7 @@ class PlaylistsMixin:
                   "thumbnails": [...],
                   "isAvailable": True,
                   "isExplicit": False,
+                  "videoType": "MUSIC_VIDEO_TYPE_OMV",
                   "feedbackTokens": {
                     "add": "AB9zfpJxtvrU...",
                     "remove": "AB9zfpKTyZ..."

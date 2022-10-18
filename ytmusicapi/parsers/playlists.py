@@ -66,6 +66,8 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
 
             isExplicit = nav(data, BADGE_LABEL, True) is not None
 
+            videoType = nav(data, MENU_ITEMS + [0, 'menuNavigationItemRenderer', 'navigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
+
             song = {
                 'videoId': videoId,
                 'title': title,
@@ -74,7 +76,8 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                 'likeStatus': like,
                 'thumbnails': thumbnails,
                 'isAvailable': isAvailable,
-                'isExplicit': isExplicit
+                'isExplicit': isExplicit,
+                'videoType': videoType
             }
             if duration:
                 song['duration'] = duration
