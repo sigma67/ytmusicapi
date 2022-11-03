@@ -38,7 +38,7 @@ def parse_song_runs(runs):
 
         else:
             # note: YT uses non-breaking space \xa0 to separate number and magnitude
-            if re.match(r"^\d([^ ])* [^ ]*$", text):
+            if re.match(r"^\d([^ ])* [^ ]*$", text) and i > 0:
                 parsed['views'] = text.split(' ')[0]
 
             elif re.match(r"^(\d+:)*\d+:\d+$", text):
