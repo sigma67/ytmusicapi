@@ -66,6 +66,8 @@ def to_int(string):
 
 
 def sum_total_duration(item):
+    if 'tracks' not in item:
+        return 0
     return sum([
         track['duration_seconds'] if 'duration_seconds' in track else 0 for track in item['tracks']
     ])
