@@ -10,7 +10,7 @@ config = configparser.RawConfigParser()
 config.read('./test.cfg', 'utf-8')
 
 sample_album = "MPREb_4pL8gzRtw1p"  # Eminem - Revival
-sample_video = "tGWs0xKwhag"  # Oasis - Wonderwall (Remastered)
+sample_video = "hpSrLjc5SMs"  # Oasis - Wonderwall
 sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 
 
