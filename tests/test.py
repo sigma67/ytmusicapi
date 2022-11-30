@@ -143,7 +143,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_song(self):
         song = self.yt_auth.get_song(config['uploads']['private_upload_id'])  # private upload
-        self.assertEqual(len(song), 4)
+        self.assertEqual(len(song), 5)
         song = self.yt.get_song(sample_video)
         self.assertGreaterEqual(len(song['streamingData']['adaptiveFormats']), 10)
 
@@ -207,8 +207,8 @@ class TestYTMusic(unittest.TestCase):
     ###############
 
     def test_get_watch_playlist(self):
-        playlist = self.yt_auth.get_watch_playlist(playlistId="RDAMPLOLAK5uy_l_fKDQGOUsk8kbWsm9s86n4-nZNd2JR8Q",
-                                                   radio=True, limit=90)
+        playlist = self.yt_auth.get_watch_playlist(
+            playlistId="RDAMPLOLAK5uy_l_fKDQGOUsk8kbWsm9s86n4-nZNd2JR8Q", radio=True, limit=90)
         self.assertGreaterEqual(len(playlist['tracks']), 90)
         playlist = self.yt_auth.get_watch_playlist("9mWr4c_ig54", limit=50)
         self.assertGreater(len(playlist['tracks']), 45)
@@ -217,7 +217,8 @@ class TestYTMusic(unittest.TestCase):
         playlist = self.yt.get_watch_playlist(
             playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc", shuffle=True)
         self.assertEqual(len(playlist['tracks']), 12)
-        playlist = self.yt_brand.get_watch_playlist(playlistId=config['playlists']['own'], shuffle=True)
+        playlist = self.yt_brand.get_watch_playlist(playlistId=config['playlists']['own'],
+                                                    shuffle=True)
         self.assertEqual(len(playlist['tracks']), 4)
 
     ################
@@ -244,7 +245,7 @@ class TestYTMusic(unittest.TestCase):
         albums = self.yt_auth.get_library_albums(100)
         self.assertGreater(len(albums), 50)
         for album in albums:
-            self.assertIn('playlistId',album)
+            self.assertIn('playlistId', album)
         albums = self.yt_brand.get_library_albums(100, order='a_to_z')
         self.assertGreater(len(albums), 50)
         albums = self.yt_brand.get_library_albums(100, order='z_to_a')

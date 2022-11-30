@@ -478,6 +478,33 @@ class BrowsingMixin:
                         }
                     ]
                 },
+                "playbackTracking": {
+                    "videostatsPlaybackUrl": {
+                      "baseUrl": "https://s.youtube.com/api/stats/playback?cl=491307275&docid=AjXQiKP5kMs&ei=Nl2HY-6MH5WE8gPjnYnoDg&fexp=1714242%2C9405963%2C23804281%2C23858057%2C23880830%2C23880833%2C23882685%2C23918597%2C23934970%2C23946420%2C23966208%2C23983296%2C23998056%2C24001373%2C24002022%2C24002025%2C24004644%2C24007246%2C24034168%2C24036947%2C24077241%2C24080738%2C24120820%2C24135310%2C24135692%2C24140247%2C24161116%2C24162919%2C24164186%2C24169501%2C24175560%2C24181174%2C24187043%2C24187377%2C24187854%2C24191629%2C24197450%2C24199724%2C24200839%2C24209349%2C24211178%2C24217535%2C24219713%2C24224266%2C24241378%2C24248091%2C24248956%2C24255543%2C24255545%2C24262346%2C24263796%2C24265426%2C24267564%2C24268142%2C24279196%2C24280220%2C24283426%2C24283493%2C24287327%2C24288045%2C24290971%2C24292955%2C24293803%2C24299747%2C24390674%2C24391018%2C24391537%2C24391709%2C24392268%2C24392363%2C24392401%2C24401557%2C24402891%2C24403794%2C24406605%2C24407200%2C24407665%2C24407914%2C24408220%2C24411766%2C24413105%2C24413820%2C24414162%2C24415866%2C24416354%2C24420756%2C24421162%2C24425861%2C24428962%2C24590921%2C39322504%2C39322574%2C39322694%2C39322707&ns=yt&plid=AAXusD4TIOMjS5N4&el=detailpage&len=246&of=Jx1iRksbq-rB9N1KSijZLQ&osid=MWU2NzBjYTI%3AAOeUNAagU8UyWDUJIki5raGHy29-60-yTA&uga=29&vm=CAEQABgEOjJBUEV3RWxUNmYzMXNMMC1MYVpCVnRZTmZWMWw1OWVZX2ZOcUtCSkphQ245VFZwOXdTQWJbQVBta0tETEpWNXI1SlNIWEJERXdHeFhXZVllNXBUemt5UHR4WWZEVzFDblFUSmdla3BKX2R0dXk3bzFORWNBZmU5YmpYZnlzb3doUE5UU0FoVGRWa0xIaXJqSWgB",
+                      "headers": [
+                        {
+                          "headerType": "USER_AUTH"
+                        },
+                        {
+                          "headerType": "VISITOR_ID"
+                        },
+                        {
+                          "headerType": "PLUS_PAGE_ID"
+                        }
+                      ]
+                    },
+                    "videostatsDelayplayUrl": {(as above)},
+                    "videostatsWatchtimeUrl": {(as above)},
+                    "ptrackingUrl": {(as above)},
+                    "qoeUrl": {(as above)},
+                    "atrUrl": {(as above)},
+                    "videostatsScheduledFlushWalltimeSeconds": [
+                      10,
+                      20,
+                      30
+                    ],
+                    "videostatsDefaultFlushIntervalSeconds": 40
+                },
                 "videoDetails": {
                     "videoId": "AjXQiKP5kMs",
                     "title": "Sparks",
@@ -577,7 +604,9 @@ class BrowsingMixin:
             "video_id": videoId
         }
         response = self._send_request(endpoint, params)
-        keys = ['videoDetails', 'playabilityStatus', 'streamingData', 'microformat']
+        keys = [
+            'videoDetails', 'playabilityStatus', 'streamingData', 'microformat', 'playbackTracking'
+        ]
         for k in list(response.keys()):
             if k not in keys:
                 del response[k]
