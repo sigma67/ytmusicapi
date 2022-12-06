@@ -2,6 +2,7 @@ from typing import List, Dict
 from ytmusicapi.navigation import *
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.parsers.search_params import *
+from raise_utils import filter_exception, scope_exception, set_exception
 
 
 class SearchMixin:
@@ -123,26 +124,9 @@ class SearchMixin:
         body = {'query': query}
         endpoint = 'search'
         search_results = []
-        filters = [
-            'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs',
-            'videos'
-        ]
-        if filter and filter not in filters:
-            raise Exception(
-                "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
-                + ', '.join(filters))
-
-        scopes = ['library', 'uploads']
-        if scope and scope not in scopes:
-            raise Exception(
-                "Invalid scope provided. Please use one of the following scopes or leave out the parameter: "
-                + ', '.join(scopes))
-
-        if scope == scopes[1] and filter:
-            raise Exception(
-                "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to "
-                "uploads. "
-            )
+        filter_exception(filter)
+        scope_exception(scope)
+        set_exception(scope, filter)
 
         params = get_search_params(filter, scope, ignore_spelling)
         if params:

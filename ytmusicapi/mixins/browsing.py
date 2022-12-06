@@ -5,6 +5,7 @@ from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.playlists import parse_playlist_items
 from ytmusicapi.parsers.library import parse_albums
+from raise_utils import raise_get_song, raise_get_lyrics, raise_match, raise_match_signature
 
 
 class BrowsingMixin:
@@ -686,8 +687,7 @@ class BrowsingMixin:
               }
             ]
         """
-        if not browseId:
-            raise Exception("Invalid browseId provided.")
+        raise_get_song(browseId)
 
         response = self._send_request('browse', {'browseId': browseId})
         sections = nav(response, ['contents'] + SECTION_LIST)
@@ -709,8 +709,7 @@ class BrowsingMixin:
 
         """
         lyrics = {}
-        if not browseId:
-            raise Exception("Invalid browseId provided. This song might not have lyrics.")
+        raise_get_lyrics(browseId)
 
         response = self._send_request('browse', {'browseId': browseId})
         lyrics['lyrics'] = nav(response,
@@ -729,8 +728,7 @@ class BrowsingMixin:
         """
         response = self._send_get_request(url=YTM_DOMAIN)
         match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response)
-        if match is None:
-            raise Exception("Could not identify the URL for base.js player.")
+        raise_match(match)
 
         return YTM_DOMAIN + match.group(1)
 
@@ -747,8 +745,7 @@ class BrowsingMixin:
             url = self.get_basejs_url()
         response = self._send_get_request(url=url)
         match = re.search(r"signatureTimestamp[:=](\d+)", response)
-        if match is None:
-            raise Exception("Unable to identify the signatureTimestamp.")
+        raise_match_signature(match)
 
         return int(match.group(1))
 

@@ -2,7 +2,7 @@ import requests
 import ntpath
 import os
 from typing import List, Dict, Union
-
+from raise_utils import check_path, support_exception
 from ._utils import validate_order_parameter, prepare_order_params
 from ytmusicapi.helpers import *
 from ytmusicapi.navigation import *
@@ -194,14 +194,8 @@ class UploadsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        if not os.path.isfile(filepath):
-            raise Exception("The provided file does not exist.")
-
-        supported_filetypes = ["mp3", "m4a", "wma", "flac", "ogg"]
-        if os.path.splitext(filepath)[1][1:] not in supported_filetypes:
-            raise Exception(
-                "The provided file type is not supported by YouTube Music. Supported file types are "
-                + ', '.join(supported_filetypes))
+        check_path(filepath)
+        support_exception(filepath)
 
         headers = self.headers.copy()
         upload_url = "https://upload.youtube.com/upload/usermusic/http?authuser=%s" % headers[
