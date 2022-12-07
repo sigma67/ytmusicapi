@@ -338,7 +338,7 @@ class BrowsingMixin:
         """
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
-        matches = re.findall(r"\"MPRE.+?\"", response)
+        matches = re.findall(r"\"MPRE.+?\"", response.text)
         browse_id = None
         if len(matches) > 0:
             browse_id = matches[0].encode('utf8').decode('unicode-escape').strip('"')
@@ -728,7 +728,7 @@ class BrowsingMixin:
         :return: URL to `base.js`
         """
         response = self._send_get_request(url=YTM_DOMAIN)
-        match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response)
+        match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response.text)
         if match is None:
             raise Exception("Could not identify the URL for base.js player.")
 
@@ -746,7 +746,7 @@ class BrowsingMixin:
         if url is None:
             url = self.get_basejs_url()
         response = self._send_get_request(url=url)
-        match = re.search(r"signatureTimestamp[:=](\d+)", response)
+        match = re.search(r"signatureTimestamp[:=](\d+)", response.text)
         if match is None:
             raise Exception("Unable to identify the signatureTimestamp.")
 

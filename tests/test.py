@@ -277,11 +277,13 @@ class TestYTMusic(unittest.TestCase):
         songs = self.yt_auth.get_history()
         self.assertGreater(len(songs), 0)
 
-    @unittest.skip
-    def test_remove_history_items(self):
+    def test_manipulate_history_items(self):
+        song = self.yt_auth.get_song(sample_video)
+        response = self.yt_auth.add_history_item(song)
+        self.assertEqual(response.status_code, 204)
         songs = self.yt_auth.get_history()
-        response = self.yt_auth.remove_history_items(
-            [songs[0]['feedbackToken'], songs[1]['feedbackToken']])
+        self.assertGreater(len(songs), 0)
+        response = self.yt_auth.remove_history_items([songs[0]['feedbackToken']])
         self.assertIn('feedbackResponses', response)
 
     def test_rate_song(self):

@@ -104,8 +104,8 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         locale_dir = os.path.abspath(os.path.dirname(__file__)) + os.sep + 'locales'
         supported_languages = [f for f in next(os.walk(locale_dir))[1]]
         if language not in supported_languages:
-            raise Exception("Language not supported. Supported languages are " +
-                            (', '.join(supported_languages)) + ".")
+            raise Exception("Language not supported. Supported languages are "
+                            + (', '.join(supported_languages)) + ".")
         self.language = language
         try:
             locale.setlocale(locale.LC_ALL, self.language)
@@ -150,7 +150,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                                      headers=self.headers,
                                      proxies=self.proxies,
                                      cookies=self.cookies)
-        return response.text
+        return response
 
     def _check_auth(self):
         if not self.auth:

@@ -53,6 +53,7 @@ Library
 .. automethod:: YTMusic.get_library_subscriptions
 .. automethod:: YTMusic.get_liked_songs
 .. automethod:: YTMusic.get_history
+.. automethod:: YTMusic.add_history_item
 .. automethod:: YTMusic.remove_history_items
 .. automethod:: YTMusic.rate_song
 .. automethod:: YTMusic.edit_song_library_status

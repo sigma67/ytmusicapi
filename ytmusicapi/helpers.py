@@ -32,7 +32,7 @@ def initialize_context():
 
 def get_visitor_id(request_func):
     response = request_func(YTM_DOMAIN)
-    matches = re.findall(r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;', response)
+    matches = re.findall(r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;', response.text)
     visitor_id = ""
     if len(matches) > 0:
         ytcfg = json.loads(matches[0])
