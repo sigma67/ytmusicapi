@@ -77,6 +77,8 @@ class LibraryMixin:
 
         results = response['results']
         songs = response['parsed']
+        if songs is None:
+            return []
 
         if 'continuations' in results:
             request_continuations_func = lambda additionalParams: self._send_request(

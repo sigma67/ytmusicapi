@@ -2,7 +2,9 @@
 CONTENT = ['contents', 0]
 RUN_TEXT = ['runs', 0, 'text']
 TAB_CONTENT = ['tabs', 0, 'tabRenderer', 'content']
-SINGLE_COLUMN_TAB = ['contents', 'singleColumnBrowseResultsRenderer'] + TAB_CONTENT
+TAB_1_CONTENT = ['tabs', 1, 'tabRenderer', 'content']
+SINGLE_COLUMN = ['contents', 'singleColumnBrowseResultsRenderer']
+SINGLE_COLUMN_TAB = SINGLE_COLUMN + TAB_CONTENT
 SECTION_LIST = ['sectionListRenderer', 'contents']
 SECTION_LIST_ITEM = ['sectionListRenderer'] + CONTENT
 ITEM_SECTION = ['itemSectionRenderer'] + CONTENT

@@ -98,16 +98,30 @@ def parse_library_artists(response, request_func, limit):
 
 def parse_library_songs(response):
     results = get_library_contents(response, MUSIC_SHELF)
-    return {'results': results, 'parsed': (parse_playlist_items(results['contents'][1:]))}
+    return {
+        'results': results,
+        'parsed': parse_playlist_items(results['contents'][1:]) if results else results
+    }
 
 
 def get_library_contents(response, renderer):
-    # first 3 lines are original path prior to #301
-    contents = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
-    if contents is None:  # empty library
-        return None
-    results = find_object_by_key(contents, 'itemSectionRenderer')
-    if results is None:
-        return nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + renderer, True)
+    """
+    Find library contents. This function is a bit messy now
+    as it is supporting two different response types. Can be
+    cleaned up once all users are migrated to the new responses.
+    :param response: ytmusicapi response
+    :param renderer: GRID or MUSIC_SHELF
+    :return: library contents or None
+    """
+    section = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
+    contents = None
+    if section is None:  # empty library
+        contents = nav(response, SINGLE_COLUMN + TAB_1_CONTENT + SECTION_LIST_ITEM + renderer,
+                       True)
     else:
-        return nav(results, ITEM_SECTION + renderer)
+        results = find_object_by_key(section, 'itemSectionRenderer')
+        if results is None:
+            contents = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + renderer, True)
+        else:
+            contents = nav(results, ITEM_SECTION + renderer, True)
+    return contents
