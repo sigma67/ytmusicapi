@@ -1,0 +1,58 @@
+# Translations for ytmusicapi
+# Copyright (C) 2021 sigma67
+# This file is distributed under the same license as ytmusicapi
+# sigma67 <ytmusicapi@gmail.com>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-03-24 13:13+0100\n"
+"PO-Revision-Date: 2023-01-02 22:18+0530\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ur\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: parsers/browsing.py:22
+msgid "artist"
+msgstr "فنکار"
+
+#: parsers/browsing.py:22
+msgid "playlist"
+msgstr "پلے لسٹ"
+
+#: parsers/browsing.py:23
+msgid "song"
+msgstr "نغمہ"
+
+#: parsers/browsing.py:23
+msgid "video"
+msgstr "ویڈیو"
+
+#: parsers/browsing.py:24
+msgid "station"
+msgstr "اسٹیشن"
+
+#: parsers/browsing.py:128
+msgid "albums"
+msgstr "البمز"
+
+#: parsers/browsing.py:128
+msgid "singles"
+msgstr "سنگلز"
+
+#: parsers/browsing.py:128
+msgid "videos"
+msgstr "ویڈیوز"
+
+#: parsers/browsing.py:128
+msgid "playlists"
+msgstr "پلے لسٹس"
+
+#: parsers/browsing.py:128
+msgid "related"
+msgstr "متعلقہ"
