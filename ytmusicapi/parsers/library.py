@@ -1,4 +1,5 @@
 from .playlists import parse_playlist_items
+from .songs import parse_song_runs
 from ._utils import *
 from ytmusicapi.continuations import get_continuations
 
@@ -50,30 +51,8 @@ def parse_albums(results):
         album['thumbnails'] = nav(data, THUMBNAIL_RENDERER)
 
         if 'runs' in data['subtitle']:
-            run_count = len(data['subtitle']['runs'])
-            has_artists = False
-            if run_count == 1:
-                album['year'] = nav(data, SUBTITLE)
-            else:
-                album['type'] = nav(data, SUBTITLE)
-
-            if run_count == 3:
-                if nav(data, SUBTITLE2).isdigit():
-                    album['year'] = nav(data, SUBTITLE2)
-                else:
-                    has_artists = True
-
-            elif run_count > 3:
-                album['year'] = nav(data, SUBTITLE3)
-                has_artists = True
-
-            if has_artists:
-                subtitle = data['subtitle']['runs'][2]
-                album['artists'] = []
-                album['artists'].append({
-                    'name': subtitle['text'],
-                    'id': nav(subtitle, NAVIGATION_BROWSE_ID, True)
-                })
+            album['type'] = nav(data, SUBTITLE)
+            album.update(parse_song_runs(data['subtitle']['runs'][2:]))
 
         albums.append(album)
 
