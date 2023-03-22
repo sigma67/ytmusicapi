@@ -5,8 +5,9 @@ from requests.structures import CaseInsensitiveDict
 from functools import partial
 from contextlib import suppress
 from typing import Dict
+
+from ytmusicapi.parsers.i18n import Parser
 from ytmusicapi.helpers import *
-from ytmusicapi.parsers import browsing
 from ytmusicapi.setup import setup
 from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.search import SearchMixin
@@ -24,6 +25,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
+
     def __init__(self,
                  auth: str = None,
                  user: str = None,
@@ -113,7 +115,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             with suppress(locale.Error):
                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         self.lang = gettext.translation('base', localedir=locale_dir, languages=[language])
-        self.parser = browsing.Parser(self.lang)
+        self.parser = Parser(self.lang)
 
         if user:
             self.context['context']['user']['onBehalfOfUser'] = user

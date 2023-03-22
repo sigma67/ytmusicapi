@@ -5,9 +5,11 @@ from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.playlists import parse_playlist_items
 from ytmusicapi.parsers.library import parse_albums
+from typing import List, Dict
 
 
 class BrowsingMixin:
+
     def get_home(self, limit=3) -> List[Dict]:
         """
         Get the home page.
@@ -99,14 +101,14 @@ class BrowsingMixin:
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         home = []
-        home.extend(self.parser.parse_mixed_content(results))
+        home.extend(parse_mixed_content(results))
 
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
         if 'continuations' in section_list:
             request_func = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams)
 
-            parse_func = lambda contents: self.parser.parse_mixed_content(contents)
+            parse_func = lambda contents: parse_mixed_content(contents)
 
             home.extend(
                 get_continuations(section_list, 'sectionListContinuation', limit - len(home),
@@ -329,7 +331,7 @@ class BrowsingMixin:
 
         return user_playlists
 
-    def get_album_browse_id(self, audioPlaylistId: str):
+    def get_album_browse_id(self, audioPlaylistId: str) -> str:
         """
         Get an album's browseId based on its audioPlaylistId
 
@@ -691,7 +693,7 @@ class BrowsingMixin:
 
         response = self._send_request('browse', {'browseId': browseId})
         sections = nav(response, ['contents'] + SECTION_LIST)
-        return self.parser.parse_mixed_content(sections)
+        return parse_mixed_content(sections)
 
     def get_lyrics(self, browseId: str) -> Dict:
         """

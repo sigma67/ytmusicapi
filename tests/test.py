@@ -3,6 +3,7 @@ import unittest.mock
 import configparser
 import time
 import sys
+
 sys.path.insert(0, '..')
 from ytmusicapi.ytmusic import YTMusic  # noqa: E402
 
@@ -15,6 +16,7 @@ sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 
 
 class TestYTMusic(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         cls.yt = YTMusic(requests_session=False)

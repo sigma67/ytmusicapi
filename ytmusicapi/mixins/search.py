@@ -1,10 +1,10 @@
 from typing import List, Dict
-from ytmusicapi.navigation import *
 from ytmusicapi.continuations import get_continuations
-from ytmusicapi.parsers.search_params import *
+from ytmusicapi.parsers.search import *
 
 
 class SearchMixin:
+
     def search(self,
                query: str,
                filter: str = None,
@@ -141,8 +141,7 @@ class SearchMixin:
         if scope == scopes[1] and filter:
             raise Exception(
                 "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to "
-                "uploads. "
-            )
+                "uploads. ")
 
         params = get_search_params(filter, scope, ignore_spelling)
         if params:
@@ -174,26 +173,39 @@ class SearchMixin:
             filter = scopes[1]
 
         for res in results:
-            if 'musicShelfRenderer' in res:
+            if 'musicCardShelfRenderer' in res:
+                top_result = parse_top_result(res['musicCardShelfRenderer'],
+                                              self.parser.get_search_result_types())
+                search_results.append(top_result)
+                if results := nav(res, ['musicCardShelfRenderer', 'contents'], True):
+                    category = nav(results.pop(0), ['messageRenderer'] + TEXT_RUN_TEXT, True)
+                    type = None
+                else:
+                    continue
+
+            elif 'musicShelfRenderer' in res:
                 results = res['musicShelfRenderer']['contents']
-                original_filter = filter
+                type_filter = filter
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
-                if not filter and scope == scopes[0]:
-                    filter = category
+                if not type_filter and scope == scopes[0]:
+                    type_filter = category
 
-                type = filter[:-1].lower() if filter else None
-                search_results.extend(self.parser.parse_search_results(results, type, category))
-                filter = original_filter
+                type = type_filter[:-1].lower() if type_filter else None
 
-                if 'continuations' in res['musicShelfRenderer']:
-                    request_func = lambda additionalParams: self._send_request(
-                        endpoint, body, additionalParams)
+            else:
+                continue
 
-                    parse_func = lambda contents: self.parser.parse_search_results(
-                        contents, type, category)
+            search_results.extend(
+                parse_search_results(results, self.parser.get_search_result_types(), type,
+                                     category))
 
-                    search_results.extend(
-                        get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
-                                          limit - len(search_results), request_func, parse_func))
+            if filter:  # if filter is set, there are continuations
+                request_func = lambda additionalParams: self._send_request(
+                    endpoint, body, additionalParams)
+                parse_func = lambda contents: parse_search_results(contents, type, category)
+
+                search_results.extend(
+                    get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
+                                      limit - len(search_results), request_func, parse_func))
 
         return search_results

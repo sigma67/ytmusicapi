@@ -3,9 +3,11 @@ from ytmusicapi.continuations import *
 from ._utils import *
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import *
+from typing import List, Dict
 
 
 class LibraryMixin:
+
     def get_library_playlists(self, limit: int = 25) -> List[Dict]:
         """
         Retrieves the playlists in the user's library.

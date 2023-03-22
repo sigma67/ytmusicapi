@@ -10,7 +10,12 @@ from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 
 
 class PlaylistsMixin:
-    def get_playlist(self, playlistId: str, limit: int = 100, related: bool = False, suggestions_limit: int = 0) -> Dict:
+
+    def get_playlist(self,
+                     playlistId: str,
+                     limit: int = 100,
+                     related: bool = False,
+                     suggestions_limit: int = 0) -> Dict:
         """
         Returns a list of playlist items
 
@@ -119,11 +124,11 @@ class PlaylistsMixin:
         playlist['title'] = nav(header, TITLE_TEXT)
         playlist['thumbnails'] = nav(header, THUMBNAIL_CROPPED)
         playlist["description"] = nav(header, DESCRIPTION, True)
-        run_count = len(header['subtitle']['runs'])
+        run_count = len(nav(header, SUBTITLE_RUNS))
         if run_count > 1:
             playlist['author'] = {
                 'name': nav(header, SUBTITLE2),
-                'id': nav(header, ['subtitle', 'runs', 2] + NAVIGATION_BROWSE_ID, True)
+                'id': nav(header, SUBTITLE_RUNS + [2] + NAVIGATION_BROWSE_ID, True)
             }
             if run_count == 5:
                 playlist['year'] = nav(header, SUBTITLE3)
@@ -135,7 +140,8 @@ class PlaylistsMixin:
 
         playlist['trackCount'] = song_count
 
-        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams
+                                                                   )
 
         # suggestions and related are missing e.g. on liked songs
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
@@ -150,19 +156,20 @@ class PlaylistsMixin:
                 playlist['suggestions'] = get_continuation_contents(suggestions_shelf, parse_func)
 
                 parse_func = lambda results: parse_playlist_items(results)
-                playlist['suggestions'].extend(get_continuations(suggestions_shelf,
-                                                            'musicShelfContinuation',
-                                                            suggestions_limit - len(playlist['suggestions']),
-                                                            request_func,
-                                                            parse_func,
-                                                            reloadable=True))
+                playlist['suggestions'].extend(
+                    get_continuations(suggestions_shelf,
+                                      'musicShelfContinuation',
+                                      suggestions_limit - len(playlist['suggestions']),
+                                      request_func,
+                                      parse_func,
+                                      reloadable=True))
 
             if related:
                 response = request_func(additionalParams)
                 continuation = nav(response, SECTION_LIST_CONTINUATION)
                 parse_func = lambda results: parse_content_list(results, parse_playlist)
-                playlist['related'] = get_continuation_contents(nav(continuation, CONTENT + CAROUSEL),
-                                                            parse_func)
+                playlist['related'] = get_continuation_contents(
+                    nav(continuation, CONTENT + CAROUSEL), parse_func)
 
         if song_count > 0:
             playlist['tracks'] = parse_playlist_items(results['contents'])

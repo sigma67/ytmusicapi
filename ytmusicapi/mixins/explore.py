@@ -1,7 +1,9 @@
 from ytmusicapi.parsers.explore import *
+from typing import List, Dict
 
 
 class ExploreMixin:
+
     def get_mood_categories(self) -> Dict:
         """
         Fetch "Moods & Genres" categories from YouTube Music.

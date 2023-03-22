@@ -31,22 +31,15 @@ NAVIGATION_VIDEO_TYPE = [
     'watchEndpoint', 'watchEndpointMusicSupportedConfigs', 'watchEndpointMusicConfig',
     'musicVideoType'
 ]
-HEADER_DETAIL = ['header', 'musicDetailHeaderRenderer']
-DESCRIPTION_SHELF = ['musicDescriptionShelfRenderer']
-DESCRIPTION = ['description'] + RUN_TEXT
-CAROUSEL = ['musicCarouselShelfRenderer']
-IMMERSIVE_CAROUSEL = ['musicImmersiveCarouselShelfRenderer']
-CAROUSEL_CONTENTS = CAROUSEL + ['contents']
-CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer', 'title', 'runs', 0]
-FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
 TITLE = ['title', 'runs', 0]
 TITLE_TEXT = ['title'] + RUN_TEXT
 TEXT_RUNS = ['text', 'runs']
 TEXT_RUN = TEXT_RUNS + [0]
 TEXT_RUN_TEXT = TEXT_RUN + ['text']
 SUBTITLE = ['subtitle'] + RUN_TEXT
-SUBTITLE2 = ['subtitle', 'runs', 2, 'text']
-SUBTITLE3 = ['subtitle', 'runs', 4, 'text']
+SUBTITLE_RUNS = ['subtitle', 'runs']
+SUBTITLE2 = SUBTITLE_RUNS + [2, 'text']
+SUBTITLE3 = SUBTITLE_RUNS + [4, 'text']
 THUMBNAIL = ['thumbnail', 'thumbnails']
 THUMBNAILS = ['thumbnail', 'musicThumbnailRenderer'] + THUMBNAIL
 THUMBNAIL_RENDERER = ['thumbnailRenderer', 'musicThumbnailRenderer'] + THUMBNAIL
@@ -63,6 +56,15 @@ TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
 TASTE_PROFILE_ARTIST = ["title", "runs"]
 SECTION_LIST_CONTINUATION = ['continuationContents', 'sectionListContinuation']
 MENU_PLAYLIST_ID = MENU_ITEMS + [0, 'menuNavigationItemRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID
+HEADER_DETAIL = ['header', 'musicDetailHeaderRenderer']
+DESCRIPTION_SHELF = ['musicDescriptionShelfRenderer']
+DESCRIPTION = ['description'] + RUN_TEXT
+CAROUSEL = ['musicCarouselShelfRenderer']
+IMMERSIVE_CAROUSEL = ['musicImmersiveCarouselShelfRenderer']
+CAROUSEL_CONTENTS = CAROUSEL + ['contents']
+CAROUSEL_TITLE = ['header', 'musicCarouselShelfBasicHeaderRenderer'] + TITLE
+CARD_SHELF_TITLE = ['header', 'musicCardShelfHeaderBasicRenderer'] + TITLE_TEXT
+FRAMEWORK_MUTATIONS = ['frameworkUpdates', 'entityBatchUpdate', 'mutations']
 
 
 def nav(root, items, none_if_absent=False):
