@@ -39,8 +39,9 @@ def setup(filepath=None, headers_raw=None):
         )
 
     ignore_headers = {"host", "content-length", "accept-encoding"}
-    for i in ignore_headers:
-        user_headers.pop(i, None)
+    for key in user_headers.copy().keys():
+        if key.startswith("sec") or key in ignore_headers:
+            user_headers.pop(key, None)
 
     init_headers = initialize_headers()
     user_headers.update(init_headers)
