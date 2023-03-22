@@ -35,3 +35,7 @@ include-package-data=false
 
 [tool.setuptools.package-data]
 "*" = ["**.rst", "**.py", "**.mo"]
+
+[tool.yapf]
+column_limit = 99
+split_before_arithmetic_operator = true
