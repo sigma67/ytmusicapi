@@ -1,9 +1,10 @@
 repos:
 -   repo: https://github.com/pre-commit/mirrors-yapf
-    rev: v0.30.0
+    rev: v0.32.0
     hooks:
-    - id: yapf
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.0
+    -   id: yapf
+        additional_dependencies: [toml]
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
     hooks:
     - id: flake8
