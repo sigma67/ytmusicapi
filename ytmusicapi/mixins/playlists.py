@@ -1,4 +1,3 @@
-import unicodedata
 from typing import Dict, Union, Tuple
 from ._utils import *
 
@@ -133,15 +132,18 @@ class PlaylistsMixin:
             if run_count == 5:
                 playlist['year'] = nav(header, SUBTITLE3)
 
-        song_count = to_int(
-            unicodedata.normalize("NFKD", header['secondSubtitle']['runs'][0]['text']))
-        if len(header['secondSubtitle']['runs']) > 1:
-            playlist['duration'] = header['secondSubtitle']['runs'][2]['text']
+        second_subtitle_runs = header['secondSubtitle']['runs']
+        own_offset = (own_playlist and len(second_subtitle_runs) > 3) * 2
+        song_count = to_int(second_subtitle_runs[own_offset]['text'])
+        if len(second_subtitle_runs) > 1:
+            playlist['duration'] = second_subtitle_runs[own_offset + 2]['text']
 
         playlist['trackCount'] = song_count
+        playlist['views'] = None
+        if own_playlist:
+            playlist['views'] = to_int(second_subtitle_runs[0]['text'])
 
-        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams
-                                                                   )
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])

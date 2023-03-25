@@ -372,23 +372,23 @@ class TestYTMusic(unittest.TestCase):
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
     def test_end2end(self):
-        playlistId = self.yt_auth.create_playlist(
+        playlistId = self.yt_brand.create_playlist(
             "test",
             "test description",
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y")
         self.assertEqual(len(playlistId), 34, "Playlist creation failed")
-        response = self.yt_auth.add_playlist_items(
+        response = self.yt_brand.add_playlist_items(
             playlistId, [sample_video, sample_video],
             source_playlist='OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow',
             duplicates=True)
         self.assertEqual(response["status"], 'STATUS_SUCCEEDED', "Adding playlist item failed")
         self.assertGreater(len(response["playlistEditResults"]), 0, "Adding playlist item failed")
         time.sleep(2)
-        playlist = self.yt_auth.get_playlist(playlistId, related=True)
+        playlist = self.yt_brand.get_playlist(playlistId, related=True)
         self.assertEqual(len(playlist['tracks']), 46, "Getting playlist items failed")
-        response = self.yt_auth.remove_playlist_items(playlistId, playlist['tracks'])
+        response = self.yt_brand.remove_playlist_items(playlistId, playlist['tracks'])
         self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
-        response = self.yt_auth.delete_playlist(playlistId)
+        response = self.yt_brand.delete_playlist(playlistId)
         self.assertEqual(response['command']['handlePlaylistDeletionCommand']['playlistId'],
                          playlistId, "Playlist removal failed")
 
