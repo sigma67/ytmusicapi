@@ -50,8 +50,15 @@ class TestYTMusic(unittest.TestCase):
         query = "edm playlist"
         self.assertRaises(Exception, self.yt_auth.search, query, filter="song")
         self.assertRaises(Exception, self.yt_auth.search, query, scope="upload")
-        results = self.yt.search(query)
-        self.assertGreater(len(results), 10)
+        results = self.yt.search("l1qwkfkah2l1qwkfkah2")
+        self.assertLessEqual(len(results), 2)
+        queries = ["taylor swift", "taylor swift blank space", "taylor swift fearless"]
+        for q in queries:
+            with self.subTest():
+                results = self.yt_brand.search(q)
+                self.assertGreater(len(results), 10)
+                results = self.yt.search(q)
+                self.assertGreater(len(results), 10)
         results = self.yt_auth.search('Martin Stig Andersen - Deteriation', ignore_spelling=True)
         self.assertGreater(len(results), 0)
         results = self.yt_auth.search(query, filter='songs')
