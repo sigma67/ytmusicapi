@@ -17,9 +17,8 @@ def get_search_result_type(result_type_local, result_types_local):
 
 
 def parse_top_result(data, search_result_types):
-    search_result = {}
     result_type = get_search_result_type(nav(data, SUBTITLE), search_result_types)
-    search_result['resultType'] = result_type
+    search_result = {'category': nav(data, CARD_SHELF_TITLE), 'resultType': result_type}
     if result_type == 'artist':
         subscribers = nav(data, SUBTITLE2, True)
         if subscribers:
@@ -27,6 +26,12 @@ def parse_top_result(data, search_result_types):
 
         artist_info = parse_song_runs(nav(data, ['title', 'runs']))
         search_result.update(artist_info)
+
+    if result_type in ['song', 'video']:
+        on_tap = data.get('onTap')
+        if on_tap:
+            search_result['videoId'] = nav(on_tap, WATCH_VIDEO_ID)
+            search_result['videoType'] = nav(on_tap, NAVIGATION_VIDEO_TYPE)
 
     if result_type in ['song', 'video', 'album']:
         search_result['title'] = nav(data, TITLE_TEXT)

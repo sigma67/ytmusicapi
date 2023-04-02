@@ -50,7 +50,7 @@ class TestYTMusic(unittest.TestCase):
         query = "edm playlist"
         self.assertRaises(Exception, self.yt_auth.search, query, filter="song")
         self.assertRaises(Exception, self.yt_auth.search, query, scope="upload")
-        results = self.yt.search("l1qwkfkah2l1qwkfkah2")
+        results = self.yt.search("動水切脱学医発料転探耳金処潟載")
         self.assertLessEqual(len(results), 2)
         queries = ["taylor swift", "taylor swift blank space", "taylor swift fearless"]
         for q in queries:

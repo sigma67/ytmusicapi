@@ -24,7 +24,8 @@ NAVIGATION_BROWSE_ID = NAVIGATION_BROWSE + ['browseId']
 PAGE_TYPE = [
     'browseEndpointContextSupportedConfigs', 'browseEndpointContextMusicConfig', 'pageType'
 ]
-NAVIGATION_VIDEO_ID = ['navigationEndpoint', 'watchEndpoint', 'videoId']
+WATCH_VIDEO_ID = ['watchEndpoint', 'videoId']
+NAVIGATION_VIDEO_ID = ['navigationEndpoint'] + WATCH_VIDEO_ID
 NAVIGATION_PLAYLIST_ID = ['navigationEndpoint', 'watchEndpoint', 'playlistId']
 NAVIGATION_WATCH_PLAYLIST_ID = ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId']
 NAVIGATION_VIDEO_TYPE = [

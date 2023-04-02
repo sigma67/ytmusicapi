@@ -178,7 +178,10 @@ class SearchMixin:
                                               self.parser.get_search_result_types())
                 search_results.append(top_result)
                 if results := nav(res, ['musicCardShelfRenderer', 'contents'], True):
-                    category = nav(results.pop(0), ['messageRenderer'] + TEXT_RUN_TEXT, True)
+                    category = None
+                    # category "more from youtube" is missing sometimes
+                    if 'messageRenderer' in results[0]:
+                        category = nav(results.pop(0), ['messageRenderer'] + TEXT_RUN_TEXT)
                     type = None
                 else:
                     continue
