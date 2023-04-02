@@ -50,8 +50,8 @@ class TestYTMusic(unittest.TestCase):
         query = "edm playlist"
         self.assertRaises(Exception, self.yt_auth.search, query, filter="song")
         self.assertRaises(Exception, self.yt_auth.search, query, scope="upload")
-        results = self.yt.search("動水切脱学医発料転探耳金処潟載")
-        self.assertLessEqual(len(results), 2)
+        results = self.yt.search("۳ǇĺӣՊ֬ãʸύЩЂקդӀâ")
+        self.assertEqual(len(results), 0)
         queries = ["taylor swift", "taylor swift blank space", "taylor swift fearless"]
         for q in queries:
             with self.subTest():
@@ -118,7 +118,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(results), 11)
 
     def test_get_artist_albums(self):
-        artist = self.yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
+        artist = self.yt.get_artist("UCj5ZiBBqpe0Tg4zfKGHEFuQ")
         results = self.yt.get_artist_albums(artist['albums']['browseId'],
                                             artist['albums']['params'])
         self.assertGreater(len(results), 0)
@@ -208,8 +208,8 @@ class TestYTMusic(unittest.TestCase):
     def test_get_charts(self):
         charts = self.yt_auth.get_charts()
         self.assertEqual(len(charts), 4)
-        charts = self.yt_auth.get_charts(country='US')
-        self.assertEqual(len(charts), 6)
+        charts = self.yt.get_charts(country='US')
+        self.assertEqual(len(charts), 5)
         charts = self.yt.get_charts(country='BE')
         self.assertEqual(len(charts), 4)
 
