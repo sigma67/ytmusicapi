@@ -1,6 +1,6 @@
 .idea
 .vscode
-headers_auth.json
+**.json
 docs/build
 **.cfg
 **.mp3

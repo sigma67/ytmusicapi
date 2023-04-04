@@ -1,4 +1,5 @@
 from ytmusicapi.ytmusic import YTMusic
+from ytmusicapi.setup import setup, setup_oauth
 from importlib.metadata import version, PackageNotFoundError
 
 try:
@@ -10,3 +11,4 @@ except PackageNotFoundError:
 __copyright__ = 'Copyright 2022 sigma67'
 __license__ = 'MIT'
 __title__ = 'ytmusicapi'
+__all__ = ["YTMusic", "setup_oauth", "setup"]

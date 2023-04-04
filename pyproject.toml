@@ -39,3 +39,6 @@ include-package-data=false
 [tool.yapf]
 column_limit = 99
 split_before_arithmetic_operator = true
+
+[tool.coverage.run]
+command_line = "-m unittest discover tests"
