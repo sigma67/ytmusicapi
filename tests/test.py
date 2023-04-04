@@ -193,6 +193,13 @@ class TestYTMusic(unittest.TestCase):
         result = self.yt_auth.get_tasteprofile()
         self.assertGreaterEqual(len(result), 0)
 
+    def test_get_search_suggestions(self):
+        result = self.yt.get_search_suggestions("fade")
+        self.assertGreaterEqual(len(result), 0)
+
+        result = self.yt.get_search_suggestions("fade", detailed_runs=True)
+        self.assertGreaterEqual(len(result), 0)
+
     ################
     # EXPLORE
     ################
