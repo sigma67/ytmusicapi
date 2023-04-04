@@ -1,9 +1,7 @@
 name: Build Documentation
 
 on:
-  push:
-    branches:
-    - master
+  push
 
 jobs:
   build:
