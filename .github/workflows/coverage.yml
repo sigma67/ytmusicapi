@@ -21,6 +21,7 @@ jobs:
         pip install coverage
         curl -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/headers_auth.json
+        cat <<< "$OAUTH_JSON" > tests/oauth.json
         cat <<< "$TEST_CFG" > tests/test.cfg
         coverage run
         coverage xml
