@@ -147,3 +147,25 @@ def parse_watch_playlist(data):
         'playlistId': nav(data, NAVIGATION_WATCH_PLAYLIST_ID),
         'thumbnails': nav(data, THUMBNAIL_RENDERER),
     }
+
+
+def parse_search_suggestions(results, detailed_runs):
+    if not results.get('contents', [{}])[0].get('searchSuggestionsSectionRenderer', {}).get(
+            'contents', []):
+        return []
+
+    raw_suggestions = results['contents'][0]['searchSuggestionsSectionRenderer']['contents']
+    suggestions = []
+
+    for raw_suggestion in raw_suggestions:
+        suggestion_content = raw_suggestion['searchSuggestionRenderer']
+
+        text = suggestion_content['navigationEndpoint']['searchEndpoint']['query']
+        runs = suggestion_content['suggestion']['runs']
+
+        if detailed_runs:
+            suggestions.append({'text': text, 'runs': runs})
+        else:
+            suggestions.append(text)
+
+    return suggestions
