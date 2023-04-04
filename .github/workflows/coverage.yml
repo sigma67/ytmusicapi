@@ -19,11 +19,10 @@ jobs:
       run: |
         pip install -e .
         pip install coverage
-        cd tests
-        curl -o test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
-        cat <<< "$HEADERS_AUTH" > headers_auth.json
-        cat <<< "$TEST_CFG" > test.cfg
-        coverage run --source=../ytmusicapi -m unittest test.py
+        curl -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
+        cat <<< "$HEADERS_AUTH" > tests/headers_auth.json
+        cat <<< "$TEST_CFG" > tests/test.cfg
+        coverage run
         coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

@@ -1,14 +1,13 @@
 import requests
 import gettext
 import os
-from requests.structures import CaseInsensitiveDict
 from functools import partial
 from contextlib import suppress
 from typing import Dict
 
+from ytmusicapi.auth.headers import prepare_headers
 from ytmusicapi.parsers.i18n import Parser
 from ytmusicapi.helpers import *
-from ytmusicapi.setup import setup
 from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.search import SearchMixin
 from ytmusicapi.mixins.watch import WatchMixin
@@ -37,7 +36,6 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
         :param auth: Optional. Provide a string or path to file.
           Authentication credentials are needed to manage your library.
-          Should be an adjusted version of `headers_auth.json.example` in the project root.
           See :py:func:`setup` for how to fill in the correct credentials.
           Default: A default header is used without authentication.
         :param user: Optional. Specify a user ID string to use in requests.
@@ -79,23 +77,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         self.proxies = proxies
         self.cookies = {'CONSENT': 'YES+1'}
 
-        # prepare headers
-        if auth:
-            try:
-                if os.path.isfile(auth):
-                    file = auth
-                    with open(file) as json_file:
-                        self.headers = CaseInsensitiveDict(json.load(json_file))
-                else:
-                    self.headers = CaseInsensitiveDict(json.loads(auth))
-
-            except Exception as e:
-                print(
-                    "Failed loading provided credentials. Make sure to provide a string or a file path. "
-                    "Reason: " + str(e))
-
-        else:  # no authentication
-            self.headers = initialize_headers()
+        self.headers = prepare_headers(self._session, proxies, auth)
 
         if 'x-goog-visitor-id' not in self.headers:
             self.headers.update(get_visitor_id(self._send_get_request))
@@ -120,8 +102,9 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         if user:
             self.context['context']['user']['onBehalfOfUser'] = user
 
-        # verify authentication credentials work
-        if auth:
+        auth_header = self.headers.get("authorization")
+        self.is_browser_auth = auth_header and "SAPISIDHASH" in auth_header
+        if self.is_browser_auth:
             try:
                 cookie = self.headers.get('cookie')
                 self.sapisid = sapisid_from_cookie(cookie)
@@ -130,10 +113,13 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
         body.update(self.context)
-        if self.auth:
+        params = YTM_PARAMS
+        if self.is_browser_auth:
             origin = self.headers.get('origin', self.headers.get('x-origin'))
-            self.headers["Authorization"] = get_authorization(self.sapisid + ' ' + origin)
-        response = self._session.post(YTM_BASE_API + endpoint + YTM_PARAMS + additionalParams,
+            self.headers["authorization"] = get_authorization(self.sapisid + ' ' + origin)
+            params += YTM_PARAMS_KEY
+
+        response = self._session.post(YTM_BASE_API + endpoint + params + additionalParams,
                                       json=body,
                                       headers=self.headers,
                                       proxies=self.proxies,
@@ -157,19 +143,6 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
     def _check_auth(self):
         if not self.auth:
             raise Exception("Please provide authentication before using this function")
-
-    @classmethod
-    def setup(cls, filepath: str = None, headers_raw: str = None) -> Dict:
-        """
-        Requests browser headers from the user via command line
-        and returns a string that can be passed to YTMusic()
-
-        :param filepath: Optional filepath to store headers to.
-        :param headers_raw: Optional request headers copied from browser.
-            Otherwise requested from terminal
-        :return: configuration headers string
-        """
-        return setup(filepath, headers_raw)
 
     def __enter__(self):
         return self
