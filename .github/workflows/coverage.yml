@@ -13,7 +13,7 @@ jobs:
       with:
         python-version: 3.x
     - name: create-json
-      uses: jsdaniell/create-json@1.2.2
+      uses: jsdaniell/create-json@v1.2.2
       with:
         name: "oauth.json"
         dir: "tests/"
