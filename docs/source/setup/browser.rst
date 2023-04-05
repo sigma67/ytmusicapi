@@ -1,17 +1,12 @@
-Setup
-=====
+Browser authentication
+======================
 
-Installation
-------------
-.. code-block:: bash
-
-    pip install ytmusicapi
-
-Authenticated requests
-----------------------
+This method of authentication emulates your browser session by reusing its request headers.
+Follow the instructions to have your browser's YouTube Music session request headers parsed 
+to a ``ytmusicapi`` configuration file.
 
 Copy authentication headers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
 
 To run authenticated requests, set it up by first copying your request headers from an authenticated POST request in your browser.
 To do so, follow these steps:
@@ -51,24 +46,25 @@ To do so, follow these steps:
    </details><br>
 
 Using the headers in your project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
-To set up your project, open a Python console and call :py:func:`YTMusic.setup` with the parameter ``filepath=headers_auth.json`` and follow the instructions and paste the request headers to the terminal input:
+To set up your project, open a console and call
 
-.. code-block:: python
+.. code-block:: bash
 
-    from ytmusicapi import YTMusic
-    YTMusic.setup(filepath="headers_auth.json")
+    ytmusicapi browser
+
+Follow the instructions and paste the request headers to the terminal input.
 
 If you don't want terminal interaction in your project, you can pass the request headers with the ``headers_raw`` parameter:
 
 .. code-block:: python
 
-    from ytmusicapi import YTMusic
-    YTMusic.setup(filepath="headers_auth.json", headers_raw="<headers copied above>")
-    
-The function returns a JSON string with the credentials needed for :doc:`Usage <usage>`. Alternatively, if you passed the filepath parameter as described above,
-a file called ``headers_auth.json`` will be created in the current directory, which you can pass to ``YTMusic()`` for authentication.
+    import ytmusicapi
+    ytmusicapi.setup(filepath="browser.json", headers_raw="<headers copied above>")
+
+The function returns a JSON string with the credentials needed for :doc:`../usage`. Alternatively, if you passed the filepath parameter as described above,
+a file called ``browser.json`` will be created in the current directory, which you can pass to ``YTMusic()`` for authentication.
 
 These credentials remain valid as long as your YTMusic browser session is valid (about 2 years unless you log out).
 
@@ -80,7 +76,7 @@ These credentials remain valid as long as your YTMusic browser session is valid 
 .. container::
 
     - MacOS terminal application can only accept 1024 characters pasted to std input. To paste in terminal, a small utility called pbpaste must be used.
-    - In terminal just prefix the command used to run the script you created above with ``pbpaste | ``
+    - In terminal just prefix the command used to run the script you created above with :kbd:`pbpaste | `
     - This will pipe the contents of the clipboard into the script just as if you had pasted it from the edit menu.
 
 .. raw:: html
@@ -90,7 +86,7 @@ These credentials remain valid as long as your YTMusic browser session is valid 
 Manual file creation
 --------------------
 
-Alternatively, you can paste the cookie to ``headers_auth.json`` below and create your own file:
+Alternatively, you can create your own file ``browser.json`` and paste the cookie:
 
 .. literalinclude:: headers_auth.json.example
   :language: JSON

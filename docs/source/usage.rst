@@ -17,14 +17,14 @@ If an endpoint requires authentication you will receive an error:
 
 Authenticated
 -------------
-For authenticated requests you need to set up your credentials first: :doc:`Setup <setup>`
+For authenticated requests you need to set up your credentials first: :doc:`Setup <setup/index>`
 
 After you have created the authentication JSON, you can instantiate the class:
 
 .. code-block:: python
 
     from ytmusicapi import YTMusic
-    ytmusic = YTMusic('headers_auth.json')
+    ytmusic = YTMusic("oauth.json")
 
 
 With the :code:`ytmusic` instance you can now perform authenticated requests:
@@ -47,6 +47,6 @@ Example:
 .. code-block:: python
 
     from ytmusicapi import YTMusic
-    ytmusic = YTMusic('headers_auth.json', "101234161234936123473")
+    ytmusic = YTMusic("oauth.json", "101234161234936123473")
 
 
