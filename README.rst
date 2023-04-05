@@ -34,7 +34,7 @@ If you find something missing or broken, feel free to create an `issue <https://
 
 | **Browsing**:
 
-* search (including all filters)
+* search (including all filters) and suggestions
 * get artist information and releases (songs, videos, albums, singles, related artists)
 * get user information (videos, playlists)
 * get albums

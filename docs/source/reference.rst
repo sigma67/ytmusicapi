@@ -18,6 +18,7 @@ See also the :doc:`Setup <setup>` page
 Search
 ------
 .. automethod:: YTMusic.search
+.. automethod:: YTMusic.get_search_suggestions
 
 Browsing
 --------
