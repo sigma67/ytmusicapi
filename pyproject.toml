@@ -16,6 +16,9 @@ dynamic = ["version", "readme"]
 [project.optional-dependencies]
 dev = ['pre-commit', 'flake8', 'yapf', 'coverage', 'sphinx', 'sphinx-rtd-theme']
 
+[project.scripts]
+ytmusicapi = "ytmusicapi.setup:main"
+
 [project.urls]
 homepage = "https://github.com/sigma67/ytmusicapi"
 documentation = "https://ytmusicapi.readthedocs.io"

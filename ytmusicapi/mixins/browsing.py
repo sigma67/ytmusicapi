@@ -789,12 +789,12 @@ class BrowsingMixin:
     def set_tasteprofile(self, artists: List[str], taste_profile: Dict = None) -> None:
         """
         Favorites artists to see more recommendations from the artist.
-        Use get_tasteprofile() to see which artists are available to be recommended
+        Use :py:func:`get_tasteprofile` to see which artists are available to be recommended
 
         :param artists: A List with names of artists, must be contained in the tasteprofile
         :param taste_profile: tasteprofile result from :py:func:`get_tasteprofile`.
             Pass this if you call :py:func:`get_tasteprofile` anyway to save an extra request.
-        :return None if successful
+        :return: None if successful
         """
 
         if taste_profile is None:

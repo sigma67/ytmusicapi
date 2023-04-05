@@ -1,3 +1,6 @@
+import argparse
+import sys
+from pathlib import Path
 from typing import Dict
 
 import requests
@@ -37,5 +40,19 @@ def setup_oauth(filepath: str = None,
     return YTMusicOAuth(session, proxies).setup(filepath)
 
 
-if __name__ == "__main__":
-    setup_oauth()
+def parse_args(args):
+    parser = argparse.ArgumentParser(description='Setup ytmusicapi.')
+    parser.add_argument("setup_type",
+                        type=str,
+                        choices=["oauth", "browser"],
+                        help="choose a setup type.")
+    parser.add_argument("--file", type=Path, help="optional path to output file.")
+    return parser.parse_args(args)
+
+
+def main():
+    args = parse_args(sys.argv[1:])
+    filename = args.file if args.file else f"{args.setup_type}.json"
+    print(f"Creating {filename} with your authentication credentials...")
+    func = setup_oauth if args.setup_type == "oauth" else setup
+    return func(filename)
