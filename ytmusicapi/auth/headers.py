@@ -14,23 +14,17 @@ def prepare_headers(session: requests.Session,
                     auth: Optional[str] = None) -> Dict:
     headers = {}
     if auth:
-        try:
-            if os.path.isfile(auth):
-                with open(auth) as json_file:
-                    input_json = json.load(json_file)
-            else:
-                input_json = json.loads(auth)
+        if os.path.isfile(auth):
+            with open(auth) as json_file:
+                input_json = json.load(json_file)
+        else:
+            input_json = json.loads(auth)
 
-            if "oauth.json" in auth:
-                oauth = YTMusicOAuth(session, proxies)
-                headers = oauth.load_headers(input_json, auth)
-            else:
-                headers = CaseInsensitiveDict(input_json)
-
-        except Exception as e:
-            print(
-                "Failed loading provided credentials. Make sure to provide a string or a file path. "
-                "Reason: " + str(e))
+        if "oauth.json" in auth:
+            oauth = YTMusicOAuth(session, proxies)
+            headers = oauth.load_headers(input_json, auth)
+        else:
+            headers = CaseInsensitiveDict(input_json)
 
     else:  # no authentication
         headers = initialize_headers()
