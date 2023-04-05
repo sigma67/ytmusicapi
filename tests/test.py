@@ -6,7 +6,7 @@ from pathlib import Path
 from requests import Response
 from unittest import mock
 
-from ytmusicapi.setup import setup_oauth, setup  # noqa: E402
+from ytmusicapi.setup import main, setup  # noqa: E402
 from ytmusicapi.ytmusic import YTMusic  # noqa: E402
 
 
@@ -31,7 +31,7 @@ class TestYTMusic(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         with YTMusic(requests_session=False) as yt:
-            pass
+            assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
         cls.yt_oauth = YTMusic(headers_oauth)
         cls.yt_auth = YTMusic(headers_browser)
@@ -39,17 +39,19 @@ class TestYTMusic(unittest.TestCase):
         cls.yt_empty = YTMusic(config['auth']['headers_empty'],
                                config['auth']['brand_account_empty'])
 
+    @mock.patch('sys.argv', ["ytmusicapi", "browser", "--file", headers_browser])
     def test_setup_browser(self):
         headers = setup(headers_browser, config['auth']['headers_raw'])
         self.assertGreaterEqual(len(headers), 2)
         headers_raw = config['auth']['headers_raw'].split('\n')
         with mock.patch('builtins.input', side_effect=(headers_raw + [EOFError()])):
-            headers = setup(headers_browser)
+            headers = main()
             self.assertGreaterEqual(len(headers), 2)
 
     # @unittest.skip("Cannot test oauth flow non-interactively")
     @mock.patch('requests.Response.json')
     @mock.patch('requests.Session.post')
+    @mock.patch('sys.argv', ["ytmusicapi", "oauth", "--file", headers_oauth])
     def test_setup_oauth(self, session_mock, json_mock):
         session_mock.return_value = Response()
         json_mock.side_effect = [
@@ -57,8 +59,7 @@ class TestYTMusic(unittest.TestCase):
             json.loads(config['auth']['oauth_token'])
         ]
         with mock.patch('builtins.input', return_value='y'):
-            headers = setup_oauth(headers_oauth)
-            self.assertEqual(len(headers), 6)
+            main()
             self.assertTrue(Path(headers_oauth).exists())
 
     ###############
@@ -470,7 +471,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_library_upload_artist(self):
         tracks = self.yt_oauth.get_library_upload_artist(config['uploads']['private_artist_id'],
-                                                        100)
+                                                         100)
         self.assertGreater(len(tracks), 0)
 
 
