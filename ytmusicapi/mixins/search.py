@@ -216,7 +216,9 @@ class SearchMixin:
 
         return search_results
 
-    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[List, List[Dict]]:
+    def get_search_suggestions(self,
+                               query: str,
+                               detailed_runs=False) -> Union[List[str], List[Dict]]:
         """
         Get Search Suggestions
 
@@ -226,71 +228,61 @@ class SearchMixin:
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on detailed_runs param.
-            Examples:
-                1.
-                Params:
-                    query = 'fade'
-                    detailed_runs = False
+        :return: List of search suggestion results depending on ``detailed_runs`` param.
 
-                Response:
-                [
-                    'faded',
-                    'faded alan walker lyrics',
-                    'faded alan walker',
-                    'faded remix',
-                    'faded song',
-                    'faded lyrics',
-                    'faded instrumental'
-                ]
+          Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
 
-                2.
-                Params:
-                    query = 'fade'
-                    detailed_runs = True
+              [
+                "faded",
+                "faded alan walker lyrics",
+                "faded alan walker",
+                "faded remix",
+                "faded song",
+                "faded lyrics",
+                "faded instrumental"
+              ]
 
-                Response:
-                    Runs with bold: True show the text typed by user & other runs contain the remaining suggestion.
+          Example response when ``detailed_runs`` is set to ``True``::
 
-                [
+              [
+                {
+                  "text": "faded",
+                  "runs": [
                     {
-                        'text': 'faded',
-                        'runs': [
-                            {
-                                'text': 'fade',
-                                'bold': True
-                            },
-                            {
-                                'text': 'd'
-                            }
-                        ]
+                      "text": "fade",
+                      "bold": true
                     },
                     {
-                        'text': 'faded alan walker lyrics',
-                        'runs': [
-                            {
-                                'text': 'fade',
-                                'bold': True
-                            },
-                            {
-                                'text': 'd alan walker lyrics'
-                            }
-                        ]
+                      "text": "d"
+                    }
+                  ]
+                },
+                {
+                  "text": "faded alan walker lyrics",
+                  "runs": [
+                    {
+                      "text": "fade",
+                      "bold": true
                     },
                     {
-                        'text': 'faded alan walker',
-                        'runs': [
-                            {
-                                'text': 'fade',
-                                'bold': True
-                            },
-                            {
-                                'text': 'd alan walker'
-                            }
-                        ]
+                      "text": "d alan walker lyrics"
+                    }
+                  ]
+                },
+                {
+                  "text": "faded alan walker",
+                  "runs": [
+                    {
+                      "text": "fade",
+                      "bold": true
                     },
-                    ...
-                ]
+                    {
+                      "text": "d alan walker"
+                    }
+                  ]
+                },
+                ...
+              ]
         """
 
         body = {'input': query}
