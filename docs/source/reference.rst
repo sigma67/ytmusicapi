@@ -1,19 +1,19 @@
 Reference
 ==================
 
-
-
 Reference for the YTMusic class.
 
 .. currentmodule:: ytmusicapi
 .. autoclass:: YTMusic
 .. automethod:: YTMusic.__init__
 
+
 Setup
 -----
-See also the :doc:`Setup <setup>` page
+See also the :doc:`Setup <setup/index>` page
 
-.. automethod:: YTMusic.setup
+.. autofunction:: setup
+.. autofunction:: setup_oauth
 
 Search
 ------
