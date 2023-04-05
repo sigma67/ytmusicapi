@@ -50,7 +50,7 @@ class YTMusicOAuth:
     def dump_token(token, filepath):
         token["expires_at"] = int(time.time()) + int(token["expires_in"])
         with open(filepath, encoding="utf8", mode="w") as file:
-            json.dump(token, file)
+            json.dump(token, file, indent=True)
 
     def setup(self, filepath: Optional[str] = None) -> Dict:
         code = self.get_code()
@@ -63,7 +63,7 @@ class YTMusicOAuth:
     def load_headers(self, token: Dict, filepath: Optional[str] = None):
         headers = initialize_headers()
         if time.time() > token["expires_at"] - 3600:
-            token = self.refresh_token(token["refresh_token"])
+            token.update(self.refresh_token(token["refresh_token"]))
             self.dump_token(token, filepath)
         headers["Authorization"] = f"{token['token_type']} {token['access_token']}"
         headers["Content-Type"] = "application/json"
