@@ -185,7 +185,7 @@ def get_search_params(filter, scope, ignore_spelling):
             param1 = filtered_param1
             param2 = _get_param2(filter)
             if not ignore_spelling:
-                param3 = 'AWoMEA4QChADEAQQCRAF'
+                param3 = 'AWoKEAMQCRAEEAoQBQ%3D%3D'
             else:
                 param3 = 'AUICCAFqDBAOEAoQAxAEEAkQBQ%3D%3D'
 
