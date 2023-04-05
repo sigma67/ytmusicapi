@@ -73,6 +73,18 @@ What is a browseId?
 A ``browseId`` is an internal, globally unique identifier used by YouTube Music for browsable content.
 
 
+Which videoTypes exist and what do they mean?
+***********************************************************************
+
+``videoType`` is prefixed with ``MUSIC_VIDEO_TYPE_``, i.e. ``MUSIC_VIDEO_TYPE_OMV``.
+Currently the following variants of ``videoType`` are known:
+
+- ``OMV``: Original Music Video - uploaded by original artist with actual video content
+- ``UGC``: User Generated Content - uploaded by regular YouTube user
+- ``ATV``: High quality song uploaded by original artist with cover image
+- ``OFFICIAL_SOURCE_MUSIC``: Official video content, but not for a single track
+
+
 Why is ytmusicapi returning more results than requested with the limit parameter?
 *********************************************************************************
 YouTube Music always returns increments of a specific pagination value, usually between 20 and 100 items at a time.
