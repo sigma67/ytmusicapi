@@ -198,3 +198,25 @@ def get_search_params(filter, scope, ignore_spelling):
 def _get_param2(filter):
     filter_params = {'songs': 'I', 'videos': 'Q', 'albums': 'Y', 'artists': 'g', 'playlists': 'o'}
     return filter_params[filter]
+
+
+def parse_search_suggestions(results, detailed_runs):
+    if not results.get('contents', [{}])[0].get('searchSuggestionsSectionRenderer', {}).get(
+            'contents', []):
+        return []
+
+    raw_suggestions = results['contents'][0]['searchSuggestionsSectionRenderer']['contents']
+    suggestions = []
+
+    for raw_suggestion in raw_suggestions:
+        suggestion_content = raw_suggestion['searchSuggestionRenderer']
+
+        text = suggestion_content['navigationEndpoint']['searchEndpoint']['query']
+        runs = suggestion_content['suggestion']['runs']
+
+        if detailed_runs:
+            suggestions.append({'text': text, 'runs': runs})
+        else:
+            suggestions.append(text)
+
+    return suggestions

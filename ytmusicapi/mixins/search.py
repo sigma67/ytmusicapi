@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.parsers.search import *
 
@@ -203,12 +203,100 @@ class SearchMixin:
                                      category))
 
             if filter:  # if filter is set, there are continuations
-                request_func = lambda additionalParams: self._send_request(
-                    endpoint, body, additionalParams)
-                parse_func = lambda contents: parse_search_results(contents, type, category)
+
+                def request_func(additionalParams):
+                    return self._send_request(endpoint, body, additionalParams)
+
+                def parse_func(contents):
+                    return parse_search_results(contents, type, category)
 
                 search_results.extend(
                     get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
                                       limit - len(search_results), request_func, parse_func))
 
         return search_results
+
+    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[List, List[Dict]]:
+        """
+        Get Search Suggestions
+
+        :param query: Query string, i.e. 'faded'
+        :param detailed_runs: Whether to return detailed runs of each suggestion.
+            If True, it returns the query that the user typed and the remaining
+            suggestion along with the complete text (like many search services
+            usually bold the text typed by the user).
+            Default: False, returns the list of search suggestions in plain text.
+        :return: List of search suggestion results depending on detailed_runs param.
+            Examples:
+                1.
+                Params:
+                    query = 'fade'
+                    detailed_runs = False
+
+                Response:
+                [
+                    'faded',
+                    'faded alan walker lyrics',
+                    'faded alan walker',
+                    'faded remix',
+                    'faded song',
+                    'faded lyrics',
+                    'faded instrumental'
+                ]
+
+                2.
+                Params:
+                    query = 'fade'
+                    detailed_runs = True
+
+                Response:
+                    Runs with bold: True show the text typed by user & other runs contain the remaining suggestion.
+
+                [
+                    {
+                        'text': 'faded',
+                        'runs': [
+                            {
+                                'text': 'fade',
+                                'bold': True
+                            },
+                            {
+                                'text': 'd'
+                            }
+                        ]
+                    },
+                    {
+                        'text': 'faded alan walker lyrics',
+                        'runs': [
+                            {
+                                'text': 'fade',
+                                'bold': True
+                            },
+                            {
+                                'text': 'd alan walker lyrics'
+                            }
+                        ]
+                    },
+                    {
+                        'text': 'faded alan walker',
+                        'runs': [
+                            {
+                                'text': 'fade',
+                                'bold': True
+                            },
+                            {
+                                'text': 'd alan walker'
+                            }
+                        ]
+                    },
+                    ...
+                ]
+        """
+
+        body = {'input': query}
+        endpoint = 'music/get_search_suggestions'
+
+        response = self._send_request(endpoint, body)
+        search_suggestions = parse_search_suggestions(response, detailed_runs)
+
+        return search_suggestions
