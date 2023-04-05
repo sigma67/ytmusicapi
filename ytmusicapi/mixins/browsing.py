@@ -105,12 +105,10 @@ class BrowsingMixin:
 
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
         if 'continuations' in section_list:
+            request_func = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams)
 
-            def request_func(additionalParams):
-                return self._send_request(endpoint, body, additionalParams)
-
-            def parse_func(contents):
-                return parse_mixed_content(contents)
+            parse_func = lambda contents: parse_mixed_content(contents)
 
             home.extend(
                 get_continuations(section_list, 'sectionListContinuation', limit - len(home),
