@@ -46,8 +46,8 @@ def parse_top_result(data, search_result_types):
 def parse_search_result(data, search_result_types, result_type, category):
     default_offset = (not result_type) * 2
     search_result = {'category': category}
-    if video_type := nav(data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE,
-                         True):
+    video_type = nav(data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
+    if not result_type and video_type:
         result_type = 'song' if video_type == 'MUSIC_VIDEO_TYPE_ATV' else 'video'
 
     result_type = get_search_result_type(get_item_text(data, 1),
@@ -185,7 +185,7 @@ def get_search_params(filter, scope, ignore_spelling):
             param1 = filtered_param1
             param2 = _get_param2(filter)
             if not ignore_spelling:
-                param3 = 'AWoKEAMQCRAEEAoQBQ%3D%3D'
+                param3 = 'AWoMEA4QChADEAQQCRAF'
             else:
                 param3 = 'AUICCAFqDBAOEAoQAxAEEAkQBQ%3D%3D'
 

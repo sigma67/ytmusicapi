@@ -198,9 +198,9 @@ class SearchMixin:
             else:
                 continue
 
+            search_result_types = self.parser.get_search_result_types()
             search_results.extend(
-                parse_search_results(results, self.parser.get_search_result_types(), type,
-                                     category))
+                parse_search_results(results, search_result_types, type, category))
 
             if filter:  # if filter is set, there are continuations
 
@@ -208,7 +208,7 @@ class SearchMixin:
                     return self._send_request(endpoint, body, additionalParams)
 
                 def parse_func(contents):
-                    return parse_search_results(contents, type, category)
+                    return parse_search_results(contents, search_result_types, type, category)
 
                 search_results.extend(
                     get_continuations(res['musicShelfRenderer'], 'musicShelfContinuation',
