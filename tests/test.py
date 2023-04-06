@@ -278,7 +278,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(playlists), config.getint('limits', 'library_playlists'))
 
         playlists = self.yt_empty.get_library_playlists()
-        self.assertEqual(len(playlists), 0)
+        self.assertLessEqual(len(playlists), 1)  # "Episodes saved for later"
 
     def test_get_library_songs(self):
         self.assertRaises(Exception, self.yt_auth.get_library_songs, None, True)
