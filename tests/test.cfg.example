@@ -4,6 +4,9 @@ brand_account_empty = 1123456629123420379537
 headers = headers_auth_json_as_string
 headers_empty = headers_account_with_empty_library_as_json_as_string
 headers_file = ./headers_auth.json
+headers_oauth = ./oauth.json
+oauth_code = {"device_code":"","user_code":"","expires_in":1800,"interval":5,"verification_url":"https://www.google.com/device"}
+oauth_token = {"access_token":"","expires_in":1000,"refresh_token":"","scope":"https://www.googleapis.com/auth/youtube","token_type":"Bearer"}
 headers_raw = raw_headers_pasted_from_browser
 
 [playlists]

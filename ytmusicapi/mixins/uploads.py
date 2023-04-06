@@ -194,6 +194,8 @@ class UploadsMixin:
         :return: Status String or full response
         """
         self._check_auth()
+        if not self.is_browser_auth:
+            raise Exception("Please provide authentication before using this function")
         if not os.path.isfile(filepath):
             raise Exception("The provided file does not exist.")
 

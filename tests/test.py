@@ -466,6 +466,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_upload_song(self):
         self.assertRaises(Exception, self.yt_auth.upload_song, 'song.wav')
+        self.assertRaises(Exception, self.yt_oauth.upload_song, config['uploads']['file'])
         response = self.yt_auth.upload_song(get_resource(config['uploads']['file']))
         self.assertEqual(response.status_code, 409)
 
