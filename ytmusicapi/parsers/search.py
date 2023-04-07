@@ -126,8 +126,6 @@ def parse_search_result(data, search_result_types, result_type, category):
 
     if result_type in ['artist', 'album', 'playlist']:
         search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID, True)
-        if not search_result['browseId']:
-            return {}
 
     if result_type in ['song', 'album']:
         search_result['isExplicit'] = nav(data, BADGE_LABEL, True) is not None
