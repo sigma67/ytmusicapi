@@ -23,8 +23,6 @@ class YTMusicOAuth:
     def get_code(self) -> Dict:
         code_response = self._send_request(OAUTH_CODE_URL, data={"scope": OAUTH_SCOPE})
         response_json = code_response.json()
-        url = f"{response_json['verification_url']}?user_code={response_json['user_code']}"
-        input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
         return response_json
 
     def get_token_from_code(self, device_code: str) -> Dict:
@@ -54,6 +52,8 @@ class YTMusicOAuth:
 
     def setup(self, filepath: Optional[str] = None) -> Dict:
         code = self.get_code()
+        url = f"{code['verification_url']}?user_code={code['user_code']}"
+        input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
         token = self.get_token_from_code(code["device_code"])
         if filepath:
             self.dump_token(token, filepath)
