@@ -1,10 +1,12 @@
-import json
 import configparser
+import json
 import time
 import unittest
+import warnings
 from pathlib import Path
-from requests import Response
 from unittest import mock
+
+from requests import Response
 
 from ytmusicapi.setup import main, setup  # noqa: E402
 from ytmusicapi.ytmusic import YTMusic  # noqa: E402
@@ -16,49 +18,53 @@ def get_resource(file: str) -> str:
 
 
 config = configparser.RawConfigParser()
-config.read(get_resource('test.cfg'), 'utf-8')
+config.read(get_resource("test.cfg"), "utf-8")
 
 sample_album = "MPREb_4pL8gzRtw1p"  # Eminem - Revival
 sample_video = "hpSrLjc5SMs"  # Oasis - Wonderwall
 sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 
-headers_oauth = get_resource(config['auth']['headers_oauth'])
-headers_browser = get_resource(config['auth']['headers_file'])
+headers_oauth = get_resource(config["auth"]["headers_oauth"])
+headers_browser = get_resource(config["auth"]["headers_file"])
 
 
 class TestYTMusic(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
         with YTMusic(requests_session=False) as yt:
             assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
         cls.yt_oauth = YTMusic(headers_oauth)
+        with open(headers_oauth, mode="r", encoding="utf8") as headers:
+            string_headers = headers.read()
+            cls.yt_oauth = YTMusic(string_headers)
         cls.yt_auth = YTMusic(headers_browser)
-        cls.yt_brand = YTMusic(config['auth']['headers'], config['auth']['brand_account'])
-        cls.yt_empty = YTMusic(config['auth']['headers_empty'],
-                               config['auth']['brand_account_empty'])
+        cls.yt_brand = YTMusic(config["auth"]["headers"], config["auth"]["brand_account"])
+        cls.yt_empty = YTMusic(config["auth"]["headers_empty"],
+                               config["auth"]["brand_account_empty"])
 
-    @mock.patch('sys.argv', ["ytmusicapi", "browser", "--file", headers_browser])
+    @mock.patch("sys.argv", ["ytmusicapi", "browser", "--file", headers_browser])
     def test_setup_browser(self):
-        headers = setup(headers_browser, config['auth']['headers_raw'])
+        headers = setup(headers_browser, config["auth"]["headers_raw"])
         self.assertGreaterEqual(len(headers), 2)
-        headers_raw = config['auth']['headers_raw'].split('\n')
-        with mock.patch('builtins.input', side_effect=(headers_raw + [EOFError()])):
+        headers_raw = config["auth"]["headers_raw"].split("\n")
+        with mock.patch("builtins.input", side_effect=(headers_raw + [EOFError()])):
             headers = main()
             self.assertGreaterEqual(len(headers), 2)
 
     # @unittest.skip("Cannot test oauth flow non-interactively")
-    @mock.patch('requests.Response.json')
-    @mock.patch('requests.Session.post')
-    @mock.patch('sys.argv', ["ytmusicapi", "oauth", "--file", headers_oauth])
+    @mock.patch("requests.Response.json")
+    @mock.patch("requests.Session.post")
+    @mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", headers_oauth])
     def test_setup_oauth(self, session_mock, json_mock):
         session_mock.return_value = Response()
         json_mock.side_effect = [
-            json.loads(config['auth']['oauth_code']),
-            json.loads(config['auth']['oauth_token'])
+            json.loads(config["auth"]["oauth_code"]),
+            json.loads(config["auth"]["oauth_token"]),
         ]
-        with mock.patch('builtins.input', return_value='y'):
+        with mock.patch("builtins.input", return_value="y"):
             main()
             self.assertTrue(Path(headers_oauth).exists())
 
@@ -80,53 +86,55 @@ class TestYTMusic(unittest.TestCase):
         for q in queries:
             with self.subTest():
                 results = self.yt_brand.search(q)
-                self.assertListEqual(['resultType' in r for r in results], [True] * len(results))
+                self.assertListEqual(["resultType" in r for r in results], [True] * len(results))
                 self.assertGreater(len(results), 10)
                 results = self.yt.search(q)
                 self.assertGreater(len(results), 10)
-        results = self.yt_auth.search('Martin Stig Andersen - Deteriation', ignore_spelling=True)
+        results = self.yt_auth.search("Martin Stig Andersen - Deteriation", ignore_spelling=True)
         self.assertGreater(len(results), 0)
-        results = self.yt_auth.search(query, filter='songs')
-        self.assertListEqual([r['resultType'] for r in results], ['song'] * len(results))
+        results = self.yt_auth.search(query, filter="songs")
+        self.assertListEqual([r["resultType"] for r in results], ["song"] * len(results))
         self.assertGreater(len(results), 10)
-        results = self.yt_auth.search(query, filter='videos')
+        results = self.yt_auth.search(query, filter="videos")
         self.assertGreater(len(results), 10)
-        results = self.yt_auth.search(query, filter='albums', limit=40)
-        self.assertListEqual([r['resultType'] for r in results], ['album'] * len(results))
+        results = self.yt_auth.search(query, filter="albums", limit=40)
+        self.assertListEqual([r["resultType"] for r in results], ["album"] * len(results))
         self.assertGreater(len(results), 20)
-        results = self.yt_auth.search('project-2', filter='artists', ignore_spelling=True)
+        results = self.yt_auth.search("project-2", filter="artists", ignore_spelling=True)
         self.assertGreater(len(results), 0)
-        results = self.yt_auth.search("classical music", filter='playlists')
+        results = self.yt_auth.search("classical music", filter="playlists")
         self.assertGreater(len(results), 5)
-        results = self.yt_auth.search("clasical music", filter='playlists', ignore_spelling=True)
+        results = self.yt_auth.search("clasical music", filter="playlists", ignore_spelling=True)
         self.assertGreater(len(results), 5)
         results = self.yt_auth.search("clasic rock",
-                                      filter='community_playlists',
+                                      filter="community_playlists",
                                       ignore_spelling=True)
         self.assertGreater(len(results), 5)
-        results = self.yt_auth.search("hip hop", filter='featured_playlists')
+        results = self.yt_auth.search("hip hop", filter="featured_playlists")
         self.assertGreater(len(results), 5)
 
     def test_search_uploads(self):
-        self.assertRaises(Exception,
-                          self.yt.search,
-                          'audiomachine',
-                          filter="songs",
-                          scope='uploads',
-                          limit=40)
-        results = self.yt_auth.search('audiomachine', scope='uploads', limit=40)
+        self.assertRaises(
+            Exception,
+            self.yt.search,
+            "audiomachine",
+            filter="songs",
+            scope="uploads",
+            limit=40,
+        )
+        results = self.yt_auth.search("audiomachine", scope="uploads", limit=40)
         self.assertGreater(len(results), 20)
 
     def test_search_library(self):
-        results = self.yt_oauth.search('garrix', scope='library')
+        results = self.yt_oauth.search("garrix", scope="library")
         self.assertGreater(len(results), 5)
-        results = self.yt_auth.search('bergersen', filter='songs', scope='library', limit=40)
+        results = self.yt_auth.search("bergersen", filter="songs", scope="library", limit=40)
         self.assertGreater(len(results), 10)
-        results = self.yt_auth.search('garrix', filter='albums', scope='library', limit=40)
+        results = self.yt_auth.search("garrix", filter="albums", scope="library", limit=40)
         self.assertGreaterEqual(len(results), 4)
-        results = self.yt_auth.search('garrix', filter='artists', scope='library', limit=40)
+        results = self.yt_auth.search("garrix", filter="artists", scope="library", limit=40)
         self.assertGreaterEqual(len(results), 1)
-        results = self.yt_auth.search('garrix', filter='playlists', scope='library')
+        results = self.yt_auth.search("garrix", filter="playlists", scope="library")
         self.assertGreaterEqual(len(results), 1)
 
     def test_get_artist(self):
@@ -134,26 +142,28 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results), 14)
 
         # test correctness of related artists
-        related = results['related']['results']
+        related = results["related"]["results"]
         self.assertEqual(
             len([
                 x for x in related
                 if set(x.keys()) == {"browseId", "subscribers", "title", "thumbnails"}
-            ]), len(related))
+            ]),
+            len(related),
+        )
 
         results = self.yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         self.assertGreaterEqual(len(results), 11)
 
     def test_get_artist_albums(self):
         artist = self.yt.get_artist("UCj5ZiBBqpe0Tg4zfKGHEFuQ")
-        results = self.yt.get_artist_albums(artist['albums']['browseId'],
-                                            artist['albums']['params'])
+        results = self.yt.get_artist_albums(artist["albums"]["browseId"],
+                                            artist["albums"]["params"])
         self.assertGreater(len(results), 0)
 
     def test_get_artist_singles(self):
         artist = self.yt_auth.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
-        results = self.yt_auth.get_artist_albums(artist['singles']['browseId'],
-                                                 artist['singles']['params'])
+        results = self.yt_auth.get_artist_albums(artist["singles"]["browseId"],
+                                                 artist["singles"]["params"])
         self.assertGreater(len(results), 0)
 
     def test_get_user(self):
@@ -163,7 +173,7 @@ class TestYTMusic(unittest.TestCase):
     def test_get_user_playlists(self):
         results = self.yt.get_user("UCPVhZsC2od1xjGhgEc2NEPQ")
         results = self.yt.get_user_playlists("UCPVhZsC2od1xjGhgEc2NEPQ",
-                                             results['playlists']['params'])
+                                             results["playlists"]["params"])
         self.assertGreater(len(results), 100)
 
     def test_get_album_browse_id(self):
@@ -173,17 +183,17 @@ class TestYTMusic(unittest.TestCase):
     def test_get_album(self):
         results = self.yt_auth.get_album(sample_album)
         self.assertGreaterEqual(len(results), 9)
-        self.assertTrue(results['tracks'][0]['isExplicit'])
-        self.assertIn('feedbackTokens', results['tracks'][0])
-        self.assertEqual(len(results['other_versions']), 2)
+        self.assertTrue(results["tracks"][0]["isExplicit"])
+        self.assertIn("feedbackTokens", results["tracks"][0])
+        self.assertEqual(len(results["other_versions"]), 2)
         results = self.yt.get_album("MPREb_BQZvl3BFGay")
-        self.assertEqual(len(results['tracks']), 7)
+        self.assertEqual(len(results["tracks"]), 7)
 
     def test_get_song(self):
-        song = self.yt_oauth.get_song(config['uploads']['private_upload_id'])  # private upload
+        song = self.yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
         self.assertEqual(len(song), 5)
         song = self.yt.get_song(sample_video)
-        self.assertGreaterEqual(len(song['streamingData']['adaptiveFormats']), 10)
+        self.assertGreaterEqual(len(song["streamingData"]["adaptiveFormats"]), 10)
 
     def test_get_song_related_content(self):
         song = self.yt_oauth.get_watch_playlist(sample_video)
@@ -196,7 +206,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertIsNotNone(lyrics_song["lyrics"])
         self.assertIsNotNone(lyrics_song["source"])
 
-        playlist = self.yt.get_watch_playlist(config['uploads']['private_upload_id'])
+        playlist = self.yt.get_watch_playlist(config["uploads"]["private_upload_id"])
         self.assertIsNone(playlist["lyrics"])
         self.assertRaises(Exception, self.yt.get_lyrics, playlist["lyrics"])
 
@@ -242,9 +252,9 @@ class TestYTMusic(unittest.TestCase):
     def test_get_charts(self):
         charts = self.yt_oauth.get_charts()
         self.assertEqual(len(charts), 4)
-        charts = self.yt.get_charts(country='US')
+        charts = self.yt.get_charts(country="US")
         self.assertEqual(len(charts), 5)
-        charts = self.yt.get_charts(country='BE')
+        charts = self.yt.get_charts(country="BE")
         self.assertEqual(len(charts), 4)
 
     ###############
@@ -253,18 +263,21 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_watch_playlist(self):
         playlist = self.yt_oauth.get_watch_playlist(
-            playlistId="RDAMPLOLAK5uy_l_fKDQGOUsk8kbWsm9s86n4-nZNd2JR8Q", radio=True, limit=90)
-        self.assertGreaterEqual(len(playlist['tracks']), 90)
+            playlistId="RDAMPLOLAK5uy_l_fKDQGOUsk8kbWsm9s86n4-nZNd2JR8Q",
+            radio=True,
+            limit=90,
+        )
+        self.assertGreaterEqual(len(playlist["tracks"]), 90)
         playlist = self.yt_oauth.get_watch_playlist("9mWr4c_ig54", limit=50)
-        self.assertGreater(len(playlist['tracks']), 45)
+        self.assertGreater(len(playlist["tracks"]), 45)
         playlist = self.yt_oauth.get_watch_playlist("UoAf_y9Ok4k")  # private track
-        self.assertGreaterEqual(len(playlist['tracks']), 25)
+        self.assertGreaterEqual(len(playlist["tracks"]), 25)
         playlist = self.yt.get_watch_playlist(
             playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc", shuffle=True)
-        self.assertEqual(len(playlist['tracks']), 12)
-        playlist = self.yt_brand.get_watch_playlist(playlistId=config['playlists']['own'],
+        self.assertEqual(len(playlist["tracks"]), 12)
+        playlist = self.yt_brand.get_watch_playlist(playlistId=config["playlists"]["own"],
                                                     shuffle=True)
-        self.assertEqual(len(playlist['tracks']), 4)
+        self.assertEqual(len(playlist["tracks"]), 4)
 
     ################
     # LIBRARY
@@ -275,7 +288,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(playlists), 25)
 
         playlists = self.yt_auth.get_library_playlists(None)
-        self.assertGreaterEqual(len(playlists), config.getint('limits', 'library_playlists'))
+        self.assertGreaterEqual(len(playlists), config.getint("limits", "library_playlists"))
 
         playlists = self.yt_empty.get_library_playlists()
         self.assertLessEqual(len(playlists), 1)  # "Episodes saved for later"
@@ -285,8 +298,8 @@ class TestYTMusic(unittest.TestCase):
         songs = self.yt_oauth.get_library_songs(100)
         self.assertGreaterEqual(len(songs), 100)
         songs = self.yt_auth.get_library_songs(200, validate_responses=True)
-        self.assertGreaterEqual(len(songs), config.getint('limits', 'library_songs'))
-        songs = self.yt_auth.get_library_songs(order='a_to_z')
+        self.assertGreaterEqual(len(songs), config.getint("limits", "library_songs"))
+        songs = self.yt_auth.get_library_songs(order="a_to_z")
         self.assertGreaterEqual(len(songs), 25)
         songs = self.yt_empty.get_library_songs()
         self.assertEqual(len(songs), 0)
@@ -295,12 +308,12 @@ class TestYTMusic(unittest.TestCase):
         albums = self.yt_oauth.get_library_albums(100)
         self.assertGreater(len(albums), 50)
         for album in albums:
-            self.assertIn('playlistId', album)
-        albums = self.yt_brand.get_library_albums(100, order='a_to_z')
+            self.assertIn("playlistId", album)
+        albums = self.yt_brand.get_library_albums(100, order="a_to_z")
         self.assertGreater(len(albums), 50)
-        albums = self.yt_brand.get_library_albums(100, order='z_to_a')
+        albums = self.yt_brand.get_library_albums(100, order="z_to_a")
         self.assertGreater(len(albums), 50)
-        albums = self.yt_brand.get_library_albums(100, order='recently_added')
+        albums = self.yt_brand.get_library_albums(100, order="recently_added")
         self.assertGreater(len(albums), 50)
         albums = self.yt_empty.get_library_albums()
         self.assertEqual(len(albums), 0)
@@ -308,28 +321,28 @@ class TestYTMusic(unittest.TestCase):
     def test_get_library_artists(self):
         artists = self.yt_auth.get_library_artists(50)
         self.assertGreater(len(artists), 40)
-        artists = self.yt_oauth.get_library_artists(order='a_to_z', limit=50)
+        artists = self.yt_oauth.get_library_artists(order="a_to_z", limit=50)
         self.assertGreater(len(artists), 40)
         artists = self.yt_brand.get_library_artists(limit=None)
-        self.assertGreater(len(artists), config.getint('limits', 'library_artists'))
+        self.assertGreater(len(artists), config.getint("limits", "library_artists"))
         artists = self.yt_empty.get_library_artists()
         self.assertEqual(len(artists), 0)
 
     def test_get_library_subscriptions(self):
         artists = self.yt_brand.get_library_subscriptions(50)
         self.assertGreater(len(artists), 40)
-        artists = self.yt_brand.get_library_subscriptions(order='z_to_a')
+        artists = self.yt_brand.get_library_subscriptions(order="z_to_a")
         self.assertGreater(len(artists), 20)
         artists = self.yt_brand.get_library_subscriptions(limit=None)
-        self.assertGreater(len(artists), config.getint('limits', 'library_subscriptions'))
+        self.assertGreater(len(artists), config.getint("limits", "library_subscriptions"))
         artists = self.yt_empty.get_library_subscriptions()
         self.assertEqual(len(artists), 0)
 
     def test_get_liked_songs(self):
         songs = self.yt_brand.get_liked_songs(200)
-        self.assertGreater(len(songs['tracks']), 100)
+        self.assertGreater(len(songs["tracks"]), 100)
         songs = self.yt_empty.get_liked_songs()
-        self.assertEqual(songs['trackCount'], 0)
+        self.assertEqual(songs["trackCount"], 0)
 
     def test_get_history(self):
         songs = self.yt_oauth.get_history()
@@ -341,34 +354,34 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response.status_code, 204)
         songs = self.yt_auth.get_history()
         self.assertGreater(len(songs), 0)
-        response = self.yt_auth.remove_history_items([songs[0]['feedbackToken']])
-        self.assertIn('feedbackResponses', response)
+        response = self.yt_auth.remove_history_items([songs[0]["feedbackToken"]])
+        self.assertIn("feedbackResponses", response)
 
     def test_rate_song(self):
-        response = self.yt_auth.rate_song(sample_video, 'LIKE')
-        self.assertIn('actions', response)
-        response = self.yt_auth.rate_song(sample_video, 'INDIFFERENT')
-        self.assertIn('actions', response)
+        response = self.yt_auth.rate_song(sample_video, "LIKE")
+        self.assertIn("actions", response)
+        response = self.yt_auth.rate_song(sample_video, "INDIFFERENT")
+        self.assertIn("actions", response)
 
     def test_edit_song_library_status(self):
         album = self.yt_brand.get_album(sample_album)
         response = self.yt_brand.edit_song_library_status(
-            album['tracks'][2]['feedbackTokens']['add'])
-        self.assertTrue(response['feedbackResponses'][0]['isProcessed'])
+            album["tracks"][2]["feedbackTokens"]["add"])
+        self.assertTrue(response["feedbackResponses"][0]["isProcessed"])
         response = self.yt_brand.edit_song_library_status(
-            album['tracks'][2]['feedbackTokens']['remove'])
-        self.assertTrue(response['feedbackResponses'][0]['isProcessed'])
+            album["tracks"][2]["feedbackTokens"]["remove"])
+        self.assertTrue(response["feedbackResponses"][0]["isProcessed"])
 
     def test_rate_playlist(self):
-        response = self.yt_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4', 'LIKE')
-        self.assertIn('actions', response)
-        response = self.yt_auth.rate_playlist('OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4',
-                                              'INDIFFERENT')
-        self.assertIn('actions', response)
+        response = self.yt_auth.rate_playlist("OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4", "LIKE")
+        self.assertIn("actions", response)
+        response = self.yt_auth.rate_playlist("OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4",
+                                              "INDIFFERENT")
+        self.assertIn("actions", response)
 
     def test_subscribe_artists(self):
-        self.yt_auth.subscribe_artists(['UCUDVBtnOQi4c7E8jebpjc9Q', 'UCiMhD4jzUqG-IgPzUmmytRQ'])
-        self.yt_auth.unsubscribe_artists(['UCUDVBtnOQi4c7E8jebpjc9Q', 'UCiMhD4jzUqG-IgPzUmmytRQ'])
+        self.yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q", "UCiMhD4jzUqG-IgPzUmmytRQ"])
+        self.yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q", "UCiMhD4jzUqG-IgPzUmmytRQ"])
 
     ###############
     # PLAYLISTS
@@ -377,114 +390,128 @@ class TestYTMusic(unittest.TestCase):
     def test_get_foreign_playlist(self):
         self.assertRaises(Exception, self.yt.get_playlist, "PLABC")
         playlist = self.yt.get_playlist(sample_playlist, limit=300, suggestions_limit=7)
-        self.assertGreater(len(playlist['tracks']), 200)
-        self.assertNotIn('suggestions', playlist)
+        self.assertGreater(len(playlist["tracks"]), 200)
+        self.assertNotIn("suggestions", playlist)
 
         playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4",
                                         limit=None,
                                         related=True)
-        self.assertGreater(len(playlist['tracks']), 100)
-        self.assertEqual(len(playlist['related']), 10)
+        self.assertGreater(len(playlist["tracks"]), 100)
+        self.assertEqual(len(playlist["related"]), 10)
 
     def test_get_owned_playlist(self):
-        playlist = self.yt_brand.get_playlist(config['playlists']['own'],
+        playlist = self.yt_brand.get_playlist(config["playlists"]["own"],
                                               related=True,
                                               suggestions_limit=21)
-        self.assertLess(len(playlist['tracks']), 100)
-        self.assertEqual(len(playlist['suggestions']), 21)
-        self.assertEqual(len(playlist['related']), 10)
+        self.assertLess(len(playlist["tracks"]), 100)
+        self.assertEqual(len(playlist["suggestions"]), 21)
+        self.assertEqual(len(playlist["related"]), 10)
 
     def test_edit_playlist(self):
-        playlist = self.yt_brand.get_playlist(config['playlists']['own'])
-        response = self.yt_brand.edit_playlist(playlist['id'],
-                                               title='',
-                                               description='',
-                                               privacyStatus='PRIVATE',
-                                               moveItem=(playlist['tracks'][1]['setVideoId'],
-                                                         playlist['tracks'][0]['setVideoId']))
-        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
-        self.yt_brand.edit_playlist(playlist['id'],
-                                    title=playlist['title'],
-                                    description=playlist['description'],
-                                    privacyStatus=playlist['privacy'],
-                                    moveItem=(playlist['tracks'][0]['setVideoId'],
-                                              playlist['tracks'][1]['setVideoId']))
-        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist edit failed")
+        playlist = self.yt_brand.get_playlist(config["playlists"]["own"])
+        response = self.yt_brand.edit_playlist(
+            playlist["id"],
+            title="",
+            description="",
+            privacyStatus="PRIVATE",
+            moveItem=(
+                playlist["tracks"][1]["setVideoId"],
+                playlist["tracks"][0]["setVideoId"],
+            ),
+        )
+        self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist edit failed")
+        self.yt_brand.edit_playlist(
+            playlist["id"],
+            title=playlist["title"],
+            description=playlist["description"],
+            privacyStatus=playlist["privacy"],
+            moveItem=(
+                playlist["tracks"][0]["setVideoId"],
+                playlist["tracks"][1]["setVideoId"],
+            ),
+        )
+        self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
     def test_end2end(self):
         playlistId = self.yt_brand.create_playlist(
             "test",
             "test description",
-            source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y")
+            source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+        )
         self.assertEqual(len(playlistId), 34, "Playlist creation failed")
         response = self.yt_brand.add_playlist_items(
-            playlistId, [sample_video, sample_video],
-            source_playlist='OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow',
-            duplicates=True)
-        self.assertEqual(response["status"], 'STATUS_SUCCEEDED', "Adding playlist item failed")
+            playlistId,
+            [sample_video, sample_video],
+            source_playlist="OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow",
+            duplicates=True,
+        )
+        self.assertEqual(response["status"], "STATUS_SUCCEEDED", "Adding playlist item failed")
         self.assertGreater(len(response["playlistEditResults"]), 0, "Adding playlist item failed")
         time.sleep(2)
         playlist = self.yt_brand.get_playlist(playlistId, related=True)
-        self.assertEqual(len(playlist['tracks']), 46, "Getting playlist items failed")
-        response = self.yt_brand.remove_playlist_items(playlistId, playlist['tracks'])
-        self.assertEqual(response, 'STATUS_SUCCEEDED', "Playlist item removal failed")
+        self.assertEqual(len(playlist["tracks"]), 46, "Getting playlist items failed")
+        response = self.yt_brand.remove_playlist_items(playlistId, playlist["tracks"])
+        self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist item removal failed")
         response = self.yt_brand.delete_playlist(playlistId)
-        self.assertEqual(response['command']['handlePlaylistDeletionCommand']['playlistId'],
-                         playlistId, "Playlist removal failed")
+        self.assertEqual(
+            response["command"]["handlePlaylistDeletionCommand"]["playlistId"],
+            playlistId,
+            "Playlist removal failed",
+        )
 
     ###############
     # UPLOADS
     ###############
 
     def test_get_library_upload_songs(self):
-        results = self.yt_oauth.get_library_upload_songs(50, order='z_to_a')
+        results = self.yt_oauth.get_library_upload_songs(50, order="z_to_a")
         self.assertGreater(len(results), 25)
 
         results = self.yt_empty.get_library_upload_songs(100)
         self.assertEqual(len(results), 0)
 
     def test_get_library_upload_albums(self):
-        results = self.yt_oauth.get_library_upload_albums(50, order='a_to_z')
+        results = self.yt_oauth.get_library_upload_albums(50, order="a_to_z")
         self.assertGreater(len(results), 40)
 
         albums = self.yt_auth.get_library_upload_albums(None)
-        self.assertGreaterEqual(len(albums), config.getint('limits', 'library_upload_albums'))
+        self.assertGreaterEqual(len(albums), config.getint("limits", "library_upload_albums"))
 
         results = self.yt_empty.get_library_upload_albums(100)
         self.assertEqual(len(results), 0)
 
     def test_get_library_upload_artists(self):
         artists = self.yt_oauth.get_library_upload_artists(None)
-        self.assertGreaterEqual(len(artists), config.getint('limits', 'library_upload_artists'))
+        self.assertGreaterEqual(len(artists), config.getint("limits", "library_upload_artists"))
 
-        results = self.yt_auth.get_library_upload_artists(50, order='recently_added')
+        results = self.yt_auth.get_library_upload_artists(50, order="recently_added")
         self.assertGreaterEqual(len(results), 25)
 
         results = self.yt_empty.get_library_upload_artists(100)
         self.assertEqual(len(results), 0)
 
     def test_upload_song(self):
-        self.assertRaises(Exception, self.yt_auth.upload_song, 'song.wav')
-        self.assertRaises(Exception, self.yt_oauth.upload_song, config['uploads']['file'])
-        response = self.yt_auth.upload_song(get_resource(config['uploads']['file']))
+        self.assertRaises(Exception, self.yt_auth.upload_song, "song.wav")
+        self.assertRaises(Exception, self.yt_oauth.upload_song, config["uploads"]["file"])
+        response = self.yt_auth.upload_song(get_resource(config["uploads"]["file"]))
         self.assertEqual(response.status_code, 409)
 
     @unittest.skip("Do not delete uploads")
     def test_delete_upload_entity(self):
         results = self.yt_oauth.get_library_upload_songs()
-        response = self.yt_oauth.delete_upload_entity(results[0]['entityId'])
-        self.assertEqual(response, 'STATUS_SUCCEEDED')
+        response = self.yt_oauth.delete_upload_entity(results[0]["entityId"])
+        self.assertEqual(response, "STATUS_SUCCEEDED")
 
     def test_get_library_upload_album(self):
-        album = self.yt_oauth.get_library_upload_album(config['uploads']['private_album_id'])
-        self.assertGreater(len(album['tracks']), 0)
+        album = self.yt_oauth.get_library_upload_album(config["uploads"]["private_album_id"])
+        self.assertGreater(len(album["tracks"]), 0)
 
     def test_get_library_upload_artist(self):
-        tracks = self.yt_oauth.get_library_upload_artist(config['uploads']['private_artist_id'],
+        tracks = self.yt_oauth.get_library_upload_artist(config["uploads"]["private_artist_id"],
                                                          100)
         self.assertGreater(len(tracks), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

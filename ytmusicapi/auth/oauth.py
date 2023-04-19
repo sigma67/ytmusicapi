@@ -1,10 +1,25 @@
+import json
 import time
 from typing import Dict, Optional
-import requests
-import json
 
-from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_SCOPE, OAUTH_CODE_URL, OAUTH_TOKEN_URL, OAUTH_USER_AGENT
+import requests
+from requests.structures import CaseInsensitiveDict
+
+from ytmusicapi.constants import (OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET,
+                                  OAUTH_CODE_URL, OAUTH_SCOPE, OAUTH_TOKEN_URL,
+                                  OAUTH_USER_AGENT)
 from ytmusicapi.helpers import initialize_headers
+
+
+def is_oauth(headers: CaseInsensitiveDict) -> bool:
+    oauth_structure = {
+        "access_token",
+        "expires_at",
+        "expires_in",
+        "token_type",
+        "refresh_token",
+    }
+    return oauth_structure.issubset(headers.keys())
 
 
 class YTMusicOAuth:
@@ -26,22 +41,25 @@ class YTMusicOAuth:
         return response_json
 
     def get_token_from_code(self, device_code: str) -> Dict:
-        token_response = self._send_request(OAUTH_TOKEN_URL,
-                                            data={
-                                                "client_secret": OAUTH_CLIENT_SECRET,
-                                                "grant_type":
-                                                "http://oauth.net/grant_type/device/1.0",
-                                                "code": device_code
-                                            })
+        token_response = self._send_request(
+            OAUTH_TOKEN_URL,
+            data={
+                "client_secret": OAUTH_CLIENT_SECRET,
+                "grant_type": "http://oauth.net/grant_type/device/1.0",
+                "code": device_code,
+            },
+        )
         return token_response.json()
 
     def refresh_token(self, refresh_token: str) -> Dict:
-        response = self._send_request(OAUTH_TOKEN_URL,
-                                      data={
-                                          "client_secret": OAUTH_CLIENT_SECRET,
-                                          "grant_type": "refresh_token",
-                                          "refresh_token": refresh_token
-                                      })
+        response = self._send_request(
+            OAUTH_TOKEN_URL,
+            data={
+                "client_secret": OAUTH_CLIENT_SECRET,
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+            },
+        )
         return response.json()
 
     @staticmethod
