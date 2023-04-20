@@ -37,9 +37,6 @@ class TestYTMusic(unittest.TestCase):
             assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
         cls.yt_oauth = YTMusic(headers_oauth)
-        with open(headers_oauth, mode="r", encoding="utf8") as headers:
-            string_headers = headers.read()
-            cls.yt_oauth = YTMusic(string_headers)
         cls.yt_auth = YTMusic(headers_browser)
         cls.yt_brand = YTMusic(config["auth"]["headers"], config["auth"]["brand_account"])
         cls.yt_empty = YTMusic(config["auth"]["headers_empty"],
@@ -54,7 +51,6 @@ class TestYTMusic(unittest.TestCase):
             headers = main()
             self.assertGreaterEqual(len(headers), 2)
 
-    # @unittest.skip("Cannot test oauth flow non-interactively")
     @mock.patch("requests.Response.json")
     @mock.patch("requests.Session.post")
     @mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", headers_oauth])
@@ -67,6 +63,11 @@ class TestYTMusic(unittest.TestCase):
         with mock.patch("builtins.input", return_value="y"):
             main()
             self.assertTrue(Path(headers_oauth).exists())
+
+        json_mock.side_effect = None
+        with open(headers_oauth, mode="r", encoding="utf8") as headers:
+            string_headers = headers.read()
+            self.yt_oauth = YTMusic(string_headers)
 
     ###############
     # BROWSING

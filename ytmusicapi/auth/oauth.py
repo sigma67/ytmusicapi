@@ -1,13 +1,13 @@
 import json
 import time
+from pathlib import Path
 from typing import Dict, Optional
 
 import requests
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.constants import (OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET,
-                                  OAUTH_CODE_URL, OAUTH_SCOPE, OAUTH_TOKEN_URL,
-                                  OAUTH_USER_AGENT)
+from ytmusicapi.constants import (OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_CODE_URL,
+                                  OAUTH_SCOPE, OAUTH_TOKEN_URL, OAUTH_USER_AGENT)
 from ytmusicapi.helpers import initialize_headers
 
 
@@ -40,8 +40,14 @@ class YTMusicOAuth:
         response_json = code_response.json()
         return response_json
 
+    @staticmethod
+    def _parse_token(response) -> Dict:
+        token = response.json()
+        token["expires_at"] = int(time.time()) + int(token["expires_in"])
+        return token
+
     def get_token_from_code(self, device_code: str) -> Dict:
-        token_response = self._send_request(
+        response = self._send_request(
             OAUTH_TOKEN_URL,
             data={
                 "client_secret": OAUTH_CLIENT_SECRET,
@@ -49,7 +55,7 @@ class YTMusicOAuth:
                 "code": device_code,
             },
         )
-        return token_response.json()
+        return self._parse_token(response)
 
     def refresh_token(self, refresh_token: str) -> Dict:
         response = self._send_request(
@@ -60,11 +66,12 @@ class YTMusicOAuth:
                 "refresh_token": refresh_token,
             },
         )
-        return response.json()
+        return self._parse_token(response)
 
     @staticmethod
     def dump_token(token, filepath):
-        token["expires_at"] = int(time.time()) + int(token["expires_in"])
+        if not Path(filepath).is_file():
+            return
         with open(filepath, encoding="utf8", mode="w") as file:
             json.dump(token, file, indent=True)
 
@@ -73,8 +80,7 @@ class YTMusicOAuth:
         url = f"{code['verification_url']}?user_code={code['user_code']}"
         input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
         token = self.get_token_from_code(code["device_code"])
-        if filepath:
-            self.dump_token(token, filepath)
+        self.dump_token(token, filepath)
 
         return token
 
