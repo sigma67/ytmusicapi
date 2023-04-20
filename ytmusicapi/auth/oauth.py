@@ -1,6 +1,5 @@
 import json
 import time
-from pathlib import Path
 from typing import Dict, Optional
 
 import requests
@@ -69,8 +68,8 @@ class YTMusicOAuth:
         return self._parse_token(response)
 
     @staticmethod
-    def dump_token(token, filepath):
-        if not Path(filepath).is_file():
+    def dump_token(token: Dict, filepath: Optional[str]):
+        if not filepath or len(filepath) > 255:
             return
         with open(filepath, encoding="utf8", mode="w") as file:
             json.dump(token, file, indent=True)

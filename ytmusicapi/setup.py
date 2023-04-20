@@ -52,7 +52,7 @@ def parse_args(args):
 
 def main():
     args = parse_args(sys.argv[1:])
-    filename = args.file if args.file else f"{args.setup_type}.json"
+    filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
     print(f"Creating {filename} with your authentication credentials...")
     func = setup_oauth if args.setup_type == "oauth" else setup
     return func(filename)
