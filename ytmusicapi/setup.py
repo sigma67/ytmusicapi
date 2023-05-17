@@ -24,7 +24,8 @@ def setup(filepath: str = None, headers_raw: str = None) -> Dict:
 
 def setup_oauth(filepath: str = None,
                 session: requests.Session = None,
-                proxies: dict = None) -> Dict:
+                proxies: dict = None,
+                open_browser: bool = False) -> Dict:
     """
     Starts oauth flow from the terminal
     and returns a string that can be passed to YTMusic()
@@ -32,12 +33,13 @@ def setup_oauth(filepath: str = None,
     :param session: Session to use for authentication
     :param proxies: Proxies to use for authentication
     :param filepath: Optional filepath to store headers to.
+    :param open_browser: If True, open the default browser with the setup link
     :return: configuration headers string
     """
     if not session:
         session = requests.Session()
 
-    return YTMusicOAuth(session, proxies).setup(filepath)
+    return YTMusicOAuth(session, proxies).setup(filepath, open_browser)
 
 
 def parse_args(args):
@@ -54,5 +56,7 @@ def main():
     args = parse_args(sys.argv[1:])
     filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
     print(f"Creating {filename} with your authentication credentials...")
-    func = setup_oauth if args.setup_type == "oauth" else setup
-    return func(filename)
+    if args.setup_type == "oauth":
+        return setup_oauth(filename, open_browser=True)
+    else:
+        return setup(filename)

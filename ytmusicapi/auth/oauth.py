@@ -1,5 +1,6 @@
 import json
 import time
+import webbrowser
 from typing import Dict, Optional
 
 import requests
@@ -74,9 +75,11 @@ class YTMusicOAuth:
         with open(filepath, encoding="utf8", mode="w") as file:
             json.dump(token, file, indent=True)
 
-    def setup(self, filepath: Optional[str] = None) -> Dict:
+    def setup(self, filepath: Optional[str] = None, open_browser: bool = False) -> Dict:
         code = self.get_code()
         url = f"{code['verification_url']}?user_code={code['user_code']}"
+        if open_browser:
+            webbrowser.open(url)
         input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
         token = self.get_token_from_code(code["device_code"])
         self.dump_token(token, filepath)
