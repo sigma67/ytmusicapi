@@ -29,8 +29,6 @@ It emulates YouTube Music web client requests using the user's cookie data for a
 
 Features
 --------
-At this point ytmusicapi supports nearly all content interactions in the YouTube Music web app.
-If you find something missing or broken, feel free to create an `issue <https://github.com/sigma67/ytmusicapi/issues/new>`_
 
 | **Browsing**:
 
@@ -65,6 +63,9 @@ If you find something missing or broken, feel free to create an `issue <https://
 * upload songs and remove them again
 * list uploaded songs, artists and albums
 
+If you find something missing or broken,
+check the `FAQ <https://ytmusicapi.readthedocs.io/en/stable/faq.html>`__ or
+feel free to create an `issue <https://github.com/sigma67/ytmusicapi/issues/new/choose>`__.
 
 Usage
 ------
