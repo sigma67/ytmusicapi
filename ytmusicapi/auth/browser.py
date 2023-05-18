@@ -10,7 +10,7 @@ path = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
 def is_browser(headers: CaseInsensitiveDict) -> bool:
     browser_structure = {"authorization", "cookie"}
-    return browser_structure.issubset(headers.keys())
+    return all(key in headers for key in browser_structure)
 
 
 def setup_browser(filepath=None, headers_raw=None):
