@@ -19,7 +19,7 @@ def is_oauth(headers: CaseInsensitiveDict) -> bool:
         "token_type",
         "refresh_token",
     }
-    return oauth_structure.issubset(headers.keys())
+    return all(key in headers for key in oauth_structure)
 
 
 class YTMusicOAuth:
