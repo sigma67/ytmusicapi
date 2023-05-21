@@ -391,14 +391,15 @@ class TestYTMusic(unittest.TestCase):
     def test_get_foreign_playlist(self):
         self.assertRaises(Exception, self.yt.get_playlist, "PLABC")
         playlist = self.yt.get_playlist(sample_playlist, limit=300, suggestions_limit=7)
+        self.assertGreater(len(playlist['duration']), 5)
         self.assertGreater(len(playlist["tracks"]), 200)
         self.assertNotIn("suggestions", playlist)
 
-        playlist = self.yt.get_playlist("RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4",
-                                        limit=None,
-                                        related=True)
-        self.assertGreater(len(playlist["tracks"]), 100)
-        self.assertEqual(len(playlist["related"]), 10)
+        playlist = self.yt_oauth.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk",
+                                              limit=None,
+                                              related=True)
+        self.assertGreater(len(playlist["tracks"]), 200)
+        self.assertEqual(len(playlist["related"]), 0)
 
     def test_get_owned_playlist(self):
         playlist = self.yt_brand.get_playlist(config["playlists"]["own"],

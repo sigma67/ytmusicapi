@@ -133,20 +133,20 @@ class PlaylistsMixin:
                 playlist['year'] = nav(header, SUBTITLE3)
 
         second_subtitle_runs = header['secondSubtitle']['runs']
-        own_offset = (own_playlist and len(second_subtitle_runs) > 3) * 2
-        song_count = to_int(second_subtitle_runs[own_offset]['text'])
-        if len(second_subtitle_runs) > 1:
-            playlist['duration'] = second_subtitle_runs[own_offset + 2]['text']
 
+        has_views = (len(second_subtitle_runs) > 3) * 2
+        playlist['views'] = None if not has_views else to_int(second_subtitle_runs[0]['text'])
+        has_duration = (len(second_subtitle_runs) > 1) * 2
+        playlist['duration'] = None if not has_duration else second_subtitle_runs[has_views + has_duration]['text']
+        song_count = second_subtitle_runs[has_views + 0]['text'].split(" ")
+        song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
         playlist['trackCount'] = song_count
-        playlist['views'] = None
-        if own_playlist:
-            playlist['views'] = to_int(second_subtitle_runs[0]['text'])
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
+        playlist['related'] = []
         if 'continuations' in section_list:
             additionalParams = get_continuation_params(section_list)
             if own_playlist and (suggestions_limit > 0 or related):
@@ -168,23 +168,21 @@ class PlaylistsMixin:
 
             if related:
                 response = request_func(additionalParams)
-                continuation = nav(response, SECTION_LIST_CONTINUATION)
-                parse_func = lambda results: parse_content_list(results, parse_playlist)
-                playlist['related'] = get_continuation_contents(
-                    nav(continuation, CONTENT + CAROUSEL), parse_func)
+                continuation = nav(response, SECTION_LIST_CONTINUATION, True)
+                if continuation:
+                    parse_func = lambda results: parse_content_list(results, parse_playlist)
+                    playlist['related'] = get_continuation_contents(
+                        nav(continuation, CONTENT + CAROUSEL), parse_func)
 
-        if song_count > 0:
+        playlist['tracks'] = []
+        if 'contents' in results:
             playlist['tracks'] = parse_playlist_items(results['contents'])
-            if limit is None:
-                limit = song_count
-            songs_to_get = min(limit, song_count)
 
             parse_func = lambda contents: parse_playlist_items(contents)
             if 'continuations' in results:
                 playlist['tracks'].extend(
-                    get_continuations(results, 'musicPlaylistShelfContinuation',
-                                      songs_to_get - len(playlist['tracks']), request_func,
-                                      parse_func))
+                    get_continuations(results, 'musicPlaylistShelfContinuation', limit,
+                                      request_func, parse_func))
 
         playlist['duration_seconds'] = sum_total_duration(playlist)
         return playlist
