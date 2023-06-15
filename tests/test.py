@@ -37,7 +37,7 @@ class TestYTMusic(unittest.TestCase):
             assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
         cls.yt_oauth = YTMusic(headers_oauth)
-        cls.yt_auth = YTMusic(headers_browser)
+        cls.yt_auth = YTMusic(headers_browser, location="GB")
         cls.yt_brand = YTMusic(config["auth"]["headers"], config["auth"]["brand_account"])
         cls.yt_empty = YTMusic(config["auth"]["headers_empty"],
                                config["auth"]["brand_account_empty"])
