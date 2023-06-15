@@ -22,6 +22,11 @@ def is_oauth(headers: CaseInsensitiveDict) -> bool:
     return all(key in headers for key in oauth_structure)
 
 
+def is_custom_oauth(headers: CaseInsensitiveDict) -> bool:
+    """Checks whether the headers contain a Bearer token, indicating a custom OAuth implementation."""
+    return "authorization" in headers and headers["authorization"].startswith("Bearer ")
+
+
 class YTMusicOAuth:
     """OAuth implementation for YouTube Music based on YouTube TV"""
 
