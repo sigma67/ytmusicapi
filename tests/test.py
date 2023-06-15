@@ -162,8 +162,8 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 0)
 
     def test_get_artist_singles(self):
-        artist = self.yt_auth.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
-        results = self.yt_auth.get_artist_albums(artist["singles"]["browseId"],
+        artist = self.yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
+        results = self.yt.get_artist_albums(artist["singles"]["browseId"],
                                                  artist["singles"]["params"])
         self.assertGreater(len(results), 0)
 
