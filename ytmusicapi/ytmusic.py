@@ -30,7 +30,8 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                  user: str = None,
                  requests_session=True,
                  proxies: dict = None,
-                 language: str = 'en'):
+                 language: str = 'en',
+                 location: str = ''):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -62,6 +63,9 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         :param language: Optional. Can be used to change the language of returned data.
             English will be used by default. Available languages can be checked in
             the ytmusicapi/locales directory.
+        :param location: Optional. Can be used to change the location of the user.
+            No location will be set by default. This means it is determined by the server.
+            Available languages can be checked in the FAQ.
         """
         self.auth = auth
 
@@ -84,18 +88,24 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
         # prepare context
         self.context = initialize_context()
-        self.context['context']['client']['hl'] = language
-        locale_dir = os.path.abspath(os.path.dirname(__file__)) + os.sep + 'locales'
-        supported_languages = [f for f in next(os.walk(locale_dir))[1]]
-        if language not in supported_languages:
+
+        if location:
+            if location not in SUPPORTED_LOCATIONS:
+                raise Exception("Location not supported. Check the FAQ for supported locations.")
+            self.context['context']['client']['gl'] = location
+
+        if language not in SUPPORTED_LANGUAGES:
             raise Exception("Language not supported. Supported languages are "
-                            + (', '.join(supported_languages)) + ".")
+                            + (', '.join(SUPPORTED_LANGUAGES)) + ".")
+        self.context['context']['client']['hl'] = language
         self.language = language
         try:
             locale.setlocale(locale.LC_ALL, self.language)
         except locale.Error:
             with suppress(locale.Error):
                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+        locale_dir = os.path.abspath(os.path.dirname(__file__)) + os.sep + 'locales'
         self.lang = gettext.translation('base', localedir=locale_dir, languages=[language])
         self.parser = Parser(self.lang)
 
