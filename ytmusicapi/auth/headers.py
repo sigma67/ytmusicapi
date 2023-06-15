@@ -6,7 +6,7 @@ import requests
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.auth.browser import is_browser
-from ytmusicapi.auth.oauth import YTMusicOAuth, is_oauth
+from ytmusicapi.auth.oauth import YTMusicOAuth, is_oauth, is_custom_oauth
 from ytmusicapi.helpers import initialize_headers
 
 
@@ -34,6 +34,9 @@ def prepare_headers(
             headers = oauth.load_headers(dict(input_dict), auth)
 
         elif is_browser(input_dict):
+            headers = input_dict
+
+        elif is_custom_oauth(input_dict):
             headers = input_dict
 
         else:
