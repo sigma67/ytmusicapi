@@ -127,7 +127,6 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         input_json = load_headers_file(self.auth)
         input_dict = CaseInsensitiveDict(input_json)
         if is_oauth(input_dict):
-            print("WAZZZIPP BOY")
             self.headers = prepare_headers(self._session, self.proxies, self.auth)
         body.update(self.context)
         params = YTM_PARAMS
