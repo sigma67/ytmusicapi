@@ -5,7 +5,8 @@ from functools import partial
 from contextlib import suppress
 from typing import Dict
 
-from ytmusicapi.auth.headers import prepare_headers
+from requests.structures import CaseInsensitiveDict
+from ytmusicapi.auth.headers import prepare_headers, load_headers_file
 from ytmusicapi.parsers.i18n import Parser
 from ytmusicapi.helpers import *
 from ytmusicapi.mixins.browsing import BrowsingMixin
@@ -15,6 +16,7 @@ from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
+from ytmusicapi.auth.oauth import is_oauth
 
 
 class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
@@ -122,6 +124,11 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
 
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+        input_json = load_headers_file(self.auth)
+        input_dict = CaseInsensitiveDict(input_json)
+        if is_oauth(input_dict):
+            print("WAZZZIPP BOY")
+            self.headers = prepare_headers(self._session, self.proxies, self.auth)
         body.update(self.context)
         params = YTM_PARAMS
         if self.is_browser_auth:
