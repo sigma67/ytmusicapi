@@ -132,6 +132,8 @@ class PlaylistsMixin:
             if run_count == 5:
                 playlist['year'] = nav(header, SUBTITLE3)
 
+        playlist['views'] = None
+        playlist['duration'] = None
         if 'runs' in header['secondSubtitle']:
             second_subtitle_runs = header['secondSubtitle']['runs']
             has_views = (len(second_subtitle_runs) > 3) * 2
