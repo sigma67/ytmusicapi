@@ -24,13 +24,13 @@ def prepare_headers(
     session: requests.Session,
     proxies: Optional[Dict] = None,
     auth: Optional[str] = None,
+    oauth: Optional[YTMusicOAuth] = None
 ) -> Dict:
     if auth:
         input_json = load_headers_file(auth)
         input_dict = CaseInsensitiveDict(input_json)
 
         if is_oauth(input_dict):
-            oauth = YTMusicOAuth(session, proxies)
             headers = oauth.load_headers(dict(input_dict), auth)
 
         elif is_browser(input_dict):

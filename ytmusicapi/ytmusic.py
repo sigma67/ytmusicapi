@@ -6,7 +6,7 @@ from contextlib import suppress
 from typing import Dict
 
 from requests.structures import CaseInsensitiveDict
-from ytmusicapi.auth.headers import prepare_headers, load_headers_file
+from ytmusicapi.auth.headers import load_headers_file, prepare_headers
 from ytmusicapi.parsers.i18n import Parser
 from ytmusicapi.helpers import *
 from ytmusicapi.mixins.browsing import BrowsingMixin
@@ -16,7 +16,7 @@ from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
-from ytmusicapi.auth.oauth import is_oauth
+from ytmusicapi.auth.oauth import YTMusicOAuth, is_oauth
 
 
 class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
@@ -83,7 +83,13 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         self.proxies = proxies
         self.cookies = {'CONSENT': 'YES+1'}
 
-        self.headers = prepare_headers(self._session, proxies, auth)
+        input_json = load_headers_file(self.auth)
+        self.input_dict = CaseInsensitiveDict(input_json)
+        self.is_oauth_auth = is_oauth(self.input_dict)
+        if self.is_oauth_auth:
+            self.ytmusic_oauth = YTMusicOAuth(self._session, self.proxies)
+
+        self.headers = prepare_headers(self._session, proxies, auth, self.ytmusic_oauth)
 
         if 'x-goog-visitor-id' not in self.headers:
             self.headers.update(get_visitor_id(self._send_get_request))
@@ -123,11 +129,12 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
 
+
+
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
-        input_json = load_headers_file(self.auth)
-        input_dict = CaseInsensitiveDict(input_json)
-        if is_oauth(input_dict):
-            self.headers = prepare_headers(self._session, self.proxies, self.auth)
+
+        if self.is_oauth_auth and self.ytmusic_oauth is not None:
+            self.headers = self.ytmusic_oauth.load_headers(dict(self.input_dict), self.auth)
         body.update(self.context)
         params = YTM_PARAMS
         if self.is_browser_auth:
