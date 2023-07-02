@@ -140,8 +140,11 @@ class PlaylistsMixin:
             playlist['views'] = None if not has_views else to_int(second_subtitle_runs[0]['text'])
             has_duration = (len(second_subtitle_runs) > 1) * 2
             playlist['duration'] = None if not has_duration else second_subtitle_runs[has_views + has_duration]['text']
-        
-        song_count = len(results['contents'])
+            song_count = second_subtitle_runs[has_views + 0]['text'].split(" ")
+            song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
+        else:
+            song_count = len(results['contents'])
+
         playlist['trackCount'] = song_count
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
