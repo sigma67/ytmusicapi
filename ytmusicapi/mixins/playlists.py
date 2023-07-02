@@ -132,14 +132,16 @@ class PlaylistsMixin:
             if run_count == 5:
                 playlist['year'] = nav(header, SUBTITLE3)
 
-        second_subtitle_runs = header['secondSubtitle']['runs']
-
-        has_views = (len(second_subtitle_runs) > 3) * 2
-        playlist['views'] = None if not has_views else to_int(second_subtitle_runs[0]['text'])
-        has_duration = (len(second_subtitle_runs) > 1) * 2
-        playlist['duration'] = None if not has_duration else second_subtitle_runs[has_views + has_duration]['text']
-        song_count = second_subtitle_runs[has_views + 0]['text'].split(" ")
-        song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
+        playlist['views'] = None
+        playlist['duration'] = None
+        if 'runs' in header['secondSubtitle']:
+            second_subtitle_runs = header['secondSubtitle']['runs']
+            has_views = (len(second_subtitle_runs) > 3) * 2
+            playlist['views'] = None if not has_views else to_int(second_subtitle_runs[0]['text'])
+            has_duration = (len(second_subtitle_runs) > 1) * 2
+            playlist['duration'] = None if not has_duration else second_subtitle_runs[has_views + has_duration]['text']
+        
+        song_count = len(results['contents'])
         playlist['trackCount'] = song_count
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
