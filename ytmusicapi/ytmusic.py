@@ -70,6 +70,8 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             Available languages can be checked in the FAQ.
         """
         self.auth = auth
+        self.input_dict = None
+        self.is_oauth_auth = False
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
@@ -82,11 +84,11 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
         self.proxies = proxies
         self.cookies = {'CONSENT': 'YES+1'}
-
-        input_json = load_headers_file(self.auth)
-        self.input_dict = CaseInsensitiveDict(input_json)
-        self.input_dict['filepath'] = self.auth
-        self.is_oauth_auth = is_oauth(self.input_dict)
+        if self.auth is not None:
+            input_json = load_headers_file(self.auth)
+            self.input_dict = CaseInsensitiveDict(input_json)
+            self.input_dict['filepath'] = self.auth
+            self.is_oauth_auth = is_oauth(self.input_dict)
 
         self.headers = prepare_headers(self._session, proxies, self.input_dict)
 
