@@ -8,7 +8,7 @@ def parse_uploaded_items(results):
         data = result[MRLIR]
         if 'menu' not in data:
             continue
-        entityId = nav(data, MENU_ITEMS)[-1]['menuNavigationItemRenderer']['navigationEndpoint'][
+        entityId = nav(data, MENU_ITEMS)[-2]['menuNavigationItemRenderer']['navigationEndpoint'][
             'confirmDialogEndpoint']['content']['confirmDialogRenderer']['confirmButton'][
                 'buttonRenderer']['command']['musicDeletePrivatelyOwnedEntityCommand']['entityId']
 
