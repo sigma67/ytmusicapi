@@ -5,9 +5,7 @@ from ._utils import *
 
 def parse_playlist_items(results, menu_entries: List[List] = None):
     songs = []
-    count = 1
     for result in results:
-        count += 1
         if MRLIR not in result:
             continue
         data = result[MRLIR]
