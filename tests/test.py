@@ -137,6 +137,18 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(results), 1)
         results = self.yt_auth.search("garrix", filter="playlists", scope="library")
         self.assertGreaterEqual(len(results), 1)
+        self.assertRaises(Exception,
+                          self.yt_auth.search,
+                          "beatles",
+                          filter="community_playlists",
+                          scope="library",
+                          limit=40)
+        self.assertRaises(Exception,
+                          self.yt_auth.search,
+                          "beatles",
+                          filter="featured_playlists",
+                          scope="library",
+                          limit=40)
 
     def test_get_artist(self):
         results = self.yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
@@ -164,7 +176,7 @@ class TestYTMusic(unittest.TestCase):
     def test_get_artist_singles(self):
         artist = self.yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
         results = self.yt.get_artist_albums(artist["singles"]["browseId"],
-                                                 artist["singles"]["params"])
+                                            artist["singles"]["params"])
         self.assertGreater(len(results), 0)
 
     def test_get_user(self):
