@@ -147,9 +147,9 @@ class SearchMixin:
 
         if scope == scopes[0] and filter in filters[3:5]:
             raise Exception(
-                "Community Playlists and Featured Playlists filters cannot be set when searching library. "
-                "Please use one of the following filters or leave out the parameter: "
-                "albums, artists, playlists, songs, videos")
+                f"{filter} cannot be set when searching library. "
+                f"Please use one of the following filters or leave out the parameter: "
+                + ', '.join(filters[0:3]+filters[5:]))
 
         params = get_search_params(filter, scope, ignore_spelling)
         if params:
