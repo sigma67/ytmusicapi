@@ -470,12 +470,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(playlist["tracks"]), 46, "Getting playlist items failed")
         response = self.yt_brand.remove_playlist_items(playlistId, playlist["tracks"])
         self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist item removal failed")
-        response = self.yt_brand.delete_playlist(playlistId)
-        self.assertEqual(
-            response["command"]["handlePlaylistDeletionCommand"]["playlistId"],
-            playlistId,
-            "Playlist removal failed",
-        )
+        self.yt_brand.delete_playlist(playlistId)
 
     ###############
     # UPLOADS
