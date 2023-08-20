@@ -20,7 +20,7 @@ To do so, follow these steps:
 .. raw:: html
 
    <details open>
-   <summary><a>Firefox</a></summary>
+   <summary><a>Firefox (recommended)</a></summary>
 
 .. container::
 

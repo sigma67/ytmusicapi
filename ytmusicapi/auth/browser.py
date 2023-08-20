@@ -29,11 +29,19 @@ def setup_browser(filepath=None, headers_raw=None):
 
     try:
         user_headers = {}
+        chrome_remembered_key = ""
         for content in contents:
             header = content.split(": ")
-            if len(header) == 1 or header[0].startswith(
-                    ":"):  # nothing was split or chromium headers
+            if header[0].startswith(":"):  # nothing was split or chromium headers
                 continue
+            if header[0].endswith(":"):  # pragma: no cover
+                # weird new chrome "copy-paste in separate lines" format
+                chrome_remembered_key = content.replace(":", "")
+            if len(header) == 1:
+                if chrome_remembered_key:  # pragma: no cover
+                    user_headers[chrome_remembered_key] = header[0]
+                continue
+
             user_headers[header[0].lower()] = ": ".join(header[1:])
 
     except Exception as e:
