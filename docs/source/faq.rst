@@ -49,6 +49,13 @@ Can I download songs?
 ***********************************************************************
 You can use `youtube-dl <https://github.com/ytdl-org/youtube-dl/>`_ for this purpose.
 
+How do I package ytmusicapi with ``pyinstaller``?
+*************************************************
+
+To package ytmusicapi correctly, you need to add the locales files to your executable.
+
+You can use ``--add-data path-to-ytmusicapi/locales`` or ``--collect-all ytmusicapi`` to accomplish this.
+
 
 YouTube Music API Internals
 ------------------------------
@@ -93,10 +100,70 @@ indicates the server-side pagination increment. ytmusicapi will keep fetching co
 reached at least the ``limit`` parameter, and return all of these results.
 
 
+Which values can I use for languages?
+*************************************
+
+The `language` parameter determines the language of the returned results.
+``ytmusicapi`` only supports a subset of the languages supported by YouTube Music, as translations need to be done manually.
+Contributions are welcome, see `here for instructions <https://github.com/sigma67/ytmusicapi/tree/master/ytmusicapi/locales>`__.
+
+For the list of values you can use for the ``language`` parameter, see below:
+
+.. raw:: html
+
+   <details>
+   <summary><a>Supported locations</a></summary>
+
+.. container::
+
+    .. list-table::
+
+        * - Language
+          - Value
+        * - Arabic
+          - ar
+        * - German
+          - de
+        * - English (default)
+          - en
+        * - Spanish
+          - es
+        * - French
+          - fr
+        * - Hindi
+          - hi
+        * - Italian
+          - it
+        * - Japanese
+          - ja
+        * - Korean
+          - ko
+        * - Dutch
+          - nl
+        * - Portuguese
+          - pt
+        * - Russian
+          - ru
+        * - Turkish
+          - tr
+        * - Urdu
+          - ur
+        * - Chinese (Mainland)
+          - zh_CN
+        * - Chinese (Taiwan)
+          - zh_TW
+
+
+.. raw:: html
+
+   </details>
+
+
+
 Which values can I use for locations?
 *************************************
 
-Pick a value from the list below for your desired location and pass it using the `location` parameter.
+Pick a value from the list below for your desired location and pass it using the ``location`` parameter.
 
 .. raw:: html
 

@@ -63,9 +63,16 @@ Features
 * upload songs and remove them again
 * list uploaded songs, artists and albums
 
+| **Localization**:
+
+* all regions are supported (see `locations FAQ <https://ytmusicapi.readthedocs.io/en/stable/faq.html#which-values-can-i-use-for-locations>`__
+* 16 languages are supported (see `languages FAQ <https://ytmusicapi.readthedocs.io/en/stable/faq.html#which-values-can-i-use-for-languages>`__
+
+
 If you find something missing or broken,
 check the `FAQ <https://ytmusicapi.readthedocs.io/en/stable/faq.html>`__ or
 feel free to create an `issue <https://github.com/sigma67/ytmusicapi/issues/new/choose>`__.
+
 
 Usage
 ------
