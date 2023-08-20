@@ -13,7 +13,7 @@ class Parser:
 
     @i18n
     def get_search_result_types(self):
-        return [_('artist'), _('playlist'), _('song'), _('video'), _('station')]
+        return [_('artist'), _('playlist'), _('song'), _('video'), _('station'), _('profile')]
 
     @i18n
     def parse_artist_contents(self, results: List) -> Dict:

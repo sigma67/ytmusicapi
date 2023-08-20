@@ -93,26 +93,37 @@ class TestYTMusic(unittest.TestCase):
                 self.assertGreater(len(results), 10)
         results = self.yt_auth.search("Martin Stig Andersen - Deteriation", ignore_spelling=True)
         self.assertGreater(len(results), 0)
+
+    def test_search_filters(self):
+        query = "hip hop playlist"
         results = self.yt_auth.search(query, filter="songs")
-        self.assertListEqual([r["resultType"] for r in results], ["song"] * len(results))
         self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'song' for item in results))
         results = self.yt_auth.search(query, filter="videos")
         self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'video' for item in results))
         results = self.yt_auth.search(query, filter="albums", limit=40)
-        self.assertListEqual([r["resultType"] for r in results], ["album"] * len(results))
         self.assertGreater(len(results), 20)
+        self.assertTrue(all(item['resultType'] == 'album' for item in results))
         results = self.yt_auth.search("project-2", filter="artists", ignore_spelling=True)
-        self.assertGreater(len(results), 0)
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'artist' for item in results))
         results = self.yt_auth.search("classical music", filter="playlists")
-        self.assertGreater(len(results), 5)
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'playlist' for item in results))
         results = self.yt_auth.search("clasical music", filter="playlists", ignore_spelling=True)
-        self.assertGreater(len(results), 5)
+        self.assertGreater(len(results), 10)
         results = self.yt_auth.search("clasic rock",
                                       filter="community_playlists",
                                       ignore_spelling=True)
-        self.assertGreater(len(results), 5)
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'playlist' for item in results))
         results = self.yt_auth.search("hip hop", filter="featured_playlists")
-        self.assertGreater(len(results), 5)
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'playlist' for item in results))
+        results = self.yt_auth.search("some user", filter="profiles")
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'profile' for item in results))
 
     def test_search_uploads(self):
         self.assertRaises(

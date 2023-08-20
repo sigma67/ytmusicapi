@@ -1,5 +1,5 @@
 # Translations for ytmusicapi
-# Copyright (C) 2021 sigma67
+# Copyright (C) 2023 sigma67
 # This file is distributed under the same license as ytmusicapi
 # sigma67 <ytmusicapi@gmail.com>
 # 
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-24 13:13+0100\n"
+"POT-Creation-Date: 2023-08-20 16:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,42 +17,46 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: parsers/browsing.py:22
+#: parsers/i18n.py:16
 msgid "artist"
 msgstr "künstler"
 
-#: parsers/browsing.py:22
+#: parsers/i18n.py:16
 msgid "playlist"
 msgstr "playlist"
 
-#: parsers/browsing.py:23
+#: parsers/i18n.py:16
 msgid "song"
 msgstr "titel"
 
-#: parsers/browsing.py:23
+#: parsers/i18n.py:16
 msgid "video"
 msgstr "video"
 
-#: parsers/browsing.py:24
+#: parsers/i18n.py:16
 msgid "station"
 msgstr "sender"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:16
+msgid "profile"
+msgstr "profil"
+
+#: parsers/i18n.py:21
 msgid "albums"
 msgstr "alben"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "singles"
 msgstr "singles"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "videos"
 msgstr "videos"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "playlists"
 msgstr "playlists"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "related"
 msgstr "das könnte fans auch gefallen"

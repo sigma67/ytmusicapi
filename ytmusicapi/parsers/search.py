@@ -5,7 +5,7 @@ from ._utils import *
 def get_search_result_type(result_type_local, result_types_local):
     if not result_type_local:
         return None
-    result_types = ['artist', 'playlist', 'song', 'video', 'station']
+    result_types = ['artist', 'playlist', 'song', 'video', 'station', 'profile']
     result_type_local = result_type_local.lower()
     # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
     if result_type_local not in result_types_local:
@@ -67,14 +67,17 @@ def parse_search_result(data, search_result_types, result_type, category):
     elif result_type == 'playlist':
         flex_item = get_flex_column_item(data, 1)['text']['runs']
         has_author = len(flex_item) == default_offset + 3
-        search_result['itemCount'] = nav(flex_item,
-                                         [default_offset + has_author * 2, 'text']).split(' ')[0]
-        search_result['author'] = None if not has_author else nav(flex_item,
-                                                                  [default_offset, 'text'])
+        search_result['itemCount'] = get_item_text(data, 1,
+                                                   default_offset + has_author * 2).split(' ')[0]
+        search_result['author'] = None if not has_author else get_item_text(
+            data, 1, default_offset)
 
     elif result_type == 'station':
         search_result['videoId'] = nav(data, NAVIGATION_VIDEO_ID)
         search_result['playlistId'] = nav(data, NAVIGATION_PLAYLIST_ID)
+
+    elif result_type == 'profile':
+        search_result['name'] = get_item_text(data, 1, 2)
 
     elif result_type == 'song':
         search_result['album'] = None
@@ -124,7 +127,7 @@ def parse_search_result(data, search_result_types, result_type, category):
         song_info = parse_song_runs(runs)
         search_result.update(song_info)
 
-    if result_type in ['artist', 'album', 'playlist']:
+    if result_type in ['artist', 'album', 'playlist', 'profile']:
         search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID, True)
 
     if result_type in ['song', 'album']:
@@ -143,7 +146,7 @@ def parse_search_results(results, search_result_types, resultType=None, category
 
 
 def get_search_params(filter, scope, ignore_spelling):
-    filtered_param1 = 'EgWKAQI'
+    filtered_param1 = 'EgWKAQ'
     params = None
     if filter is None and scope is None and not ignore_spelling:
         return params
@@ -194,7 +197,14 @@ def get_search_params(filter, scope, ignore_spelling):
 
 
 def _get_param2(filter):
-    filter_params = {'songs': 'I', 'videos': 'Q', 'albums': 'Y', 'artists': 'g', 'playlists': 'o'}
+    filter_params = {
+        'songs': 'II',
+        'videos': 'IQ',
+        'albums': 'IY',
+        'artists': 'Ig',
+        'playlists': 'Io',
+        'profiles': 'JY'
+    }
     return filter_params[filter]
 
 

@@ -117,6 +117,14 @@ class SearchMixin:
                 "artist": "Oasis",
                 "shuffleId": "RDAOkjHYJjL1a3xspEyVkhHAsg",
                 "radioId": "RDEMkjHYJjL1a3xspEyVkhHAsg"
+              },
+              {
+                "category": "Profiles",
+                "resultType": "profile",
+                "title": "Taylor Swift Time",
+                "name": "@TaylorSwiftTime",
+                "browseId": "UCSCRK7XlVQ6fBdEl00kX6pQ",
+                "thumbnails": ...
               }
             ]
 
@@ -127,7 +135,7 @@ class SearchMixin:
         search_results = []
         filters = [
             'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs',
-            'videos'
+            'videos', 'profiles'
         ]
         if filter and filter not in filters:
             raise Exception(
@@ -148,7 +156,7 @@ class SearchMixin:
         if scope == scopes[0] and filter in filters[3:5]:
             raise Exception(f"{filter} cannot be set when searching library. "
                             f"Please use one of the following filters or leave out the parameter: "
-                            + ', '.join(filters[0:3]+filters[5:]))
+                            + ', '.join(filters[0:3] + filters[5:]))
 
         params = get_search_params(filter, scope, ignore_spelling)
         if params:

@@ -1,13 +1,13 @@
 # Translations for ytmusicapi
-# Copyright (C) 2021 sigma67
+# Copyright (C) 2023 sigma67
 # This file is distributed under the same license as ytmusicapi
 # sigma67 <ytmusicapi@gmail.com>
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-24 13:13+0100\n"
+"POT-Creation-Date: 2023-08-20 16:00+0200\n"
 "PO-Revision-Date: 2023-01-02 22:18+0530\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,42 +17,46 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: parsers/browsing.py:22
+#: parsers/i18n.py:16
 msgid "artist"
 msgstr "فنکار"
 
-#: parsers/browsing.py:22
+#: parsers/i18n.py:16
 msgid "playlist"
 msgstr "پلے لسٹ"
 
-#: parsers/browsing.py:23
+#: parsers/i18n.py:16
 msgid "song"
 msgstr "نغمہ"
 
-#: parsers/browsing.py:23
+#: parsers/i18n.py:16
 msgid "video"
 msgstr "ویڈیو"
 
-#: parsers/browsing.py:24
+#: parsers/i18n.py:16
 msgid "station"
 msgstr "اسٹیشن"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:16
+msgid "profile"
+msgstr "پروفائ"
+
+#: parsers/i18n.py:21
 msgid "albums"
 msgstr "البمز"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "singles"
 msgstr "سنگلز"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "videos"
 msgstr "ویڈیوز"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "playlists"
 msgstr "پلے لسٹس"
 
-#: parsers/browsing.py:128
+#: parsers/i18n.py:21
 msgid "related"
 msgstr "متعلقہ"
