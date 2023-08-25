@@ -77,7 +77,7 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result['playlistId'] = nav(data, NAVIGATION_PLAYLIST_ID)
 
     elif result_type == 'profile':
-        search_result['name'] = get_item_text(data, 1, 2)
+        search_result['name'] = get_item_text(data, 1, 2, True)
 
     elif result_type == 'song':
         search_result['album'] = None
