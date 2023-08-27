@@ -83,7 +83,7 @@ class TestYTMusic(unittest.TestCase):
         query = "edm playlist"
         self.assertRaises(Exception, self.yt_auth.search, query, filter="song")
         self.assertRaises(Exception, self.yt_auth.search, query, scope="upload")
-        queries = ["taylor swift", "taylor swift blank space", "taylor swift fearless"]
+        queries = ["Maylssi", "qllwlwl", "heun"]
         for q in queries:
             with self.subTest():
                 results = self.yt_brand.search(q)
@@ -413,7 +413,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_playlist_foreign(self):
         self.assertRaises(Exception, self.yt.get_playlist, "PLABC")
-        playlist = self.yt.get_playlist(sample_playlist, limit=300, suggestions_limit=7)
+        playlist = self.yt.get_playlist("PLPK7133-0ahmzknIfvNUMNJglX-O1rTd2", limit=300, suggestions_limit=7)
         self.assertGreater(len(playlist['duration']), 5)
         self.assertGreater(len(playlist["tracks"]), 200)
         self.assertNotIn("suggestions", playlist)
