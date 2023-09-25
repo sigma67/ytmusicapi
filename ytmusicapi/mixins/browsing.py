@@ -253,10 +253,7 @@ class BrowsingMixin:
         endpoint = 'browse'
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
-        if 'gridRenderer' in results:
-            results = nav(results, GRID_ITEMS)
-        else:
-            results = nav(results, CAROUSEL_CONTENTS)
+        results = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
         albums = parse_albums(results)
 
         return albums
