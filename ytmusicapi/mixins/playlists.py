@@ -139,7 +139,8 @@ class PlaylistsMixin:
             has_views = (len(second_subtitle_runs) > 3) * 2
             playlist['views'] = None if not has_views else to_int(second_subtitle_runs[0]['text'])
             has_duration = (len(second_subtitle_runs) > 1) * 2
-            playlist['duration'] = None if not has_duration else second_subtitle_runs[has_views + has_duration]['text']
+            playlist['duration'] = None if not has_duration else second_subtitle_runs[
+                has_views + has_duration]['text']
             song_count = second_subtitle_runs[has_views + 0]['text'].split(" ")
             song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
         else:
@@ -147,7 +148,8 @@ class PlaylistsMixin:
 
         playlist['trackCount'] = song_count
 
-        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams
+                                                                   )
 
         # suggestions and related are missing e.g. on liked songs
         section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
@@ -230,7 +232,8 @@ class PlaylistsMixin:
                       description: str = None,
                       privacyStatus: str = None,
                       moveItem: Tuple[str, str] = None,
-                      addPlaylistId: str = None) -> Union[str, Dict]:
+                      addPlaylistId: str = None,
+                      addToTop: bool = False) -> Union[str, Dict]:
         """
         Edit title, description or privacyStatus of a playlist.
         You may also move an item within a playlist or append another playlist to this playlist.
@@ -241,7 +244,8 @@ class PlaylistsMixin:
         :param privacyStatus: Optional. New privacy status for the playlist
         :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, see :py:func:`get_playlist`
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
-        :return: Status String or full response
+        :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist by default.
+        :return: Status String or full responwwwse
         """
         self._check_auth()
         body = {'playlistId': validate_playlist_id(playlistId)}
@@ -270,6 +274,9 @@ class PlaylistsMixin:
 
         if addPlaylistId:
             actions.append({'action': 'ACTION_ADD_PLAYLIST', 'addedFullListId': addPlaylistId})
+
+        if addToTop:
+            actions.append({'action': 'ACTION_SET_ADD_TO_TOP', 'addToTop': 'true'})
 
         body['actions'] = actions
         endpoint = 'browse/edit_playlist'
