@@ -419,7 +419,7 @@ class BrowsingMixin:
         album['duration_seconds'] = sum_total_duration(album)
         for i, track in enumerate(album['tracks']):
             album['tracks'][i]['album'] = album['title']
-            album['tracks'][i]['artists'] = album['artists']
+            album['tracks'][i]['artists'] = album['tracks'][i]['artists'] or album['artists']
 
         return album
 

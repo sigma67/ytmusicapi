@@ -212,6 +212,9 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(len(results["other_versions"]), 2)
         results = self.yt.get_album("MPREb_BQZvl3BFGay")
         self.assertEqual(len(results["tracks"]), 7)
+        self.assertEqual(len(results["tracks"][0]["artists"]), 1)
+        results = self.yt.get_album("MPREb_rqH94Zr3NN0")
+        self.assertEqual(len(results["tracks"][0]["artists"]), 2)
 
     def test_get_song(self):
         song = self.yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
