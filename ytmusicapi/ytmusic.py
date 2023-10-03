@@ -83,7 +83,9 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                 self._session = requests.api
 
         self.proxies = proxies
-        self.cookies = {'CONSENT': 'YES+1'}
+        # see google cookie docs: https://policies.google.com/technologies/cookies
+        # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
+        self.cookies = {'SOCS': 'CAI'}
         if self.auth is not None:
             input_json = load_headers_file(self.auth)
             self.input_dict = CaseInsensitiveDict(input_json)
@@ -130,12 +132,10 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
 
-
-
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
 
         if self.is_oauth_auth:
-            self.headers = prepare_headers(self._session, self.proxies, self.input_dict) 
+            self.headers = prepare_headers(self._session, self.proxies, self.input_dict)
         body.update(self.context)
         params = YTM_PARAMS
         if self.is_browser_auth:
