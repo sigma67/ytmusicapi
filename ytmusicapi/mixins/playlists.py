@@ -1,4 +1,4 @@
-from typing import Dict, Union, Tuple
+from typing import Dict, Union, Tuple, Optional
 from ._utils import *
 
 from ytmusicapi.continuations import *
@@ -233,7 +233,7 @@ class PlaylistsMixin:
                       privacyStatus: str = None,
                       moveItem: Tuple[str, str] = None,
                       addPlaylistId: str = None,
-                      addToTop: bool = False) -> Union[str, Dict]:
+                      addToTop: Optional[bool] = None) -> Union[str, Dict]:
         """
         Edit title, description or privacyStatus of a playlist.
         You may also move an item within a playlist or append another playlist to this playlist.
@@ -244,8 +244,9 @@ class PlaylistsMixin:
         :param privacyStatus: Optional. New privacy status for the playlist
         :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, see :py:func:`get_playlist`
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
-        :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist by default.
-        :return: Status String or full responwwwse
+        :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
+            or the bottom of the playlist (if False - this is also the default of a new playlist).
+        :return: Status String or full response
         """
         self._check_auth()
         body = {'playlistId': validate_playlist_id(playlistId)}
@@ -277,6 +278,9 @@ class PlaylistsMixin:
 
         if addToTop:
             actions.append({'action': 'ACTION_SET_ADD_TO_TOP', 'addToTop': 'true'})
+
+        if addToTop is not None:
+            actions.append({'action': 'ACTION_SET_ADD_TO_TOP', 'addToTop': str(addToTop)})
 
         body['actions'] = actions
         endpoint = 'browse/edit_playlist'

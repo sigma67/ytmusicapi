@@ -480,6 +480,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response["status"], "STATUS_SUCCEEDED", "Adding playlist item failed")
         self.assertGreater(len(response["playlistEditResults"]), 0, "Adding playlist item failed")
         time.sleep(2)
+        self.yt_brand.edit_playlist(playlistId, addToTop=False)
         playlist = self.yt_brand.get_playlist(playlistId, related=True)
         self.assertEqual(len(playlist["tracks"]), 46, "Getting playlist items failed")
         response = self.yt_brand.remove_playlist_items(playlistId, playlist["tracks"])
