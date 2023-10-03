@@ -44,7 +44,7 @@ def parse_top_result(data, search_result_types):
 
 
 def parse_search_result(data, search_result_types, result_type, category):
-    default_offset = (not result_type) * 2
+    default_offset = (not result_type or result_type == "album") * 2
     search_result = {'category': category}
     video_type = nav(data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
     if not result_type and video_type:
