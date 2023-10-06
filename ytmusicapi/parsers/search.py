@@ -39,6 +39,9 @@ def parse_top_result(data, search_result_types):
         song_info = parse_song_runs(runs)
         search_result.update(song_info)
 
+    if result_type in ['album']:
+        search_result['browseId'] = nav(data, NAVIGATION_BROWSE_ID, True)
+
     search_result['thumbnails'] = nav(data, THUMBNAILS, True)
     return search_result
 
