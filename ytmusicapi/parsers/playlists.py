@@ -20,10 +20,11 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
                 if 'menuServiceItemRenderer' in item:
                     menu_service = nav(item, MENU_SERVICE)
                     if 'playlistEditEndpoint' in menu_service:
-                        setVideoId = menu_service['playlistEditEndpoint']['actions'][0][
-                            'setVideoId']
-                        videoId = menu_service['playlistEditEndpoint']['actions'][0][
-                            'removedVideoId']
+                        a = menu_service['playlistEditEndpoint']['actions'][0]
+                        if 'setVideoId' in a:
+                            setVideoId = a['setVideoId']
+                        if 'removedVideoId' in a:
+                            videoId = a['removedVideoId']
 
                 if TOGGLE_MENU in item:
                     feedback_tokens = parse_song_menu_tokens(item)
