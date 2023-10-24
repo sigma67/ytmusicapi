@@ -52,7 +52,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
             s = requests.Session()
             s.request = functools.partial(s.request, timeout=3)
-            ytm = YTMusic(session=s)
+            ytm = YTMusic(requests_session=s)
 
           A falsy value disables sessions.
           It is generally a good idea to keep sessions enabled for
