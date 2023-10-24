@@ -87,6 +87,7 @@ def parse_search_result(data, search_result_types, result_type, category):
         if 'menu' in data:
             toggle_menu = find_object_by_key(nav(data, MENU_ITEMS), TOGGLE_MENU)
             if toggle_menu:
+                search_result['inLibrary'] = parse_song_library_status(toggle_menu)
                 search_result['feedbackTokens'] = parse_song_menu_tokens(toggle_menu)
 
     elif result_type == 'upload':

@@ -26,9 +26,10 @@ def parse_watch_playlist(results):
 
 
 def parse_watch_track(data):
-    feedback_tokens = like_status = None
+    feedback_tokens = like_status = library_status = None
     for item in nav(data, MENU_ITEMS):
         if TOGGLE_MENU in item:
+            library_status = parse_song_library_status(item)
             service = item[TOGGLE_MENU]['defaultServiceEndpoint']
             if 'feedbackEndpoint' in service:
                 feedback_tokens = parse_song_menu_tokens(item)
@@ -44,6 +45,7 @@ def parse_watch_track(data):
         'thumbnail': nav(data, THUMBNAIL),
         'feedbackTokens': feedback_tokens,
         'likeStatus': like_status,
+        'inLibrary': library_status,
         'videoType': nav(data, ['navigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
     }
     track.update(song_info)

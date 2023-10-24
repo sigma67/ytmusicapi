@@ -62,13 +62,21 @@ def parse_song_album(data, index):
     }
 
 
+def parse_song_library_status(item) -> bool:
+    """Returns True if song is in the library"""
+    library_status = nav(item, [TOGGLE_MENU, 'defaultIcon', 'iconType'], True)
+
+    return library_status == "LIBRARY_SAVED"
+
+
 def parse_song_menu_tokens(item):
     toggle_menu = item[TOGGLE_MENU]
-    service_type = toggle_menu['defaultIcon']['iconType']
+
     library_add_token = nav(toggle_menu, ['defaultServiceEndpoint'] + FEEDBACK_TOKEN, True)
     library_remove_token = nav(toggle_menu, ['toggledServiceEndpoint'] + FEEDBACK_TOKEN, True)
 
-    if service_type == "LIBRARY_REMOVE":  # swap if already in library
+    in_library = parse_song_library_status(item)
+    if in_library:
         library_add_token, library_remove_token = library_remove_token, library_add_token
 
     return {'add': library_add_token, 'remove': library_remove_token}

@@ -13,6 +13,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
         videoId = setVideoId = None
         like = None
         feedback_tokens = None
+        library_status = None
 
         # if the item has a menu, find its setVideoId
         if 'menu' in data:
@@ -27,6 +28,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
 
                 if TOGGLE_MENU in item:
                     feedback_tokens = parse_song_menu_tokens(item)
+                    library_status = parse_song_library_status(item)
 
         # if item is not playable, the videoId was retrieved above
         if nav(data, PLAY_BUTTON, none_if_absent=True) is not None:
@@ -73,6 +75,7 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
             'artists': artists,
             'album': album,
             'likeStatus': like,
+            'inLibrary': library_status,
             'thumbnails': thumbnails,
             'isAvailable': isAvailable,
             'isExplicit': isExplicit,

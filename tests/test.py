@@ -393,10 +393,14 @@ class TestYTMusic(unittest.TestCase):
     def test_edit_song_library_status(self):
         album = self.yt_brand.get_album(sample_album)
         response = self.yt_brand.edit_song_library_status(
-            album["tracks"][2]["feedbackTokens"]["add"])
+            album["tracks"][0]["feedbackTokens"]["add"])
+        album = self.yt_brand.get_album(sample_album)
+        self.assertTrue(album["tracks"][0]["inLibrary"])
         self.assertTrue(response["feedbackResponses"][0]["isProcessed"])
         response = self.yt_brand.edit_song_library_status(
-            album["tracks"][2]["feedbackTokens"]["remove"])
+            album["tracks"][0]["feedbackTokens"]["remove"])
+        album = self.yt_brand.get_album(sample_album)
+        self.assertFalse(album["tracks"][0]["inLibrary"])
         self.assertTrue(response["feedbackResponses"][0]["isProcessed"])
 
     def test_rate_playlist(self):
