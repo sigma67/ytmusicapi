@@ -105,7 +105,8 @@ def parse_video(result):
     artists_len = get_dot_separator_index(runs)
     videoId = nav(result, NAVIGATION_VIDEO_ID, True)
     if not videoId:
-        videoId = nav(result, NAVIGATION_VIDEO_ID_2)
+        videoId = next(id for entry in nav(result, MENU_ITEMS)
+                       if nav(entry, MENU_SERVICE + QUEUE_VIDEO_ID, True))
     return {
         'title': nav(result, TITLE_TEXT),
         'videoId': videoId,

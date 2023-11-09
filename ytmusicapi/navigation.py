@@ -27,7 +27,6 @@ PAGE_TYPE = [
 WATCH_VIDEO_ID = ['watchEndpoint', 'videoId']
 NAVIGATION_VIDEO_ID = ['navigationEndpoint'] + WATCH_VIDEO_ID
 QUEUE_VIDEO_ID = ['queueAddEndpoint','queueTarget','videoId']
-NAVIGATION_VIDEO_ID_2 = MENU_ITEMS+[0]+MENU_SERVICE+QUEUE_VIDEO_ID
 NAVIGATION_PLAYLIST_ID = ['navigationEndpoint', 'watchEndpoint', 'playlistId']
 NAVIGATION_WATCH_PLAYLIST_ID = ['navigationEndpoint', 'watchPlaylistEndpoint', 'playlistId']
 NAVIGATION_VIDEO_TYPE = [
