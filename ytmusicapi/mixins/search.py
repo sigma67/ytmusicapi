@@ -135,7 +135,7 @@ class SearchMixin:
         search_results = []
         filters = [
             'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'songs',
-            'videos', 'profiles'
+            'videos', 'profiles', 'podcasts', 'episodes'
         ]
         if filter and filter not in filters:
             raise Exception(
