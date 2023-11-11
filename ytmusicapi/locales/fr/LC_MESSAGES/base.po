@@ -47,7 +47,7 @@ msgstr ""
 
 #: parsers/i18n.py:16
 msgid "episode"
-msgstr ""
+msgstr "Épisode"
 
 #: parsers/i18n.py:21
 msgid "albums"
