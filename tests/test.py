@@ -124,6 +124,12 @@ class TestYTMusic(unittest.TestCase):
         results = self.yt_auth.search("some user", filter="profiles")
         self.assertGreater(len(results), 10)
         self.assertTrue(all(item['resultType'] == 'profile' for item in results))
+        results = self.yt_auth.search(query, filter="podcasts")
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'podcast' for item in results))
+        results = self.yt_auth.search(query, filter="episodes")
+        self.assertGreater(len(results), 10)
+        self.assertTrue(all(item['resultType'] == 'episode' for item in results))
 
     def test_search_uploads(self):
         self.assertRaises(
