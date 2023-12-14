@@ -30,13 +30,35 @@ def is_custom_oauth(headers: CaseInsensitiveDict) -> bool:
 class YTMusicOAuth:
     """OAuth implementation for YouTube Music based on YouTube TV"""
 
-    def __init__(self, session: requests.Session, proxies: Dict = None):
+    def __init__(self,
+                 session: requests.Session,
+                 proxies: Dict = None,
+                 *,
+                 oauth_client_id: Optional[str] = None,
+                 oauth_client_secret: Optional[str] = None):
+        """
+        :param session: Session instance used for authorization requests.
+        :param proxies: Optional. Proxy configuration to be used by the session.
+        :param oauth_client_id: Optional. Keyword Only. Can be supplied to change the oauth client for token
+            retrieval and refreshing. Requires oauth_client_secret also be provided.
+        :param oauth_client_secret: Optional. Keyword Only. Used in conjunction with oauth_client_id to switch
+            underlying oauth client.
+        """
+
+        if not isinstance(oauth_client_id, type(oauth_client_secret)):
+            raise KeyError(
+                'Alternate oauth credential usage requires an id AND a secret. Pass both or neither.'
+            )
+
+        self.oauth_id = oauth_client_id if oauth_client_id else OAUTH_CLIENT_ID
+        self.oauth_secret = oauth_client_secret if oauth_client_secret else OAUTH_CLIENT_SECRET
+
         self._session = session
         if proxies:
             self._session.proxies.update(proxies)
 
     def _send_request(self, url, data) -> requests.Response:
-        data.update({"client_id": OAUTH_CLIENT_ID})
+        data.update({"client_id": self.oauth_id})
         headers = {"User-Agent": OAUTH_USER_AGENT}
         return self._session.post(url, data, headers=headers)
 
@@ -55,7 +77,7 @@ class YTMusicOAuth:
         response = self._send_request(
             OAUTH_TOKEN_URL,
             data={
-                "client_secret": OAUTH_CLIENT_SECRET,
+                "client_secret": self.oauth_secret,
                 "grant_type": "http://oauth.net/grant_type/device/1.0",
                 "code": device_code,
             },
@@ -66,7 +88,7 @@ class YTMusicOAuth:
         response = self._send_request(
             OAUTH_TOKEN_URL,
             data={
-                "client_secret": OAUTH_CLIENT_SECRET,
+                "client_secret": self.oauth_secret,
                 "grant_type": "refresh_token",
                 "refresh_token": refresh_token,
             },
