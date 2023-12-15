@@ -50,8 +50,11 @@ def parse_search_result(data, search_result_types, result_type, category):
     default_offset = (not result_type or result_type == "album") * 2
     search_result = {'category': category}
     video_type = nav(data, PLAY_BUTTON + ['playNavigationEndpoint'] + NAVIGATION_VIDEO_TYPE, True)
-    if not result_type and video_type:
-        result_type = 'song' if video_type == 'MUSIC_VIDEO_TYPE_ATV' else 'video'
+    if not result_type:
+        if search_result["category"] == "Albums":
+            result_type = 'album'
+        elif video_type:
+            result_type = 'song' if video_type == 'MUSIC_VIDEO_TYPE_ATV' else 'video'
 
     result_type = get_search_result_type(get_item_text(data, 1),
                                          search_result_types) if not result_type else result_type
