@@ -284,7 +284,8 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_charts(self):
         charts = self.yt_oauth.get_charts()
-        self.assertEqual(len(charts), 4)
+        # songs section appears to be removed currently (US)
+        self.assertGreaterEqual(len(charts), 3)
         charts = self.yt.get_charts(country="US")
         self.assertEqual(len(charts), 5)
         charts = self.yt.get_charts(country="BE")

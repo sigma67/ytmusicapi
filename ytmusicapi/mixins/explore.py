@@ -95,7 +95,7 @@ class ExploreMixin:
         Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
 
         :param country: ISO 3166-1 Alpha-2 country code. Default: ZZ = Global
-        :return: Dictionary containing chart songs (only if authenticated), chart videos, chart artists and
+        :return: Dictionary containing chart songs (only if authenticated and available), chart videos, chart artists and
             trending videos.
 
         Example::
@@ -209,9 +209,13 @@ class ExploreMixin:
             ]))
         charts_categories = ['videos', 'artists']
 
-        has_songs = bool(self.auth)
         has_genres = country == 'US'
         has_trending = country != 'ZZ'
+        # songs section appears to no longer exist, extra length check avoids
+        # index errors and will still include songs if the feature is added back
+        has_songs = bool(
+            self.auth) and len(results) - 1 > (len(charts_categories) + has_genres + has_trending)
+
         if has_songs:
             charts_categories.insert(0, 'songs')
         if has_genres:
