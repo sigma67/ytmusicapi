@@ -20,16 +20,26 @@ def load_headers_file(auth: str) -> Dict:
     return input_json
 
 
-def prepare_headers(
-    session: requests.Session,
-    proxies: Optional[Dict] = None,
-    input_dict: Optional[CaseInsensitiveDict] = None,
-) -> Dict:
+def prepare_headers(auth_session: requests.Session | YTMusicOAuth,
+                    proxies: Optional[Dict] = None,
+                    input_dict: Optional[CaseInsensitiveDict] = None) -> Dict:
+    """
+
+    :param auth_session: Either the session to be used when creating a YTMusicOAuth
+        instance or the YTMusicOAuth instance itself.
+    :param proxies: Optional. Proxy configuration parameters passed to session.
+        Ignored if YTMusicOAuth instance passed to function.
+    :param input_dict: Optional. Either completed browser auth headers or oauth token.
+    """
     if input_dict:
 
         if is_oauth(input_dict):
-            oauth = YTMusicOAuth(session, proxies)
-            headers = oauth.load_headers(dict(input_dict), input_dict['filepath'])
+            if isinstance(auth_session, YTMusicOAuth):
+                oauth = auth_session
+            else:
+                oauth = YTMusicOAuth(auth_session, proxies)
+
+            headers = oauth.load_headers(dict(input_dict), input_dict.get('filepath'))
 
         elif is_browser(input_dict):
             headers = input_dict

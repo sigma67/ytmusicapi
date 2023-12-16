@@ -10,6 +10,7 @@ from requests import Response
 
 from ytmusicapi.setup import main, setup  # noqa: E402
 from ytmusicapi.ytmusic import YTMusic  # noqa: E402
+from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 
 
 def get_resource(file: str) -> str:
@@ -27,6 +28,8 @@ sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 headers_oauth = get_resource(config["auth"]["headers_oauth"])
 headers_browser = get_resource(config["auth"]["headers_file"])
 
+alt_oauth_args = {'oauth_client_id': OAUTH_CLIENT_ID, 'oauth_client_secret': OAUTH_CLIENT_SECRET}
+
 
 class TestYTMusic(unittest.TestCase):
 
@@ -37,6 +40,7 @@ class TestYTMusic(unittest.TestCase):
             assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
         cls.yt_oauth = YTMusic(headers_oauth)
+        cls.yt_alt_oauth = YTMusic(headers_browser, alt_oauth=alt_oauth_args)
         cls.yt_auth = YTMusic(headers_browser, location="GB")
         cls.yt_brand = YTMusic(config["auth"]["headers"], config["auth"]["brand_account"])
         cls.yt_empty = YTMusic(config["auth"]["headers_empty"],
@@ -67,7 +71,14 @@ class TestYTMusic(unittest.TestCase):
         json_mock.side_effect = None
         with open(headers_oauth, mode="r", encoding="utf8") as headers:
             string_headers = headers.read()
-            self.yt_oauth = YTMusic(string_headers)
+
+        self.yt_oauth = YTMusic(string_headers)
+        with self.subTest():
+            # ensure client works/ignores alt if browser credentials passed as auth
+            self.assertFalse(self.yt_alt_oauth.is_alt_oauth)
+            # oauth token dict entry and alt
+            self.yt_alt_oauth = YTMusic(json.loads(string_headers), alt_oauth=alt_oauth_args)
+            self.assertTrue(self.yt_alt_oauth.is_alt_oauth)
 
     ###############
     # BROWSING
@@ -148,10 +159,10 @@ class TestYTMusic(unittest.TestCase):
     def test_search_library(self):
         results = self.yt_oauth.search(config['queries']['library_any'], scope="library")
         self.assertGreater(len(results), 5)
-        results = self.yt_auth.search(config['queries']['library_songs'],
-                                      filter="songs",
-                                      scope="library",
-                                      limit=40)
+        results = self.yt_alt_oauth.search(config['queries']['library_songs'],
+                                           filter="songs",
+                                           scope="library",
+                                           limit=40)
         self.assertGreater(len(results), 10)
         results = self.yt_auth.search(config['queries']['library_albums'],
                                       filter="albums",
@@ -243,7 +254,7 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_song_related_content(self):
         song = self.yt_oauth.get_watch_playlist(sample_video)
-        song = self.yt_oauth.get_song_related(song["related"])
+        song = self.yt_alt_oauth.get_song_related(song["related"])
         self.assertGreaterEqual(len(song), 5)
 
     def test_get_lyrics(self):
