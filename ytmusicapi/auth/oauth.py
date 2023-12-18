@@ -2,6 +2,9 @@ import json
 import time
 import webbrowser
 from typing import Dict, Optional
+from dataclasses import dataclass
+from os import environ as env
+
 
 import requests
 from requests.structures import CaseInsensitiveDict
@@ -27,6 +30,12 @@ def is_custom_oauth(headers: CaseInsensitiveDict) -> bool:
     return "authorization" in headers and headers["authorization"].startswith("Bearer ")
 
 
+@dataclass
+class OAuthCredentials:
+    client_id: Optional[str] = env.get('YTMA_OAUTH_ID', OAUTH_CLIENT_ID)
+    client_secret: Optional[str] = env.get('YTMA_OAUTH_SECRET', OAUTH_CLIENT_SECRET)
+
+
 class YTMusicOAuth:
     """OAuth implementation for YouTube Music based on YouTube TV"""
 
@@ -34,31 +43,23 @@ class YTMusicOAuth:
                  session: requests.Session,
                  proxies: Dict = None,
                  *,
-                 oauth_client_id: Optional[str] = None,
-                 oauth_client_secret: Optional[str] = None):
+                 oauth_credentials: Optional[OAuthCredentials] = None):
         """
         :param session: Session instance used for authorization requests.
         :param proxies: Optional. Proxy configuration to be used by the session.
-        :param oauth_client_id: Optional. Keyword Only. Can be supplied to change the oauth client for token
-            retrieval and refreshing. Requires oauth_client_secret also be provided.
-        :param oauth_client_secret: Optional. Keyword Only. Used in conjunction with oauth_client_id to switch
-            underlying oauth client.
+        :param oauth_credentials: Optional. Instance of OAuthCredentials containing
+            a client id and secret used for authentication flow. Providing will override
+            those found in constants or provided as environmental variables.
         """
 
-        if not isinstance(oauth_client_id, type(oauth_client_secret)):
-            raise KeyError(
-                'Alternate oauth credential usage requires an id AND a secret. Pass both or neither.'
-            )
-
-        self.oauth_id = oauth_client_id if oauth_client_id else OAUTH_CLIENT_ID
-        self.oauth_secret = oauth_client_secret if oauth_client_secret else OAUTH_CLIENT_SECRET
+        self.credentials = oauth_credentials if oauth_credentials else OAuthCredentials()
 
         self._session = session
         if proxies:
             self._session.proxies.update(proxies)
 
     def _send_request(self, url, data) -> requests.Response:
-        data.update({"client_id": self.oauth_id})
+        data.update({"client_id": self.credentials.client_id})
         headers = {"User-Agent": OAUTH_USER_AGENT}
         return self._session.post(url, data, headers=headers)
 
@@ -77,7 +78,7 @@ class YTMusicOAuth:
         response = self._send_request(
             OAUTH_TOKEN_URL,
             data={
-                "client_secret": self.oauth_secret,
+                "client_secret": self.credentials.client_secret,
                 "grant_type": "http://oauth.net/grant_type/device/1.0",
                 "code": device_code,
             },
@@ -88,7 +89,7 @@ class YTMusicOAuth:
         response = self._send_request(
             OAUTH_TOKEN_URL,
             data={
-                "client_secret": self.oauth_secret,
+                "client_secret": self.credentials.client_secret,
                 "grant_type": "refresh_token",
                 "refresh_token": refresh_token,
             },

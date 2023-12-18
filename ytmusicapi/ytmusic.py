@@ -16,7 +16,7 @@ from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
-from ytmusicapi.auth.oauth import YTMusicOAuth, is_oauth
+from ytmusicapi.auth.oauth import OAuthCredentials, YTMusicOAuth, is_oauth
 
 
 class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
@@ -34,7 +34,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                  proxies: dict = None,
                  language: str = 'en',
                  location: str = '',
-                 alt_oauth: Optional[dict] = None):
+                 oauth_credentials: Optional[OAuthCredentials] = None):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -69,14 +69,16 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         :param location: Optional. Can be used to change the location of the user.
             No location will be set by default. This means it is determined by the server.
             Available languages can be checked in the FAQ.
-        :param alt_oauth: Optional. Used to specify a different oauth client id and secret to be
-            used for authentication flow. Should contain both oauth_client_id
-            and oauth_client_secret keys when provided.
+        :param oauth_credentials: Optional. Used to specify a different oauth client id and secret to be
+            used for authentication flow.
         """
         self.auth = auth
         self.input_dict = None
         self.is_oauth_auth = False
-        self.alt_oauth = None
+        if oauth_credentials is not None:
+            self.oauth_credentials = oauth_credentials
+        else:
+            self.oauth_credentials = OAuthCredentials()
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
@@ -95,20 +97,17 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             if isinstance(self.auth, str):
                 input_json = load_headers_file(self.auth)
                 self.input_dict = CaseInsensitiveDict(input_json)
-                self.input_dict['filepath'] = self.auth
 
-            elif isinstance(self.auth, dict):
+            else:
                 self.input_dict = self.auth
 
             self.is_oauth_auth = is_oauth(self.input_dict)
+            self.is_alt_oauth = self.is_oauth_auth and oauth_credentials is not None
 
-        # use custom oauth client parameters if provided
-        if alt_oauth and isinstance(alt_oauth, dict):
-            self.alt_oauth = YTMusicOAuth(self._session, proxies, **alt_oauth)
-            # custom oauth passed in place of session, kwarg used as proxies are skipped
-            self.headers = prepare_headers(self.alt_oauth, input_dict=self.input_dict)
-        else:
-            self.headers = prepare_headers(self._session, proxies, self.input_dict)
+        self.headers = prepare_headers(self._session,
+                                       proxies,
+                                       self.input_dict,
+                                       oauth_credentials=self.oauth_credentials)
 
         if 'x-goog-visitor-id' not in self.headers:
             self.headers.update(get_visitor_id(self._send_get_request))
@@ -148,14 +147,14 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
 
-    @property
-    def is_alt_oauth(self):
-        return self.alt_oauth is not None and self.is_oauth_auth
-
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
 
         if self.is_oauth_auth:
-            self.headers = prepare_headers(self._session, self.proxies, self.input_dict)
+            self.headers = prepare_headers(self._session,
+                                           self.proxies,
+                                           self.input_dict,
+                                           oauth_credentials=self.oauth_credentials)
+
         body.update(self.context)
         params = YTM_PARAMS
         if self.is_browser_auth:

@@ -9,7 +9,7 @@ from unittest import mock
 from requests import Response
 
 from ytmusicapi.setup import main, setup  # noqa: E402
-from ytmusicapi.ytmusic import YTMusic  # noqa: E402
+from ytmusicapi.ytmusic import YTMusic, OAuthCredentials  # noqa: E402
 from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 
 
@@ -28,7 +28,7 @@ sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 headers_oauth = get_resource(config["auth"]["headers_oauth"])
 headers_browser = get_resource(config["auth"]["headers_file"])
 
-alt_oauth_args = {'oauth_client_id': OAUTH_CLIENT_ID, 'oauth_client_secret': OAUTH_CLIENT_SECRET}
+alt_oauth_creds = OAuthCredentials(**{'client_id': OAUTH_CLIENT_ID, 'client_secret': OAUTH_CLIENT_SECRET})
 
 
 class TestYTMusic(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestYTMusic(unittest.TestCase):
             assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
         cls.yt_oauth = YTMusic(headers_oauth)
-        cls.yt_alt_oauth = YTMusic(headers_browser, alt_oauth=alt_oauth_args)
+        cls.yt_alt_oauth = YTMusic(headers_browser, oauth_credentials=alt_oauth_creds)
         cls.yt_auth = YTMusic(headers_browser, location="GB")
         cls.yt_brand = YTMusic(config["auth"]["headers"], config["auth"]["brand_account"])
         cls.yt_empty = YTMusic(config["auth"]["headers_empty"],
@@ -71,14 +71,14 @@ class TestYTMusic(unittest.TestCase):
         json_mock.side_effect = None
         with open(headers_oauth, mode="r", encoding="utf8") as headers:
             string_headers = headers.read()
+            self.yt_oauth = YTMusic(string_headers)
 
-        self.yt_oauth = YTMusic(string_headers)
-        with self.subTest():
-            # ensure client works/ignores alt if browser credentials passed as auth
-            self.assertFalse(self.yt_alt_oauth.is_alt_oauth)
-            # oauth token dict entry and alt
-            self.yt_alt_oauth = YTMusic(json.loads(string_headers), alt_oauth=alt_oauth_args)
-            self.assertTrue(self.yt_alt_oauth.is_alt_oauth)
+    def test_alt_oauth(self):
+        # ensure client works/ignores alt if browser credentials passed as auth
+        self.assertFalse(self.yt_alt_oauth.is_alt_oauth)
+        # oauth token dict entry and alt
+        self.yt_alt_oauth = YTMusic(json.loads(config['auth']['oauth_token']), oauth_credentials=alt_oauth_creds)
+        self.assertTrue(self.yt_alt_oauth.is_alt_oauth)
 
     ###############
     # BROWSING
@@ -501,6 +501,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
+    @unittest.skip('You are creating too many playlists')
     def test_end2end(self):
         playlist_id = self.yt_brand.create_playlist(
             "test",
