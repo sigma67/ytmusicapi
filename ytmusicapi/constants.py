@@ -1,3 +1,5 @@
+import os
+
 YTM_DOMAIN = 'https://music.youtube.com'
 YTM_BASE_API = YTM_DOMAIN + '/youtubei/v1/'
 YTM_PARAMS = '?alt=json'
@@ -16,8 +18,9 @@ SUPPORTED_LOCATIONS = {
     'PL', 'PR', 'PT', 'PY', 'QA', 'RO', 'RS', 'RU', 'SA', 'SE', 'SG', 'SI', 'SK', 'SN', 'SV', 'TH',
     'TN', 'TR', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'VE', 'VN', 'YE', 'ZA', 'ZW'
 }
-OAUTH_CLIENT_ID = "861556708454-d6dlm3lh05idd8npek18k6be8ba3oc68.apps.googleusercontent.com"
-OAUTH_CLIENT_SECRET = "SboVhoG9s0rNafixCSGGKXAT"
+OAUTH_CLIENT_ID = os.environ.get("YOUTUBE_CLIENT_ID", "861556708454-d6dlm3lh05idd8npek18k6be8ba3oc68.apps.googleusercontent.com")
+OAUTH_CLIENT_SECRET = os.environ.get("YOUTUBE_CLIENT_SECRET", "SboVhoG9s0rNafixCSGGKXAT")
+OAUTH_REDIRECT_URI = os.environ.get("YOUTUBE_REDIRECT_URI", None)
 OAUTH_SCOPE = "https://www.googleapis.com/auth/youtube"
 OAUTH_CODE_URL = "https://www.youtube.com/o/oauth2/device/code"
 OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
