@@ -75,11 +75,18 @@ def parse_library_artists(response, request_func, limit):
     return artists
 
 
+def pop_songs_random_mix(results) -> None:
+    """remove the random mix that conditionally appears at the start of library songs"""
+    if len(results) >= 2:
+        results.pop(0)
+
+
 def parse_library_songs(response):
     results = get_library_contents(response, MUSIC_SHELF)
+    pop_songs_random_mix(results['contents'])
     return {
         'results': results,
-        'parsed': parse_playlist_items(results['contents'][1:]) if results else results
+        'parsed': parse_playlist_items(results['contents']) if results else results
     }
 
 

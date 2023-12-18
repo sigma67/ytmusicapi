@@ -7,12 +7,14 @@ from ._utils import validate_order_parameter, prepare_order_params
 from ytmusicapi.helpers import *
 from ytmusicapi.navigation import *
 from ytmusicapi.continuations import get_continuations
-from ytmusicapi.parsers.library import parse_library_albums, parse_library_artists, get_library_contents
+from ytmusicapi.parsers.library import parse_library_albums, parse_library_artists, get_library_contents, \
+    pop_songs_random_mix
 from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.uploads import parse_uploaded_items
 
 
 class UploadsMixin:
+
     def get_library_upload_songs(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Returns a list of uploaded songs
@@ -44,9 +46,10 @@ class UploadsMixin:
             body["params"] = prepare_order_params(order)
         response = self._send_request(endpoint, body)
         results = get_library_contents(response, MUSIC_SHELF)
+        pop_songs_random_mix(results['contents'])
         if results is None:
             return []
-        songs = parse_uploaded_items(results['contents'][1:])
+        songs = parse_uploaded_items(results['contents'])
 
         if 'continuations' in results:
             request_func = lambda additionalParams: self._send_request(
