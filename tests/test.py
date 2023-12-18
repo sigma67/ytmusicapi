@@ -441,13 +441,6 @@ class TestYTMusic(unittest.TestCase):
                                               "INDIFFERENT")
         self.assertIn("actions", response)
 
-    def test_save_album(self):
-        response = self.yt_auth.set_album_save("OLAK5uy_kCxQGgn8Ayb-8VNSs3Ok7qdcKe5PJy6ZQ")
-        self.assertIn("actions", response)
-        response = self.yt_auth.set_album_save("OLAK5uy_kCxQGgn8Ayb-8VNSs3Ok7qdcKe5PJy6ZQ",
-                                               saved=False)
-        self.assertIn("actions", response)
-
     def test_subscribe_artists(self):
         self.yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q", "UCiMhD4jzUqG-IgPzUmmytRQ"])
         self.yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q", "UCiMhD4jzUqG-IgPzUmmytRQ"])

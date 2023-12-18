@@ -267,25 +267,6 @@ class LibraryMixin:
 
         return self._send_request(endpoint, body)
 
-    def set_album_save(self, audioPlaylistId: str, saved=True):
-        """
-        Edit the save status of an album in the user's library. Findable convenience/alias
-        method for album portion of rate_playlist.
-
-        :param audioPlaylistId: audioPlaylistId (starts with "OLAKuy_") for the target album
-        :param saved: Boolean. The resulting saved state of the album. (Default = True)
-
-        :return: Full response
-        """
-
-        self._check_auth()
-        body = {'target': {'playlistId': audioPlaylistId}}
-        endpoint = prepare_like_endpoint('LIKE' if saved else 'INDIFFERENT')
-        if endpoint is None:
-            return
-
-        return self._send_request(endpoint, body)
-
     def edit_song_library_status(self, feedbackTokens: List[str] = None) -> Dict:
         """
         Adds or removes a song from your library depending on the token provided.
