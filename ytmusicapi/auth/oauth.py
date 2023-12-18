@@ -93,7 +93,7 @@ class YTMusicOAuth:
 
     def load_headers(self, token: Dict, filepath: Optional[str] = None):
         headers = initialize_headers()
-        if time.time() > token["expires_at"] - 3600:
+        if time.time() > token["expires_at"]:
             token.update(self.refresh_token(token["refresh_token"]))
             self.dump_token(token, filepath)
         headers["Authorization"] = f"{token['token_type']} {token['access_token']}"
