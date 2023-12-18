@@ -306,7 +306,7 @@ class TestYTMusic(unittest.TestCase):
         playlist = self.yt_oauth.get_watch_playlist("UoAf_y9Ok4k")  # private track
         self.assertGreaterEqual(len(playlist["tracks"]), 25)
         playlist = self.yt.get_watch_playlist(
-            playlistId="OLAK5uy_lKgoGvlrWhX0EIPavQUXxyPed8Cj38AWc", shuffle=True)
+            playlistId="OLAK5uy_kt7zOXlNCGsYFEdNc5Pvnr4JFfMkspmc8", shuffle=True)
         self.assertEqual(len(playlist["tracks"]), 12)
         playlist = self.yt_brand.get_watch_playlist(playlistId=config["playlists"]["own"],
                                                     shuffle=True)
