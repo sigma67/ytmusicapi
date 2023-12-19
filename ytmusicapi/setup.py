@@ -26,7 +26,6 @@ def setup_oauth(filepath: str = None,
                 session: requests.Session = None,
                 proxies: dict = None,
                 open_browser: bool = False,
-                env_credentials: bool = False,
                 client_id: str = None,
                 client_secret: str = None) -> Dict:
     """
@@ -37,13 +36,8 @@ def setup_oauth(filepath: str = None,
     :param proxies: Proxies to use for authentication
     :param filepath: Optional filepath to store headers to.
     :param open_browser: If True, open the default browser with the setup link
-    :param env_credentials: Optional. Specifies if client_id and client_secret should be
-        pulled from the environment. Modifies client_id and client_secret parameters to
-        instead specify the keys to search environment for. Default keys are
-        YTMA_OAUTH_CLIENT_ID for client_id and YTMA_OAUTH_CLIENT_SECRET for secret.
     :param client_id: Optional. Used to specify the client_id oauth should use for authentication
-        flow. If used with env_credentials, instead specifies the environmental key of client_id.
-        If not used with env_credentials, client_secret MUST also be passed or both will be ignored.
+        flow. If provided, client_secret MUST also be passed or both will be ignored.
     :param client_secret: Optional. Same as client_id but for the oauth client secret.
 
     :return: configuration headers string
@@ -51,13 +45,7 @@ def setup_oauth(filepath: str = None,
     if not session:
         session = requests.Session()
 
-    if env_credentials:
-        oauth_credentials = OAuthCredentials.from_env(session,
-                                                      proxies,
-                                                      client_id_key=client_id,
-                                                      client_secret_key=client_secret)
-
-    elif client_id and client_secret:
+    if client_id and client_secret:
         oauth_credentials = OAuthCredentials(client_id, client_secret, session, proxies)
 
     else:

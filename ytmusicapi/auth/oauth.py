@@ -2,7 +2,6 @@ import json
 import time
 import webbrowser
 from typing import Dict, Optional, Any
-from os import environ as env
 import os
 
 import requests
@@ -87,23 +86,6 @@ class OAuthToken:
 
 
 class OAuthCredentials:
-
-    @classmethod
-    def from_env(cls,
-                 session: Optional[requests.Session] = None,
-                 proxies: Optional[Dict] = None,
-                 *,
-                 client_id_key='YTMA_OAUTH_CLIENT_ID',
-                 client_secret_key='YTMA_OAUTH_CLIENT_SECRET'):
-        missing_keys = [x for x in [client_id_key, client_secret_key] if x not in env]
-        if missing_keys:
-            raise KeyError('Failed to build credentials from environment. Missing required keys: ',
-                           missing_keys)
-
-        return cls(client_id=env[client_id_key],
-                   client_secret=env[client_secret_key],
-                   session=session,
-                   proxies=proxies)
 
     def __init__(self,
                  client_id: Optional[str] = OAUTH_CLIENT_ID,
