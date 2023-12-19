@@ -27,14 +27,21 @@ class OAuthToken:
 
     @classmethod
     def from_response(cls, response):
-        return cls(**response.json())
+        data = response.json()
+        return cls(**data)
 
-    def __init__(self, access_token: str, refresh_token: str, scope: str, expires_at: int,
-                 token_type: str, **etc: Optional[Any]):
+    def __init__(self,
+                 access_token: str,
+                 refresh_token: str,
+                 scope: str,
+                 token_type: str,
+                 expires_at: Optional[int] = None,
+                 expires_in: Optional[int] = None,
+                 **etc: Optional[Any]):
         self._access_token = access_token
         self._refresh_token = refresh_token
         self._scope = scope
-        self._expires_at: int = expires_at
+        self._expires_at: int = expires_at if expires_at else int(time.time() + expires_in)
         self._token_type = token_type
 
     @property
