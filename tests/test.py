@@ -28,7 +28,10 @@ sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
 headers_oauth = get_resource(config["auth"]["headers_oauth"])
 headers_browser = get_resource(config["auth"]["headers_file"])
 
-alt_oauth_creds = OAuthCredentials(**{'client_id': OAUTH_CLIENT_ID, 'client_secret': OAUTH_CLIENT_SECRET})
+alt_oauth_creds = OAuthCredentials(**{
+    'client_id': OAUTH_CLIENT_ID,
+    'client_secret': OAUTH_CLIENT_SECRET
+})
 
 
 class TestYTMusic(unittest.TestCase):
@@ -77,7 +80,8 @@ class TestYTMusic(unittest.TestCase):
         # ensure client works/ignores alt if browser credentials passed as auth
         self.assertFalse(self.yt_alt_oauth.is_alt_oauth)
         # oauth token dict entry and alt
-        self.yt_alt_oauth = YTMusic(json.loads(config['auth']['oauth_token']), oauth_credentials=alt_oauth_creds)
+        self.yt_alt_oauth = YTMusic(json.loads(config['auth']['oauth_token']),
+                                    oauth_credentials=alt_oauth_creds)
         self.assertTrue(self.yt_alt_oauth.is_alt_oauth)
 
     ###############
@@ -501,7 +505,6 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
-    @unittest.skip('You are creating too many playlists')
     def test_end2end(self):
         playlist_id = self.yt_brand.create_playlist(
             "test",

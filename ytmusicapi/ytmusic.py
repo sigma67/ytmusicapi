@@ -4,9 +4,10 @@ import os
 from functools import partial
 from contextlib import suppress
 from typing import Dict, Optional
+import time
 
 from requests.structures import CaseInsensitiveDict
-from ytmusicapi.auth.headers import load_headers_file, prepare_headers
+from ytmusicapi.auth.headers import load_headers_file
 from ytmusicapi.parsers.i18n import Parser
 from ytmusicapi.helpers import *
 from ytmusicapi.mixins.browsing import BrowsingMixin
@@ -16,7 +17,7 @@ from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
-from ytmusicapi.auth.oauth import OAuthCredentials, YTMusicOAuth, is_oauth
+from ytmusicapi.auth.oauth import OAuthCredentials, is_oauth, RefreshingToken, OAuthToken
 
 
 class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
@@ -69,16 +70,19 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         :param location: Optional. Can be used to change the location of the user.
             No location will be set by default. This means it is determined by the server.
             Available languages can be checked in the FAQ.
-        :param oauth_credentials: Optional. Used to specify a different oauth client id and secret to be
+        :param oauth_credentials: Optional. Used to specify a different oauth client to be
             used for authentication flow.
         """
+        self._base_headers = None
+        self._headers = None
         self.auth = auth
-        self.input_dict = None
+        self._input_dict = {}
+        self.is_alt_oauth = False
         self.is_oauth_auth = False
-        if oauth_credentials is not None:
-            self.oauth_credentials = oauth_credentials
-        else:
-            self.oauth_credentials = OAuthCredentials()
+        self.is_browser_auth = False
+        self.is_custom_oauth = False
+        self._token = None
+        self.proxies = proxies
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
@@ -89,28 +93,28 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             else:  # Use the Requests API module as a "session".
                 self._session = requests.api
 
-        self.proxies = proxies
+        if oauth_credentials is not None:
+            self.oauth_credentials = oauth_credentials
+        else:
+            self.oauth_credentials = OAuthCredentials()
+
         # see google cookie docs: https://policies.google.com/technologies/cookies
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
         self.cookies = {'SOCS': 'CAI'}
         if self.auth is not None:
             if isinstance(self.auth, str):
                 input_json = load_headers_file(self.auth)
-                self.input_dict = CaseInsensitiveDict(input_json)
+                self._input_dict = CaseInsensitiveDict(input_json)
 
             else:
-                self.input_dict = self.auth
+                self._input_dict = self.auth
 
-            self.is_oauth_auth = is_oauth(self.input_dict)
-            self.is_alt_oauth = self.is_oauth_auth and oauth_credentials is not None
-
-        self.headers = prepare_headers(self._session,
-                                       proxies,
-                                       self.input_dict,
-                                       oauth_credentials=self.oauth_credentials)
-
-        if 'x-goog-visitor-id' not in self.headers:
-            self.headers.update(get_visitor_id(self._send_get_request))
+            if is_oauth(self._input_dict):
+                self.is_oauth_auth = True
+                self.is_alt_oauth = oauth_credentials is not None
+                self._token = RefreshingToken(OAuthToken(**self._input_dict),
+                                              self.oauth_credentials,
+                                              self._input_dict.get('filepath'))
 
         # prepare context
         self.context = initialize_context()
@@ -138,31 +142,65 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         if user:
             self.context['context']['user']['onBehalfOfUser'] = user
 
-        auth_header = self.headers.get("authorization")
-        self.is_browser_auth = auth_header and "SAPISIDHASH" in auth_header
+        auth_headers = self._input_dict.get("authorization")
+        if auth_headers:
+            if "SAPISIDHASH" in auth_headers:
+                self.is_browser_auth = True
+            elif auth_headers.startswith('Bearer'):
+                self.is_custom_oauth = True
+
+        # sapsid, origin, and params all set once during init
+        self.params = YTM_PARAMS
         if self.is_browser_auth:
+            self.params += YTM_PARAMS_KEY
             try:
-                cookie = self.headers.get('cookie')
+                cookie = self.base_headers.get('cookie')
                 self.sapisid = sapisid_from_cookie(cookie)
+                self.origin = self.base_headers.get('origin', self.base_headers.get('x-origin'))
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
 
-    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+    @property
+    def base_headers(self):
+        if not self._base_headers:
+            if self.is_browser_auth or self.is_custom_oauth:
+                self._base_headers = self._input_dict
+            else:
+                self._base_headers = {
+                    "user-agent": USER_AGENT,
+                    "accept": "*/*",
+                    "accept-encoding": "gzip, deflate",
+                    "content-type": "application/json",
+                    "content-encoding": "gzip",
+                    "origin": YTM_DOMAIN
+                }
 
-        if self.is_oauth_auth:
-            self.headers = prepare_headers(self._session,
-                                           self.proxies,
-                                           self.input_dict,
-                                           oauth_credentials=self.oauth_credentials)
+        return self._base_headers
 
-        body.update(self.context)
-        params = YTM_PARAMS
+    @property
+    def headers(self):
+        # set on first use
+        if not self._headers:
+            self._headers = self.base_headers
+
+        # keys updated each use, custom oauth implementations left untouched
         if self.is_browser_auth:
-            origin = self.headers.get('origin', self.headers.get('x-origin'))
-            self.headers["authorization"] = get_authorization(self.sapisid + ' ' + origin)
-            params += YTM_PARAMS_KEY
+            self._headers["authorization"] = get_authorization(self.sapisid + ' ' + self.origin)
 
-        response = self._session.post(YTM_BASE_API + endpoint + params + additionalParams,
+        elif self.is_oauth_auth:
+            self._headers['authorization'] = self._token.as_auth()
+            self._headers['X-Goog-Request-Time'] = str(int(time.time()))
+
+        return self._headers
+
+    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+        body.update(self.context)
+
+        # only required for post requests (?)
+        if 'X-Goog-Visitor-Id' not in self.headers:
+            self._headers.update(get_visitor_id(self._send_get_request))
+
+        response = self._session.post(YTM_BASE_API + endpoint + self.params + additionalParams,
                                       json=body,
                                       headers=self.headers,
                                       proxies=self.proxies,
@@ -176,11 +214,13 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         return response_text
 
     def _send_get_request(self, url: str, params: Dict = None):
-        response = self._session.get(url,
-                                     params=params,
-                                     headers=self.headers,
-                                     proxies=self.proxies,
-                                     cookies=self.cookies)
+        response = self._session.get(
+            url,
+            params=params,
+            # handle first-use x-goog-visitor-id fetching
+            headers=self.headers if self._headers else self.base_headers,
+            proxies=self.proxies,
+            cookies=self.cookies)
         return response
 
     def _check_auth(self):
