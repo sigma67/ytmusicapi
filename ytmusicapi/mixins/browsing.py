@@ -342,10 +342,11 @@ class BrowsingMixin:
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
 
-        if (start := response.text.find('MPREb_')) == -1:
-            return None
-
-        return response.text[start:(response.text.find('"', start) - 1)]
+        matches = re.search(r"\"MPRE.+?\"", response.text.encode("utf8").decode("unicode_escape"))
+        browse_id = None
+        if matches:
+            browse_id = matches.group().strip('"')
+        return browse_id
 
     def get_album(self, browseId: str) -> Dict:
         """

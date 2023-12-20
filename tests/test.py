@@ -237,6 +237,11 @@ class TestYTMusic(unittest.TestCase):
     def test_get_album_browse_id(self):
         browse_id = self.yt.get_album_browse_id("OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY")
         self.assertEqual(browse_id, sample_album)
+        with self.subTest():
+            escaped_browse_id = self.yt.get_album_browse_id(
+                "OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
+            # general length, I believe 17 is standard, but unsure if edge cases exist
+            self.assertLess(len(escaped_browse_id), 24)
 
     def test_get_album(self):
         results = self.yt_auth.get_album(sample_album)
@@ -505,6 +510,7 @@ class TestYTMusic(unittest.TestCase):
         self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist edit failed")
 
     # end to end test adding playlist, adding item, deleting item, deleting playlist
+    # @unittest.skip('You are creating too many playlists. Please wait a bit...')
     def test_end2end(self):
         playlist_id = self.yt_brand.create_playlist(
             "test",
