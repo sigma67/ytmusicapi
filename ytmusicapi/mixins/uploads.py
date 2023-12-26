@@ -46,9 +46,9 @@ class UploadsMixin:
             body["params"] = prepare_order_params(order)
         response = self._send_request(endpoint, body)
         results = get_library_contents(response, MUSIC_SHELF)
-        pop_songs_random_mix(results)
         if results is None:
             return []
+        pop_songs_random_mix(results)
         songs = parse_uploaded_items(results['contents'])
 
         if 'continuations' in results:
