@@ -128,6 +128,11 @@ class BrowsingMixin:
         :param channelId: channel id of the artist
         :return: Dictionary with requested information.
 
+        .. warning::
+
+            The returned channelId is not the same as the one passed to the function.
+            It should be used only with :py:func:`subscribe_artists`.
+
         Example::
 
             {
