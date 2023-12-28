@@ -235,13 +235,13 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreater(len(results), 100)
 
     def test_get_album_browse_id(self):
+        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         browse_id = self.yt.get_album_browse_id("OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY")
         self.assertEqual(browse_id, sample_album)
         with self.subTest():
             escaped_browse_id = self.yt.get_album_browse_id(
                 "OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
-            # general length, I believe 17 is standard, but unsure if edge cases exist
-            self.assertLess(len(escaped_browse_id), 24)
+            self.assertEqual(escaped_browse_id, 'MPREb_scJdtUCpPE2')
 
     def test_get_album(self):
         results = self.yt_auth.get_album(sample_album)
