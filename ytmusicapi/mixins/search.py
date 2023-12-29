@@ -233,7 +233,8 @@ class SearchMixin:
 
     def get_search_suggestions(self,
                                query: str,
-                               detailed_runs=False) -> Union[List[str], List[Dict]]:
+                               detailed_runs=False,
+                               include_history=False) -> Union[List[str], List[Dict]]:
         """
         Get Search Suggestions
 
@@ -243,6 +244,8 @@ class SearchMixin:
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
+        :param include_history: Whether to return suggestions based on historical/previously
+            searched items. Only relevant to detailed_runs.
         :return: List of search suggestion results depending on ``detailed_runs`` param.
 
           Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
@@ -304,6 +307,6 @@ class SearchMixin:
         endpoint = 'music/get_search_suggestions'
 
         response = self._send_request(endpoint, body)
-        search_suggestions = parse_search_suggestions(response, detailed_runs)
+        search_suggestions = parse_search_suggestions(response, detailed_runs, include_history)
 
         return search_suggestions

@@ -5,7 +5,9 @@ from ._utils import *
 def get_search_result_type(result_type_local, result_types_local):
     if not result_type_local:
         return None
-    result_types = ['artist', 'playlist', 'song', 'video', 'station', 'profile', 'podcast', 'episode']
+    result_types = [
+        'artist', 'playlist', 'song', 'video', 'station', 'profile', 'podcast', 'episode'
+    ]
     result_type_local = result_type_local.lower()
     # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
     if result_type_local not in result_types_local:
@@ -214,7 +216,7 @@ def _get_param2(filter):
     return filter_params[filter]
 
 
-def parse_search_suggestions(results, detailed_runs):
+def parse_search_suggestions(results, detailed_runs, history):
     if not results.get('contents', [{}])[0].get('searchSuggestionsSectionRenderer', {}).get(
             'contents', []):
         return []
@@ -223,7 +225,14 @@ def parse_search_suggestions(results, detailed_runs):
     suggestions = []
 
     for raw_suggestion in raw_suggestions:
-        suggestion_content = raw_suggestion['searchSuggestionRenderer']
+
+        if 'historySuggestionRenderer' in raw_suggestion:
+            if history:
+                suggestion_content = raw_suggestion['historySuggestionRenderer']
+            else:
+                continue
+        else:
+            suggestion_content = raw_suggestion['searchSuggestionRenderer']
 
         text = suggestion_content['navigationEndpoint']['searchEndpoint']['query']
         runs = suggestion_content['suggestion']['runs']

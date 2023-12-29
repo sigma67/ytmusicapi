@@ -270,6 +270,14 @@ class TestYTMusic(unittest.TestCase):
         result = self.yt.get_search_suggestions("fade", detailed_runs=True)
         self.assertGreaterEqual(len(result), 0)
 
+    def test_auth_search_suggestions(self):
+        # add search term to history
+        first_pass = self.yt_auth.search('b')
+        self.assertGreater(len(first_pass), 0)
+        # get results
+        results = self.yt_auth.get_search_suggestions('b', detailed_runs=True)
+        self.assertGreater(len(results), 0)
+
     ################
     # EXPLORE
     ################
