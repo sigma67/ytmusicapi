@@ -24,14 +24,18 @@ config.read(get_resource("test.cfg"), "utf-8")
 sample_album = "MPREb_4pL8gzRtw1p"  # Eminem - Revival
 sample_video = "hpSrLjc5SMs"  # Oasis - Wonderwall
 sample_playlist = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large playlist
+blank_code = {
+    "device_code": "",
+    "user_code": "",
+    "expires_in": 1800,
+    "interval": 5,
+    "verification_url": "https://www.google.com/device"
+}
 
-headers_oauth = get_resource(config["auth"]["headers_oauth"])
-headers_browser = get_resource(config["auth"]["headers_file"])
+oauth_filepath = get_resource(config["auth"]["oauth_file"])
+browser_filepath = get_resource(config["auth"]["browser_file"])
 
-alt_oauth_creds = OAuthCredentials(**{
-    'client_id': OAUTH_CLIENT_ID,
-    'client_secret': OAUTH_CLIENT_SECRET
-})
+alt_oauth_creds = OAuthCredentials(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
 
 
 class TestYTMusic(unittest.TestCase):
@@ -42,16 +46,16 @@ class TestYTMusic(unittest.TestCase):
         with YTMusic(requests_session=False) as yt:
             assert isinstance(yt, YTMusic)
         cls.yt = YTMusic()
-        cls.yt_oauth = YTMusic(headers_oauth)
-        cls.yt_alt_oauth = YTMusic(headers_browser, oauth_credentials=alt_oauth_creds)
-        cls.yt_auth = YTMusic(headers_browser, location="GB")
+        cls.yt_oauth = YTMusic(oauth_filepath)
+        cls.yt_alt_oauth = YTMusic(browser_filepath, oauth_credentials=alt_oauth_creds)
+        cls.yt_auth = YTMusic(browser_filepath, location="GB")
         cls.yt_brand = YTMusic(config["auth"]["headers"], config["auth"]["brand_account"])
         cls.yt_empty = YTMusic(config["auth"]["headers_empty"],
                                config["auth"]["brand_account_empty"])
 
-    @mock.patch("sys.argv", ["ytmusicapi", "browser", "--file", headers_browser])
+    @mock.patch("sys.argv", ["ytmusicapi", "browser", "--file", browser_filepath])
     def test_setup_browser(self):
-        headers = setup(headers_browser, config["auth"]["headers_raw"])
+        headers = setup(browser_filepath, config["auth"]["headers_raw"])
         self.assertGreaterEqual(len(headers), 2)
         headers_raw = config["auth"]["headers_raw"].split("\n")
         with mock.patch("builtins.input", side_effect=(headers_raw + [EOFError()])):
@@ -60,28 +64,64 @@ class TestYTMusic(unittest.TestCase):
 
     @mock.patch("requests.Response.json")
     @mock.patch("requests.Session.post")
-    @mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", headers_oauth])
+    @mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", oauth_filepath])
     def test_setup_oauth(self, session_mock, json_mock):
         session_mock.return_value = Response()
-        json_mock.side_effect = [
-            json.loads(config["auth"]["oauth_code"]),
-            json.loads(config["auth"]["oauth_token"]),
-        ]
+        fresh_token = self.yt_oauth._token.as_dict()
+        json_mock.side_effect = [blank_code, fresh_token]
         with mock.patch("builtins.input", return_value="y"):
             main()
-            self.assertTrue(Path(headers_oauth).exists())
+            self.assertTrue(Path(oauth_filepath).exists())
 
         json_mock.side_effect = None
-        with open(headers_oauth, mode="r", encoding="utf8") as headers:
-            string_headers = headers.read()
-            self.yt_oauth = YTMusic(string_headers)
+        with open(oauth_filepath, mode="r", encoding="utf8") as oauth_file:
+            string_oauth_token = oauth_file.read()
+        self.yt_oauth = YTMusic(string_oauth_token)
+
+    ###############
+    # OAUTH
+    ###############
+    # 000 so test is run first and fresh token is available to others
+    def test_000_oauth_tokens(self):
+        # ensure instance initialized token
+        self.assertIsNotNone(self.yt_oauth._token)
+
+        # set reference file
+        with open(oauth_filepath, 'r') as f:
+            first_json = json.load(f)
+
+        # pull reference values from underlying token
+        first_token = self.yt_oauth._token.token.access_token
+        first_expire = self.yt_oauth._token.token.expires_at
+        # make token expire
+        self.yt_oauth._token.token._expires_at = time.time()
+        # check
+        self.assertTrue(self.yt_oauth._token.token.is_expiring)
+        # pull new values, assuming token will be refreshed on access
+        second_token = self.yt_oauth._token.access_token
+        second_expire = self.yt_oauth._token.token.expires_at
+        second_token_inner = self.yt_oauth._token.token.access_token
+        # check it was refreshed
+        self.assertNotEqual(first_token, second_token)
+        # check expiration timestamps to confirm
+        self.assertNotEqual(second_expire, first_expire)
+        self.assertGreater(second_expire, time.time() + 60)
+        # check token is propagating properly
+        self.assertEqual(second_token, second_token_inner)
+
+        with open(oauth_filepath, 'r') as f2:
+            second_json = json.load(f2)
+
+        # ensure token is updating local file
+        self.assertNotEqual(first_json, second_json)
 
     def test_alt_oauth(self):
         # ensure client works/ignores alt if browser credentials passed as auth
         self.assertFalse(self.yt_alt_oauth.is_alt_oauth)
+        with open(oauth_filepath, 'r') as f:
+            token_dict = json.load(f)
         # oauth token dict entry and alt
-        self.yt_alt_oauth = YTMusic(json.loads(config['auth']['oauth_token']),
-                                    oauth_credentials=alt_oauth_creds)
+        self.yt_alt_oauth = YTMusic(token_dict, oauth_credentials=alt_oauth_creds)
         self.assertTrue(self.yt_alt_oauth.is_alt_oauth)
 
     ###############
@@ -509,7 +549,7 @@ class TestYTMusic(unittest.TestCase):
         )
         self.assertEqual(response, "STATUS_SUCCEEDED", "Playlist edit failed")
 
-    # end to end test adding playlist, adding item, deleting item, deleting playlist
+    # end-to-end test adding playlist, adding item, deleting item, deleting playlist
     # @unittest.skip('You are creating too many playlists. Please wait a bit...')
     def test_end2end(self):
         playlist_id = self.yt_brand.create_playlist(
