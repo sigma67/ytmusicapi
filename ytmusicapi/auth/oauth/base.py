@@ -47,7 +47,6 @@ class Token:
         }
 
     def as_json(self) -> str:
-        # TODO: [PYDANTIC]: add a custom serializer
         return json.dumps(self.as_dict())
 
     def as_auth(self) -> str:
