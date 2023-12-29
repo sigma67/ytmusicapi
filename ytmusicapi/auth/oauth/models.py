@@ -2,28 +2,32 @@
 
 from typing import Union, Literal, TypedDict
 
-DefaultScope = Literal['https://www.googleapis.com/auth/youtube']
-Bearer = Literal['Bearer']
+# for static typechecking
+DefaultScope = Union[str, Literal['https://www.googleapis.com/auth/youtube']]
+Bearer = Union[str, Literal['Bearer']]
 
 
 class BaseTokenDict(TypedDict):
     """ Limited token. Does not provide a refresh token. Commonly obtained via a token refresh. """
-    access_token: str
-    expires_in: int
-    scope: Union[str, DefaultScope]
-    token_type: Union[str, Bearer]
+
+    access_token: str  # str to be used in Authorization header
+    expires_in: int  # seconds until expiration from request timestamp
+    scope: DefaultScope  # should be 'https://www.googleapis.com/auth/youtube'
+    token_type: Bearer  # should be 'Bearer'
 
 
-class FullTokenDict(BaseTokenDict):
+class RefreshableTokenDict(BaseTokenDict):
     """ Entire token. Including refresh. Obtained through token setup. """
-    expires_at: int
-    refresh_token: str
+
+    expires_at: int  # UNIX epoch timestamp in seconds
+    refresh_token: str  # str used to obtain new access token upon expiration
 
 
-class CodeDict(TypedDict):
+class AuthCodeDict(TypedDict):
     """ Keys for the json object obtained via code response during auth flow. """
-    device_code: str
-    user_code: str
-    expires_in: int
-    interval: int
-    verification_url: str
+
+    device_code: str  # code obtained via user confirmation and oauth consent
+    user_code: str  # alphanumeric code user is prompted to enter as confirmation. formatted as XXX-XXX-XXX.
+    expires_in: int  # seconds from original request timestamp
+    interval: int  # (?) "5" (?)
+    verification_url: str  # base url for OAuth consent screen for user signin/confirmation

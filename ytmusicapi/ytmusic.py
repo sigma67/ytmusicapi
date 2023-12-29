@@ -31,10 +31,10 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
     """
 
     def __init__(self,
-                 auth: Optional[str | dict] = None,
+                 auth: Optional[str | Dict] = None,
                  user: str = None,
                  requests_session=True,
-                 proxies: dict = None,
+                 proxies: Dict = None,
                  language: str = 'en',
                  location: str = '',
                  oauth_credentials: Optional[OAuthCredentials] = None):
@@ -75,16 +75,24 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         :param oauth_credentials: Optional. Used to specify a different oauth client to be
             used for authentication flow.
         """
-        self._base_headers = None
-        self._headers = None
-        self.auth = auth
-        self._input_dict = {}
-        self.is_alt_oauth = False
-        self.is_oauth_auth = False
-        self.is_browser_auth = False
-        self.is_custom_oauth = False
-        self._token = None
-        self.proxies = proxies
+
+        self._base_headers = None  # for authless initializing requests during OAuth flow
+        self._headers = None  # cache formed headers including auth
+
+        self.auth = auth  # raw auth
+        self._input_dict = {}  # parsed auth arg value in dictionary format
+
+        # (?) may be better implemented as an auth_type attribute with a literal/enum value (?)
+        self.is_alt_oauth = False  # YTM instance is using a non-default OAuth client (id & secret)
+        self.is_oauth_auth = False  # client auth via OAuth token refreshing
+        self.is_browser_auth = False  # authorization via extracted browser headers, enables uploading capabilities
+        self.is_custom_oauth = False  # allows fully formed OAuth headers to ignore browser auth refresh flow
+
+        self._token: Token  # OAuth credential handler
+        self.oauth_credentials: OAuthCredentials  # Client used for OAuth refreshing
+
+        self._session: requests.Session  # request session for connection pooling
+        self.proxies: Dict = proxies  # params for session modification
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session

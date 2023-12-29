@@ -1,15 +1,31 @@
-from typing import Optional, Any
-import time
+from typing import Optional
 import os
 import json
 
 from .base import OAuthToken, Token, Credentials
+from .models import RefreshableTokenDict, Bearer, DefaultScope
 
 
 class RefreshingToken(Token):
+    """
+    Compositional implementation of Token that automatically refreshes
+    an underlying OAuthToken when required (credential expiration <= 1 min)
+    upon access_token attribute access.
+    """
 
     @classmethod
     def from_file(cls, file_path: str, credentials: Credentials, sync=True):
+        """
+        Initialize a refreshing token and underlying OAuthToken directly from a file.
+
+        :param file_path: path to json containing token values
+        :param credentials: credentials used with token in file.
+        :param sync: Optional. Whether to pass the filepath into instance enabling file
+            contents to be updated upon refresh. (Default=True).
+        :return: RefreshingToken instance
+        :rtype: RefreshingToken
+        """
+
         if os.path.isfile(file_path):
             with open(file_path) as json_file:
                 file_pack = json.load(json_file)
@@ -20,22 +36,32 @@ class RefreshingToken(Token):
                  token: OAuthToken,
                  credentials: Credentials,
                  local_cache: Optional[str] = None):
-        self.token = token
-        self.credentials = credentials
+        """
+        :param token: Underlying Token being maintained.
+        :param credentials: OAuth client being used for refreshing.
+        :param local_cache: Optional. Path to json file where token values are stored.
+            When provided, file contents is updated upon token refresh.
+        """
+
+        self.token: OAuthToken = token  # internal token being used / refreshed / maintained
+        self.credentials = credentials  # credentials used for access_token refreshing
+
+        # protected/property attribute enables auto writing token
+        # values to new file location via setter
         self._local_cache = local_cache
 
     @property
-    def local_cache(self):
+    def local_cache(self) -> str | None:
         return self._local_cache
 
-    # as a property so swapping it will automatically dump the token to the new location
     @local_cache.setter
     def local_cache(self, path: str):
+        """ Update attribute and dump token to new path. """
         self._local_cache = path
         self.store_token()
 
     @property
-    def access_token(self):
+    def access_token(self) -> str:
         if self.token.is_expiring:
             fresh = self.credentials.refresh_token(self.token.refresh_token)
             self.token.update(fresh)
@@ -43,34 +69,48 @@ class RefreshingToken(Token):
 
         return self.token.access_token
 
-    def store_token(self):
-        if self.local_cache:
-            with open(self.local_cache, encoding="utf8", mode='w') as file:
+    def store_token(self, path: Optional[str] = None) -> None:
+        """
+        Write token values to json file at specified path, defaulting to self.local_cache.
+        Operation does not update instance local_cache attribute.
+        Automatically called when local_cache is set post init.
+        """
+        file_path = path if path else self.local_cache
+
+        if file_path:
+            with open(file_path, encoding="utf8", mode='w') as file:
                 json.dump(self.token.as_dict(), file, indent=True)
 
     @property
-    def refresh_token(self):
+    def refresh_token(self) -> str:
+        # pass underlying value
         return self.token.refresh_token
 
     @property
     def is_expiring(self) -> bool:
+        # Refreshing token never expires
         return False
 
     @property
-    def expires_at(self):
+    def expires_at(self) -> None:
+        # Refreshing token never expires
         return None
 
     @property
-    def expires_in(self):
+    def expires_in(self) -> None:
+        # Refreshing token never expires
         return None
 
     @property
-    def scope(self):
+    def scope(self) -> DefaultScope:
+        # pass underlying value
         return self.token.scope
 
     @property
-    def token_type(self):
+    def token_type(self) -> Bearer:
+        # pass underlying value
         return self.token.token_type
 
-    def as_dict(self):
+    def as_dict(self) -> RefreshableTokenDict:
+        # override base class method with call to underlying token's method
         return self.token.as_dict()
