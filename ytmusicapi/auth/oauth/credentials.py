@@ -13,17 +13,6 @@ from ytmusicapi.constants import (OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_CO
                                   OAUTH_SCOPE, OAUTH_TOKEN_URL, OAUTH_USER_AGENT)
 
 
-def is_oauth(headers: CaseInsensitiveDict) -> bool:
-    oauth_structure = {
-        "access_token",
-        "expires_at",
-        "expires_in",
-        "token_type",
-        "refresh_token",
-    }
-    return all(key in headers for key in oauth_structure)
-
-
 class OAuthCredentials(Credentials):
 
     def __init__(self,

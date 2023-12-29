@@ -7,7 +7,6 @@ from typing import Dict, Optional
 import time
 
 from requests.structures import CaseInsensitiveDict
-from ytmusicapi.auth.headers import load_headers_file
 from ytmusicapi.parsers.i18n import Parser
 from ytmusicapi.helpers import *
 from ytmusicapi.mixins.browsing import BrowsingMixin
@@ -17,7 +16,10 @@ from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
-from ytmusicapi.auth.oauth import OAuthCredentials, is_oauth, RefreshingToken, OAuthToken
+
+from .auth.headers import load_headers_file
+from .auth.oauth import OAuthCredentials, RefreshingToken, OAuthToken
+from .auth.oauth.base import Token
 
 
 class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
@@ -109,12 +111,17 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             else:
                 self._input_dict = self.auth
 
-            if is_oauth(self._input_dict):
+            # check if OAuth by passing values as kwargs to OAuthToken init using
+            # KeyError from incompatible input_dict as False
+            try:
+                base_token = OAuthToken(**self._input_dict)
+                self._token = RefreshingToken(base_token, self.oauth_credentials,
+                                              self._input_dict.get('filepath'))
                 self.is_oauth_auth = True
                 self.is_alt_oauth = oauth_credentials is not None
-                self._token = RefreshingToken(OAuthToken(**self._input_dict),
-                                              self.oauth_credentials,
-                                              self._input_dict.get('filepath'))
+
+            except TypeError:
+                pass
 
         # prepare context
         self.context = initialize_context()

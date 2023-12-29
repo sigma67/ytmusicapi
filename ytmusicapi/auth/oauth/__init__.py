@@ -1,5 +1,5 @@
-from .credentials import OAuthCredentials, is_oauth
+from .credentials import OAuthCredentials
 from .refreshing import RefreshingToken
 from .base import OAuthToken
 
-__all__ = ['OAuthCredentials', 'is_oauth', 'RefreshingToken', 'OAuthToken']
+__all__ = ['OAuthCredentials', 'RefreshingToken', 'OAuthToken']
