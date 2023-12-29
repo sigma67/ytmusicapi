@@ -7,6 +7,7 @@ from requests.structures import CaseInsensitiveDict
 from .models import FullTokenDict, BaseTokenDict, CodeDict
 from .base import OAuthToken, Credentials
 from .refreshing import RefreshingToken
+from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
 
 from ytmusicapi.constants import (OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_CODE_URL,
                                   OAUTH_SCOPE, OAUTH_TOKEN_URL, OAUTH_USER_AGENT)
@@ -42,10 +43,25 @@ class OAuthCredentials(Credentials):
 
     def _send_request(self, url, data):
         data.update({"client_id": self.client_id})
-        return self._session.post(url, data, headers={"User-Agent": OAUTH_USER_AGENT})
+        response = self._session.post(url, data, headers={"User-Agent": OAUTH_USER_AGENT})
+        if response.status_code == 401:
+            data = response.json()
+            issue = data.get('error')
+            if issue == 'unauthorized_client':
+                raise UnauthorizedOAuthClient(
+                    'Token refresh error. Most likely client/token mismatch.')
+
+            elif issue == 'invalid_client':
+                raise BadOAuthClient(
+                    'OAuth client failure. Most likely client_id and client_secret mismatch or '
+                    'YouTubeData API is not enabled.')
+            else:
+                raise Exception(
+                    f'OAuth request error. status_code: {response.status_code}, url: {url}, content: {data}'
+                )
+        return response
 
     def token_from_code(self, device_code: str) -> FullTokenDict:
-        """ Returns a FullTokenDict, including refresh_token """
         response = self._send_request(
             OAUTH_TOKEN_URL,
             data={
