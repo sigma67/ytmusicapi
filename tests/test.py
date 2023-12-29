@@ -277,6 +277,11 @@ class TestYTMusic(unittest.TestCase):
         # get results
         results = self.yt_auth.get_search_suggestions('b', detailed_runs=True)
         self.assertGreater(len(results), 0)
+        # get more results
+        historical = self.yt_auth.get_search_suggestions('b',
+                                                         detailed_runs=True,
+                                                         include_history=True)
+        self.assertGreater(len(historical), len(results))
 
     ################
     # EXPLORE
