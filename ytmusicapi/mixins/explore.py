@@ -95,8 +95,8 @@ class ExploreMixin:
         Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
 
         :param country: ISO 3166-1 Alpha-2 country code. Default: ZZ = Global
-        :return: Dictionary containing chart songs (only if authenticated and available), chart videos, chart artists and
-            trending videos.
+        :return: Dictionary containing chart songs (only if authenticated with premium account),
+            chart videos, chart artists and trending videos.
 
         Example::
 
@@ -192,8 +192,8 @@ class ExploreMixin:
         body = {'browseId': 'FEmusic_charts'}
         if country:
             body['formData'] = {'selectedValues': [country]}
-        endpoint = 'browse'
-        response = self._send_request(endpoint, body)
+
+        response = self._send_request('browse', body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         charts = {'countries': {}}
         menu = nav(
@@ -211,10 +211,10 @@ class ExploreMixin:
 
         has_genres = country == 'US'
         has_trending = country != 'ZZ'
-        # songs section appears to no longer exist, extra length check avoids
-        # index errors and will still include songs if the feature is added back
-        has_songs = bool(
-            self.auth) and len(results) - 1 > (len(charts_categories) + has_genres + has_trending)
+
+        # use result length to determine if songs category is present
+        # could also be done via an is_premium attribute on YTMusic instance
+        has_songs = (len(results) - 1) > (len(charts_categories) + has_genres + has_trending)
 
         if has_songs:
             charts_categories.insert(0, 'songs')
