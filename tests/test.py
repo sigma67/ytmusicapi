@@ -266,6 +266,8 @@ class TestYTMusic(unittest.TestCase):
         results = self.yt_auth.get_album(sample_album)
         self.assertGreaterEqual(len(results), 9)
         self.assertTrue(results["tracks"][0]["isExplicit"])
+        self.assertTrue(all(item["views"] is not None for item in results["tracks"]))
+        self.assertTrue(all(item["album"] is not None for item in results["tracks"]))
         self.assertIn("feedbackTokens", results["tracks"][0])
         self.assertGreaterEqual(len(results["other_versions"]), 1)  # appears to be regional
         results = self.yt.get_album("MPREb_BQZvl3BFGay")
@@ -483,7 +485,9 @@ class TestYTMusic(unittest.TestCase):
 
     def test_get_playlist_foreign(self):
         self.assertRaises(Exception, self.yt.get_playlist, "PLABC")
-        playlist = self.yt.get_playlist("PLk5BdzXBUiUe8Q5I13ZSCD8HbxMqJUUQA", limit=300, suggestions_limit=7)
+        playlist = self.yt_auth.get_playlist(
+            "PLk5BdzXBUiUe8Q5I13ZSCD8HbxMqJUUQA", limit=300, suggestions_limit=7
+        )
         self.assertGreater(len(playlist["duration"]), 5)
         self.assertGreater(len(playlist["tracks"]), 200)
         self.assertNotIn("suggestions", playlist)
