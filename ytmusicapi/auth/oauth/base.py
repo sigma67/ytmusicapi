@@ -1,14 +1,15 @@
-from typing import Optional, Dict
-import time
 import json
+import time
+from typing import Dict, Optional
 
 from requests.structures import CaseInsensitiveDict
 
-from .models import BaseTokenDict, DefaultScope, Bearer, RefreshableTokenDict
+from .models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
 
 
 class Credentials:
-    """ Base class representation of YouTubeMusicAPI OAuth Credentials """
+    """Base class representation of YouTubeMusicAPI OAuth Credentials"""
+
     client_id: str
     client_secret: str
 
@@ -23,7 +24,8 @@ class Credentials:
 
 
 class Token:
-    """ Base class representation of the YouTubeMusicAPI OAuth token. """
+    """Base class representation of the YouTubeMusicAPI OAuth token."""
+
     access_token: str
     refresh_token: str
     expires_in: int
@@ -34,38 +36,40 @@ class Token:
     token_type: Bearer
 
     def __repr__(self) -> str:
-        """ Readable version. """
-        return f'{self.__class__.__name__}: {self.as_dict()}'
+        """Readable version."""
+        return f"{self.__class__.__name__}: {self.as_dict()}"
 
     def as_dict(self) -> RefreshableTokenDict:
-        """ Returns dictionary containing underlying token values. """
+        """Returns dictionary containing underlying token values."""
         return {
-            'access_token': self.access_token,
-            'refresh_token': self.refresh_token,
-            'scope': self.scope,
-            'expires_at': self.expires_at,
-            'expires_in': self.expires_in,
-            'token_type': self.token_type
+            "access_token": self.access_token,
+            "refresh_token": self.refresh_token,
+            "scope": self.scope,
+            "expires_at": self.expires_at,
+            "expires_in": self.expires_in,
+            "token_type": self.token_type,
         }
 
     def as_json(self) -> str:
         return json.dumps(self.as_dict())
 
     def as_auth(self) -> str:
-        """ Returns Authorization header ready str of token_type and access_token. """
-        return f'{self.token_type} {self.access_token}'
+        """Returns Authorization header ready str of token_type and access_token."""
+        return f"{self.token_type} {self.access_token}"
 
 
 class OAuthToken(Token):
-    """ Wrapper for an OAuth token implementing expiration methods. """
+    """Wrapper for an OAuth token implementing expiration methods."""
 
-    def __init__(self,
-                 access_token: str,
-                 refresh_token: str,
-                 scope: str,
-                 token_type: str,
-                 expires_at: Optional[int] = None,
-                 expires_in: Optional[int] = None):
+    def __init__(
+        self,
+        access_token: str,
+        refresh_token: str,
+        scope: str,
+        token_type: str,
+        expires_at: Optional[int] = None,
+        expires_in: Optional[int] = None,
+    ):
         """
 
         :param access_token: active oauth key
@@ -102,8 +106,8 @@ class OAuthToken(Token):
         expires_at attribute set using current epoch, avoid expiration desync
         by passing only recently requested tokens dicts or updating values to compensate.
         """
-        self._access_token = fresh_access['access_token']
-        self._expires_at = int(time.time() + fresh_access['expires_in'])
+        self._access_token = fresh_access["access_token"]
+        self._expires_at = int(time.time() + fresh_access["expires_in"])
 
     @property
     def access_token(self) -> str:

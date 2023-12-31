@@ -22,12 +22,14 @@ def setup(filepath: str = None, headers_raw: str = None) -> Dict:
     return setup_browser(filepath, headers_raw)
 
 
-def setup_oauth(filepath: str = None,
-                session: requests.Session = None,
-                proxies: dict = None,
-                open_browser: bool = False,
-                client_id: str = None,
-                client_secret: str = None) -> Dict:
+def setup_oauth(
+    filepath: str = None,
+    session: requests.Session = None,
+    proxies: dict = None,
+    open_browser: bool = False,
+    client_id: str = None,
+    client_secret: str = None,
+) -> Dict:
     """
     Starts oauth flow from the terminal
     and returns a string that can be passed to YTMusic()
@@ -55,11 +57,8 @@ def setup_oauth(filepath: str = None,
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description='Setup ytmusicapi.')
-    parser.add_argument("setup_type",
-                        type=str,
-                        choices=["oauth", "browser"],
-                        help="choose a setup type.")
+    parser = argparse.ArgumentParser(description="Setup ytmusicapi.")
+    parser.add_argument("setup_type", type=str, choices=["oauth", "browser"], help="choose a setup type.")
     parser.add_argument("--file", type=Path, help="optional path to output file.")
 
     return parser.parse_args(args)

@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.parsers.playlists import validate_playlist_id
@@ -6,12 +6,14 @@ from ytmusicapi.parsers.watch import *
 
 
 class WatchMixin:
-    def get_watch_playlist(self,
-                           videoId: str = None,
-                           playlistId: str = None,
-                           limit=25,
-                           radio: bool = False,
-                           shuffle: bool = False) -> Dict[str, Union[List[Dict]]]:
+    def get_watch_playlist(
+        self,
+        videoId: str = None,
+        playlistId: str = None,
+        limit=25,
+        radio: bool = False,
+        shuffle: bool = False,
+    ) -> Dict[str, Union[List[Dict]]]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -101,59 +103,71 @@ class WatchMixin:
 
         """
         body = {
-            'enablePersistentPlaylistPanel': True,
-            'isAudioOnly': True,
-            'tunerSettingValue': 'AUTOMIX_SETTING_NORMAL'
+            "enablePersistentPlaylistPanel": True,
+            "isAudioOnly": True,
+            "tunerSettingValue": "AUTOMIX_SETTING_NORMAL",
         }
         if not videoId and not playlistId:
             raise Exception("You must provide either a video id, a playlist id, or both")
         if videoId:
-            body['videoId'] = videoId
+            body["videoId"] = videoId
             if not playlistId:
                 playlistId = "RDAMVM" + videoId
             if not (radio or shuffle):
-                body['watchEndpointMusicSupportedConfigs'] = {
-                    'watchEndpointMusicConfig': {
-                        'hasPersistentPlaylistPanel': True,
-                        'musicVideoType': "MUSIC_VIDEO_TYPE_ATV",
+                body["watchEndpointMusicSupportedConfigs"] = {
+                    "watchEndpointMusicConfig": {
+                        "hasPersistentPlaylistPanel": True,
+                        "musicVideoType": "MUSIC_VIDEO_TYPE_ATV",
                     }
                 }
-        body['playlistId'] = validate_playlist_id(playlistId)
-        is_playlist = body['playlistId'].startswith('PL') or \
-                      body['playlistId'].startswith('OLA')
+        body["playlistId"] = validate_playlist_id(playlistId)
+        is_playlist = body["playlistId"].startswith("PL") or body["playlistId"].startswith("OLA")
         if shuffle and playlistId is not None:
-            body['params'] = "wAEB8gECKAE%3D"
+            body["params"] = "wAEB8gECKAE%3D"
         if radio:
-            body['params'] = "wAEB"
-        endpoint = 'next'
+            body["params"] = "wAEB"
+        endpoint = "next"
         response = self._send_request(endpoint, body)
-        watchNextRenderer = nav(response, [
-            'contents', 'singleColumnMusicWatchNextResultsRenderer', 'tabbedRenderer',
-            'watchNextTabbedResultsRenderer'
-        ])
+        watchNextRenderer = nav(
+            response,
+            [
+                "contents",
+                "singleColumnMusicWatchNextResultsRenderer",
+                "tabbedRenderer",
+                "watchNextTabbedResultsRenderer",
+            ],
+        )
 
         lyrics_browse_id = get_tab_browse_id(watchNextRenderer, 1)
         related_browse_id = get_tab_browse_id(watchNextRenderer, 2)
 
-        results = nav(watchNextRenderer,
-                      TAB_CONTENT + ['musicQueueRenderer', 'content', 'playlistPanelRenderer'])
+        results = nav(
+            watchNextRenderer, TAB_CONTENT + ["musicQueueRenderer", "content", "playlistPanelRenderer"]
+        )
         playlist = next(
             filter(
                 bool,
                 map(
-                    lambda x: nav(x, ['playlistPanelVideoRenderer'] + NAVIGATION_PLAYLIST_ID, True
-                                  ), results['contents'])), None)
-        tracks = parse_watch_playlist(results['contents'])
+                    lambda x: nav(x, ["playlistPanelVideoRenderer"] + NAVIGATION_PLAYLIST_ID, True),
+                    results["contents"],
+                ),
+            ),
+            None,
+        )
+        tracks = parse_watch_playlist(results["contents"])
 
-        if 'continuations' in results:
-            request_func = lambda additionalParams: self._send_request(
-                endpoint, body, additionalParams)
+        if "continuations" in results:
+            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
             parse_func = lambda contents: parse_watch_playlist(contents)
             tracks.extend(
-                get_continuations(results, 'playlistPanelContinuation', limit - len(tracks),
-                                  request_func, parse_func, '' if is_playlist else 'Radio'))
+                get_continuations(
+                    results,
+                    "playlistPanelContinuation",
+                    limit - len(tracks),
+                    request_func,
+                    parse_func,
+                    "" if is_playlist else "Radio",
+                )
+            )
 
-        return dict(tracks=tracks,
-                    playlistId=playlist,
-                    lyrics=lyrics_browse_id,
-                    related=related_browse_id)
+        return dict(tracks=tracks, playlistId=playlist, lyrics=lyrics_browse_id, related=related_browse_id)

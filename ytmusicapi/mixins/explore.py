@@ -1,9 +1,9 @@
+from typing import Dict, List
+
 from ytmusicapi.parsers.explore import *
-from typing import List, Dict
 
 
 class ExploreMixin:
-
     def get_mood_categories(self) -> Dict:
         """
         Fetch "Moods & Genres" categories from YouTube Music.
@@ -50,15 +50,14 @@ class ExploreMixin:
 
         """
         sections = {}
-        response = self._send_request('browse', {'browseId': 'FEmusic_moods_and_genres'})
+        response = self._send_request("browse", {"browseId": "FEmusic_moods_and_genres"})
         for section in nav(response, SINGLE_COLUMN_TAB + SECTION_LIST):
-            title = nav(section, GRID + ['header', 'gridHeaderRenderer'] + TITLE_TEXT)
+            title = nav(section, GRID + ["header", "gridHeaderRenderer"] + TITLE_TEXT)
             sections[title] = []
             for category in nav(section, GRID_ITEMS):
-                sections[title].append({
-                    "title": nav(category, CATEGORY_TITLE),
-                    "params": nav(category, CATEGORY_PARAMS)
-                })
+                sections[title].append(
+                    {"title": nav(category, CATEGORY_TITLE), "params": nav(category, CATEGORY_PARAMS)}
+                )
 
         return sections
 
@@ -71,25 +70,24 @@ class ExploreMixin:
 
         """
         playlists = []
-        response = self._send_request('browse', {
-            'browseId': 'FEmusic_moods_and_genres_category',
-            'params': params
-        })
+        response = self._send_request(
+            "browse", {"browseId": "FEmusic_moods_and_genres_category", "params": params}
+        )
         for section in nav(response, SINGLE_COLUMN_TAB + SECTION_LIST):
             path = []
-            if 'gridRenderer' in section:
+            if "gridRenderer" in section:
                 path = GRID_ITEMS
-            elif 'musicCarouselShelfRenderer' in section:
+            elif "musicCarouselShelfRenderer" in section:
                 path = CAROUSEL_CONTENTS
-            elif 'musicImmersiveCarouselShelfRenderer' in section:
-                path = ['musicImmersiveCarouselShelfRenderer', 'contents']
+            elif "musicImmersiveCarouselShelfRenderer" in section:
+                path = ["musicImmersiveCarouselShelfRenderer", "contents"]
             if len(path):
                 results = nav(section, path)
                 playlists += parse_content_list(results, parse_playlist)
 
         return playlists
 
-    def get_charts(self, country: str = 'ZZ') -> Dict:
+    def get_charts(self, country: str = "ZZ") -> Dict:
         """
         Get latest charts data from YouTube Music: Top songs, top videos, top artists and top trending videos.
         Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
@@ -189,58 +187,69 @@ class ExploreMixin:
             }
 
         """
-        body = {'browseId': 'FEmusic_charts'}
+        body = {"browseId": "FEmusic_charts"}
         if country:
-            body['formData'] = {'selectedValues': [country]}
+            body["formData"] = {"selectedValues": [country]}
 
-        response = self._send_request('browse', body)
+        response = self._send_request("browse", body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        charts = {'countries': {}}
+        charts = {"countries": {}}
         menu = nav(
-            results[0], MUSIC_SHELF + [
-                'subheaders', 0, 'musicSideAlignedItemRenderer', 'startItems', 0,
-                'musicSortFilterButtonRenderer'
-            ])
-        charts['countries']['selected'] = nav(menu, TITLE)
-        charts['countries']['options'] = list(
-            filter(None, [
-                nav(m, ['payload', 'musicFormBooleanChoice', 'opaqueToken'], True)
-                for m in nav(response, FRAMEWORK_MUTATIONS)
-            ]))
-        charts_categories = ['videos', 'artists']
+            results[0],
+            MUSIC_SHELF
+            + [
+                "subheaders",
+                0,
+                "musicSideAlignedItemRenderer",
+                "startItems",
+                0,
+                "musicSortFilterButtonRenderer",
+            ],
+        )
+        charts["countries"]["selected"] = nav(menu, TITLE)
+        charts["countries"]["options"] = list(
+            filter(
+                None,
+                [
+                    nav(m, ["payload", "musicFormBooleanChoice", "opaqueToken"], True)
+                    for m in nav(response, FRAMEWORK_MUTATIONS)
+                ],
+            )
+        )
+        charts_categories = ["videos", "artists"]
 
-        has_genres = country == 'US'
-        has_trending = country != 'ZZ'
+        has_genres = country == "US"
+        has_trending = country != "ZZ"
 
         # use result length to determine if songs category is present
         # could also be done via an is_premium attribute on YTMusic instance
         has_songs = (len(results) - 1) > (len(charts_categories) + has_genres + has_trending)
 
         if has_songs:
-            charts_categories.insert(0, 'songs')
+            charts_categories.insert(0, "songs")
         if has_genres:
-            charts_categories.append('genres')
+            charts_categories.append("genres")
         if has_trending:
-            charts_categories.append('trending')
+            charts_categories.append("trending")
 
         parse_chart = lambda i, parse_func, key: parse_content_list(
-            nav(results[i + has_songs], CAROUSEL_CONTENTS), parse_func, key)
+            nav(results[i + has_songs], CAROUSEL_CONTENTS), parse_func, key
+        )
         for i, c in enumerate(charts_categories):
             charts[c] = {
-                'playlist': nav(results[1 + i], CAROUSEL + CAROUSEL_TITLE + NAVIGATION_BROWSE_ID,
-                                True)
+                "playlist": nav(results[1 + i], CAROUSEL + CAROUSEL_TITLE + NAVIGATION_BROWSE_ID, True)
             }
 
         if has_songs:
-            charts['songs'].update({'items': parse_chart(0, parse_chart_song, MRLIR)})
+            charts["songs"].update({"items": parse_chart(0, parse_chart_song, MRLIR)})
 
-        charts['videos']['items'] = parse_chart(1, parse_video, MTRIR)
-        charts['artists']['items'] = parse_chart(2, parse_chart_artist, MRLIR)
+        charts["videos"]["items"] = parse_chart(1, parse_video, MTRIR)
+        charts["artists"]["items"] = parse_chart(2, parse_chart_artist, MRLIR)
 
         if has_genres:
-            charts['genres'] = parse_chart(3, parse_playlist, MTRIR)
+            charts["genres"] = parse_chart(3, parse_playlist, MTRIR)
 
         if has_trending:
-            charts['trending']['items'] = parse_chart(3 + has_genres, parse_chart_trending, MRLIR)
+            charts["trending"]["items"] = parse_chart(3 + has_genres, parse_chart_trending, MRLIR)
 
         return charts

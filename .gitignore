@@ -10,3 +10,4 @@ venv*/
 *.egg-info/
 build
 dist
+.pdm-python

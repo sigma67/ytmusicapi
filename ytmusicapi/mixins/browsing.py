@@ -1,15 +1,16 @@
-from ._utils import get_datestamp
+from typing import Dict, List
+
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.albums import parse_album_header
-from ytmusicapi.parsers.playlists import parse_playlist_items
+from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import parse_albums
-from typing import List, Dict
+from ytmusicapi.parsers.playlists import parse_playlist_items
+
+from ._utils import get_datestamp
 
 
 class BrowsingMixin:
-
     def get_home(self, limit=3) -> List[Dict]:
         """
         Get the home page.
@@ -96,23 +97,24 @@ class BrowsingMixin:
             ]
 
         """
-        endpoint = 'browse'
+        endpoint = "browse"
         body = {"browseId": "FEmusic_home"}
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         home = []
         home.extend(parse_mixed_content(results))
 
-        section_list = nav(response, SINGLE_COLUMN_TAB + ['sectionListRenderer'])
-        if 'continuations' in section_list:
-            request_func = lambda additionalParams: self._send_request(
-                endpoint, body, additionalParams)
+        section_list = nav(response, SINGLE_COLUMN_TAB + ["sectionListRenderer"])
+        if "continuations" in section_list:
+            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
             parse_func = lambda contents: parse_mixed_content(contents)
 
             home.extend(
-                get_continuations(section_list, 'sectionListContinuation', limit - len(home),
-                                  request_func, parse_func))
+                get_continuations(
+                    section_list, "sectionListContinuation", limit - len(home), request_func, parse_func
+                )
+            )
 
         return home
 
@@ -210,36 +212,39 @@ class BrowsingMixin:
         """
         if channelId.startswith("MPLA"):
             channelId = channelId[4:]
-        body = {'browseId': channelId}
-        endpoint = 'browse'
+        body = {"browseId": channelId}
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
-        artist = {'description': None, 'views': None}
-        header = response['header']['musicImmersiveHeaderRenderer']
-        artist['name'] = nav(header, TITLE_TEXT)
+        artist = {"description": None, "views": None}
+        header = response["header"]["musicImmersiveHeaderRenderer"]
+        artist["name"] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
         if descriptionShelf:
-            artist['description'] = nav(descriptionShelf, DESCRIPTION)
-            artist['views'] = None if 'subheader' not in descriptionShelf else descriptionShelf[
-                'subheader']['runs'][0]['text']
-        subscription_button = header['subscriptionButton']['subscribeButtonRenderer']
-        artist['channelId'] = subscription_button['channelId']
-        artist['shuffleId'] = nav(header,
-                                  ['playButton', 'buttonRenderer'] + NAVIGATION_WATCH_PLAYLIST_ID,
-                                  True)
-        artist['radioId'] = nav(header, ['startRadioButton', 'buttonRenderer']
-                                + NAVIGATION_WATCH_PLAYLIST_ID, True)
-        artist['subscribers'] = nav(subscription_button,
-                                    ['subscriberCountText', 'runs', 0, 'text'], True)
-        artist['subscribed'] = subscription_button['subscribed']
-        artist['thumbnails'] = nav(header, THUMBNAILS, True)
-        artist['songs'] = {'browseId': None}
-        if 'musicShelfRenderer' in results[0]:  # API sometimes does not return songs
+            artist["description"] = nav(descriptionShelf, DESCRIPTION)
+            artist["views"] = (
+                None
+                if "subheader" not in descriptionShelf
+                else descriptionShelf["subheader"]["runs"][0]["text"]
+            )
+        subscription_button = header["subscriptionButton"]["subscribeButtonRenderer"]
+        artist["channelId"] = subscription_button["channelId"]
+        artist["shuffleId"] = nav(
+            header, ["playButton", "buttonRenderer"] + NAVIGATION_WATCH_PLAYLIST_ID, True
+        )
+        artist["radioId"] = nav(
+            header, ["startRadioButton", "buttonRenderer"] + NAVIGATION_WATCH_PLAYLIST_ID, True
+        )
+        artist["subscribers"] = nav(subscription_button, ["subscriberCountText", "runs", 0, "text"], True)
+        artist["subscribed"] = subscription_button["subscribed"]
+        artist["thumbnails"] = nav(header, THUMBNAILS, True)
+        artist["songs"] = {"browseId": None}
+        if "musicShelfRenderer" in results[0]:  # API sometimes does not return songs
             musicShelf = nav(results[0], MUSIC_SHELF)
-            if 'navigationEndpoint' in nav(musicShelf, TITLE):
-                artist['songs']['browseId'] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
-            artist['songs']['results'] = parse_playlist_items(musicShelf['contents'])
+            if "navigationEndpoint" in nav(musicShelf, TITLE):
+                artist["songs"]["browseId"] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
+            artist["songs"]["results"] = parse_playlist_items(musicShelf["contents"])
 
         artist.update(self.parser.parse_artist_contents(results))
         return artist
@@ -255,7 +260,7 @@ class BrowsingMixin:
 
         """
         body = {"browseId": channelId, "params": params}
-        endpoint = 'browse'
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
         results = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
@@ -311,10 +316,10 @@ class BrowsingMixin:
               }
             }
         """
-        endpoint = 'browse'
+        endpoint = "browse"
         body = {"browseId": channelId}
         response = self._send_request(endpoint, body)
-        user = {'name': nav(response, ['header', 'musicVisualHeaderRenderer'] + TITLE_TEXT)}
+        user = {"name": nav(response, ["header", "musicVisualHeaderRenderer"] + TITLE_TEXT)}
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         user.update(self.parser.parse_artist_contents(results))
         return user
@@ -329,8 +334,8 @@ class BrowsingMixin:
         :return: List of user playlists in the format of :py:func:`get_library_playlists`
 
         """
-        endpoint = 'browse'
-        body = {"browseId": channelId, 'params': params}
+        endpoint = "browse"
+        body = {"browseId": channelId, "params": params}
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
         user_playlists = parse_content_list(results, parse_playlist)
@@ -413,19 +418,19 @@ class BrowsingMixin:
               "duration_seconds": 4657
             }
         """
-        body = {'browseId': browseId}
-        endpoint = 'browse'
+        body = {"browseId": browseId}
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
-        album['tracks'] = parse_playlist_items(results['contents'])
+        album["tracks"] = parse_playlist_items(results["contents"])
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + CAROUSEL, True)
         if results is not None:
-            album['other_versions'] = parse_content_list(results['contents'], parse_album)
-        album['duration_seconds'] = sum_total_duration(album)
-        for i, track in enumerate(album['tracks']):
-            album['tracks'][i]['album'] = album['title']
-            album['tracks'][i]['artists'] = album['tracks'][i]['artists'] or album['artists']
+            album["other_versions"] = parse_content_list(results["contents"], parse_album)
+        album["duration_seconds"] = sum_total_duration(album)
+        for i, track in enumerate(album["tracks"]):
+            album["tracks"][i]["album"] = album["title"]
+            album["tracks"][i]["artists"] = album["tracks"][i]["artists"] or album["artists"]
 
         return album
 
@@ -600,22 +605,16 @@ class BrowsingMixin:
             }
 
         """
-        endpoint = 'player'
+        endpoint = "player"
         if not signatureTimestamp:
             signatureTimestamp = get_datestamp() - 1
 
         params = {
-            "playbackContext": {
-                "contentPlaybackContext": {
-                    "signatureTimestamp": signatureTimestamp
-                }
-            },
-            "video_id": videoId
+            "playbackContext": {"contentPlaybackContext": {"signatureTimestamp": signatureTimestamp}},
+            "video_id": videoId,
         }
         response = self._send_request(endpoint, params)
-        keys = [
-            'videoDetails', 'playabilityStatus', 'streamingData', 'microformat', 'playbackTracking'
-        ]
+        keys = ["videoDetails", "playabilityStatus", "streamingData", "microformat", "playbackTracking"]
         for k in list(response.keys()):
             if k not in keys:
                 del response[k]
@@ -698,8 +697,8 @@ class BrowsingMixin:
         if not browseId:
             raise Exception("Invalid browseId provided.")
 
-        response = self._send_request('browse', {'browseId': browseId})
-        sections = nav(response, ['contents'] + SECTION_LIST)
+        response = self._send_request("browse", {"browseId": browseId})
+        sections = nav(response, ["contents"] + SECTION_LIST)
         return parse_mixed_content(sections)
 
     def get_lyrics(self, browseId: str) -> Dict:
@@ -721,12 +720,13 @@ class BrowsingMixin:
         if not browseId:
             raise Exception("Invalid browseId provided. This song might not have lyrics.")
 
-        response = self._send_request('browse', {'browseId': browseId})
-        lyrics['lyrics'] = nav(response,
-                               ['contents'] + SECTION_LIST_ITEM + DESCRIPTION_SHELF + DESCRIPTION,
-                               True)
-        lyrics['source'] = nav(response, ['contents'] + SECTION_LIST_ITEM + DESCRIPTION_SHELF
-                               + ['footer'] + RUN_TEXT, True)
+        response = self._send_request("browse", {"browseId": browseId})
+        lyrics["lyrics"] = nav(
+            response, ["contents"] + SECTION_LIST_ITEM + DESCRIPTION_SHELF + DESCRIPTION, True
+        )
+        lyrics["source"] = nav(
+            response, ["contents"] + SECTION_LIST_ITEM + DESCRIPTION_SHELF + ["footer"] + RUN_TEXT, True
+        )
 
         return lyrics
 
@@ -780,7 +780,7 @@ class BrowsingMixin:
 
         """
 
-        response = self._send_request('browse', {'browseId': "FEmusic_tastebuilder"})
+        response = self._send_request("browse", {"browseId": "FEmusic_tastebuilder"})
         profiles = nav(response, TASTE_PROFILE_ITEMS)
 
         taste_profiles = {}
@@ -789,7 +789,7 @@ class BrowsingMixin:
                 artist = nav(item["tastebuilderItemRenderer"], TASTE_PROFILE_ARTIST)[0]["text"]
                 taste_profiles[artist] = {
                     "selectionValue": item["tastebuilderItemRenderer"]["selectionFormValue"],
-                    "impressionValue": item["tastebuilderItemRenderer"]["impressionFormValue"]
+                    "impressionValue": item["tastebuilderItemRenderer"]["impressionFormValue"],
                 }
         return taste_profiles
 
@@ -807,9 +807,8 @@ class BrowsingMixin:
         if taste_profile is None:
             taste_profile = self.get_tasteprofile()
         formData = {
-            "impressionValues":
-            [taste_profile[profile]["impressionValue"] for profile in taste_profile],
-            "selectedValues": []
+            "impressionValues": [taste_profile[profile]["impressionValue"] for profile in taste_profile],
+            "selectedValues": [],
         }
 
         for artist in artists:
@@ -817,5 +816,5 @@ class BrowsingMixin:
                 raise Exception("The artist, {}, was not present in taste!".format(artist))
             formData["selectedValues"].append(taste_profile[artist]["selectionValue"])
 
-        body = {'browseId': "FEmusic_home", "formData": formData}
-        self._send_request('browse', body)
+        body = {"browseId": "FEmusic_home", "formData": formData}
+        self._send_request("browse", body)
