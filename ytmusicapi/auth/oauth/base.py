@@ -1,6 +1,8 @@
-from typing import Optional, Any, Dict
+from typing import Optional, Dict
 import time
 import json
+
+from requests.structures import CaseInsensitiveDict
 
 from .models import BaseTokenDict, DefaultScope, Bearer, RefreshableTokenDict
 
@@ -63,8 +65,7 @@ class OAuthToken(Token):
                  scope: str,
                  token_type: str,
                  expires_at: Optional[int] = None,
-                 expires_in: Optional[int] = None,
-                 **_: Optional[Any]):
+                 expires_in: Optional[int] = None):
         """
 
         :param access_token: active oauth key
@@ -73,7 +74,6 @@ class OAuthToken(Token):
         :param token_type: commonly 'Bearer'
         :param expires_at: Optional. Unix epoch (seconds) of access token expiration.
         :param expires_in: Optional. Seconds till expiration, assumes/calculates epoch of init.
-        :param _: void excess kwargs
 
         """
         # match baseclass attribute/property format
@@ -84,6 +84,17 @@ class OAuthToken(Token):
         # set/calculate token expiration using current epoch
         self._expires_at: int = expires_at if expires_at else int(time.time() + expires_in)
         self._token_type = token_type
+
+    @staticmethod
+    def is_oauth(headers: CaseInsensitiveDict) -> bool:
+        oauth_structure = {
+            "access_token",
+            "expires_at",
+            "expires_in",
+            "token_type",
+            "refresh_token",
+        }
+        return all(key in headers for key in oauth_structure)
 
     def update(self, fresh_access: BaseTokenDict):
         """

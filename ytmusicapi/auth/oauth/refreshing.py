@@ -43,11 +43,11 @@ class RefreshingToken(Token):
             When provided, file contents is updated upon token refresh.
         """
 
-        self.token: OAuthToken = token  # internal token being used / refreshed / maintained
-        self.credentials = credentials  # credentials used for access_token refreshing
+        self.token: OAuthToken = token  #: internal token being used / refreshed / maintained
+        self.credentials = credentials  #: credentials used for access_token refreshing
 
-        # protected/property attribute enables auto writing token
-        # values to new file location via setter
+        #: protected/property attribute enables auto writing token
+        #  values to new file location via setter
         self._local_cache = local_cache
 
     @property
@@ -80,31 +80,6 @@ class RefreshingToken(Token):
         if file_path:
             with open(file_path, encoding="utf8", mode='w') as file:
                 json.dump(self.token.as_dict(), file, indent=True)
-
-    @property
-    def refresh_token(self) -> str:
-        # pass underlying value
-        return self.token.refresh_token
-
-    @property
-    def is_expiring(self) -> bool:
-        # Refreshing token never expires
-        return False
-
-    @property
-    def expires_at(self) -> None:
-        # Refreshing token never expires
-        return None
-
-    @property
-    def expires_in(self) -> None:
-        # Refreshing token never expires
-        return None
-
-    @property
-    def scope(self) -> DefaultScope:
-        # pass underlying value
-        return self.token.scope
 
     @property
     def token_type(self) -> Bearer:

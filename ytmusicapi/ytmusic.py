@@ -76,23 +76,23 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             used for authentication flow.
         """
 
-        self._base_headers = None  # for authless initializing requests during OAuth flow
-        self._headers = None  # cache formed headers including auth
+        self._base_headers = None  #: for authless initializing requests during OAuth flow
+        self._headers = None  #: cache formed headers including auth
 
-        self.auth = auth  # raw auth
-        self._input_dict = {}  # parsed auth arg value in dictionary format
+        self.auth = auth  #: raw auth
+        self._input_dict = {}  #: parsed auth arg value in dictionary format
 
         # (?) may be better implemented as an auth_type attribute with a literal/enum value (?)
-        self.is_alt_oauth = False  # YTM instance is using a non-default OAuth client (id & secret)
-        self.is_oauth_auth = False  # client auth via OAuth token refreshing
-        self.is_browser_auth = False  # authorization via extracted browser headers, enables uploading capabilities
-        self.is_custom_oauth = False  # allows fully formed OAuth headers to ignore browser auth refresh flow
+        self.is_alt_oauth = False  #: YTM instance is using a non-default OAuth client (id & secret)
+        self.is_oauth_auth = False  #: client auth via OAuth token refreshing
+        self.is_browser_auth = False  #: authorization via extracted browser headers, enables uploading capabilities
+        self.is_custom_oauth = False  #: allows fully formed OAuth headers to ignore browser auth refresh flow
 
-        self._token: Token  # OAuth credential handler
-        self.oauth_credentials: OAuthCredentials  # Client used for OAuth refreshing
+        self._token: Token  #: OAuth credential handler
+        self.oauth_credentials: OAuthCredentials  #: Client used for OAuth refreshing
 
-        self._session: requests.Session  # request session for connection pooling
-        self.proxies: Dict = proxies  # params for session modification
+        self._session: requests.Session  #: request session for connection pooling
+        self.proxies: Dict = proxies  #: params for session modification
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
@@ -103,10 +103,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             else:  # Use the Requests API module as a "session".
                 self._session = requests.api
 
-        if oauth_credentials is not None:
-            self.oauth_credentials = oauth_credentials
-        else:
-            self.oauth_credentials = OAuthCredentials()
+        self.oauth_credentials = oauth_credentials if oauth_credentials is not None else OAuthCredentials()
 
         # see google cookie docs: https://policies.google.com/technologies/cookies
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
@@ -119,17 +116,12 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             else:
                 self._input_dict = self.auth
 
-            # check if OAuth by passing values as kwargs to OAuthToken init using
-            # KeyError from incompatible input_dict as False
-            try:
+            if OAuthToken.is_oauth(self._input_dict):
                 base_token = OAuthToken(**self._input_dict)
                 self._token = RefreshingToken(base_token, self.oauth_credentials,
                                               self._input_dict.get('filepath'))
                 self.is_oauth_auth = True
                 self.is_alt_oauth = oauth_credentials is not None
-
-            except TypeError:
-                pass
 
         # prepare context
         self.context = initialize_context()
