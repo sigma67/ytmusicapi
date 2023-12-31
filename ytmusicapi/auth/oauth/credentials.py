@@ -3,13 +3,19 @@ from typing import Dict, Optional
 
 import requests
 
-from .models import RefreshableTokenDict, BaseTokenDict, AuthCodeDict
-from .base import OAuthToken, Credentials
-from .refreshing import RefreshingToken
-from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
+from ytmusicapi.constants import (
+    OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET,
+    OAUTH_CODE_URL,
+    OAUTH_SCOPE,
+    OAUTH_TOKEN_URL,
+    OAUTH_USER_AGENT,
+)
 
-from ytmusicapi.constants import (OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_CODE_URL,
-                                  OAUTH_SCOPE, OAUTH_TOKEN_URL, OAUTH_USER_AGENT)
+from .base import Credentials, OAuthToken
+from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
+from .models import AuthCodeDict, BaseTokenDict, RefreshableTokenDict
+from .refreshing import RefreshingToken
 
 
 class OAuthCredentials(Credentials):

@@ -1,5 +1,6 @@
+from typing import Dict, List
+
 from ytmusicapi.parsers.explore import *
-from typing import List, Dict
 
 
 class ExploreMixin:

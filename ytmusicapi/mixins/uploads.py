@@ -1,17 +1,23 @@
-import requests
 import ntpath
 import os
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
-from ._utils import validate_order_parameter, prepare_order_params
+import requests
+
+from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import *
 from ytmusicapi.navigation import *
-from ytmusicapi.continuations import get_continuations
-from ytmusicapi.parsers.library import parse_library_albums, parse_library_artists, get_library_contents, \
-    pop_songs_random_mix
 from ytmusicapi.parsers.albums import parse_album_header
+from ytmusicapi.parsers.library import (
+    get_library_contents,
+    parse_library_albums,
+    parse_library_artists,
+    pop_songs_random_mix,
+)
 from ytmusicapi.parsers.uploads import parse_uploaded_items
+
 from ..auth.types import AuthType
+from ._utils import prepare_order_params, validate_order_parameter
 
 
 class UploadsMixin:

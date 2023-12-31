@@ -1,11 +1,10 @@
-import re
 import json
-from http.cookies import SimpleCookie
-from hashlib import sha1
-import time
 import locale
-
+import re
+import time
 import unicodedata
+from hashlib import sha1
+from http.cookies import SimpleCookie
 
 from ytmusicapi.constants import *
 

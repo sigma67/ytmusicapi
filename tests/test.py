@@ -9,9 +9,9 @@ from unittest import mock
 from requests import Response
 
 from ytmusicapi.auth.types import AuthType
-from ytmusicapi.setup import main, setup  # noqa: E402
-from ytmusicapi.ytmusic import YTMusic, OAuthCredentials  # noqa: E402
 from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
+from ytmusicapi.setup import main, setup  # noqa: E402
+from ytmusicapi.ytmusic import OAuthCredentials, YTMusic  # noqa: E402
 
 
 def get_resource(file: str) -> str:

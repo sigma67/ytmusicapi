@@ -1,9 +1,15 @@
-from typing import List, Dict
+from typing import Dict, List
 
-from ytmusicapi.navigation import nav, CAROUSEL, CAROUSEL_TITLE, NAVIGATION_BROWSE_ID
+from ytmusicapi.navigation import CAROUSEL, CAROUSEL_TITLE, NAVIGATION_BROWSE_ID, nav
 from ytmusicapi.parsers._utils import i18n
-from ytmusicapi.parsers.browsing import parse_album, parse_single, parse_video, parse_playlist, parse_related_artist, \
-    parse_content_list
+from ytmusicapi.parsers.browsing import (
+    parse_album,
+    parse_content_list,
+    parse_playlist,
+    parse_related_artist,
+    parse_single,
+    parse_video,
+)
 
 
 class Parser:

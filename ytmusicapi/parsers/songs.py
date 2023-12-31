@@ -1,5 +1,6 @@
-from ._utils import *
 import re
+
+from ._utils import *
 
 
 def parse_song_artists(data, index):

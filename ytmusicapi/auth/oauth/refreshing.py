@@ -1,9 +1,9 @@
-from typing import Optional
-import os
 import json
+import os
+from typing import Optional
 
-from .base import OAuthToken, Token, Credentials
-from .models import RefreshableTokenDict, Bearer, DefaultScope
+from .base import Credentials, OAuthToken, Token
+from .models import Bearer, RefreshableTokenDict
 
 
 class RefreshingToken(Token):

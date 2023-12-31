@@ -1,5 +1,5 @@
-from .songs import *
 from ._utils import *
+from .songs import *
 
 
 def parse_mixed_content(rows):

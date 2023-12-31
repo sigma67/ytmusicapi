@@ -1,11 +1,13 @@
-from ._utils import get_datestamp
+from typing import Dict, List
+
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.albums import parse_album_header
-from ytmusicapi.parsers.playlists import parse_playlist_items
+from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import parse_albums
-from typing import List, Dict
+from ytmusicapi.parsers.playlists import parse_playlist_items
+
+from ._utils import get_datestamp
 
 
 class BrowsingMixin:

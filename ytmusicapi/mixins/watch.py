@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.parsers.playlists import validate_playlist_id

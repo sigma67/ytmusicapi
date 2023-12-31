@@ -13,9 +13,6 @@ dependencies = [
 ]
 dynamic = ["version", "readme"]
 
-[project.optional-dependencies]
-dev = ['pre-commit', 'flake8', 'yapf', 'coverage', 'sphinx', 'sphinx-rtd-theme']
-
 [project.scripts]
 ytmusicapi = "ytmusicapi.setup:main"
 
@@ -28,8 +25,6 @@ repository = "https://github.com/sigma67/ytmusicapi"
 requires = ["setuptools>=65", "setuptools_scm[toml]>=7"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools_scm]
-
 [tool.setuptools.dynamic]
 readme = {file = ["README.rst"]}
 
@@ -39,9 +34,21 @@ include-package-data=false
 [tool.setuptools.package-data]
 "*" = ["**.rst", "**.py", "**.mo"]
 
-[tool.yapf]
-column_limit = 99
-split_before_arithmetic_operator = true
-
 [tool.coverage.run]
 command_line = "-m unittest discover tests"
+
+[tool.ruff]
+#fix = true
+line-length = 99
+ignore = [ "F403", "F405", "F821", "E731" ]
+extend-select = [
+    "I",   # isort
+]
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "coverage>=7.4.0",
+    'sphinx<7',
+    'sphinx-rtd-theme',
+    "ruff>=0.1.9",
+]

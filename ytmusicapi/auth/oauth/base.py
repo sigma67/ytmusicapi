@@ -1,10 +1,10 @@
-from typing import Optional, Dict
-import time
 import json
+import time
+from typing import Dict, Optional
 
 from requests.structures import CaseInsensitiveDict
 
-from .models import BaseTokenDict, DefaultScope, Bearer, RefreshableTokenDict
+from .models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
 
 
 class Credentials:

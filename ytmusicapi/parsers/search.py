@@ -1,5 +1,5 @@
-from .songs import *
 from ._utils import *
+from .songs import *
 
 
 def get_search_result_type(result_type_local, result_types_local):

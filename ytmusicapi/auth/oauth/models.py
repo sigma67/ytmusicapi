@@ -1,6 +1,6 @@
 """models for oauth authentication"""
 
-from typing import Union, Literal, TypedDict
+from typing import Literal, TypedDict, Union
 
 DefaultScope = Union[str, Literal['https://www.googleapis.com/auth/youtube']]
 Bearer = Union[str, Literal['Bearer']]

@@ -1,7 +1,8 @@
+from ytmusicapi.continuations import get_continuations
+
+from ._utils import *
 from .playlists import parse_playlist_items
 from .songs import parse_song_runs
-from ._utils import *
-from ytmusicapi.continuations import get_continuations
 
 
 def parse_artists(results, uploaded=False):
