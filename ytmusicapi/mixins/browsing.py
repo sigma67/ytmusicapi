@@ -337,7 +337,7 @@ class BrowsingMixin:
 
         return user_playlists
 
-    def get_album_browse_id(self, audioPlaylistId: str) -> str:
+    def get_album_browse_id(self, audioPlaylistId: str) -> str | None:
         """
         Get an album's browseId based on its audioPlaylistId
 
@@ -346,6 +346,7 @@ class BrowsingMixin:
         """
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
+
         matches = re.search(r"\"MPRE.+?\"", response.text.encode("utf8").decode("unicode_escape"))
         browse_id = None
         if matches:

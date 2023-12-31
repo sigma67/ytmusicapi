@@ -11,6 +11,7 @@ from ytmusicapi.parsers.library import parse_library_albums, parse_library_artis
     pop_songs_random_mix
 from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.uploads import parse_uploaded_items
+from ..auth.types import AuthType
 
 
 class UploadsMixin:
@@ -197,7 +198,7 @@ class UploadsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        if not self.is_browser_auth:
+        if not self.auth_type == AuthType.BROWSER:
             raise Exception("Please provide authentication before using this function")
         if not os.path.isfile(filepath):
             raise Exception("The provided file does not exist.")
