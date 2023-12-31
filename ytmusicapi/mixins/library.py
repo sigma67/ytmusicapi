@@ -1,14 +1,15 @@
 from random import randint
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from ytmusicapi.continuations import *
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import *
 
+from ._protocol import MixinProtocol
 from ._utils import *
 
 
-class LibraryMixin:
+class LibraryMixin(MixinProtocol):
     def get_library_playlists(self, limit: int = 25) -> List[Dict]:
         """
         Retrieves the playlists in the user's library.
@@ -44,7 +45,7 @@ class LibraryMixin:
         return playlists
 
     def get_library_songs(
-        self, limit: int = 25, validate_responses: bool = False, order: str = None
+        self, limit: int = 25, validate_responses: bool = False, order: Optional[str] = None
     ) -> List[Dict]:
         """
         Gets the songs in the user's library (liked videos are not included).
@@ -114,7 +115,7 @@ class LibraryMixin:
 
         return songs
 
-    def get_library_albums(self, limit: int = 25, order: str = None) -> List[Dict]:
+    def get_library_albums(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Gets the albums in the user's library.
 
@@ -149,7 +150,7 @@ class LibraryMixin:
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_artists(self, limit: int = 25, order: str = None) -> List[Dict]:
+    def get_library_artists(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Gets the artists of the songs in the user's library.
 
@@ -177,7 +178,7 @@ class LibraryMixin:
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_subscriptions(self, limit: int = 25, order: str = None) -> List[Dict]:
+    def get_library_subscriptions(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Gets the artists the user has subscribed to.
 
@@ -195,15 +196,6 @@ class LibraryMixin:
         return parse_library_artists(
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
-
-    def get_liked_songs(self, limit: int = 100) -> Dict:
-        """
-        Gets playlist items for the 'Liked Songs' playlist
-
-        :param limit: How many items to return. Default: 100
-        :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
-        """
-        return self.get_playlist("LM", limit)
 
     def get_history(self) -> List[Dict]:
         """
@@ -260,7 +252,7 @@ class LibraryMixin:
 
         return response
 
-    def rate_song(self, videoId: str, rating: str = "INDIFFERENT") -> Dict:
+    def rate_song(self, videoId: str, rating: str = "INDIFFERENT") -> Optional[Dict]:
         """
         Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
 
@@ -275,11 +267,11 @@ class LibraryMixin:
         body = {"target": {"videoId": videoId}}
         endpoint = prepare_like_endpoint(rating)
         if endpoint is None:
-            return
+            return None
 
         return self._send_request(endpoint, body)
 
-    def edit_song_library_status(self, feedbackTokens: List[str] = None) -> Dict:
+    def edit_song_library_status(self, feedbackTokens: Optional[List[str]] = None) -> Dict:
         """
         Adds or removes a song from your library depending on the token provided.
 
@@ -290,7 +282,7 @@ class LibraryMixin:
         self._check_auth()
         body = {"feedbackTokens": feedbackTokens}
         endpoint = "feedback"
-        return endpoint if not endpoint else self._send_request(endpoint, body)
+        return self._send_request(endpoint, body)
 
     def rate_playlist(self, playlistId: str, rating: str = "INDIFFERENT") -> Dict:
         """

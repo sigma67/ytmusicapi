@@ -1,6 +1,7 @@
 import json
 import time
-from typing import Dict, Optional
+from abc import ABC
+from typing import Mapping, Optional
 
 from requests.structures import CaseInsensitiveDict
 
@@ -13,7 +14,7 @@ class Credentials:
     client_id: str
     client_secret: str
 
-    def get_code(self) -> Dict:
+    def get_code(self) -> Mapping:
         raise NotImplementedError()
 
     def token_from_code(self, device_code: str) -> RefreshableTokenDict:
@@ -23,17 +24,17 @@ class Credentials:
         raise NotImplementedError()
 
 
-class Token:
+class Token(ABC):
     """Base class representation of the YouTubeMusicAPI OAuth token."""
 
-    access_token: str
-    refresh_token: str
-    expires_in: int
-    expires_at: int
-    is_expiring: bool
+    _access_token: str
+    _refresh_token: str
+    _expires_in: int
+    _expires_at: int
+    _is_expiring: bool
 
-    scope: DefaultScope
-    token_type: Bearer
+    _scope: DefaultScope
+    _token_type: Bearer
 
     def __repr__(self) -> str:
         """Readable version."""
@@ -57,6 +58,34 @@ class Token:
         """Returns Authorization header ready str of token_type and access_token."""
         return f"{self.token_type} {self.access_token}"
 
+    @property
+    def access_token(self) -> str:
+        return self._access_token
+
+    @property
+    def refresh_token(self) -> str:
+        return self._refresh_token
+
+    @property
+    def token_type(self) -> Bearer:
+        return self._token_type
+
+    @property
+    def scope(self) -> DefaultScope:
+        return self._scope
+
+    @property
+    def expires_at(self) -> int:
+        return self._expires_at
+
+    @property
+    def expires_in(self) -> int:
+        return self._expires_in
+
+    @property
+    def is_expiring(self) -> bool:
+        return self.expires_in < 60
+
 
 class OAuthToken(Token):
     """Wrapper for an OAuth token implementing expiration methods."""
@@ -68,7 +97,7 @@ class OAuthToken(Token):
         scope: str,
         token_type: str,
         expires_at: Optional[int] = None,
-        expires_in: Optional[int] = None,
+        expires_in: int = 0,
     ):
         """
 
@@ -84,10 +113,11 @@ class OAuthToken(Token):
         self._access_token = access_token
         self._refresh_token = refresh_token
         self._scope = scope
+        self._token_type = token_type
 
         # set/calculate token expiration using current epoch
-        self._expires_at: int = expires_at if expires_at else int(time.time() + expires_in)
-        self._token_type = token_type
+        self._expires_at: int = expires_at if expires_at else int(time.time()) + expires_in
+        self._expires_in: int = expires_in
 
     @staticmethod
     def is_oauth(headers: CaseInsensitiveDict) -> bool:
@@ -108,26 +138,6 @@ class OAuthToken(Token):
         """
         self._access_token = fresh_access["access_token"]
         self._expires_at = int(time.time() + fresh_access["expires_in"])
-
-    @property
-    def access_token(self) -> str:
-        return self._access_token
-
-    @property
-    def refresh_token(self) -> str:
-        return self._refresh_token
-
-    @property
-    def token_type(self) -> Bearer:
-        return self._token_type
-
-    @property
-    def scope(self) -> DefaultScope:
-        return self._scope
-
-    @property
-    def expires_at(self) -> int:
-        return self._expires_at
 
     @property
     def expires_in(self) -> int:

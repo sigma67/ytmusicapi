@@ -1,4 +1,6 @@
 import gettext
+import json
+import locale
 import os
 import time
 from contextlib import suppress
@@ -6,9 +8,22 @@ from functools import partial
 from typing import Dict, Optional
 
 import requests
+from requests import Response
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.helpers import *
+from ytmusicapi.helpers import (
+    SUPPORTED_LANGUAGES,
+    SUPPORTED_LOCATIONS,
+    USER_AGENT,
+    YTM_BASE_API,
+    YTM_DOMAIN,
+    YTM_PARAMS,
+    YTM_PARAMS_KEY,
+    get_authorization,
+    get_visitor_id,
+    initialize_context,
+    sapisid_from_cookie,
+)
 from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
@@ -35,9 +50,9 @@ class YTMusic(
     def __init__(
         self,
         auth: Optional[str | Dict] = None,
-        user: str = None,
+        user: Optional[str] = None,
         requests_session=True,
-        proxies: Dict = None,
+        proxies: Optional[Dict[str, str]] = None,
         language: str = "en",
         location: str = "",
         oauth_credentials: Optional[OAuthCredentials] = None,
@@ -84,7 +99,9 @@ class YTMusic(
         self._headers = None  #: cache formed headers including auth
 
         self.auth = auth  #: raw auth
-        self._input_dict = {}  #: parsed auth arg value in dictionary format
+        self._input_dict: CaseInsensitiveDict = (
+            CaseInsensitiveDict()
+        )  #: parsed auth arg value in dictionary format
 
         self.auth_type: AuthType = AuthType.UNAUTHORIZED
 
@@ -92,16 +109,16 @@ class YTMusic(
         self.oauth_credentials: OAuthCredentials  #: Client used for OAuth refreshing
 
         self._session: requests.Session  #: request session for connection pooling
-        self.proxies: Dict = proxies  #: params for session modification
+        self.proxies: Optional[Dict[str, str]] = proxies  #: params for session modification
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
         else:
             if requests_session:  # Build a new session.
                 self._session = requests.Session()
-                self._session.request = partial(self._session.request, timeout=30)
+                self._session.request = partial(self._session.request, timeout=30)  # type: ignore[method-assign]
             else:  # Use the Requests API module as a "session".
-                self._session = requests.api
+                self._session = requests.api  # type: ignore[assignment]
 
         # see google cookie docs: https://policies.google.com/technologies/cookies
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
@@ -110,18 +127,19 @@ class YTMusic(
             self.oauth_credentials = (
                 oauth_credentials if oauth_credentials is not None else OAuthCredentials()
             )
-            auth_filepath = None
+            auth_filepath: Optional[str] = None
             if isinstance(self.auth, str):
-                if os.path.isfile(auth):
-                    with open(auth) as json_file:
-                        auth_filepath = auth
+                auth_str: str = self.auth
+                if os.path.isfile(auth_str):
+                    with open(auth_str) as json_file:
+                        auth_filepath = auth_str
                         input_json = json.load(json_file)
                 else:
-                    input_json = json.loads(auth)
+                    input_json = json.loads(auth_str)
                 self._input_dict = CaseInsensitiveDict(input_json)
 
             else:
-                self._input_dict = self.auth
+                self._input_dict = CaseInsensitiveDict(self.auth)
 
             if OAuthToken.is_oauth(self._input_dict):
                 base_token = OAuthToken(**self._input_dict)
@@ -210,7 +228,7 @@ class YTMusic(
         body.update(self.context)
 
         # only required for post requests (?)
-        if "X-Goog-Visitor-Id" not in self.headers:
+        if self._headers and "X-Goog-Visitor-Id" not in self._headers:
             self._headers.update(get_visitor_id(self._send_get_request))
 
         response = self._session.post(
@@ -227,7 +245,7 @@ class YTMusic(
             raise Exception(message + error)
         return response_text
 
-    def _send_get_request(self, url: str, params: Dict = None):
+    def _send_get_request(self, url: str, params: Optional[Dict] = None) -> Response:
         response = self._session.get(
             url,
             params=params,

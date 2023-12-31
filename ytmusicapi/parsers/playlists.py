@@ -1,10 +1,9 @@
-from typing import List
+from typing import List, Optional
 
-from ._utils import *
 from .songs import *
 
 
-def parse_playlist_items(results, menu_entries: List[List] = None):
+def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
     songs = []
     for result in results:
         if MRLIR not in result:
@@ -110,5 +109,5 @@ def parse_playlist_items(results, menu_entries: List[List] = None):
     return songs
 
 
-def validate_playlist_id(playlistId):
+def validate_playlist_id(playlistId: str) -> str:
     return playlistId if not playlistId.startswith("VL") else playlistId[2:]

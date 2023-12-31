@@ -1,19 +1,20 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from ytmusicapi.continuations import get_continuations
+from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.playlists import validate_playlist_id
 from ytmusicapi.parsers.watch import *
 
 
-class WatchMixin:
+class WatchMixin(MixinProtocol):
     def get_watch_playlist(
         self,
-        videoId: str = None,
-        playlistId: str = None,
+        videoId: Optional[str] = None,
+        playlistId: Optional[str] = None,
         limit=25,
         radio: bool = False,
         shuffle: bool = False,
-    ) -> Dict[str, Union[List[Dict]]]:
+    ) -> Dict[str, Union[List[Dict], str, None]]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -120,8 +121,12 @@ class WatchMixin:
                         "musicVideoType": "MUSIC_VIDEO_TYPE_ATV",
                     }
                 }
-        body["playlistId"] = validate_playlist_id(playlistId)
-        is_playlist = body["playlistId"].startswith("PL") or body["playlistId"].startswith("OLA")
+        is_playlist = False
+        if playlistId:
+            playlist_id = validate_playlist_id(playlistId)
+            is_playlist = playlist_id.startswith("PL") or playlist_id.startswith("OLA")
+            body["playlistId"] = playlist_id
+
         if shuffle and playlistId is not None:
             body["params"] = "wAEB8gECKAE%3D"
         if radio:

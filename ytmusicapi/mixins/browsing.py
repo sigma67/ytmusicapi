@@ -1,16 +1,19 @@
-from typing import Dict, List
+import re
+from typing import Any, Dict, List, Optional
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
 from ytmusicapi.parsers.albums import parse_album_header
-from ytmusicapi.parsers.browsing import *
+from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
 
+from ..navigation import *
+from ._protocol import MixinProtocol
 from ._utils import get_datestamp
 
 
-class BrowsingMixin:
+class BrowsingMixin(MixinProtocol):
     def get_home(self, limit=3) -> List[Dict]:
         """
         Get the home page.
@@ -217,7 +220,7 @@ class BrowsingMixin:
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
-        artist = {"description": None, "views": None}
+        artist: Dict[str, Any] = {"description": None, "views": None}
         header = response["header"]["musicImmersiveHeaderRenderer"]
         artist["name"] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
@@ -434,7 +437,7 @@ class BrowsingMixin:
 
         return album
 
-    def get_song(self, videoId: str, signatureTimestamp: int = None) -> Dict:
+    def get_song(self, videoId: str, signatureTimestamp: Optional[int] = None) -> Dict:
         """
         Returns metadata and streaming information about a song or video.
 
@@ -743,7 +746,7 @@ class BrowsingMixin:
 
         return YTM_DOMAIN + match.group(1)
 
-    def get_signatureTimestamp(self, url: str = None) -> int:
+    def get_signatureTimestamp(self, url: Optional[str] = None) -> int:
         """
         Fetch the `base.js` script from YouTube Music and parse out the
         `signatureTimestamp` for use with :py:func:`get_song`.
@@ -793,7 +796,7 @@ class BrowsingMixin:
                 }
         return taste_profiles
 
-    def set_tasteprofile(self, artists: List[str], taste_profile: Dict = None) -> None:
+    def set_tasteprofile(self, artists: List[str], taste_profile: Optional[Dict] = None) -> None:
         """
         Favorites artists to see more recommendations from the artist.
         Use :py:func:`get_tasteprofile` to see which artists are available to be recommended

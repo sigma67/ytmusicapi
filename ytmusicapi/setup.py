@@ -1,15 +1,15 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Optional
 
 import requests
 
 from ytmusicapi.auth.browser import setup_browser
-from ytmusicapi.auth.oauth import OAuthCredentials
+from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken
 
 
-def setup(filepath: str = None, headers_raw: str = None) -> Dict:
+def setup(filepath: Optional[str] = None, headers_raw: Optional[str] = None) -> str:
     """
     Requests browser headers from the user via command line
     and returns a string that can be passed to YTMusic()
@@ -23,13 +23,13 @@ def setup(filepath: str = None, headers_raw: str = None) -> Dict:
 
 
 def setup_oauth(
-    filepath: str = None,
-    session: requests.Session = None,
-    proxies: dict = None,
+    filepath: Optional[str] = None,
+    session: Optional[requests.Session] = None,
+    proxies: Optional[dict] = None,
     open_browser: bool = False,
-    client_id: str = None,
-    client_secret: str = None,
-) -> Dict:
+    client_id: Optional[str] = None,
+    client_secret: Optional[str] = None,
+) -> RefreshingToken:
     """
     Starts oauth flow from the terminal
     and returns a string that can be passed to YTMusic()

@@ -48,6 +48,10 @@ class RefreshingToken(Token):
         self._local_cache = local_cache
 
     @property
+    def token_type(self) -> Bearer:
+        return self.token.token_type
+
+    @property
     def local_cache(self) -> str | None:
         return self._local_cache
 
@@ -77,11 +81,6 @@ class RefreshingToken(Token):
         if file_path:
             with open(file_path, encoding="utf8", mode="w") as file:
                 json.dump(self.token.as_dict(), file, indent=True)
-
-    @property
-    def token_type(self) -> Bearer:
-        # pass underlying value
-        return self.token.token_type
 
     def as_dict(self) -> RefreshableTokenDict:
         # override base class method with call to underlying token's method

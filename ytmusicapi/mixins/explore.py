@@ -1,9 +1,10 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
+from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.explore import *
 
 
-class ExploreMixin:
+class ExploreMixin(MixinProtocol):
     def get_mood_categories(self) -> Dict:
         """
         Fetch "Moods & Genres" categories from YouTube Music.
@@ -49,7 +50,7 @@ class ExploreMixin:
             }
 
         """
-        sections = {}
+        sections: Dict[str, Any] = {}
         response = self._send_request("browse", {"browseId": "FEmusic_moods_and_genres"})
         for section in nav(response, SINGLE_COLUMN_TAB + SECTION_LIST):
             title = nav(section, GRID + ["header", "gridHeaderRenderer"] + TITLE_TEXT)
@@ -187,13 +188,13 @@ class ExploreMixin:
             }
 
         """
-        body = {"browseId": "FEmusic_charts"}
+        body: Dict[str, Any] = {"browseId": "FEmusic_charts"}
         if country:
             body["formData"] = {"selectedValues": [country]}
 
         response = self._send_request("browse", body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        charts = {"countries": {}}
+        charts: Dict[str, Any] = {"countries": {}}
         menu = nav(
             results[0],
             MUSIC_SHELF

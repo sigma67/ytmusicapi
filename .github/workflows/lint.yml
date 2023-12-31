@@ -1,4 +1,4 @@
-name: Ruff
+name: lint
 
 on:
   pull_request:
@@ -14,3 +14,12 @@ jobs:
       - uses: chartboost/ruff-action@v1
         with:
           args: format --check
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+      - run: pip install mypy==1.8.0
+      - run:  mypy --install-types --non-interactive
