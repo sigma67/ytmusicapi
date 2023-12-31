@@ -120,13 +120,18 @@ class BrowsingMixin:
         """
         Get information about an artist and their top releases (songs,
         albums, singles, videos, and related artists). The top lists
-        contain pointers for getting the full list of releases. For
-        songs/videos, pass the browseId to :py:func:`get_playlist`.
-        For albums/singles, pass browseId and params to :py:func:
-        `get_artist_albums`.
+        contain pointers for getting the full list of releases.
+
+        For songs/videos, pass the browseId to :py:func:`get_playlist`.
+        For albums/singles, pass browseId and params to :py:func:`get_artist_albums`.
 
         :param channelId: channel id of the artist
         :return: Dictionary with requested information.
+
+        .. warning::
+
+            The returned channelId is not the same as the one passed to the function.
+            It should be used only with :py:func:`subscribe_artists`.
 
         Example::
 
@@ -243,7 +248,7 @@ class BrowsingMixin:
         """
         Get the full list of an artist's albums or singles
 
-        :param channelId: channel Id of the artist
+        :param channelId: browseId of the artist as returned by :py:func:`get_artist`
         :param params: params obtained by :py:func:`get_artist`
         :return: List of albums in the format of :py:func:`get_library_albums`,
           except artists key is missing.
@@ -332,7 +337,7 @@ class BrowsingMixin:
 
         return user_playlists
 
-    def get_album_browse_id(self, audioPlaylistId: str) -> str:
+    def get_album_browse_id(self, audioPlaylistId: str) -> str | None:
         """
         Get an album's browseId based on its audioPlaylistId
 
@@ -341,6 +346,7 @@ class BrowsingMixin:
         """
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
+
         matches = re.search(r"\"MPRE.+?\"", response.text.encode("utf8").decode("unicode_escape"))
         browse_id = None
         if matches:

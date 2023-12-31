@@ -3,14 +3,25 @@ brand_account = 101234229123420379537
 brand_account_empty = 1123456629123420379537
 headers = headers_auth_json_as_string
 headers_empty = headers_account_with_empty_library_as_json_as_string
-headers_file = ./headers_auth.json
-headers_oauth = ./oauth.json
-oauth_code = {"device_code":"","user_code":"","expires_in":1800,"interval":5,"verification_url":"https://www.google.com/device"}
-oauth_token = {"access_token":"","expires_in":1000,"refresh_token":"","scope":"https://www.googleapis.com/auth/youtube","token_type":"Bearer"}
+browser_file = ./browser.json
+oauth_file = ./oauth.json
 headers_raw = raw_headers_pasted_from_browser
+
+[queries]
+uploads_songs = query_gives_gt_20_songs
+library_any = query_gives_gt_5_results
+library_songs = query_gives_gt_10_songs
+library_albums = query_gives_gte_5_albums
+library_artists = query_gives_gte_1_artist
+library_playlists = query_gives_gte_1_playlist
 
 [playlists]
 own = owned_playlist_id
+own_length = number_of_tracks_in_playlist
+
+[albums]
+album_browse_id = sample_id_of_regionally_available_album
+album_track_length = available_album_length
 
 [uploads]
 file = song_in_tests_directory.mp3

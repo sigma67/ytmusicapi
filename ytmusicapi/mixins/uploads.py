@@ -7,12 +7,15 @@ from ._utils import validate_order_parameter, prepare_order_params
 from ytmusicapi.helpers import *
 from ytmusicapi.navigation import *
 from ytmusicapi.continuations import get_continuations
-from ytmusicapi.parsers.library import parse_library_albums, parse_library_artists, get_library_contents
+from ytmusicapi.parsers.library import parse_library_albums, parse_library_artists, get_library_contents, \
+    pop_songs_random_mix
 from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.uploads import parse_uploaded_items
+from ..auth.types import AuthType
 
 
 class UploadsMixin:
+
     def get_library_upload_songs(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
         Returns a list of uploaded songs
@@ -46,7 +49,8 @@ class UploadsMixin:
         results = get_library_contents(response, MUSIC_SHELF)
         if results is None:
             return []
-        songs = parse_uploaded_items(results['contents'][1:])
+        pop_songs_random_mix(results)
+        songs = parse_uploaded_items(results['contents'])
 
         if 'continuations' in results:
             request_func = lambda additionalParams: self._send_request(
@@ -194,7 +198,7 @@ class UploadsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        if not self.is_browser_auth:
+        if not self.auth_type == AuthType.BROWSER:
             raise Exception("Please provide authentication before using this function")
         if not os.path.isfile(filepath):
             raise Exception("The provided file does not exist.")
