@@ -1,9 +1,9 @@
-from typing import Optional
-import os
 import json
+import os
+from typing import Optional
 
-from .base import OAuthToken, Token, Credentials
-from .models import RefreshableTokenDict, Bearer, DefaultScope
+from .base import Credentials, OAuthToken, Token
+from .models import Bearer, RefreshableTokenDict
 
 
 class RefreshingToken(Token):
@@ -32,10 +32,7 @@ class RefreshingToken(Token):
 
         return cls(OAuthToken(**file_pack), credentials, file_path if sync else None)
 
-    def __init__(self,
-                 token: OAuthToken,
-                 credentials: Credentials,
-                 local_cache: Optional[str] = None):
+    def __init__(self, token: OAuthToken, credentials: Credentials, local_cache: Optional[str] = None):
         """
         :param token: Underlying Token being maintained.
         :param credentials: OAuth client being used for refreshing.
@@ -56,7 +53,7 @@ class RefreshingToken(Token):
 
     @local_cache.setter
     def local_cache(self, path: str):
-        """ Update attribute and dump token to new path. """
+        """Update attribute and dump token to new path."""
         self._local_cache = path
         self.store_token()
 
@@ -78,7 +75,7 @@ class RefreshingToken(Token):
         file_path = path if path else self.local_cache
 
         if file_path:
-            with open(file_path, encoding="utf8", mode='w') as file:
+            with open(file_path, encoding="utf8", mode="w") as file:
                 json.dump(self.token.as_dict(), file, indent=True)
 
     @property
