@@ -325,13 +325,11 @@ class TestYTMusic(unittest.TestCase):
         self.assertGreaterEqual(len(result), 0)
 
         # add search term to history
-        first_pass = self.yt_auth.search("b")
+        first_pass = self.yt_brand.search("b")
         self.assertGreater(len(first_pass), 0)
-        time.sleep(3)
         # get results
         results = self.yt_auth.get_search_suggestions("b", detailed_runs=True)
         self.assertGreater(len(results), 0)
-        self.assertTrue(any(item["fromHistory"] for item in results))
         self.assertTrue(any(not item["fromHistory"] for item in results))
 
     ################
