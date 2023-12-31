@@ -17,9 +17,9 @@ from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
 
-from .auth.headers import load_headers_file
 from .auth.oauth import OAuthCredentials, RefreshingToken, OAuthToken
 from .auth.oauth.base import Token
+from .auth.types import AuthType
 
 
 class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
@@ -82,11 +82,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         self.auth = auth  #: raw auth
         self._input_dict = {}  #: parsed auth arg value in dictionary format
 
-        # (?) may be better implemented as an auth_type attribute with a literal/enum value (?)
-        self.is_alt_oauth = False  #: YTM instance is using a non-default OAuth client (id & secret)
-        self.is_oauth_auth = False  #: client auth via OAuth token refreshing
-        self.is_browser_auth = False  #: authorization via extracted browser headers, enables uploading capabilities
-        self.is_custom_oauth = False  #: allows fully formed OAuth headers to ignore browser auth refresh flow
+        self.auth_type: AuthType = AuthType.UNAUTHORIZED
 
         self._token: Token  #: OAuth credential handler
         self.oauth_credentials: OAuthCredentials  #: Client used for OAuth refreshing
@@ -103,14 +99,19 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             else:  # Use the Requests API module as a "session".
                 self._session = requests.api
 
-        self.oauth_credentials = oauth_credentials if oauth_credentials is not None else OAuthCredentials()
-
         # see google cookie docs: https://policies.google.com/technologies/cookies
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
         self.cookies = {'SOCS': 'CAI'}
         if self.auth is not None:
+            self.oauth_credentials = oauth_credentials if oauth_credentials is not None else OAuthCredentials()
+            auth_filepath = None
             if isinstance(self.auth, str):
-                input_json = load_headers_file(self.auth)
+                if os.path.isfile(auth):
+                    with open(auth) as json_file:
+                        auth_filepath = auth
+                        input_json = json.load(json_file)
+                else:
+                    input_json = json.loads(auth)
                 self._input_dict = CaseInsensitiveDict(input_json)
 
             else:
@@ -118,10 +119,8 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
             if OAuthToken.is_oauth(self._input_dict):
                 base_token = OAuthToken(**self._input_dict)
-                self._token = RefreshingToken(base_token, self.oauth_credentials,
-                                              self._input_dict.get('filepath'))
-                self.is_oauth_auth = True
-                self.is_alt_oauth = oauth_credentials is not None
+                self._token = RefreshingToken(base_token, self.oauth_credentials, auth_filepath)
+                self.auth_type = AuthType.OAUTH_CUSTOM_CLIENT if oauth_credentials else AuthType.OAUTH_DEFAULT
 
         # prepare context
         self.context = initialize_context()
@@ -152,13 +151,13 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         auth_headers = self._input_dict.get("authorization")
         if auth_headers:
             if "SAPISIDHASH" in auth_headers:
-                self.is_browser_auth = True
+                self.auth_type = AuthType.BROWSER
             elif auth_headers.startswith('Bearer'):
-                self.is_custom_oauth = True
+                self.auth_type = AuthType.OAUTH_CUSTOM_FULL
 
         # sapsid, origin, and params all set once during init
         self.params = YTM_PARAMS
-        if self.is_browser_auth:
+        if self.auth_type == AuthType.BROWSER:
             self.params += YTM_PARAMS_KEY
             try:
                 cookie = self.base_headers.get('cookie')
@@ -170,7 +169,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
     @property
     def base_headers(self):
         if not self._base_headers:
-            if self.is_browser_auth or self.is_custom_oauth:
+            if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
                 self._base_headers = self._input_dict
             else:
                 self._base_headers = {
@@ -191,10 +190,10 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             self._headers = self.base_headers
 
         # keys updated each use, custom oauth implementations left untouched
-        if self.is_browser_auth:
+        if self.auth_type == AuthType.BROWSER:
             self._headers["authorization"] = get_authorization(self.sapisid + ' ' + self.origin)
 
-        elif self.is_oauth_auth:
+        elif self.auth_type in AuthType.oauth_types():
             self._headers['authorization'] = self._token.as_auth()
             self._headers['X-Goog-Request-Time'] = str(int(time.time()))
 

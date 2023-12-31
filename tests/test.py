@@ -8,6 +8,7 @@ from unittest import mock
 
 from requests import Response
 
+from ytmusicapi.auth.types import AuthType
 from ytmusicapi.setup import main, setup  # noqa: E402
 from ytmusicapi.ytmusic import YTMusic, OAuthCredentials  # noqa: E402
 from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
@@ -82,7 +83,7 @@ class TestYTMusic(unittest.TestCase):
     # OAUTH
     ###############
     # 000 so test is run first and fresh token is available to others
-    def test_000_oauth_tokens(self):
+    def test_oauth_tokens(self):
         # ensure instance initialized token
         self.assertIsNotNone(self.yt_oauth._token)
 
@@ -115,14 +116,14 @@ class TestYTMusic(unittest.TestCase):
         # ensure token is updating local file
         self.assertNotEqual(first_json, second_json)
 
-    def test_alt_oauth(self):
+    def test_oauth_custom_client(self):
         # ensure client works/ignores alt if browser credentials passed as auth
-        self.assertFalse(self.yt_alt_oauth.is_alt_oauth)
+        self.assertNotEqual(self.yt_alt_oauth.auth_type, AuthType.OAUTH_CUSTOM_CLIENT)
         with open(oauth_filepath, 'r') as f:
             token_dict = json.load(f)
         # oauth token dict entry and alt
         self.yt_alt_oauth = YTMusic(token_dict, oauth_credentials=alt_oauth_creds)
-        self.assertTrue(self.yt_alt_oauth.is_alt_oauth)
+        self.assertEqual(self.yt_alt_oauth.auth_type, AuthType.OAUTH_CUSTOM_CLIENT)
 
     ###############
     # BROWSING
