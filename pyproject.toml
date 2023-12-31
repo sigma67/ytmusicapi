@@ -38,7 +38,6 @@ include-package-data=false
 command_line = "-m unittest discover tests"
 
 [tool.ruff]
-#fix = true
 line-length = 110
 ignore = [ "F403", "F405", "F821", "E731" ]
 extend-select = [
