@@ -219,13 +219,18 @@ def parse_search_suggestions(results, detailed_runs):
     suggestions = []
 
     for raw_suggestion in raw_suggestions:
-        suggestion_content = raw_suggestion["searchSuggestionRenderer"]
+        if "historySuggestionRenderer" in raw_suggestion:
+            suggestion_content = raw_suggestion["historySuggestionRenderer"]
+            from_history = True
+        else:
+            suggestion_content = raw_suggestion["searchSuggestionRenderer"]
+            from_history = False
 
         text = suggestion_content["navigationEndpoint"]["searchEndpoint"]["query"]
         runs = suggestion_content["suggestion"]["runs"]
 
         if detailed_runs:
-            suggestions.append({"text": text, "runs": runs})
+            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history})
         else:
             suggestions.append(text)
 
