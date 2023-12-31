@@ -1,4 +1,6 @@
 # commonly used navigation paths
+from typing import Any, Dict, List
+
 CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]
 TAB_CONTENT = ["tabs", 0, "tabRenderer", "content"]
@@ -67,7 +69,7 @@ CARD_SHELF_TITLE = ["header", "musicCardShelfHeaderBasicRenderer"] + TITLE_TEXT
 FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
 
 
-def nav(root, items, none_if_absent=False):
+def nav(root: Dict[str, Any], items: List[Any], none_if_absent: bool = False) -> Any:
     """Access a nested object in root by item sequence."""
     try:
         for k in items:

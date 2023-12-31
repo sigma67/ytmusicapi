@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ytmusicapi.continuations import *
 from ytmusicapi.helpers import sum_total_duration, to_int
@@ -6,10 +6,11 @@ from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
 
+from ._protocol import MixinProtocol
 from ._utils import *
 
 
-class PlaylistsMixin:
+class PlaylistsMixin(MixinProtocol):
     def get_playlist(
         self, playlistId: str, limit: int = 100, related: bool = False, suggestions_limit: int = 0
     ) -> Dict:
@@ -196,13 +197,22 @@ class PlaylistsMixin:
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist
 
+    def get_liked_songs(self, limit: int = 100) -> Dict:
+        """
+        Gets playlist items for the 'Liked Songs' playlist
+
+        :param limit: How many items to return. Default: 100
+        :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
+        """
+        return self.get_playlist("LM", limit)
+
     def create_playlist(
         self,
         title: str,
         description: str,
         privacy_status: str = "PRIVATE",
-        video_ids: List = None,
-        source_playlist: str = None,
+        video_ids: Optional[List] = None,
+        source_playlist: Optional[str] = None,
     ) -> Union[str, Dict]:
         """
         Creates a new empty playlist and returns its id.
@@ -233,11 +243,11 @@ class PlaylistsMixin:
     def edit_playlist(
         self,
         playlistId: str,
-        title: str = None,
-        description: str = None,
-        privacyStatus: str = None,
-        moveItem: Tuple[str, str] = None,
-        addPlaylistId: str = None,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        privacyStatus: Optional[str] = None,
+        moveItem: Optional[Tuple[str, str]] = None,
+        addPlaylistId: Optional[str] = None,
         addToTop: Optional[bool] = None,
     ) -> Union[str, Dict]:
         """
@@ -255,7 +265,7 @@ class PlaylistsMixin:
         :return: Status String or full response
         """
         self._check_auth()
-        body = {"playlistId": validate_playlist_id(playlistId)}
+        body: Dict[str, Any] = {"playlistId": validate_playlist_id(playlistId)}
         actions = []
         if title:
             actions.append({"action": "ACTION_SET_PLAYLIST_NAME", "playlistName": title})
@@ -305,8 +315,8 @@ class PlaylistsMixin:
     def add_playlist_items(
         self,
         playlistId: str,
-        videoIds: List[str] = None,
-        source_playlist: str = None,
+        videoIds: Optional[List[str]] = None,
+        source_playlist: Optional[str] = None,
         duplicates: bool = False,
     ) -> Union[str, Dict]:
         """
@@ -319,7 +329,7 @@ class PlaylistsMixin:
         :return: Status String and a dict containing the new setVideoId for each videoId or full response
         """
         self._check_auth()
-        body = {"playlistId": validate_playlist_id(playlistId), "actions": []}
+        body: Dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
         if not videoIds and not source_playlist:
             raise Exception("You must provide either videoIds or a source_playlist to add to the playlist")
 
@@ -363,7 +373,7 @@ class PlaylistsMixin:
         if len(videos) == 0:
             raise Exception("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
 
-        body = {"playlistId": validate_playlist_id(playlistId), "actions": []}
+        body: Dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
         for video in videos:
             body["actions"].append(
                 {

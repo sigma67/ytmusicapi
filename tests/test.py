@@ -327,6 +327,7 @@ class TestYTMusic(unittest.TestCase):
         # add search term to history
         first_pass = self.yt_auth.search("b")
         self.assertGreater(len(first_pass), 0)
+        time.sleep(3)
         # get results
         results = self.yt_auth.get_search_suggestions("b", detailed_runs=True)
         self.assertGreater(len(results), 0)

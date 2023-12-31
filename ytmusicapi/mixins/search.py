@@ -1,15 +1,16 @@
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ytmusicapi.continuations import get_continuations
+from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.search import *
 
 
-class SearchMixin:
+class SearchMixin(MixinProtocol):
     def search(
         self,
         query: str,
-        filter: str = None,
-        scope: str = None,
+        filter: Optional[str] = None,
+        scope: Optional[str] = None,
         limit: int = 20,
         ignore_spelling: bool = False,
     ) -> List[Dict]:
@@ -134,7 +135,7 @@ class SearchMixin:
         """
         body = {"query": query}
         endpoint = "search"
-        search_results = []
+        search_results: List[Dict[str, Any]] = []
         filters = [
             "albums",
             "artists",

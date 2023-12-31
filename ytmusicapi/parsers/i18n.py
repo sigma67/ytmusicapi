@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from ytmusicapi.navigation import CAROUSEL, CAROUSEL_TITLE, NAVIGATION_BROWSE_ID, nav
 from ytmusicapi.parsers._utils import i18n
@@ -32,9 +32,9 @@ class Parser:
     @i18n
     def parse_artist_contents(self, results: List) -> Dict:
         categories = ["albums", "singles", "videos", "playlists", "related"]
-        categories_local = [_("albums"), _("singles"), _("videos"), _("playlists"), _("related")]
+        categories_local = [_("albums"), _("singles"), _("videos"), _("playlists"), _("related")]  # type: ignore[name-defined]
         categories_parser = [parse_album, parse_single, parse_video, parse_playlist, parse_related_artist]
-        artist = {}
+        artist: Dict[str, Any] = {}
         for i, category in enumerate(categories):
             data = [
                 r["musicCarouselShelfRenderer"]

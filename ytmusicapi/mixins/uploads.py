@@ -1,6 +1,6 @@
 import ntpath
 import os
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -17,11 +17,12 @@ from ytmusicapi.parsers.library import (
 from ytmusicapi.parsers.uploads import parse_uploaded_items
 
 from ..auth.types import AuthType
+from ._protocol import MixinProtocol
 from ._utils import prepare_order_params, validate_order_parameter
 
 
-class UploadsMixin:
-    def get_library_upload_songs(self, limit: int = 25, order: str = None) -> List[Dict]:
+class UploadsMixin(MixinProtocol):
+    def get_library_upload_songs(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Returns a list of uploaded songs
 
@@ -68,7 +69,7 @@ class UploadsMixin:
 
         return songs
 
-    def get_library_upload_albums(self, limit: int = 25, order: str = None) -> List[Dict]:
+    def get_library_upload_albums(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Gets the albums of uploaded songs in the user's library.
 
@@ -87,7 +88,7 @@ class UploadsMixin:
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_upload_artists(self, limit: int = 25, order: str = None) -> List[Dict]:
+    def get_library_upload_artists(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Gets the artists of uploaded songs in the user's library.
 

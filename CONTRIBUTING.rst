@@ -17,7 +17,9 @@ Before making changes to the code, install the development requirements using
 
 .. code-block::
 
-    pip install -e .[dev]
+    pip install pipx
+    pipx install pdm pre-commit
+    pdm install
 
 Before committing, stage your files and run style and linter checks:
 
