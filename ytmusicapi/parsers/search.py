@@ -211,7 +211,7 @@ def _get_param2(filter):
     return filter_params[filter]
 
 
-def parse_search_suggestions(results, detailed_runs, history):
+def parse_search_suggestions(results, detailed_runs):
     if not results.get("contents", [{}])[0].get("searchSuggestionsSectionRenderer", {}).get("contents", []):
         return []
 
@@ -220,18 +220,17 @@ def parse_search_suggestions(results, detailed_runs, history):
 
     for raw_suggestion in raw_suggestions:
         if "historySuggestionRenderer" in raw_suggestion:
-            if history:
-                suggestion_content = raw_suggestion["historySuggestionRenderer"]
-            else:
-                continue
+            suggestion_content = raw_suggestion["historySuggestionRenderer"]
+            from_history = True
         else:
             suggestion_content = raw_suggestion["searchSuggestionRenderer"]
+            from_history = False
 
         text = suggestion_content["navigationEndpoint"]["searchEndpoint"]["query"]
         runs = suggestion_content["suggestion"]["runs"]
 
         if detailed_runs:
-            suggestions.append({"text": text, "runs": runs})
+            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history})
         else:
             suggestions.append(text)
 
