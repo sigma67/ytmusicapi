@@ -9,7 +9,6 @@ from ._utils import *
 
 
 class LibraryMixin:
-
     def get_library_playlists(self, limit: int = 25) -> List[Dict]:
         """
         Retrieves the playlists in the user's library.
@@ -27,28 +26,26 @@ class LibraryMixin:
             }
         """
         self._check_auth()
-        body = {'browseId': 'FEmusic_liked_playlists'}
-        endpoint = 'browse'
+        body = {"browseId": "FEmusic_liked_playlists"}
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
 
         results = get_library_contents(response, GRID)
-        playlists = parse_content_list(results['items'][1:], parse_playlist)
+        playlists = parse_content_list(results["items"][1:], parse_playlist)
 
-        if 'continuations' in results:
-            request_func = lambda additionalParams: self._send_request(
-                endpoint, body, additionalParams)
+        if "continuations" in results:
+            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
             parse_func = lambda contents: parse_content_list(contents, parse_playlist)
             remaining_limit = None if limit is None else (limit - len(playlists))
             playlists.extend(
-                get_continuations(results, 'gridContinuation', remaining_limit, request_func,
-                                  parse_func))
+                get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
+            )
 
         return playlists
 
-    def get_library_songs(self,
-                          limit: int = 25,
-                          validate_responses: bool = False,
-                          order: str = None) -> List[Dict]:
+    def get_library_songs(
+        self, limit: int = 25, validate_responses: bool = False, order: str = None
+    ) -> List[Dict]:
         """
         Gets the songs in the user's library (liked videos are not included).
         To get liked songs and videos, use :py:func:`get_liked_songs`
@@ -60,11 +57,11 @@ class LibraryMixin:
         :return: List of songs. Same format as :py:func:`get_playlist`
         """
         self._check_auth()
-        body = {'browseId': 'FEmusic_liked_videos'}
+        body = {"browseId": "FEmusic_liked_videos"}
         validate_order_parameter(order)
         if order is not None:
             body["params"] = prepare_order_params(order)
-        endpoint = 'browse'
+        endpoint = "browse"
         per_page = 25
 
         request_func = lambda additionalParams: self._send_request(endpoint, body)
@@ -75,32 +72,45 @@ class LibraryMixin:
 
         if validate_responses:
             validate_func = lambda parsed: validate_response(parsed, per_page, limit, 0)
-            response = resend_request_until_parsed_response_is_valid(request_func, None,
-                                                                     parse_func, validate_func, 3)
+            response = resend_request_until_parsed_response_is_valid(
+                request_func, None, parse_func, validate_func, 3
+            )
         else:
             response = parse_func(request_func(None))
 
-        results = response['results']
-        songs = response['parsed']
+        results = response["results"]
+        songs = response["parsed"]
         if songs is None:
             return []
 
-        if 'continuations' in results:
+        if "continuations" in results:
             request_continuations_func = lambda additionalParams: self._send_request(
-                endpoint, body, additionalParams)
+                endpoint, body, additionalParams
+            )
             parse_continuations_func = lambda contents: parse_playlist_items(contents)
 
             if validate_responses:
                 songs.extend(
-                    get_validated_continuations(results, 'musicShelfContinuation',
-                                                limit - len(songs), per_page,
-                                                request_continuations_func,
-                                                parse_continuations_func))
+                    get_validated_continuations(
+                        results,
+                        "musicShelfContinuation",
+                        limit - len(songs),
+                        per_page,
+                        request_continuations_func,
+                        parse_continuations_func,
+                    )
+                )
             else:
                 remaining_limit = None if limit is None else (limit - len(songs))
                 songs.extend(
-                    get_continuations(results, 'musicShelfContinuation', remaining_limit,
-                                      request_continuations_func, parse_continuations_func))
+                    get_continuations(
+                        results,
+                        "musicShelfContinuation",
+                        remaining_limit,
+                        request_continuations_func,
+                        parse_continuations_func,
+                    )
+                )
 
         return songs
 
@@ -128,16 +138,16 @@ class LibraryMixin:
             }
         """
         self._check_auth()
-        body = {'browseId': 'FEmusic_liked_albums'}
+        body = {"browseId": "FEmusic_liked_albums"}
         validate_order_parameter(order)
         if order is not None:
             body["params"] = prepare_order_params(order)
 
-        endpoint = 'browse'
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         return parse_library_albums(
-            response,
-            lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit)
+            response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+        )
 
     def get_library_artists(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
@@ -157,15 +167,15 @@ class LibraryMixin:
             }
         """
         self._check_auth()
-        body = {'browseId': 'FEmusic_library_corpus_track_artists'}
+        body = {"browseId": "FEmusic_library_corpus_track_artists"}
         validate_order_parameter(order)
         if order is not None:
             body["params"] = prepare_order_params(order)
-        endpoint = 'browse'
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         return parse_library_artists(
-            response,
-            lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit)
+            response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+        )
 
     def get_library_subscriptions(self, limit: int = 25, order: str = None) -> List[Dict]:
         """
@@ -176,15 +186,15 @@ class LibraryMixin:
         :return: List of artists. Same format as :py:func:`get_library_artists`
         """
         self._check_auth()
-        body = {'browseId': 'FEmusic_library_corpus_artists'}
+        body = {"browseId": "FEmusic_library_corpus_artists"}
         validate_order_parameter(order)
         if order is not None:
             body["params"] = prepare_order_params(order)
-        endpoint = 'browse'
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         return parse_library_artists(
-            response,
-            lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit)
+            response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+        )
 
     def get_liked_songs(self, limit: int = 100) -> Dict:
         """
@@ -193,7 +203,7 @@ class LibraryMixin:
         :param limit: How many items to return. Default: 100
         :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
         """
-        return self.get_playlist('LM', limit)
+        return self.get_playlist("LM", limit)
 
     def get_history(self) -> List[Dict]:
         """
@@ -204,20 +214,20 @@ class LibraryMixin:
           The additional property ``feedbackToken`` can be used to remove items with :py:func:`remove_history_items`
         """
         self._check_auth()
-        body = {'browseId': 'FEmusic_history'}
-        endpoint = 'browse'
+        body = {"browseId": "FEmusic_history"}
+        endpoint = "browse"
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         songs = []
         for content in results:
-            data = nav(content, MUSIC_SHELF + ['contents'], True)
+            data = nav(content, MUSIC_SHELF + ["contents"], True)
             if not data:
-                error = nav(content, ['musicNotifierShelfRenderer'] + TITLE, True)
+                error = nav(content, ["musicNotifierShelfRenderer"] + TITLE, True)
                 raise Exception(error)
             menu_entries = [[-1] + MENU_SERVICE + FEEDBACK_TOKEN]
             songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:
-                song['played'] = nav(content['musicShelfRenderer'], TITLE_TEXT)
+                song["played"] = nav(content["musicShelfRenderer"], TITLE_TEXT)
             songs.extend(songlist)
 
         return songs
@@ -231,7 +241,7 @@ class LibraryMixin:
         :return: Full response. response.status_code is 204 if successful
         """
         url = song["playbackTracking"]["videostatsPlaybackUrl"]["baseUrl"]
-        CPNA = ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_")
+        CPNA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
         cpn = "".join((CPNA[randint(0, 256) & 63] for _ in range(0, 16)))
         params = {"ver": 2, "c": "WEB_REMIX", "cpn": cpn}
         return self._send_get_request(url, params)
@@ -244,13 +254,13 @@ class LibraryMixin:
         :return: Full response
         """
         self._check_auth()
-        body = {'feedbackTokens': feedbackTokens}
-        endpoint = 'feedback'
+        body = {"feedbackTokens": feedbackTokens}
+        endpoint = "feedback"
         response = self._send_request(endpoint, body)
 
         return response
 
-    def rate_song(self, videoId: str, rating: str = 'INDIFFERENT') -> Dict:
+    def rate_song(self, videoId: str, rating: str = "INDIFFERENT") -> Dict:
         """
         Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
 
@@ -262,7 +272,7 @@ class LibraryMixin:
         :return: Full response
         """
         self._check_auth()
-        body = {'target': {'videoId': videoId}}
+        body = {"target": {"videoId": videoId}}
         endpoint = prepare_like_endpoint(rating)
         if endpoint is None:
             return
@@ -278,11 +288,11 @@ class LibraryMixin:
         :return: Full response
         """
         self._check_auth()
-        body = {'feedbackTokens': feedbackTokens}
-        endpoint = 'feedback'
+        body = {"feedbackTokens": feedbackTokens}
+        endpoint = "feedback"
         return endpoint if not endpoint else self._send_request(endpoint, body)
 
-    def rate_playlist(self, playlistId: str, rating: str = 'INDIFFERENT') -> Dict:
+    def rate_playlist(self, playlistId: str, rating: str = "INDIFFERENT") -> Dict:
         """
         Rates a playlist/album ("Add to library"/"Remove from library" interactions on YouTube Music)
         You can also dislike a playlist/album, which has an effect on your recommendations
@@ -295,7 +305,7 @@ class LibraryMixin:
         :return: Full response
         """
         self._check_auth()
-        body = {'target': {'playlistId': playlistId}}
+        body = {"target": {"playlistId": playlistId}}
         endpoint = prepare_like_endpoint(rating)
         return endpoint if not endpoint else self._send_request(endpoint, body)
 
@@ -307,8 +317,8 @@ class LibraryMixin:
         :return: Full response
         """
         self._check_auth()
-        body = {'channelIds': channelIds}
-        endpoint = 'subscription/subscribe'
+        body = {"channelIds": channelIds}
+        endpoint = "subscription/subscribe"
         return self._send_request(endpoint, body)
 
     def unsubscribe_artists(self, channelIds: List[str]) -> Dict:
@@ -319,6 +329,6 @@ class LibraryMixin:
         :return: Full response
         """
         self._check_auth()
-        body = {'channelIds': channelIds}
-        endpoint = 'subscription/unsubscribe'
+        body = {"channelIds": channelIds}
+        endpoint = "subscription/unsubscribe"
         return self._send_request(endpoint, body)

@@ -23,22 +23,25 @@ from .auth.oauth.base import Token
 from .auth.types import AuthType
 
 
-class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin,
-              UploadsMixin):
+class YTMusic(
+    BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin, UploadsMixin
+):
     """
     Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
     Permits both authenticated and non-authenticated requests.
     Authentication header data must be provided on initialization.
     """
 
-    def __init__(self,
-                 auth: Optional[str | Dict] = None,
-                 user: str = None,
-                 requests_session=True,
-                 proxies: Dict = None,
-                 language: str = 'en',
-                 location: str = '',
-                 oauth_credentials: Optional[OAuthCredentials] = None):
+    def __init__(
+        self,
+        auth: Optional[str | Dict] = None,
+        user: str = None,
+        requests_session=True,
+        proxies: Dict = None,
+        language: str = "en",
+        location: str = "",
+        oauth_credentials: Optional[OAuthCredentials] = None,
+    ):
         """
         Create a new instance to interact with YouTube Music.
 
@@ -102,9 +105,11 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
         # see google cookie docs: https://policies.google.com/technologies/cookies
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
-        self.cookies = {'SOCS': 'CAI'}
+        self.cookies = {"SOCS": "CAI"}
         if self.auth is not None:
-            self.oauth_credentials = oauth_credentials if oauth_credentials is not None else OAuthCredentials()
+            self.oauth_credentials = (
+                oauth_credentials if oauth_credentials is not None else OAuthCredentials()
+            )
             auth_filepath = None
             if isinstance(self.auth, str):
                 if os.path.isfile(auth):
@@ -129,31 +134,32 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         if location:
             if location not in SUPPORTED_LOCATIONS:
                 raise Exception("Location not supported. Check the FAQ for supported locations.")
-            self.context['context']['client']['gl'] = location
+            self.context["context"]["client"]["gl"] = location
 
         if language not in SUPPORTED_LANGUAGES:
-            raise Exception("Language not supported. Supported languages are "
-                            + (', '.join(SUPPORTED_LANGUAGES)) + ".")
-        self.context['context']['client']['hl'] = language
+            raise Exception(
+                "Language not supported. Supported languages are " + (", ".join(SUPPORTED_LANGUAGES)) + "."
+            )
+        self.context["context"]["client"]["hl"] = language
         self.language = language
         try:
             locale.setlocale(locale.LC_ALL, self.language)
         except locale.Error:
             with suppress(locale.Error):
-                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+                locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
-        locale_dir = os.path.abspath(os.path.dirname(__file__)) + os.sep + 'locales'
-        self.lang = gettext.translation('base', localedir=locale_dir, languages=[language])
+        locale_dir = os.path.abspath(os.path.dirname(__file__)) + os.sep + "locales"
+        self.lang = gettext.translation("base", localedir=locale_dir, languages=[language])
         self.parser = Parser(self.lang)
 
         if user:
-            self.context['context']['user']['onBehalfOfUser'] = user
+            self.context["context"]["user"]["onBehalfOfUser"] = user
 
         auth_headers = self._input_dict.get("authorization")
         if auth_headers:
             if "SAPISIDHASH" in auth_headers:
                 self.auth_type = AuthType.BROWSER
-            elif auth_headers.startswith('Bearer'):
+            elif auth_headers.startswith("Bearer"):
                 self.auth_type = AuthType.OAUTH_CUSTOM_FULL
 
         # sapsid, origin, and params all set once during init
@@ -161,9 +167,9 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         if self.auth_type == AuthType.BROWSER:
             self.params += YTM_PARAMS_KEY
             try:
-                cookie = self.base_headers.get('cookie')
+                cookie = self.base_headers.get("cookie")
                 self.sapisid = sapisid_from_cookie(cookie)
-                self.origin = self.base_headers.get('origin', self.base_headers.get('x-origin'))
+                self.origin = self.base_headers.get("origin", self.base_headers.get("x-origin"))
             except KeyError:
                 raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
 
@@ -179,7 +185,7 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
                     "accept-encoding": "gzip, deflate",
                     "content-type": "application/json",
                     "content-encoding": "gzip",
-                    "origin": YTM_DOMAIN
+                    "origin": YTM_DOMAIN,
                 }
 
         return self._base_headers
@@ -192,11 +198,11 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
 
         # keys updated each use, custom oauth implementations left untouched
         if self.auth_type == AuthType.BROWSER:
-            self._headers["authorization"] = get_authorization(self.sapisid + ' ' + self.origin)
+            self._headers["authorization"] = get_authorization(self.sapisid + " " + self.origin)
 
         elif self.auth_type in AuthType.oauth_types():
-            self._headers['authorization'] = self._token.as_auth()
-            self._headers['X-Goog-Request-Time'] = str(int(time.time()))
+            self._headers["authorization"] = self._token.as_auth()
+            self._headers["X-Goog-Request-Time"] = str(int(time.time()))
 
         return self._headers
 
@@ -204,19 +210,20 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
         body.update(self.context)
 
         # only required for post requests (?)
-        if 'X-Goog-Visitor-Id' not in self.headers:
+        if "X-Goog-Visitor-Id" not in self.headers:
             self._headers.update(get_visitor_id(self._send_get_request))
 
-        response = self._session.post(YTM_BASE_API + endpoint + self.params + additionalParams,
-                                      json=body,
-                                      headers=self.headers,
-                                      proxies=self.proxies,
-                                      cookies=self.cookies)
+        response = self._session.post(
+            YTM_BASE_API + endpoint + self.params + additionalParams,
+            json=body,
+            headers=self.headers,
+            proxies=self.proxies,
+            cookies=self.cookies,
+        )
         response_text = json.loads(response.text)
         if response.status_code >= 400:
-            message = "Server returned HTTP " + str(
-                response.status_code) + ": " + response.reason + ".\n"
-            error = response_text.get('error', {}).get('message')
+            message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
+            error = response_text.get("error", {}).get("message")
             raise Exception(message + error)
         return response_text
 
@@ -227,7 +234,8 @@ class YTMusic(BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin
             # handle first-use x-goog-visitor-id fetching
             headers=self.headers if self._headers else self.base_headers,
             proxies=self.proxies,
-            cookies=self.cookies)
+            cookies=self.cookies,
+        )
         return response
 
     def _check_auth(self):

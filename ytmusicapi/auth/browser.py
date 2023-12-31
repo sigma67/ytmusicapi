@@ -50,7 +50,8 @@ def setup_browser(filepath=None, headers_raw=None):
     missing_headers = {"cookie", "x-goog-authuser"} - set(k.lower() for k in user_headers.keys())
     if missing_headers:
         raise Exception(
-            "The following entries are missing in your headers: " + ", ".join(missing_headers)
+            "The following entries are missing in your headers: "
+            + ", ".join(missing_headers)
             + ". Please try a different request (such as /browse) and make sure you are logged in."
         )
 
