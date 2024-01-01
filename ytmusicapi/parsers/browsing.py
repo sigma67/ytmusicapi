@@ -32,7 +32,9 @@ def parse_mixed_content(rows):
                     elif page_type == "MUSIC_PAGE_TYPE_PLAYLIST":
                         content = parse_playlist(data)
                 else:
-                    data = nav(result, [MRLIR])
+                    data = nav(result, [MRLIR], True)
+                    if not data:
+                        continue
                     content = parse_song_flat(data)
 
                 contents.append(content)
