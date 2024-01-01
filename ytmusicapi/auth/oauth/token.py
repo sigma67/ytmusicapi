@@ -23,20 +23,17 @@ class Token:
     expires_at: int
     expires_in: int = 0
 
+    @staticmethod
+    def members():
+        return Token.__annotations__.keys()
+
     def __repr__(self) -> str:
         """Readable version."""
         return f"{self.__class__.__name__}: {self.as_dict()}"
 
     def as_dict(self) -> RefreshableTokenDict:
         """Returns dictionary containing underlying token values."""
-        return {
-            "access_token": self.access_token,
-            "refresh_token": self.refresh_token,
-            "scope": self.scope,
-            "expires_at": self.expires_at,
-            "expires_in": self.expires_in,
-            "token_type": self.token_type,
-        }
+        return {key: self.__dict__[key] for key in Token.members()}  # type: ignore
 
     def as_json(self) -> str:
         return json.dumps(self.as_dict())
@@ -55,14 +52,7 @@ class OAuthToken(Token):
 
     @staticmethod
     def is_oauth(headers: CaseInsensitiveDict) -> bool:
-        oauth_structure = {
-            "access_token",
-            "expires_at",
-            "expires_in",
-            "token_type",
-            "refresh_token",
-        }
-        return all(key in headers for key in oauth_structure)
+        return all(key in headers for key in Token.members())
 
     def update(self, fresh_access: BaseTokenDict):
         """
