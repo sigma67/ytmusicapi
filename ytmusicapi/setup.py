@@ -53,7 +53,7 @@ def setup_oauth(
     else:
         oauth_credentials = OAuthCredentials(session=session, proxies=proxies)
 
-    return oauth_credentials.prompt_for_token(open_browser, filepath)
+    return RefreshingToken.prompt_for_token(oauth_credentials, open_browser, filepath)
 
 
 def parse_args(args):
