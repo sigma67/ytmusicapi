@@ -80,7 +80,6 @@ class TestYTMusic(unittest.TestCase):
     ###############
     # OAUTH
     ###############
-    # 000 so test is run first and fresh token is available to others
     def test_oauth_tokens(self):
         # ensure instance initialized token
         self.assertIsNotNone(self.yt_oauth._token)
@@ -90,16 +89,16 @@ class TestYTMusic(unittest.TestCase):
             first_json = json.load(f)
 
         # pull reference values from underlying token
-        first_token = self.yt_oauth._token.token.access_token
-        first_expire = self.yt_oauth._token.token.expires_at
+        first_token = self.yt_oauth._token.access_token
+        first_expire = self.yt_oauth._token.expires_at
         # make token expire
-        self.yt_oauth._token.token._expires_at = time.time()
+        self.yt_oauth._token.expires_at = time.time()
         # check
-        self.assertTrue(self.yt_oauth._token.token.is_expiring)
+        self.assertTrue(self.yt_oauth._token.is_expiring)
         # pull new values, assuming token will be refreshed on access
         second_token = self.yt_oauth._token.access_token
-        second_expire = self.yt_oauth._token.token.expires_at
-        second_token_inner = self.yt_oauth._token.token.access_token
+        second_expire = self.yt_oauth._token.expires_at
+        second_token_inner = self.yt_oauth._token.access_token
         # check it was refreshed
         self.assertNotEqual(first_token, second_token)
         # check expiration timestamps to confirm

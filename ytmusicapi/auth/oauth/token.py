@@ -100,7 +100,7 @@ class RefreshingToken(OAuthToken):
     #: protected/property attribute enables auto writing token values to new file location via setter
     _local_cache: Optional[str] = None
 
-    def __getattr__(self, item):
+    def __getattribute__(self, item):
         """access token setter to auto-refresh if it is expiring"""
         if item == "access_token" and self.is_expiring:
             fresh = self.credentials.refresh_token(self.refresh_token)
