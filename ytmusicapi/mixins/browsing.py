@@ -345,7 +345,7 @@ class BrowsingMixin(MixinProtocol):
 
         return user_playlists
 
-    def get_album_browse_id(self, audioPlaylistId: str) -> str | None:
+    def get_album_browse_id(self, audioPlaylistId: str) -> Optional[str]:
         """
         Get an album's browseId based on its audioPlaylistId
 

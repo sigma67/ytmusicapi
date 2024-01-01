@@ -1,5 +1,6 @@
-import webbrowser
-from typing import Dict, Optional
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Dict, Mapping, Optional
 
 import requests
 
@@ -12,10 +13,29 @@ from ytmusicapi.constants import (
     OAUTH_USER_AGENT,
 )
 
-from .base import Credentials, OAuthToken
 from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
 from .models import AuthCodeDict, BaseTokenDict, RefreshableTokenDict
-from .refreshing import RefreshingToken
+
+
+@dataclass
+class Credentials(ABC):
+    """Base class representation of YouTubeMusicAPI OAuth Credentials"""
+
+    client_id: str
+    client_secret: str
+
+    @abstractmethod
+    def get_code(self) -> Mapping:
+        """Method for obtaining a new user auth code. First step of token creation."""
+
+    @abstractmethod
+    def token_from_code(self, device_code: str) -> RefreshableTokenDict:
+        """Method for verifying user auth code and conversion into a FullTokenDict."""
+
+    @abstractmethod
+    def refresh_token(self, refresh_token: str) -> BaseTokenDict:
+        """Method for requesting a new access token for a given refresh_token.
+        Token must have been created by the same OAuth client."""
 
 
 class OAuthCredentials(Credentials):
@@ -89,25 +109,6 @@ class OAuthCredentials(Credentials):
             },
         )
         return response.json()
-
-    def prompt_for_token(self, open_browser: bool = False, to_file: Optional[str] = None) -> RefreshingToken:
-        """
-        Method for CLI token creation via user inputs.
-
-        :param open_browser: Optional. Open browser to OAuth consent url automatically. (Default = False).
-        :param to_file: Optional. Path to store/sync json version of resulting token. (Default = None).
-        """
-
-        code = self.get_code()
-        url = f"{code['verification_url']}?user_code={code['user_code']}"
-        if open_browser:
-            webbrowser.open(url)
-        input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
-        raw_token = self.token_from_code(code["device_code"])
-        ref_token = RefreshingToken(OAuthToken(**raw_token), credentials=self)
-        if to_file:
-            ref_token.local_cache = to_file
-        return ref_token
 
     def refresh_token(self, refresh_token: str) -> BaseTokenDict:
         """

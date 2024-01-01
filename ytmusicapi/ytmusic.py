@@ -34,7 +34,7 @@ from ytmusicapi.mixins.watch import WatchMixin
 from ytmusicapi.parsers.i18n import Parser
 
 from .auth.oauth import OAuthCredentials, OAuthToken, RefreshingToken
-from .auth.oauth.base import Token
+from .auth.oauth.token import Token
 from .auth.types import AuthType
 
 
@@ -142,8 +142,9 @@ class YTMusic(
                 self._input_dict = CaseInsensitiveDict(self.auth)
 
             if OAuthToken.is_oauth(self._input_dict):
-                base_token = OAuthToken(**self._input_dict)
-                self._token = RefreshingToken(base_token, self.oauth_credentials, auth_filepath)
+                self._token = RefreshingToken(
+                    credentials=self.oauth_credentials, _local_cache=auth_filepath, **self._input_dict
+                )
                 self.auth_type = AuthType.OAUTH_CUSTOM_CLIENT if oauth_credentials else AuthType.OAUTH_DEFAULT
 
         # prepare context
