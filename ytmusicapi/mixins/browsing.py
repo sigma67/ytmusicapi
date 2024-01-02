@@ -340,7 +340,10 @@ class BrowsingMixin(MixinProtocol):
         endpoint = "browse"
         body = {"browseId": channelId, "params": params}
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS, True)
+        if not results:
+            return []
+
         user_playlists = parse_content_list(results, parse_playlist)
 
         return user_playlists
