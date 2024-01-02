@@ -71,12 +71,12 @@ FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
 
 @overload
 def nav(root: Dict[str, Any], items: List[Any], none_if_absent: Literal[False] = False) -> Any:
-    ...
+    """overload for mypy only"""
 
 
 @overload
 def nav(root: Dict, items: List[Any], none_if_absent: Literal[True] = True) -> Optional[Any]:
-    ...
+    """overload for mypy only"""
 
 
 def nav(root: Dict, items: List[Any], none_if_absent: bool = False) -> Optional[Any]:

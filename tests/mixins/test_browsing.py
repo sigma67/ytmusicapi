@@ -37,10 +37,14 @@ class TestBrowsing:
         results = yt.get_user("UC44hbeRoCZVVMVg5z0FfIww")
         assert len(results) == 3
 
-    def test_get_user_playlists(self, yt_auth):
-        results = yt_auth.get_user("UCPVhZsC2od1xjGhgEc2NEPQ")  # Vevo playlists
-        results = yt_auth.get_user_playlists("UCPVhZsC2od1xjGhgEc2NEPQ", results["playlists"]["params"])
+    def test_get_user_playlists(self, yt, yt_auth):
+        channel = "UCPVhZsC2od1xjGhgEc2NEPQ"  # Vevo playlists
+        user = yt_auth.get_user(channel)
+        results = yt_auth.get_user_playlists(channel, user["playlists"]["params"])
         assert len(results) > 100
+
+        results_empty = yt.get_user_playlists(channel, user["playlists"]["params"])
+        assert len(results_empty) == 0
 
     def test_get_album_browse_id(self, yt, sample_album):
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)

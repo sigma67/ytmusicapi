@@ -2,11 +2,11 @@ import pytest
 
 
 class TestSearch:
-    def test_search_exceptions(self):
+    def test_search_exceptions(self, yt_auth):
         query = "edm playlist"
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Invalid filter provided"):
             yt_auth.search(query, filter="song")
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Invalid scope provided"):
             yt_auth.search(query, scope="upload")
 
     @pytest.mark.parametrize("query", ["Monekes", "qllwlwl", "heun"])

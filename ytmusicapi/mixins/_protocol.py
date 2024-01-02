@@ -17,14 +17,14 @@ class MixinProtocol(Protocol):
     proxies: Optional[Dict[str, str]]
 
     def _check_auth(self) -> None:
-        pass
+        """checks if self has authentication"""
 
     def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
-        pass
+        """for sending post requests to YouTube Music"""
 
     def _send_get_request(self, url: str, params: Optional[Dict] = None) -> Response:
-        pass
+        """for sending get requests to YouTube Music"""
 
     @property
     def headers(self) -> Dict[str, str]:
-        pass
+        """property for getting request headers"""
