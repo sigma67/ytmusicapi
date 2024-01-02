@@ -1,5 +1,5 @@
-# commonly used navigation paths
-from typing import Any, Dict, List
+"""commonly used navigation paths"""
+from typing import Any, Dict, List, Literal, Optional, overload
 
 CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]
@@ -69,7 +69,17 @@ CARD_SHELF_TITLE = ["header", "musicCardShelfHeaderBasicRenderer"] + TITLE_TEXT
 FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
 
 
-def nav(root: Dict[str, Any], items: List[Any], none_if_absent: bool = False) -> Any:
+@overload
+def nav(root: Dict[str, Any], items: List[Any], none_if_absent: Literal[False] = False) -> Any:
+    ...
+
+
+@overload
+def nav(root: Dict, items: List[Any], none_if_absent: Literal[True] = True) -> Optional[Any]:
+    ...
+
+
+def nav(root: Dict, items: List[Any], none_if_absent: bool = False) -> Optional[Any]:
     """Access a nested object in root by item sequence."""
     try:
         for k in items:

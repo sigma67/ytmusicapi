@@ -14,8 +14,6 @@ class MixinProtocol(Protocol):
 
     parser: Parser
 
-    headers: Dict[str, str]
-
     proxies: Optional[Dict[str, str]]
 
     def _check_auth(self) -> None:
@@ -25,4 +23,8 @@ class MixinProtocol(Protocol):
         pass
 
     def _send_get_request(self, url: str, params: Optional[Dict] = None) -> Response:
+        pass
+
+    @property
+    def headers(self) -> Dict[str, str]:
         pass

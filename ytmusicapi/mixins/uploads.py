@@ -207,7 +207,7 @@ class UploadsMixin(MixinProtocol):
         """
         self._check_auth()
         if not self.auth_type == AuthType.BROWSER:
-            raise Exception("Please provide authentication before using this function")
+            raise Exception("Please provide browser authentication before using this function")
         if not os.path.isfile(filepath):
             raise Exception("The provided file does not exist.")
 

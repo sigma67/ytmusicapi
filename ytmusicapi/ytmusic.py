@@ -38,15 +38,7 @@ from .auth.oauth.token import Token
 from .auth.types import AuthType
 
 
-class YTMusic(
-    BrowsingMixin, SearchMixin, WatchMixin, ExploreMixin, LibraryMixin, PlaylistsMixin, UploadsMixin
-):
-    """
-    Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
-    Permits both authenticated and non-authenticated requests.
-    Authentication header data must be provided on initialization.
-    """
-
+class YTMusicBase:
     def __init__(
         self,
         auth: Optional[str | Dict] = None,
@@ -266,3 +258,20 @@ class YTMusic(
 
     def __exit__(self, execType=None, execValue=None, trackback=None):
         pass
+
+
+class YTMusic(
+    YTMusicBase,
+    BrowsingMixin,
+    SearchMixin,
+    WatchMixin,
+    ExploreMixin,
+    LibraryMixin,
+    PlaylistsMixin,
+    UploadsMixin,
+):
+    """
+    Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
+    Permits both authenticated and non-authenticated requests.
+    Authentication header data must be provided on initialization.
+    """
