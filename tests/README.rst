@@ -30,8 +30,7 @@ Make sure you installed the dev requirements as explained in `CONTRIBUTING.rst <
 
 .. code-block:: bash
 
-    cd tests
-    coverage run -m unittest test.py
+    pdm run pytest
 
 
 to generate a coverage report.

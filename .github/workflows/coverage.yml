@@ -17,24 +17,26 @@ jobs:
       uses: actions/setup-python@master
       with:
         python-version: 3.x
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
     - name: create-json
       uses: jsdaniell/create-json@v1.2.2
       with:
         name: "oauth.json"
         dir: "tests/"
         json: ${{ secrets.OAUTH_JSON }}
+    - name: Install dependencies
+      run: pdm install
     - name: Generate coverage report
       env:
         HEADERS_AUTH: ${{ secrets.HEADERS_AUTH }}
         TEST_CFG: ${{ secrets.TEST_CFG }}
       run: |
-        pip install -e .
-        pip install coverage
         curl -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/browser.json
         cat <<< "$TEST_CFG" > tests/test.cfg
-        coverage run
-        coverage xml
+        pdm run pytest
+        pdm run coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:

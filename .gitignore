@@ -11,3 +11,4 @@ venv*/
 build
 dist
 .pdm-python
+.venv
