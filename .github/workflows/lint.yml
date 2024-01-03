@@ -3,7 +3,7 @@ name: lint
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   ruff:
