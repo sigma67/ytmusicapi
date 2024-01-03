@@ -1,4 +1,6 @@
 import json
+import os
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict
@@ -7,6 +9,7 @@ from unittest import mock
 import pytest
 from requests import Response
 
+from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
 from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 from ytmusicapi.setup import main
@@ -37,21 +40,27 @@ def fixture_yt_alt_oauth(browser_filepath: str, alt_oauth_credentials: OAuthCred
 class TestOAuth:
     @mock.patch("requests.Response.json")
     @mock.patch("requests.Session.post")
-    def test_setup_oauth(self, session_mock, json_mock, oauth_filepath, blank_code, yt_oauth):
+    def test_setup_oauth(self, session_mock, json_mock, blank_code, config):
         session_mock.return_value = Response()
-        fresh_token = yt_oauth._token.as_dict()
-        json_mock.side_effect = [blank_code, fresh_token]
+        token_code = json.loads(config["auth"]["oauth_token"])
+        json_mock.side_effect = [blank_code, token_code]
+        oauth_file = tempfile.NamedTemporaryFile(delete=False)
+        oauth_filepath = oauth_file.name
         with mock.patch("builtins.input", return_value="y"), mock.patch(
             "sys.argv", ["ytmusicapi", "oauth", "--file", oauth_filepath]
-        ):
+        ), mock.patch("webbrowser.open"):
             main()
             assert Path(oauth_filepath).exists()
 
         json_mock.side_effect = None
         with open(oauth_filepath, mode="r", encoding="utf8") as oauth_file:
-            string_oauth_token = oauth_file.read()
+            oauth_token = json.loads(oauth_file.read())
 
-        YTMusic(string_oauth_token)
+        assert oauth_token["expires_at"] != 0
+        assert OAuthToken.is_oauth(oauth_token)
+
+        oauth_file.close()
+        os.unlink(oauth_filepath)
 
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
         # ensure instance initialized token

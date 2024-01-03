@@ -20,7 +20,7 @@ class Token:
 
     access_token: str
     refresh_token: str
-    expires_at: int
+    expires_at: int = 0
     expires_in: int = 0
 
     @staticmethod
@@ -128,6 +128,7 @@ class RefreshingToken(OAuthToken):
         input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
         raw_token = credentials.token_from_code(code["device_code"])
         ref_token = cls(credentials=credentials, **raw_token)
+        ref_token.update(ref_token.as_dict())
         if to_file:
             ref_token.local_cache = to_file
         return ref_token
