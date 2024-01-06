@@ -5,7 +5,7 @@ import os
 import time
 from contextlib import suppress
 from functools import partial
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import requests
 from requests import Response
@@ -41,7 +41,7 @@ from .auth.types import AuthType
 class YTMusicBase:
     def __init__(
         self,
-        auth: Optional[str | Dict] = None,
+        auth: Optional[Union[str, Dict]] = None,
         user: Optional[str] = None,
         requests_session=True,
         proxies: Optional[Dict[str, str]] = None,
