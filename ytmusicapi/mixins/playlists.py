@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ytmusicapi.continuations import *
-from ytmusicapi.helpers import sum_total_duration, to_int
-from ytmusicapi.navigation import *
-from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
-from ytmusicapi.parsers.playlists import *
+from ..continuations import *
+from ..helpers import sum_total_duration, to_int
+from ..navigation import *
+from ..parsers.browsing import parse_content_list, parse_playlist
+from ..parsers.playlists import *
 
 from ._protocol import MixinProtocol
 from ._utils import *

@@ -1,12 +1,12 @@
 import re
 from typing import Any, Dict, List, Optional
 
-from ytmusicapi.continuations import get_continuations
-from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi.parsers.albums import parse_album_header
-from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
-from ytmusicapi.parsers.library import parse_albums
-from ytmusicapi.parsers.playlists import parse_playlist_items
+from ..continuations import get_continuations
+from ..helpers import YTM_DOMAIN, sum_total_duration
+from ..parsers.albums import parse_album_header
+from ..parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
+from ..parsers.library import parse_albums
+from ..parsers.playlists import parse_playlist_items
 
 from ..navigation import *
 from ._protocol import MixinProtocol

@@ -11,7 +11,7 @@ import requests
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.helpers import (
+from .helpers import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_LOCATIONS,
     USER_AGENT,
@@ -24,14 +24,14 @@ from ytmusicapi.helpers import (
     initialize_context,
     sapisid_from_cookie,
 )
-from ytmusicapi.mixins.browsing import BrowsingMixin
-from ytmusicapi.mixins.explore import ExploreMixin
-from ytmusicapi.mixins.library import LibraryMixin
-from ytmusicapi.mixins.playlists import PlaylistsMixin
-from ytmusicapi.mixins.search import SearchMixin
-from ytmusicapi.mixins.uploads import UploadsMixin
-from ytmusicapi.mixins.watch import WatchMixin
-from ytmusicapi.parsers.i18n import Parser
+from .mixins.browsing import BrowsingMixin
+from .mixins.explore import ExploreMixin
+from .mixins.library import LibraryMixin
+from .mixins.playlists import PlaylistsMixin
+from .mixins.search import SearchMixin
+from .mixins.uploads import UploadsMixin
+from .mixins.watch import WatchMixin
+from .parsers.i18n import Parser
 
 from .auth.oauth import OAuthCredentials, OAuthToken, RefreshingToken
 from .auth.oauth.token import Token

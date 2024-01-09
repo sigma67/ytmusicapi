@@ -6,7 +6,7 @@ import unicodedata
 from hashlib import sha1
 from http.cookies import SimpleCookie
 
-from ytmusicapi.constants import *
+from .constants import *
 
 
 def initialize_headers():

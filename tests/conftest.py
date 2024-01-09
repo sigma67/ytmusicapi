@@ -24,6 +24,12 @@ def fixture_sample_album() -> str:
     return "MPREb_4pL8gzRtw1p"
 
 
+@pytest.fixture(name="badly_indexed_album")
+def fixture_badly_indexed_album() -> str:
+    """Sean Paul - Dutty Classics Collection"""
+    return "MPREb_TPH4WqN5pUo"
+
+
 @pytest.fixture(name="sample_video")
 def fixture_sample_video() -> str:
     """Oasis - Wonderwall"""

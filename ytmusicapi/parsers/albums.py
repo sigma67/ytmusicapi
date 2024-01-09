@@ -1,4 +1,4 @@
-from ytmusicapi.helpers import to_int
+from ..helpers import to_int
 
 from ._utils import *
 from .songs import parse_like_status, parse_song_runs

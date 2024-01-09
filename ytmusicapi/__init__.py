@@ -1,7 +1,7 @@
 from importlib.metadata import PackageNotFoundError, version
 
-from ytmusicapi.setup import setup, setup_oauth
-from ytmusicapi.ytmusic import YTMusic
+from .setup import setup, setup_oauth
+from .ytmusic import YTMusic
 
 try:
     __version__ = version("ytmusicapi")

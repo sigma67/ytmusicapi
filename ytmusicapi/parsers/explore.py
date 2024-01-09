@@ -1,4 +1,4 @@
-from ytmusicapi.parsers.browsing import *
+from ..parsers.browsing import *
 
 TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL": "neutral"}
 

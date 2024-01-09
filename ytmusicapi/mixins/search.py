@@ -1,8 +1,8 @@
 from typing import Any, Dict, List, Optional, Union
 
-from ytmusicapi.continuations import get_continuations
-from ytmusicapi.mixins._protocol import MixinProtocol
-from ytmusicapi.parsers.search import *
+from ..continuations import get_continuations
+from ..mixins._protocol import MixinProtocol
+from ..parsers.search import *
 
 
 class SearchMixin(MixinProtocol):
