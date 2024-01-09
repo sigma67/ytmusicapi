@@ -79,6 +79,12 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
             True,
         )
 
+        track_position = None
+        if "index" in data:
+            # similar item nesting to duration above -> both could be refactored into
+            # a function similar to nav (?)
+            track_position = int(data["index"]["runs"][0]["text"])
+
         song = {
             "videoId": videoId,
             "title": title,
@@ -91,7 +97,9 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
             "isExplicit": isExplicit,
             "videoType": videoType,
             "views": views,
+            "track_position": track_position,
         }
+
         if duration:
             song["duration"] = duration
             song["duration_seconds"] = parse_duration(duration)
