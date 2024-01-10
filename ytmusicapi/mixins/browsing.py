@@ -252,12 +252,13 @@ class BrowsingMixin(MixinProtocol):
         artist.update(self.parser.parse_artist_contents(results))
         return artist
 
-    def get_artist_albums(self, channelId: str, params: str) -> List[Dict]:
+    def get_artist_albums(self, channelId: str, params: str, limit: int | None = 100) -> List[Dict]:
         """
         Get the full list of an artist's albums or singles
 
         :param channelId: browseId of the artist as returned by :py:func:`get_artist`
         :param params: params obtained by :py:func:`get_artist`
+        :param limit: Number of albums to return. `None` retrieves them all. Default: 100
         :return: List of albums in the format of :py:func:`get_library_albums`,
           except artists key is missing.
 
@@ -266,8 +267,17 @@ class BrowsingMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
-        results = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
-        albums = parse_albums(results)
+        contents = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
+        albums = parse_albums(contents)
+
+        results = nav(results, GRID, True)
+        if "continuations" in results:
+            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+            parse_func = lambda contents: parse_albums(contents)
+            remaining_limit = None if limit is None else (limit - len(albums))
+            albums.extend(
+                get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
+            )
 
         return albums
 
