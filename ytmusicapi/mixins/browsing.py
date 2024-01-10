@@ -1,7 +1,10 @@
 import re
 from typing import Any, Dict, List, Optional
 
-from ytmusicapi.continuations import get_continuations
+from ytmusicapi.continuations import (
+    get_continuations,
+    get_reloadable_continuation_params,
+)
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
 from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
@@ -252,13 +255,16 @@ class BrowsingMixin(MixinProtocol):
         artist.update(self.parser.parse_artist_contents(results))
         return artist
 
-    def get_artist_albums(self, channelId: str, params: str, limit: int | None = 100) -> List[Dict]:
+    def get_artist_albums(
+        self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[str] = None
+    ) -> List[Dict]:
         """
         Get the full list of an artist's albums or singles
 
         :param channelId: browseId of the artist as returned by :py:func:`get_artist`
         :param params: params obtained by :py:func:`get_artist`
         :param limit: Number of albums to return. `None` retrieves them all. Default: 100
+        :param order: Order of albums to return. Allowed values: 'Recency', 'Popularity', 'Alphabetical order'. Default: Default order.
         :return: List of albums in the format of :py:func:`get_library_albums`,
           except artists key is missing.
 
@@ -266,14 +272,63 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": channelId, "params": params}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
+
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+        parse_func = lambda contents: parse_albums(contents)
+
+        if order:
+            # pick the correct continuation from response depending on the order chosen
+            sort_options = nav(
+                response,
+                SINGLE_COLUMN_TAB
+                + SECTION
+                + HEADER_SIDE
+                + [
+                    "endItems",
+                    0,
+                    "musicSortFilterButtonRenderer",
+                    "menu",
+                    "musicMultiSelectMenuRenderer",
+                    "options",
+                ],
+            )
+            continuation = next(
+                (
+                    nav(
+                        option,
+                        MULTI_SELECT
+                        + [
+                            "selectedCommand",
+                            "commandExecutorCommand",
+                            "commands",
+                            -1,
+                            "browseSectionListReloadEndpoint",
+                        ],
+                    )
+                    for option in sort_options
+                    if nav(option, MULTI_SELECT + TITLE_TEXT).lower() == order.lower()
+                ),
+                None,
+            )
+            # if a valid order was provided, request continuation and replace original response
+            if continuation:
+                additionalParams = get_reloadable_continuation_params(
+                    {"continuations": [continuation["continuation"]]}
+                )
+                response = request_func(additionalParams)
+                results = nav(response, SECTION_LIST_CONTINUATION + CONTENT)
+            else:
+                raise ValueError(f"Invalid order parameter {order}")
+
+        else:
+            # just use the results from the first request
+            results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
+
         contents = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
         albums = parse_albums(contents)
 
         results = nav(results, GRID, True)
         if "continuations" in results:
-            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_albums(contents)
             remaining_limit = None if limit is None else (limit - len(albums))
             albums.extend(
                 get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
