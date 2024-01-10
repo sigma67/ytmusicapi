@@ -41,6 +41,9 @@ class TestBrowsing:
         assert len(results_sorted) >= 300
         assert results_sorted != results_unsorted
 
+        with pytest.raises(ValueError, match="Invalid order"):
+            yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"], order="order")
+
     def test_get_user(self, yt):
         results = yt.get_user("UC44hbeRoCZVVMVg5z0FfIww")
         assert len(results) == 3
