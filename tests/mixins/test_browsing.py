@@ -24,15 +24,22 @@ class TestBrowsing:
         assert len(results) >= 11
 
     def test_get_artist_albums(self, yt):
-        artist = yt.get_artist("UCj5ZiBBqpe0Tg4zfKGHEFuQ")
+        artist = yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
         results = yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"])
         assert len(results) == 100
         results = yt.get_artist_albums(artist["singles"]["browseId"], artist["singles"]["params"])
-        assert len(results) < 100
+        assert len(results) == 100
 
-        artist = yt.get_artist("UC6LfFqHnWV8iF94n54jwYGw")
-        results = yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"], limit=None)
-        assert len(results) >= 300
+        results_unsorted = yt.get_artist_albums(
+            artist["albums"]["browseId"], artist["albums"]["params"], limit=None
+        )
+        assert len(results_unsorted) >= 300
+
+        results_sorted = yt.get_artist_albums(
+            artist["albums"]["browseId"], artist["albums"]["params"], limit=None, order="alphabetical order"
+        )
+        assert len(results_sorted) >= 300
+        assert results_sorted != results_unsorted
 
     def test_get_user(self, yt):
         results = yt.get_user("UC44hbeRoCZVVMVg5z0FfIww")
