@@ -1,7 +1,10 @@
 name: Build Documentation
 
 on:
-  push
+  push:
+    paths:
+      - ytmusicapi
+      - docs
 
 jobs:
   build:
