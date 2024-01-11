@@ -3,7 +3,7 @@ from typing import List, Optional
 from .songs import *
 
 
-def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
+def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_album=False):
     songs = []
     for result in results:
         if MRLIR not in result:
@@ -80,10 +80,9 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
         )
 
         track_position = None
-        if "index" in data:
-            # similar item nesting to duration above -> both could be refactored into
-            # a function similar to nav (?)
-            track_position = int(data["index"]["runs"][0]["text"])
+        if is_album:
+            track_pos_found = nav(data, ["index", "runs", 0, "text"], True)
+            track_position = track_pos_found if track_pos_found is None else int(track_pos_found)
 
         song = {
             "videoId": videoId,
