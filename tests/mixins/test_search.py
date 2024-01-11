@@ -32,8 +32,8 @@ class TestSearch:
         results = yt_auth.search(query, filter="albums", limit=40)
         assert len(results) > 20
         assert all(item["resultType"] == "album" for item in results)
-        results = yt_auth.search("project-2", filter="artists", ignore_spelling=True)
-        assert len(results) > 10
+        results = yt_auth.search("armen van buren", filter="artists", ignore_spelling=True)
+        assert len(results) < 5
         assert all(item["resultType"] == "artist" for item in results)
         results = yt_auth.search("classical music", filter="playlists")
         assert len(results) > 10
