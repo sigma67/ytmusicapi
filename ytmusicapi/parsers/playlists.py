@@ -94,8 +94,8 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
         }
 
         if is_album:
-            track_pos_found = nav(data, ["index", "runs", 0, "text"], True)
-            song["track_position"] = track_pos_found if track_pos_found is None else int(track_pos_found)
+            track_idx_found = nav(data, ["index", "runs", 0, "text"], True)
+            song["track_number"] = track_idx_found if track_idx_found is None else int(track_idx_found)
 
         if duration:
             song["duration"] = duration
