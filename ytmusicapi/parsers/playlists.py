@@ -79,11 +79,6 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
             True,
         )
 
-        track_position = None
-        if is_album:
-            track_pos_found = nav(data, ["index", "runs", 0, "text"], True)
-            track_position = track_pos_found if track_pos_found is None else int(track_pos_found)
-
         song = {
             "videoId": videoId,
             "title": title,
@@ -96,8 +91,11 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
             "isExplicit": isExplicit,
             "videoType": videoType,
             "views": views,
-            "track_position": track_position,
         }
+
+        if is_album:
+            track_pos_found = nav(data, ["index", "runs", 0, "text"], True)
+            song["track_position"] = track_pos_found if track_pos_found is None else int(track_pos_found)
 
         if duration:
             song["duration"] = duration
