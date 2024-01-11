@@ -85,7 +85,7 @@ Usage
     search_results = yt.search('Oasis Wonderwall')
     yt.add_playlist_items(playlistId, [search_results[0]['videoId']])
 
-The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/test.py>`_ are also a great source of usage examples.
+The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/>`_ are also a great source of usage examples.
 
 .. end-features
 

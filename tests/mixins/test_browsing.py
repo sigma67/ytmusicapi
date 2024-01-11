@@ -24,14 +24,25 @@ class TestBrowsing:
         assert len(results) >= 11
 
     def test_get_artist_albums(self, yt):
-        artist = yt.get_artist("UCj5ZiBBqpe0Tg4zfKGHEFuQ")
-        results = yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"])
-        assert len(results) > 0
-
-    def test_get_artist_singles(self, yt):
         artist = yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
+        results = yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"])
+        assert len(results) == 100
         results = yt.get_artist_albums(artist["singles"]["browseId"], artist["singles"]["params"])
-        assert len(results) > 0
+        assert len(results) == 100
+
+        results_unsorted = yt.get_artist_albums(
+            artist["albums"]["browseId"], artist["albums"]["params"], limit=None
+        )
+        assert len(results_unsorted) >= 300
+
+        results_sorted = yt.get_artist_albums(
+            artist["albums"]["browseId"], artist["albums"]["params"], limit=None, order="alphabetical order"
+        )
+        assert len(results_sorted) >= 300
+        assert results_sorted != results_unsorted
+
+        with pytest.raises(ValueError, match="Invalid order"):
+            yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"], order="order")
 
     def test_get_user(self, yt):
         results = yt.get_user("UC44hbeRoCZVVMVg5z0FfIww")
