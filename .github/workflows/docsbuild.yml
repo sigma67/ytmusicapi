@@ -5,6 +5,12 @@ on:
     paths:
       - ytmusicapi/**
       - docs/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ytmusicapi/**
+      - docs/**
 
 jobs:
   build:
