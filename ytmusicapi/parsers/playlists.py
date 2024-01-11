@@ -3,7 +3,7 @@ from typing import List, Optional
 from .songs import *
 
 
-def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
+def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_album=False):
     songs = []
     for result in results:
         if MRLIR not in result:
@@ -92,6 +92,11 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None):
             "videoType": videoType,
             "views": views,
         }
+
+        if is_album:
+            track_idx_found = nav(data, ["index", "runs", 0, "text"], True)
+            song["track_number"] = track_idx_found if track_idx_found is None else int(track_idx_found)
+
         if duration:
             song["duration"] = duration
             song["duration_seconds"] = parse_duration(duration)

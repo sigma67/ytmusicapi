@@ -494,7 +494,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
-        album["tracks"] = parse_playlist_items(results["contents"])
+        album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + CAROUSEL, True)
         if results is not None:
             album["other_versions"] = parse_content_list(results["contents"], parse_album)
