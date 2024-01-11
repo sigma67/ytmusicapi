@@ -5,8 +5,8 @@ from typing import Optional
 
 import requests
 
-from .auth.browser import setup_browser
-from .auth.oauth import OAuthCredentials, RefreshingToken
+from ytmusicapi.auth.browser import setup_browser
+from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken
 
 
 def setup(filepath: Optional[str] = None, headers_raw: Optional[str] = None) -> str:

@@ -3,8 +3,8 @@ from typing import Dict, Optional, Protocol
 
 from requests import Response
 
-from ..auth.types import AuthType
-from ..parsers.i18n import Parser
+from ytmusicapi.auth.types import AuthType
+from ytmusicapi.parsers.i18n import Parser
 
 
 class MixinProtocol(Protocol):

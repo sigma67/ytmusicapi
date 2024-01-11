@@ -1,4 +1,4 @@
-from .navigation import nav
+from ytmusicapi.navigation import nav
 
 
 def get_continuations(

@@ -1,9 +1,9 @@
 from random import randint
 from typing import Dict, List, Optional
 
-from ..continuations import *
-from ..parsers.browsing import *
-from ..parsers.library import *
+from ytmusicapi.continuations import *
+from ytmusicapi.parsers.browsing import *
+from ytmusicapi.parsers.library import *
 
 from ._protocol import MixinProtocol
 from ._utils import *

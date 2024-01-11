@@ -1,9 +1,9 @@
 from typing import Dict, List, Optional, Union
 
-from ..continuations import get_continuations
-from ..mixins._protocol import MixinProtocol
-from ..parsers.playlists import validate_playlist_id
-from ..parsers.watch import *
+from ytmusicapi.continuations import get_continuations
+from ytmusicapi.mixins._protocol import MixinProtocol
+from ytmusicapi.parsers.playlists import validate_playlist_id
+from ytmusicapi.parsers.watch import *
 
 
 class WatchMixin(MixinProtocol):

@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
-from ..mixins._protocol import MixinProtocol
-from ..parsers.explore import *
+from ytmusicapi.mixins._protocol import MixinProtocol
+from ytmusicapi.parsers.explore import *
 
 
 class ExploreMixin(MixinProtocol):

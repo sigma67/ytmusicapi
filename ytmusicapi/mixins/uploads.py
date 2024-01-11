@@ -4,17 +4,17 @@ from typing import Dict, List, Optional, Union
 
 import requests
 
-from ..continuations import get_continuations
-from ..helpers import *
-from ..navigation import *
-from ..parsers.albums import parse_album_header
-from ..parsers.library import (
+from ytmusicapi.continuations import get_continuations
+from ytmusicapi.helpers import *
+from ytmusicapi.navigation import *
+from ytmusicapi.parsers.albums import parse_album_header
+from ytmusicapi.parsers.library import (
     get_library_contents,
     parse_library_albums,
     parse_library_artists,
     pop_songs_random_mix,
 )
-from ..parsers.uploads import parse_uploaded_items
+from ytmusicapi.parsers.uploads import parse_uploaded_items
 
 from ..auth.types import AuthType
 from ._protocol import MixinProtocol

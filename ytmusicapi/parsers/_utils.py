@@ -1,6 +1,6 @@
 from functools import wraps
 
-from ..navigation import *
+from ytmusicapi.navigation import *
 
 
 def parse_menu_playlists(data, result):

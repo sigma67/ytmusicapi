@@ -1,8 +1,8 @@
 from typing import Any, Dict, List
 
-from ..navigation import CAROUSEL, CAROUSEL_TITLE, NAVIGATION_BROWSE_ID, nav
-from ..parsers._utils import i18n
-from ..parsers.browsing import (
+from ytmusicapi.navigation import CAROUSEL, CAROUSEL_TITLE, NAVIGATION_BROWSE_ID, nav
+from ytmusicapi.parsers._utils import i18n
+from ytmusicapi.parsers.browsing import (
     parse_album,
     parse_content_list,
     parse_playlist,

@@ -4,7 +4,7 @@ from typing import Optional
 
 from requests.structures import CaseInsensitiveDict
 
-from ..helpers import *
+from ytmusicapi.helpers import *
 
 path = os.path.dirname(os.path.realpath(__file__)) + os.sep
 

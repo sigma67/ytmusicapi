@@ -4,7 +4,7 @@ from typing import Dict, Mapping, Optional
 
 import requests
 
-from ...constants import (
+from ytmusicapi.constants import (
     OAUTH_CLIENT_ID,
     OAUTH_CLIENT_SECRET,
     OAUTH_CODE_URL,

@@ -1,4 +1,4 @@
-from ..continuations import get_continuations
+from ytmusicapi.continuations import get_continuations
 
 from ._utils import *
 from .playlists import parse_playlist_items
