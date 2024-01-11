@@ -3,8 +3,8 @@ name: Build Documentation
 on:
   push:
     paths:
-      - ytmusicapi
-      - docs
+      - ytmusicapi/**
+      - docs/**
 
 jobs:
   build:
