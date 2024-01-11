@@ -48,6 +48,9 @@ addopts = "--verbose --cov"
 [tool.coverage.run]
 source = ["ytmusicapi"]
 
+[tool.coverage.report]
+precision = 2
+
 [tool.ruff]
 line-length = 110
 ignore = [ "F403", "F405", "F821", "E731" ]
