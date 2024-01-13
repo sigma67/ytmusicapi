@@ -66,7 +66,7 @@ class TestBrowsing:
         escaped_browse_id = yt.get_album_browse_id("OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
         assert escaped_browse_id == "MPREb_scJdtUCpPE2"
 
-    def test_get_album(self, yt, yt_auth, sample_album, badly_indexed_album):
+    def test_get_album(self, yt, yt_auth, sample_album, missing_indices_album, disabled_indices_album):
         results = yt_auth.get_album(sample_album)
         assert len(results) >= 9
         assert results["tracks"][0]["isExplicit"]
@@ -80,9 +80,11 @@ class TestBrowsing:
         assert len(results["tracks"][0]["artists"]) == 1
         results = yt.get_album("MPREb_rqH94Zr3NN0")
         assert len(results["tracks"][0]["artists"]) == 2
-        results = yt.get_album(badly_indexed_album)  # album with non-standard indexing
+        results = yt.get_album(missing_indices_album)  # album with tracks completely removed
         assert results["tracks"][0]["track_number"] == 3
         assert results["tracks"][13]["track_number"] == 18
+        results = yt.get_album(disabled_indices_album)  # album with track (#8) disabled/greyed out
+        assert results["tracks"][7]["track_number"] is None
 
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
