@@ -94,11 +94,7 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
         }
 
         if is_album:
-            if not isAvailable:
-                song["track_number"] = None
-            else:
-                # returning None from nav is pointless as the keys are always present
-                song["track_number"] = int(nav(data, ["index", "runs", 0, "text"]))
+            song["track_number"] = int(nav(data, ["index", "runs", 0, "text"])) if isAvailable else None
 
         if duration:
             song["duration"] = duration
