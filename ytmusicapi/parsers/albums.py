@@ -10,7 +10,7 @@ def parse_album_header(response):
         "title": nav(header, TITLE_TEXT),
         "type": nav(header, SUBTITLE),
         "thumbnails": nav(header, THUMBNAIL_CROPPED),
-        "explicit": nav(header, SUBTITLE_BADGE_LABEL, True) is not None,
+        "isExplicit": nav(header, SUBTITLE_BADGE_LABEL, True) is not None,
     }
 
     if "description" in header:

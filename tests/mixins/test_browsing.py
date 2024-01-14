@@ -69,7 +69,7 @@ class TestBrowsing:
     def test_get_album(self, yt, yt_auth, sample_album):
         album = yt_auth.get_album(sample_album)
         assert len(album) >= 9
-        assert "explicit" in album
+        assert "isExplicit" in album
         assert album["tracks"][0]["isExplicit"]
         assert all(item["views"] is not None for item in album["tracks"])
         assert all(item["album"] is not None for item in album["tracks"])
@@ -93,14 +93,14 @@ class TestBrowsing:
         assert (variant := variants[0])["type"] == "Album"
         assert len(variant["artists"]) == 1
         assert variant["artists"][0] == {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}
-        assert variant["audio_playlist_id"] is not None
+        assert variant["audioPlaylistId"] is not None
 
         # album that's multi-artist, a single, and has clean version
         # Cassö & RAYE - Prada
         album = yt.get_album("MPREb_of3qfisa0yU")
-        assert not album["explicit"]
+        assert not album["isExplicit"]
         assert (variant := album["other_versions"][0])["type"] == "Single"
-        assert variant["explicit"]
+        assert variant["isExplicit"]
         assert len(variant["artists"]) == 3
         assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"
         assert variant["artists"][1]["name"] == "RAYE"
