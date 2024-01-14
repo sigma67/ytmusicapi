@@ -34,8 +34,11 @@ def parse_top_result(data, search_result_types):
             search_result["videoType"] = nav(on_tap, NAVIGATION_VIDEO_TYPE)
 
     if result_type in ["song", "video", "album"]:
+        search_result["videoId"] = nav(data, ["onTap"] + WATCH_VIDEO_ID, True)
+        search_result["videoType"] = nav(data, ["onTap"] + NAVIGATION_VIDEO_TYPE, True)
+
         search_result["title"] = nav(data, TITLE_TEXT)
-        runs = nav(data, ["subtitle", "runs"])[2:]
+        runs = nav(data, ["subtitle", "runs"])
         song_info = parse_song_runs(runs)
         search_result.update(song_info)
 
@@ -125,7 +128,7 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result["duration"] = None
         search_result["year"] = None
         flex_item = get_flex_column_item(data, 1)
-        runs = flex_item["text"]["runs"][default_offset:]
+        runs = flex_item["text"]["runs"]
         song_info = parse_song_runs(runs)
         search_result.update(song_info)
 
