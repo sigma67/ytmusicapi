@@ -24,18 +24,6 @@ def fixture_sample_album() -> str:
     return "MPREb_4pL8gzRtw1p"
 
 
-@pytest.fixture(name="missing_indices_album")
-def fixture_missing_indices_album() -> str:
-    """Sean Paul - Dutty Classics Collection"""
-    return "MPREb_TPH4WqN5pUo"
-
-
-@pytest.fixture(name="disabled_indices_album")
-def fixture_disabled_indices_album() -> str:
-    """Kristian Conde - Absolutely Kristian Conde"""
-    return "MPREb_YuigcYm2erf"
-
-
 @pytest.fixture(name="sample_video")
 def fixture_sample_video() -> str:
     """Oasis - Wonderwall"""
