@@ -34,7 +34,6 @@ def parse_top_result(data, search_result_types):
             search_result["videoType"] = nav(on_tap, NAVIGATION_VIDEO_TYPE)
 
     if result_type in ["song", "video", "album"]:
-        on_tap = data.get("onTap")
         search_result["videoId"] = nav(data, ["onTap"] + WATCH_VIDEO_ID, True)
         search_result["videoType"] = nav(data, ["onTap"] + NAVIGATION_VIDEO_TYPE, True)
 
