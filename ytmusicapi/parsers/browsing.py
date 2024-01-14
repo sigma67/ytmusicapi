@@ -54,10 +54,20 @@ def parse_content_list(results, parse_func, key=MTRIR):
 def parse_album(result):
     return {
         "title": nav(result, TITLE_TEXT),
-        "year": nav(result, SUBTITLE2, True),
+        "type": nav(result, SUBTITLE0),
+        "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
+        # making previously unavailable keys snakecase
+        "audio_playlist_id": nav(result, THUMBNAIL_OVERLAY, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
-        "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
+        "explicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
+    }
+
+
+def parse_id_name(sub_run):
+    return {
+        "id": nav(sub_run, NAVIGATION_BROWSE_ID, True),
+        "name": nav(sub_run, ["text"], True),
     }
 
 
