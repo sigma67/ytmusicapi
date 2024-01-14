@@ -43,7 +43,6 @@ TEXT_RUN = TEXT_RUNS + [0]
 TEXT_RUN_TEXT = TEXT_RUN + ["text"]
 SUBTITLE = ["subtitle"] + RUN_TEXT
 SUBTITLE_RUNS = ["subtitle", "runs"]
-SUBTITLE0 = SUBTITLE_RUNS + [0, "text"]
 SUBTITLE2 = SUBTITLE_RUNS + [2, "text"]
 SUBTITLE3 = SUBTITLE_RUNS + [4, "text"]
 THUMBNAIL = ["thumbnail", "thumbnails"]
