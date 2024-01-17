@@ -67,6 +67,18 @@ def get_dot_separator_index(runs):
     return index
 
 
+def parse_real_count(run):
+    """Pull an int from views, plays, or subs"""
+    if not run or "text" not in run:
+        return -1
+    count = run["text"].split(" ")[0]
+    for fx in [("K", 1_000), ("M", 1_000_000), ("B", 1_000_000_000)]:
+        if fx[0] in count:
+            return int(float(count.replace(fx[0], "")) * fx[1])
+
+    return int(count.replace(",", ""))
+
+
 def parse_duration(duration):
     if duration is None:
         return duration

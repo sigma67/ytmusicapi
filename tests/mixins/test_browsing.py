@@ -11,17 +11,28 @@ class TestBrowsing:
         assert len(result) >= 15
 
     def test_get_artist(self, yt):
-        results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
-        assert len(results) == 14
+        artist = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
+        assert len(artist) == 16
+
+        # make sure artists are correctly filled for categories
+        for k in ["songs", "videos"]:
+            assert {"id": "UCmMUZbaYdNH0bEd1PAlAqsA", "name": "Oasis"} in artist[k]["results"][0]["artists"]
+        single = artist["singles"]["results"][0]
+        assert len(single["year"]) == 4 and single["year"].isnumeric()
+        assert single["type"] == "Single"
 
         # test correctness of related artists
-        related = results["related"]["results"]
+        related = artist["related"]["results"]
         assert len(
-            [x for x in related if set(x.keys()) == {"browseId", "subscribers", "title", "thumbnails"}]
+            [
+                x
+                for x in related
+                if set(x.keys()) == {"browseId", "subscribers", "title", "thumbnails", "sub_count"}
+            ]
         ) == len(related)
 
-        results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
-        assert len(results) >= 11
+        artist = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
+        assert len(artist) >= 11
 
     def test_get_artist_albums(self, yt):
         artist = yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
@@ -105,6 +116,19 @@ class TestBrowsing:
         assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"
         assert variant["artists"][1]["name"] == "RAYE"
         assert variant["artists"][2] == {"id": "UCb7jnkQW94hzOoWkG14zs4w", "name": "D-Block Europe"}
+
+    def test_get_album_parsing(self, yt):
+        album = yt.get_album("MPREb_HLU4ajrAzcU")  # Flume - Palaces
+        # album has a track with 3 artists, linked
+        assert len(targ := album["tracks"][3]["artists"]) == 3
+        # all artists should have ids
+        assert len([x["id"] for x in targ if x["id"]]) == 3
+
+        album = yt.get_album("MPREb_M4IdGHS6DyO")  # IMANU - Unfold
+        # album has tracks with 3 unlinked artists
+        assert len(targ := album["tracks"][3]["artists"]) == 3
+        # test at least album artist is filled
+        assert len([x["id"] for x in targ if x["id"]]) >= 1
 
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload

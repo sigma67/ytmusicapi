@@ -26,7 +26,7 @@ def parse_chart_artist(data):
 
 def parse_chart_trending(data):
     flex_0 = get_flex_column_item(data, 0)
-    artists = parse_song_artists(data, 1)
+    artists = parse_pl_song_artists(data, 1)
     index = get_dot_separator_index(artists)
     # last item is views for some reason
     views = None if index == len(artists) else artists.pop()["name"].split(" ")[0]

@@ -3,7 +3,7 @@ from typing import List, Optional
 from .songs import *
 
 
-def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_album=False):
+def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, by_artists=None):
     songs = []
     for result in results:
         if MRLIR not in result:
@@ -44,7 +44,9 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
         if title == "Song deleted":
             continue
 
-        artists = parse_song_artists(data, 1)
+        # when parsing album, artists are passed in
+        # to assist polyfill on unlinked artists
+        artists = parse_pl_song_artists(data, 1, fill_artists=by_artists)
 
         album = parse_song_album(data, 2)
 
@@ -93,7 +95,7 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
             "views": views,
         }
 
-        if is_album:
+        if by_artists:
             song["track_number"] = int(nav(data, ["index", "runs", 0, "text"])) if isAvailable else None
 
         if duration:

@@ -2,7 +2,9 @@
 from typing import Any, Dict, List, Literal, Optional, overload
 
 CONTENT = ["contents", 0]
-RUN_TEXT = ["runs", 0, "text"]
+ZTEXT = [0, "text"]
+TTEXT = [2, "text"]
+RUN_TEXT = ["runs"] + ZTEXT
 TAB_CONTENT = ["tabs", 0, "tabRenderer", "content"]
 TAB_1_CONTENT = ["tabs", 1, "tabRenderer", "content"]
 SINGLE_COLUMN = ["contents", "singleColumnBrowseResultsRenderer"]
@@ -43,7 +45,10 @@ TEXT_RUN = TEXT_RUNS + [0]
 TEXT_RUN_TEXT = TEXT_RUN + ["text"]
 SUBTITLE = ["subtitle"] + RUN_TEXT
 SUBTITLE_RUNS = ["subtitle", "runs"]
-SUBTITLE2 = SUBTITLE_RUNS + [2, "text"]
+LAST_RUN = ["runs", -1]
+TEXT_LAST_RUN = ["text"] + LAST_RUN
+LAST_SUB_RUN = ["subtitle"] + LAST_RUN
+SUBTITLE2 = SUBTITLE_RUNS + TTEXT
 SUBTITLE3 = SUBTITLE_RUNS + [4, "text"]
 THUMBNAIL = ["thumbnail", "thumbnails"]
 THUMBNAILS = ["thumbnail", "musicThumbnailRenderer"] + THUMBNAIL

@@ -1,5 +1,5 @@
 from ._utils import *
-from .songs import parse_song_album, parse_song_artists
+from .songs import parse_pl_song_artists, parse_song_album
 
 
 def parse_uploaded_items(results):
@@ -26,7 +26,7 @@ def parse_uploaded_items(results):
             "title": title,
             "duration": duration,
             "duration_seconds": parse_duration(duration),
-            "artists": parse_song_artists(data, 1),
+            "artists": parse_pl_song_artists(data, 1),
             "album": parse_song_album(data, 2),
             "likeStatus": like,
             "thumbnails": thumbnails,

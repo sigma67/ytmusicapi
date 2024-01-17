@@ -12,6 +12,7 @@ from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
 
 from ..navigation import *
+from ..parsers._utils import parse_real_count  # protected ?
 from ._protocol import MixinProtocol
 from ._utils import get_datestamp
 
@@ -234,6 +235,7 @@ class BrowsingMixin(MixinProtocol):
                 if "subheader" not in descriptionShelf
                 else descriptionShelf["subheader"]["runs"][0]["text"]
             )
+            artist["view_count"] = parse_real_count(nav(descriptionShelf, ["subheader", "runs", 0], True))
         subscription_button = header["subscriptionButton"]["subscribeButtonRenderer"]
         artist["channelId"] = subscription_button["channelId"]
         artist["shuffleId"] = nav(
@@ -243,6 +245,9 @@ class BrowsingMixin(MixinProtocol):
             header, ["startRadioButton", "buttonRenderer"] + NAVIGATION_WATCH_PLAYLIST_ID, True
         )
         artist["subscribers"] = nav(subscription_button, ["subscriberCountText", "runs", 0, "text"], True)
+        artist["sub_count"] = parse_real_count(
+            nav(subscription_button, ["subscriberCountText", "runs", 0], True)
+        )
         artist["subscribed"] = subscription_button["subscribed"]
         artist["thumbnails"] = nav(header, THUMBNAILS, True)
         artist["songs"] = {"browseId": None}
@@ -494,7 +499,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         album = parse_album_header(response)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
-        album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
+        album["tracks"] = parse_playlist_items(results["contents"], by_artists=album["artists"])
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + CAROUSEL, True)
         if results is not None:
             album["other_versions"] = parse_content_list(results["contents"], parse_album)

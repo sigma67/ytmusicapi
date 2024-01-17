@@ -7,7 +7,6 @@ from ytmusicapi.parsers.browsing import (
     parse_content_list,
     parse_playlist,
     parse_related_artist,
-    parse_single,
     parse_video,
 )
 
@@ -33,7 +32,7 @@ class Parser:
     def parse_artist_contents(self, results: List) -> Dict:
         categories = ["albums", "singles", "videos", "playlists", "related"]
         categories_local = [_("albums"), _("singles"), _("videos"), _("playlists"), _("related")]  # type: ignore[name-defined]
-        categories_parser = [parse_album, parse_single, parse_video, parse_playlist, parse_related_artist]
+        categories_parser = [parse_album, parse_album, parse_video, parse_playlist, parse_related_artist]
         artist: Dict[str, Any] = {}
         for i, category in enumerate(categories):
             data = [

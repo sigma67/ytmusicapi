@@ -52,31 +52,30 @@ def parse_content_list(results, parse_func, key=MTRIR):
 
 
 def parse_album(result):
-    return {
+    album = {
         "title": nav(result, TITLE_TEXT),
-        "type": nav(result, SUBTITLE),
-        "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
         "audioPlaylistId": nav(result, THUMBNAIL_OVERLAY, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
     }
 
+    runs = nav(result, SUBTITLE_RUNS)
+    if len(runs) >= 2:
+        album["type"] = nav(runs, ZTEXT, True)
 
-def parse_id_name(sub_run):
-    return {
-        "id": nav(sub_run, NAVIGATION_BROWSE_ID, True),
-        "name": nav(sub_run, ["text"], True),
-    }
+        # navigationEndpoint key is present when secondary runs are artists
+        if "navigationEndpoint" in runs[2]:
+            album["artists"] = artists_from_runs(runs)
+        else:
+            album["year"] = nav(runs, TTEXT, True)
 
+    # it's a single with just the year
+    else:
+        album["type"] = "Single"
+        album["year"] = nav(runs, ZTEXT, True)
 
-def parse_single(result):
-    return {
-        "title": nav(result, TITLE_TEXT),
-        "year": nav(result, SUBTITLE, True),
-        "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
-        "thumbnails": nav(result, THUMBNAIL_RENDERER),
-    }
+    return album
 
 
 def parse_song(result):
@@ -95,15 +94,16 @@ def parse_song_flat(data):
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
         "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
-        "artists": parse_song_artists(data, 1),
+        "artists": parse_pl_song_artists(data, 1),
         "thumbnails": nav(data, THUMBNAILS),
         "isExplicit": nav(data, BADGE_LABEL, True) is not None,
     }
-    if len(columns) > 2 and columns[2] is not None and "navigationEndpoint" in nav(columns[2], TEXT_RUN):
-        song["album"] = {
-            "name": nav(columns[2], TEXT_RUN_TEXT),
-            "id": nav(columns[2], TEXT_RUN + NAVIGATION_BROWSE_ID),
-        }
+    if (
+        len(columns) > 2
+        and columns[2] is not None
+        and "navigationEndpoint" in (targ := nav(columns[2], TEXT_RUN))
+    ):
+        song["album"] = parse_id_name(targ)
     else:
         song["views"] = nav(columns[1], ["text", "runs", -1, "text"]).split(" ")[0]
 
@@ -112,20 +112,41 @@ def parse_song_flat(data):
 
 def parse_video(result):
     runs = nav(result, SUBTITLE_RUNS)
-    artists_len = get_dot_separator_index(runs)
+    # artists_len = get_dot_separator_index(runs)
     videoId = nav(result, NAVIGATION_VIDEO_ID, True)
     if not videoId:
+        # I believe this
         videoId = next(
-            id for entry in nav(result, MENU_ITEMS) if nav(entry, MENU_SERVICE + QUEUE_VIDEO_ID, True)
-        )
-    return {
+            (
+                found
+                for entry in nav(result, MENU_ITEMS)
+                if (found := nav(entry, MENU_SERVICE + QUEUE_VIDEO_ID, True))
+            ),
+            None,
+        )  # this won't match anything for episodes, None to catch iterator
+    result = {
         "title": nav(result, TITLE_TEXT),
         "videoId": videoId,
-        "artists": parse_song_artists_runs(runs[:artists_len]),
         "playlistId": nav(result, NAVIGATION_PLAYLIST_ID, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
-        "views": runs[-1]["text"].split(" ")[0],
     }
+
+    # it's an ~episode~ -> makes the first key a duration { "text": "%m min %s sec" } format
+    # unsure if we should capture the duration for edge cases
+    # could also be an unlinked artist
+    if "navigationEndpoint" not in runs[0] and any(x in runs[0]["text"] for x in ["sec", "min"]):
+        result["type"] = "episode"
+        # views are unavailable on episodes
+        result["views"] = None
+        result["view_count"] = -1
+        result["artists"] = artists_from_runs(runs[2:], 0)
+    else:
+        result["type"] = "song"
+        result["views"] = runs[-1]["text"].split(" ")[0]
+        result["view_count"] = parse_real_count(runs[-1]) if len(runs) > 2 else -1
+        result["artists"] = artists_from_runs(runs[:-2], 0)
+
+    return result
 
 
 def parse_playlist(data):
@@ -134,12 +155,26 @@ def parse_playlist(data):
         "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
     }
-    subtitle = data["subtitle"]
-    if "runs" in subtitle:
-        playlist["description"] = "".join([run["text"] for run in subtitle["runs"]])
-        if len(subtitle["runs"]) == 3 and re.search(r"\d+ ", nav(data, SUBTITLE2)):
-            playlist["count"] = nav(data, SUBTITLE2).split(" ")[0]
-            playlist["author"] = parse_song_artists_runs(subtitle["runs"][:1])
+    runs = nav(data, SUBTITLE_RUNS)
+    if runs:
+        playlist["description"] = "".join([run["text"] for run in runs])
+        if len(runs) == 3 and runs[1]["text"] == " • ":
+            # genre charts from get_charts('US') are sent here...
+            if runs[0]["text"] == "Chart" or runs[-1]["text"] == "YouTube Music":
+                playlist["count"] = None
+                playlist["view_count"] = -1
+                playlist["author"] = {"name": "YouTube Music", "id": None}
+                playlist["featured_artists"] = None
+            else:
+                playlist["count"] = nav(data, SUBTITLE2).split(" ")[0]  # this is "views" everywhere else
+                playlist["view_count"] = parse_real_count(runs[2])
+                playlist["author"] = parse_id_name(runs[0])
+                playlist["featured_artists"] = None
+        else:
+            playlist["featured_artists"] = nav(runs, ZTEXT, True)
+            # fill default, maintain return format
+            playlist["author"] = {"name": "YouTube Music", "id": None}
+            playlist["view_count"] = -1
 
     return playlist
 
@@ -152,6 +187,7 @@ def parse_related_artist(data):
         "title": nav(data, TITLE_TEXT),
         "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
         "subscribers": subscribers,
+        "sub_count": parse_real_count(nav(data, LAST_SUB_RUN, True)),
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
     }
 
