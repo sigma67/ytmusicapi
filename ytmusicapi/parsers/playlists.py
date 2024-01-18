@@ -75,7 +75,7 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
 
         videoType = nav(
             data,
-            MENU_ITEMS + [0, "menuNavigationItemRenderer", "navigationEndpoint"] + NAVIGATION_VIDEO_TYPE,
+            [*MENU_ITEMS, 0, "menuNavigationItemRenderer", "navigationEndpoint", *NAVIGATION_VIDEO_TYPE],
             True,
         )
 

@@ -57,6 +57,7 @@ ignore = [ "F403", "F405", "F821", "E731" ]
 extend-select = [
     "I",   # isort
     "UP",  # pyupgrade
+    "RUF", # ruff
 ]
 
 [tool.mypy]

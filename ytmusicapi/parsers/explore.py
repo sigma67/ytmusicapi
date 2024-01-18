@@ -42,7 +42,7 @@ def parse_chart_trending(data):
 
 def parse_ranking(data):
     return {
-        "rank": nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer"] + TEXT_RUN_TEXT),
+        "rank": nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *TEXT_RUN_TEXT]),
         "trend": TRENDS[
             nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", "icon", "iconType"])
         ],

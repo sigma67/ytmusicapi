@@ -124,7 +124,7 @@ class PlaylistsMixin(MixinProtocol):
         if run_count > 1:
             playlist["author"] = {
                 "name": nav(header, SUBTITLE2),
-                "id": nav(header, SUBTITLE_RUNS + [2] + NAVIGATION_BROWSE_ID, True),
+                "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
             }
             if run_count == 5:
                 playlist["year"] = nav(header, SUBTITLE3)
@@ -149,7 +149,7 @@ class PlaylistsMixin(MixinProtocol):
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
-        section_list = nav(response, SINGLE_COLUMN_TAB + ["sectionListRenderer"])
+        section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         playlist["related"] = []
         if "continuations" in section_list:
             additionalParams = get_continuation_params(section_list)

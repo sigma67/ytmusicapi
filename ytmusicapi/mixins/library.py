@@ -212,11 +212,11 @@ class LibraryMixin(MixinProtocol):
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         songs = []
         for content in results:
-            data = nav(content, MUSIC_SHELF + ["contents"], True)
+            data = nav(content, [*MUSIC_SHELF, "contents"], True)
             if not data:
-                error = nav(content, ["musicNotifierShelfRenderer"] + TITLE, True)
+                error = nav(content, ["musicNotifierShelfRenderer", *TITLE], True)
                 raise Exception(error)
-            menu_entries = [[-1] + MENU_SERVICE + FEEDBACK_TOKEN]
+            menu_entries = [[-1, *MENU_SERVICE, *FEEDBACK_TOKEN]]
             songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:
                 song["played"] = nav(content["musicShelfRenderer"], TITLE_TEXT)

@@ -110,7 +110,7 @@ class BrowsingMixin(MixinProtocol):
         home = []
         home.extend(parse_mixed_content(results))
 
-        section_list = nav(response, SINGLE_COLUMN_TAB + ["sectionListRenderer"])
+        section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         if "continuations" in section_list:
             request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
@@ -237,10 +237,10 @@ class BrowsingMixin(MixinProtocol):
         subscription_button = header["subscriptionButton"]["subscribeButtonRenderer"]
         artist["channelId"] = subscription_button["channelId"]
         artist["shuffleId"] = nav(
-            header, ["playButton", "buttonRenderer"] + NAVIGATION_WATCH_PLAYLIST_ID, True
+            header, ["playButton", "buttonRenderer", *NAVIGATION_WATCH_PLAYLIST_ID], True
         )
         artist["radioId"] = nav(
-            header, ["startRadioButton", "buttonRenderer"] + NAVIGATION_WATCH_PLAYLIST_ID, True
+            header, ["startRadioButton", "buttonRenderer", *NAVIGATION_WATCH_PLAYLIST_ID], True
         )
         artist["subscribers"] = nav(subscription_button, ["subscriberCountText", "runs", 0, "text"], True)
         artist["subscribed"] = subscription_button["subscribed"]
@@ -296,8 +296,8 @@ class BrowsingMixin(MixinProtocol):
                 (
                     nav(
                         option,
-                        MULTI_SELECT
-                        + [
+                        [
+                            *MULTI_SELECT,
                             "selectedCommand",
                             "commandExecutorCommand",
                             "commands",
@@ -346,7 +346,7 @@ class BrowsingMixin(MixinProtocol):
         Example::
 
             {
-              "name": "4Tune – No Copyright Music",
+              "name": "4Tune - No Copyright Music",
               "videos": {
                 "browseId": "UC44hbeRoCZVVMVg5z0FfIww",
                 "results": [
@@ -387,7 +387,7 @@ class BrowsingMixin(MixinProtocol):
         endpoint = "browse"
         body = {"browseId": channelId}
         response = self._send_request(endpoint, body)
-        user = {"name": nav(response, ["header", "musicVisualHeaderRenderer"] + TITLE_TEXT)}
+        user = {"name": nav(response, ["header", "musicVisualHeaderRenderer", *TITLE_TEXT])}
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         user.update(self.parser.parse_artist_contents(results))
         return user
@@ -769,7 +769,7 @@ class BrowsingMixin(MixinProtocol):
             raise Exception("Invalid browseId provided.")
 
         response = self._send_request("browse", {"browseId": browseId})
-        sections = nav(response, ["contents"] + SECTION_LIST)
+        sections = nav(response, ["contents", *SECTION_LIST])
         return parse_mixed_content(sections)
 
     def get_lyrics(self, browseId: str) -> Dict:
@@ -793,10 +793,10 @@ class BrowsingMixin(MixinProtocol):
 
         response = self._send_request("browse", {"browseId": browseId})
         lyrics["lyrics"] = nav(
-            response, ["contents"] + SECTION_LIST_ITEM + DESCRIPTION_SHELF + DESCRIPTION, True
+            response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *DESCRIPTION], True
         )
         lyrics["source"] = nav(
-            response, ["contents"] + SECTION_LIST_ITEM + DESCRIPTION_SHELF + ["footer"] + RUN_TEXT, True
+            response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "footer", *RUN_TEXT], True
         )
 
         return lyrics
