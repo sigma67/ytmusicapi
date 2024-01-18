@@ -884,7 +884,7 @@ class BrowsingMixin(MixinProtocol):
 
         for artist in artists:
             if artist not in taste_profile:
-                raise Exception("The artist, {}, was not present in taste!".format(artist))
+                raise Exception(f"The artist, {artist}, was not present in taste!")
             formData["selectedValues"].append(taste_profile[artist]["selectionValue"])
 
         body = {"browseId": "FEmusic_home", "formData": formData}
