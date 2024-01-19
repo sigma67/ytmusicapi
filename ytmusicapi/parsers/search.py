@@ -45,6 +45,13 @@ def parse_top_result(data, search_result_types):
     if result_type in ["album"]:
         search_result["browseId"] = nav(data, TITLE + NAVIGATION_BROWSE_ID, True)
 
+    if result_type in ["playlist"]:
+        search_result["browseId"] = nav(data, MENU_PLAYLIST_ID)
+        search_result["title"] = nav(data, TITLE_TEXT)
+        author = parse_song_artists_runs(nav(data, ["subtitle", "runs"])[2:])
+        if len(author) > 0:
+            search_result["author"] = author[0]['name']
+
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
     return search_result
 
