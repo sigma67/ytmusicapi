@@ -211,6 +211,11 @@ class YTMusicBase:
         if self.auth_type == AuthType.BROWSER:
             self._headers["authorization"] = get_authorization(self.sapisid + " " + self.origin)
 
+        # Override the headers with the auth / input_dict when using OAUTH_CUSTOM_FULL
+        # Full headers are provided by the downstream client in this scenario.
+        elif self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
+            self._headers = self._input_dict
+
         elif self.auth_type in AuthType.oauth_types():
             self._headers["authorization"] = self._token.as_auth()
             self._headers["X-Goog-Request-Time"] = str(int(time.time()))
