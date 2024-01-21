@@ -206,6 +206,15 @@ class PlaylistsMixin(MixinProtocol):
         """
         return self.get_playlist("LM", limit)
 
+    def get_saved_episodes(self, limit: int = 100) -> Dict:
+        """
+        Gets playlist items for the 'Liked Songs' playlist
+
+        :param limit: How many items to return. Default: 100
+        :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
+        """
+        return self.get_playlist("SE", limit)
+
     def create_playlist(
         self,
         title: str,
