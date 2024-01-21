@@ -437,7 +437,7 @@ class BrowsingMixin(MixinProtocol):
             returned by :py:func:`search`
         :return: Dictionary with album and track metadata.
 
-        Each track is in the following format::
+        The result is in the following format::
 
             {
               "title": "Revival",
@@ -471,6 +471,7 @@ class BrowsingMixin(MixinProtocol):
                   "isExplicit": true,
                   "duration": "5:03",
                   "duration_seconds": 303,
+                  "trackNumber": 0,
                   "feedbackTokens": {
                     "add": "AB9zfpK...",
                     "remove": "AB9zfpK..."

@@ -72,7 +72,7 @@ class TestBrowsing:
         assert results["tracks"][0]["isExplicit"]
         assert all(item["views"] is not None for item in results["tracks"])
         assert all(item["album"] is not None for item in results["tracks"])
-        assert results["tracks"][0]["track_number"] == 1
+        assert results["tracks"][0]["trackNumber"] == 1
         assert "feedbackTokens" in results["tracks"][0]
         assert len(results["other_versions"]) >= 1  # appears to be regional
         results = yt.get_album("MPREb_BQZvl3BFGay")
@@ -81,10 +81,10 @@ class TestBrowsing:
         results = yt.get_album("MPREb_rqH94Zr3NN0")
         assert len(results["tracks"][0]["artists"]) == 2
         results = yt.get_album("MPREb_TPH4WqN5pUo")  # album with tracks completely removed/missing
-        assert results["tracks"][0]["track_number"] == 3
-        assert results["tracks"][13]["track_number"] == 18
+        assert results["tracks"][0]["trackNumber"] == 3
+        assert results["tracks"][13]["trackNumber"] == 18
         results = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
-        assert results["tracks"][7]["track_number"] is None
+        assert results["tracks"][7]["trackNumber"] is None
 
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
