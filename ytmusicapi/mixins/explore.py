@@ -53,7 +53,7 @@ class ExploreMixin(MixinProtocol):
         sections: Dict[str, Any] = {}
         response = self._send_request("browse", {"browseId": "FEmusic_moods_and_genres"})
         for section in nav(response, SINGLE_COLUMN_TAB + SECTION_LIST):
-            title = nav(section, GRID + ["header", "gridHeaderRenderer"] + TITLE_TEXT)
+            title = nav(section, [*GRID, "header", "gridHeaderRenderer", *TITLE_TEXT])
             sections[title] = []
             for category in nav(section, GRID_ITEMS):
                 sections[title].append(
@@ -197,8 +197,8 @@ class ExploreMixin(MixinProtocol):
         charts: Dict[str, Any] = {"countries": {}}
         menu = nav(
             results[0],
-            MUSIC_SHELF
-            + [
+            [
+                *MUSIC_SHELF,
                 "subheaders",
                 0,
                 "musicSideAlignedItemRenderer",

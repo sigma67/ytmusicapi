@@ -77,7 +77,7 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, by_
 
         videoType = nav(
             data,
-            MENU_ITEMS + [0, "menuNavigationItemRenderer", "navigationEndpoint"] + NAVIGATION_VIDEO_TYPE,
+            [*MENU_ITEMS, 0, MNIR, "navigationEndpoint", *NAVIGATION_VIDEO_TYPE],
             True,
         )
 
@@ -96,7 +96,7 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, by_
         }
 
         if by_artists:
-            song["track_number"] = int(nav(data, ["index", "runs", 0, "text"])) if isAvailable else None
+            song["trackNumber"] = int(nav(data, ["index", *RUN_TEXT])) if isAvailable else None
 
         if duration:
             song["duration"] = duration

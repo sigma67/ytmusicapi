@@ -53,7 +53,7 @@ class TestOAuth:
             assert Path(oauth_filepath).exists()
 
         json_mock.side_effect = None
-        with open(oauth_filepath, mode="r", encoding="utf8") as oauth_file:
+        with open(oauth_filepath, encoding="utf8") as oauth_file:
             oauth_token = json.loads(oauth_file.read())
 
         assert oauth_token["expires_at"] != 0
@@ -67,7 +67,7 @@ class TestOAuth:
         assert yt_oauth._token is not None
 
         # set reference file
-        with open(oauth_filepath, "r") as f:
+        with open(oauth_filepath) as f:
             first_json = json.load(f)
 
         # pull reference values from underlying token
@@ -89,7 +89,7 @@ class TestOAuth:
         # check token is propagating properly
         assert second_token == second_token_inner
 
-        with open(oauth_filepath, "r") as f2:
+        with open(oauth_filepath) as f2:
             second_json = json.load(f2)
 
         # ensure token is updating local file
@@ -100,7 +100,7 @@ class TestOAuth:
     ):
         # ensure client works/ignores alt if browser credentials passed as auth
         assert yt_alt_oauth.auth_type != AuthType.OAUTH_CUSTOM_CLIENT
-        with open(oauth_filepath, "r") as f:
+        with open(oauth_filepath) as f:
             token_dict = json.load(f)
         # oauth token dict entry and alt
         yt_alt_oauth = YTMusic(token_dict, oauth_credentials=alt_oauth_credentials)

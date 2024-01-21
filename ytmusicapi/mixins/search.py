@@ -214,7 +214,7 @@ class SearchMixin(MixinProtocol):
                     category = None
                     # category "more from youtube" is missing sometimes
                     if "messageRenderer" in results[0]:
-                        category = nav(results.pop(0), ["messageRenderer"] + TEXT_RUN_TEXT)
+                        category = nav(results.pop(0), ["messageRenderer", *TEXT_RUN_TEXT])
                     type = None
                 else:
                     continue

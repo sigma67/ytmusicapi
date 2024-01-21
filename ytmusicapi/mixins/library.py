@@ -212,11 +212,11 @@ class LibraryMixin(MixinProtocol):
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         songs = []
         for content in results:
-            data = nav(content, MUSIC_SHELF + ["contents"], True)
+            data = nav(content, [*MUSIC_SHELF, "contents"], True)
             if not data:
-                error = nav(content, ["musicNotifierShelfRenderer"] + TITLE, True)
+                error = nav(content, ["musicNotifierShelfRenderer", *TITLE], True)
                 raise Exception(error)
-            menu_entries = [[-1] + MENU_SERVICE + FEEDBACK_TOKEN]
+            menu_entries = [[-1, *MENU_SERVICE, *FEEDBACK_TOKEN]]
             songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:
                 song["played"] = nav(content["musicShelfRenderer"], TITLE_TEXT)
@@ -234,7 +234,7 @@ class LibraryMixin(MixinProtocol):
         """
         url = song["playbackTracking"]["videostatsPlaybackUrl"]["baseUrl"]
         CPNA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
-        cpn = "".join((CPNA[randint(0, 256) & 63] for _ in range(0, 16)))
+        cpn = "".join(CPNA[randint(0, 256) & 63] for _ in range(0, 16))
         params = {"ver": 2, "c": "WEB_REMIX", "cpn": cpn}
         return self._send_get_request(url, params)
 

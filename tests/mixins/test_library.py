@@ -64,6 +64,12 @@ class TestLibrary:
         songs = yt_empty.get_liked_songs()
         assert songs["trackCount"] == 0
 
+    def test_get_saved_episodes(self, yt_brand, yt_empty):
+        episodes = yt_brand.get_saved_episodes(200)
+        assert len(episodes["tracks"]) > 0
+        episodes = yt_empty.get_saved_episodes()
+        assert episodes["trackCount"] == 0
+
     def test_get_history(self, yt_oauth):
         songs = yt_oauth.get_history()
         assert len(songs) > 0

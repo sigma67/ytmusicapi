@@ -28,6 +28,7 @@ from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
+from ytmusicapi.mixins.podcasts import PodcastsMixin
 from ytmusicapi.mixins.search import SearchMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
 from ytmusicapi.mixins.watch import WatchMixin
@@ -211,7 +212,9 @@ class YTMusicBase:
         if self.auth_type == AuthType.BROWSER:
             self._headers["authorization"] = get_authorization(self.sapisid + " " + self.origin)
 
-        elif self.auth_type in AuthType.oauth_types():
+        # Do not set custom headers when using OAUTH_CUSTOM_FULL
+        # Full headers are provided by the downstream client in this scenario.
+        elif self.auth_type in [x for x in AuthType.oauth_types() if x != AuthType.OAUTH_CUSTOM_FULL]:
             self._headers["authorization"] = self._token.as_auth()
             self._headers["X-Goog-Request-Time"] = str(int(time.time()))
 
@@ -268,6 +271,7 @@ class YTMusic(
     ExploreMixin,
     LibraryMixin,
     PlaylistsMixin,
+    PodcastsMixin,
     UploadsMixin,
 ):
     """
