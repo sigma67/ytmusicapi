@@ -56,6 +56,13 @@ class TestSearch:
         assert len(results) > 10
         assert all(item["resultType"] == "episode" for item in results)
 
+    def test_search_top_result(self, yt):
+        results = yt.search("fdsfsfsd")  # issue 524
+        assert results[0]["category"] == "Top result"
+        assert results[0]["resultType"] == "playlist"
+        assert results[0]["playlistId"] == "PLK3q5XTYSK60QH3gDypSu3n9OBz6H9HfV"
+        assert len(results[0]["author"]) > 0
+
     def test_search_uploads(self, config, yt, yt_oauth):
         with pytest.raises(Exception, match="No filter can be set when searching uploads"):
             yt.search(
