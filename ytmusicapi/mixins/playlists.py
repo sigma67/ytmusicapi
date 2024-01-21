@@ -26,7 +26,7 @@ class PlaylistsMixin(MixinProtocol):
         :return: Dictionary with information about the playlist.
             The key ``tracks`` contains a List of playlistItem dictionaries
 
-        Each item is in the following format::
+        The result is in the following format::
 
             {
               "id": "PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_",
