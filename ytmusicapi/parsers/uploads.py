@@ -8,12 +8,23 @@ def parse_uploaded_items(results):
         data = result[MRLIR]
         if "menu" not in data:
             continue
-        entityId = nav(data, MENU_ITEMS)[-1]["menuNavigationItemRenderer"]["navigationEndpoint"][
-            "confirmDialogEndpoint"
-        ]["content"]["confirmDialogRenderer"]["confirmButton"]["buttonRenderer"]["command"][
-            "musicDeletePrivatelyOwnedEntityCommand"
-        ]["entityId"]
-
+        entityId = nav(
+            data,
+            [
+                *MENU_ITEMS,
+                -1,
+                MNIR,
+                "navigationEndpoint",
+                "confirmDialogEndpoint",
+                "content",
+                "confirmDialogRenderer",
+                "confirmButton",
+                "buttonRenderer",
+                "command",
+                "musicDeletePrivatelyOwnedEntityCommand",
+                "entityId",
+            ],
+        )
         videoId = nav(data, [*MENU_ITEMS, 0, *MENU_SERVICE])["queueAddEndpoint"]["queueTarget"]["videoId"]
 
         title = get_item_text(data, 0)

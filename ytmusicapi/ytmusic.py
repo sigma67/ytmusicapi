@@ -28,6 +28,7 @@ from ytmusicapi.mixins.browsing import BrowsingMixin
 from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
+from ytmusicapi.mixins.podcasts import PodcastsMixin
 from ytmusicapi.mixins.search import SearchMixin
 from ytmusicapi.mixins.uploads import UploadsMixin
 from ytmusicapi.mixins.watch import WatchMixin
@@ -268,6 +269,7 @@ class YTMusic(
     ExploreMixin,
     LibraryMixin,
     PlaylistsMixin,
+    PodcastsMixin,
     UploadsMixin,
 ):
     """

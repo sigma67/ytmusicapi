@@ -5,11 +5,13 @@ CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]
 TAB_CONTENT = ["tabs", 0, "tabRenderer", "content"]
 TAB_1_CONTENT = ["tabs", 1, "tabRenderer", "content"]
+TWO_COLUMN_RENDERER = ["contents", "twoColumnBrowseResultsRenderer"]
 SINGLE_COLUMN = ["contents", "singleColumnBrowseResultsRenderer"]
 SINGLE_COLUMN_TAB = SINGLE_COLUMN + TAB_CONTENT
 SECTION = ["sectionListRenderer"]
 SECTION_LIST = [*SECTION, "contents"]
 SECTION_LIST_ITEM = SECTION + CONTENT
+RESPONSIVE_HEADER = ["musicResponsiveHeaderRenderer"]
 ITEM_SECTION = ["itemSectionRenderer", *CONTENT]
 MUSIC_SHELF = ["musicShelfRenderer"]
 GRID = ["gridRenderer"]
@@ -34,6 +36,8 @@ NAVIGATION_VIDEO_TYPE = [
     "watchEndpointMusicConfig",
     "musicVideoType",
 ]
+ICON_TYPE = ["icon", "iconType"]
+TOGGLED_BUTTON = ["toggleButtonRenderer", "isToggled"]
 TITLE = ["title", "runs", 0]
 TITLE_TEXT = ["title", *RUN_TEXT]
 TEXT_RUNS = ["text", "runs"]
@@ -55,10 +59,11 @@ CATEGORY_TITLE = ["musicNavigationButtonRenderer", "buttonText", *RUN_TEXT]
 CATEGORY_PARAMS = ["musicNavigationButtonRenderer", "clickCommand", "browseEndpoint", "params"]
 MRLIR = "musicResponsiveListItemRenderer"
 MTRIR = "musicTwoRowItemRenderer"
+MNIR = "menuNavigationItemRenderer"
 TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
 TASTE_PROFILE_ARTIST = ["title", "runs"]
 SECTION_LIST_CONTINUATION = ["continuationContents", "sectionListContinuation"]
-MENU_PLAYLIST_ID = [*MENU_ITEMS, 0, "menuNavigationItemRenderer", *NAVIGATION_WATCH_PLAYLIST_ID]
+MENU_PLAYLIST_ID = [*MENU_ITEMS, 0, MNIR, *NAVIGATION_WATCH_PLAYLIST_ID]
 MULTI_SELECT = ["musicMultiSelectMenuItemRenderer"]
 HEADER_DETAIL = ["header", "musicDetailHeaderRenderer"]
 HEADER_SIDE = ["header", "musicSideAlignedItemRenderer"]

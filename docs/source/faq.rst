@@ -79,6 +79,26 @@ What is a browseId?
 ***********************************************************************
 A ``browseId`` is an internal, globally unique identifier used by YouTube Music for browsable content.
 
+In most cases you can compose it yourself:
+
++--------+------------+----------------------+
+| Prefix | Main       | Content              |
++========+============+======================+
+| VM     | playlistId | Playlist             |
++--------+------------+----------------------+
+| RDAMVM | playlistId | Video-based Radio    |
++--------+------------+----------------------+
+| RDAMPL | videoId    | Playlist-based Radio |
++--------+------------+----------------------+
+| MPLA   | channelId  | Artist               |
++--------+------------+----------------------+
+| MPRE   | custom     | Album                |
++--------+------------+----------------------+
+| MPSP   | playlistId | Podcast              |
++--------+------------+----------------------+
+| MPED   | videoId    | Episode              |
++--------+------------+----------------------+
+
 
 Which videoTypes exist and what do they mean?
 ***********************************************************************
@@ -112,14 +132,15 @@ For the list of values you can use for the ``language`` parameter, see below:
 .. raw:: html
 
    <details>
+   <br>
    <summary><a>Supported locations</a></summary>
 
 .. container::
 
     .. list-table::
 
-        * - Language
-          - Value
+        * - **Language**
+          - **Value**
         * - Arabic
           - ar
         * - German
@@ -157,6 +178,7 @@ For the list of values you can use for the ``language`` parameter, see below:
 .. raw:: html
 
    </details>
+   </br>
 
 
 
@@ -168,14 +190,15 @@ Pick a value from the list below for your desired location and pass it using the
 .. raw:: html
 
    <details>
+   <br>
    <summary><a>Supported locations</a></summary>
 
 .. container::
 
     .. list-table::
 
-        * - Location
-          - Value
+        * - **Location**
+          - **Value**
         * - Algeria
           - DZ
         * - Argentina
@@ -398,4 +421,4 @@ Pick a value from the list below for your desired location and pass it using the
 .. raw:: html
 
    </details>
-
+   </br>
