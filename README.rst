@@ -58,6 +58,11 @@ Features
 * get playlist contents
 * get playlist suggestions
 
+| **Podcasts**:
+
+* get podcasts
+* get episodes
+
 | **Uploads**:
 
 * upload songs and remove them again
@@ -73,6 +78,15 @@ If you find something missing or broken,
 check the `FAQ <https://ytmusicapi.readthedocs.io/en/stable/faq.html>`__ or
 feel free to create an `issue <https://github.com/sigma67/ytmusicapi/issues/new/choose>`__.
 
+Requirements
+------------
+
+- Python 3.8 or higher - https://www.python.org
+
+Setup
+-----
+
+See the `Documentation <https://ytmusicapi.readthedocs.io/en/stable/usage.html>`_ for detailed instructions
 
 Usage
 ------
@@ -89,18 +103,8 @@ The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/>`_ are also
 
 .. end-features
 
-Requirements
-==============
-
-- Python 3.8 or higher - https://www.python.org
-
-Setup and Usage
-===============
-
-See the `Documentation <https://ytmusicapi.readthedocs.io/en/latest/usage.html>`_ for detailed instructions
-
 Contributing
-==============
+------------
 
 Pull requests are welcome. There are still some features that are not yet implemented.
 Please, refer to `CONTRIBUTING.rst <https://github.com/sigma67/ytmusicapi/blob/master/CONTRIBUTING.rst>`_ for guidance.

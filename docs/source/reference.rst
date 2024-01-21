@@ -71,6 +71,11 @@ Playlists
 .. automethod:: YTMusic.add_playlist_items
 .. automethod:: YTMusic.remove_playlist_items
 
+Podcasts
+--------
+.. automethod:: YTMusic.get_podcast
+.. automethod:: YTMusic.get_episode
+
 Uploads
 -------
 .. automethod:: YTMusic.get_library_upload_songs

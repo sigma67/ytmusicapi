@@ -66,8 +66,8 @@ def parse_song_library_status(item) -> bool:
 def parse_song_menu_tokens(item):
     toggle_menu = item[TOGGLE_MENU]
 
-    library_add_token = nav(toggle_menu, ["defaultServiceEndpoint"] + FEEDBACK_TOKEN, True)
-    library_remove_token = nav(toggle_menu, ["toggledServiceEndpoint"] + FEEDBACK_TOKEN, True)
+    library_add_token = nav(toggle_menu, ["defaultServiceEndpoint", *FEEDBACK_TOKEN], True)
+    library_remove_token = nav(toggle_menu, ["toggledServiceEndpoint", *FEEDBACK_TOKEN], True)
 
     in_library = parse_song_library_status(item)
     if in_library:

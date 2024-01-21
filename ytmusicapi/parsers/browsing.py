@@ -7,13 +7,13 @@ def parse_mixed_content(rows):
     for row in rows:
         if DESCRIPTION_SHELF[0] in row:
             results = nav(row, DESCRIPTION_SHELF)
-            title = nav(results, ["header"] + RUN_TEXT)
+            title = nav(results, ["header", *RUN_TEXT])
             contents = nav(results, DESCRIPTION)
         else:
             results = next(iter(row.values()))
             if "contents" not in results:
                 continue
-            title = nav(results, CAROUSEL_TITLE + ["text"])
+            title = nav(results, [*CAROUSEL_TITLE, "text"])
             contents = []
             for result in results["contents"]:
                 data = nav(result, [MTRIR], True)
@@ -55,6 +55,7 @@ def parse_album(result):
     return {
         "title": nav(result, TITLE_TEXT),
         "type": nav(result, SUBTITLE),
+        "year": nav(result, SUBTITLE2, True),
         "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
         "audioPlaylistId": nav(result, THUMBNAIL_OVERLAY, True),

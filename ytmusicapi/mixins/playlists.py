@@ -26,7 +26,7 @@ class PlaylistsMixin(MixinProtocol):
         :return: Dictionary with information about the playlist.
             The key ``tracks`` contains a List of playlistItem dictionaries
 
-        Each item is in the following format::
+        The result is in the following format::
 
             {
               "id": "PLQwVIlKxHM6qv-o99iX9R85og7IzF9YS_",
@@ -124,7 +124,7 @@ class PlaylistsMixin(MixinProtocol):
         if run_count > 1:
             playlist["author"] = {
                 "name": nav(header, SUBTITLE2),
-                "id": nav(header, SUBTITLE_RUNS + [2] + NAVIGATION_BROWSE_ID, True),
+                "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
             }
             if run_count == 5:
                 playlist["year"] = nav(header, SUBTITLE3)
@@ -149,7 +149,7 @@ class PlaylistsMixin(MixinProtocol):
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
-        section_list = nav(response, SINGLE_COLUMN_TAB + ["sectionListRenderer"])
+        section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         playlist["related"] = []
         if "continuations" in section_list:
             additionalParams = get_continuation_params(section_list)
@@ -205,6 +205,15 @@ class PlaylistsMixin(MixinProtocol):
         :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
         """
         return self.get_playlist("LM", limit)
+
+    def get_saved_episodes(self, limit: int = 100) -> Dict:
+        """
+        Gets playlist items for the 'Liked Songs' playlist
+
+        :param limit: How many items to return. Default: 100
+        :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
+        """
+        return self.get_playlist("SE", limit)
 
     def create_playlist(
         self,
