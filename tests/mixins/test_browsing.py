@@ -67,24 +67,44 @@ class TestBrowsing:
         assert escaped_browse_id == "MPREb_scJdtUCpPE2"
 
     def test_get_album(self, yt, yt_auth, sample_album):
-        results = yt_auth.get_album(sample_album)
-        assert len(results) >= 9
-        assert results["tracks"][0]["isExplicit"]
-        assert all(item["views"] is not None for item in results["tracks"])
-        assert all(item["album"] is not None for item in results["tracks"])
-        assert results["tracks"][0]["trackNumber"] == 1
-        assert "feedbackTokens" in results["tracks"][0]
-        assert len(results["other_versions"]) >= 1  # appears to be regional
-        results = yt.get_album("MPREb_BQZvl3BFGay")
-        assert len(results["tracks"]) == 7
-        assert len(results["tracks"][0]["artists"]) == 1
-        results = yt.get_album("MPREb_rqH94Zr3NN0")
-        assert len(results["tracks"][0]["artists"]) == 2
-        results = yt.get_album("MPREb_TPH4WqN5pUo")  # album with tracks completely removed/missing
-        assert results["tracks"][0]["trackNumber"] == 3
-        assert results["tracks"][13]["trackNumber"] == 18
-        results = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
-        assert results["tracks"][7]["trackNumber"] is None
+        album = yt_auth.get_album(sample_album)
+        assert len(album) >= 9
+        assert "isExplicit" in album
+        assert album["tracks"][0]["isExplicit"]
+        assert all(item["views"] is not None for item in album["tracks"])
+        assert all(item["album"] is not None for item in album["tracks"])
+        assert album["tracks"][0]["trackNumber"] == 1
+        assert "feedbackTokens" in album["tracks"][0]
+        album = yt.get_album("MPREb_BQZvl3BFGay")
+        assert len(album["tracks"]) == 7
+        assert len(album["tracks"][0]["artists"]) == 1
+        album = yt.get_album("MPREb_rqH94Zr3NN0")
+        assert len(album["tracks"][0]["artists"]) == 2
+        album = yt.get_album("MPREb_TPH4WqN5pUo")  # album with tracks completely removed/missing
+        assert album["tracks"][0]["trackNumber"] == 3
+        assert album["tracks"][13]["trackNumber"] == 18
+        album = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
+        assert album["tracks"][7]["trackNumber"] is None
+
+    def test_get_album_other_versions(self, yt):
+        # Eminem - Curtain Call: The Hits (Explicit Variant)
+        album = yt.get_album("MPREb_LQCAymzbaKJ")
+        assert len(variants := album["other_versions"]) >= 1  # appears to be regional
+        assert (variant := variants[0])["type"] == "Album"
+        assert len(variant["artists"]) == 1
+        assert variant["artists"][0] == {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}
+        assert variant["audioPlaylistId"] is not None
+
+        # album that's multi-artist, a single, and has clean version
+        # Cassö & RAYE - Prada
+        album = yt.get_album("MPREb_of3qfisa0yU")
+        assert not album["isExplicit"]
+        assert (variant := album["other_versions"][0])["type"] == "Single"
+        assert variant["isExplicit"]
+        assert len(variant["artists"]) == 3
+        assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"
+        assert variant["artists"][1]["name"] == "RAYE"
+        assert variant["artists"][2] == {"id": "UCb7jnkQW94hzOoWkG14zs4w", "name": "D-Block Europe"}
 
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
