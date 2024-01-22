@@ -82,3 +82,10 @@ def i18n(method):
         return method(self, *method_args, **method_kwargs)
 
     return _impl
+
+
+def parse_id_name(sub_run):
+    return {
+        "id": nav(sub_run, NAVIGATION_BROWSE_ID, True),
+        "name": nav(sub_run, ["text"], True),
+    }

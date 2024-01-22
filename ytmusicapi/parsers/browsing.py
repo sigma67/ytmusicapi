@@ -1,4 +1,3 @@
-from ._utils import *
 from .songs import *
 
 
@@ -61,13 +60,6 @@ def parse_album(result):
         "audioPlaylistId": nav(result, THUMBNAIL_OVERLAY, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
-    }
-
-
-def parse_id_name(sub_run):
-    return {
-        "id": nav(sub_run, NAVIGATION_BROWSE_ID, True),
-        "name": nav(sub_run, ["text"], True),
     }
 
 
