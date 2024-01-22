@@ -78,7 +78,7 @@ def _parse_base_header(header: Dict) -> Dict:
 
 def parse_podcast_header(header: Dict) -> Dict:
     metadata = _parse_base_header(header)
-    metadata["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION])
+    metadata["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
     metadata["saved"] = nav(header, ["buttons", 1, *TOGGLED_BUTTON])
 
     return metadata
@@ -103,10 +103,13 @@ def parse_episodes(results) -> List[Dict]:
     episodes = []
     for result in results:
         data = nav(result, ["musicMultiRowListItemRenderer"])
-        date = nav(data, SUBTITLE)
-        duration = nav(data, SUBTITLE2)
+        if len(nav(data, SUBTITLE_RUNS)) == 1:
+            duration = nav(data, SUBTITLE)
+        else:
+            date = nav(data, SUBTITLE)
+            duration = nav(data, SUBTITLE2, True)
         title = nav(data, TITLE_TEXT)
-        description = nav(data, DESCRIPTION)
+        description = nav(data, DESCRIPTION, True)
         videoId = nav(data, ["onTap", *WATCH_VIDEO_ID], True)
         browseId = nav(data, [*TITLE, *NAVIGATION_BROWSE_ID], True)
         videoType = nav(data, ["onTap", *NAVIGATION_VIDEO_TYPE], True)
