@@ -145,8 +145,12 @@ def parse_search_result(data, search_result_types, result_type, category):
 
     if result_type in ["episode"]:
         flex_item = get_flex_column_item(data, 1)
-        search_result["date"] = nav(flex_item, TEXT_RUN_TEXT)
-        search_result["podcast"] = parse_id_name(nav(flex_item, ["text", "runs", 2]))
+        has_date = int(len(nav(flex_item, TEXT_RUNS)) > 1)
+        search_result["live"] = bool(nav(data, ["badges", 0, "liveBadgeRenderer"], True))
+        if has_date:
+            search_result["date"] = nav(flex_item, TEXT_RUN_TEXT)
+
+        search_result["podcast"] = parse_id_name(nav(flex_item, ["text", "runs", has_date * 2]))
 
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
 
