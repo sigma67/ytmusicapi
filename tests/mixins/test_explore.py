@@ -9,9 +9,10 @@ class TestExplore:
 
     def test_get_charts(self, yt, yt_oauth):
         charts = yt_oauth.get_charts()
-        # songs section appears to be removed currently (US)
-        assert len(charts) >= 3
+        assert len(charts) == 4
         charts = yt.get_charts(country="US")
+        assert len(charts) == 4
+        charts = yt_oauth.get_charts(country="US")
         assert len(charts) == 5
         charts = yt.get_charts(country="BE")
-        assert len(charts) == 4
+        assert len(charts) == 3

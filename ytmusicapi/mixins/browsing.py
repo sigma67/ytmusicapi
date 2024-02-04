@@ -424,7 +424,9 @@ class BrowsingMixin(MixinProtocol):
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
 
-        with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+        with warnings.catch_warnings():
+            # merge this with statement with catch_warnings on Python>=3.11
+            warnings.simplefilter(action="ignore", category=DeprecationWarning)
             decoded = response.text.encode("utf8").decode("unicode_escape")
 
         matches = re.search(r"\"MPRE.+?\"", decoded)
