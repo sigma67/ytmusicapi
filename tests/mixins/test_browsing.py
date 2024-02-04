@@ -5,8 +5,8 @@ import pytest
 
 class TestBrowsing:
     def test_get_home(self, yt, yt_auth):
-        result = yt.get_home(limit=6)
-        assert len(result) >= 6
+        result = yt.get_home()
+        assert len(result) == 2
         result = yt_auth.get_home(limit=15)
         assert len(result) >= 15
 

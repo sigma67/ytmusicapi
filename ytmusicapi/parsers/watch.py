@@ -37,8 +37,6 @@ def parse_watch_track(data):
             if "likeEndpoint" in service:
                 like_status = parse_like_status(service)
 
-    song_info = parse_song_runs(data["longBylineText"]["runs"])
-
     track = {
         "videoId": data["videoId"],
         "title": nav(data, TITLE_TEXT),
@@ -49,7 +47,10 @@ def parse_watch_track(data):
         "inLibrary": library_status,
         "videoType": nav(data, ["navigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
     }
-    track.update(song_info)
+    if longBylineText := nav(data, ["longBylineText"]):
+        song_info = parse_song_runs(longBylineText["runs"])
+        track.update(song_info)
+
     return track
 
 
