@@ -1,3 +1,6 @@
+import pytest
+
+
 class TestWatch:
     def test_get_watch_playlist(self, config, yt, yt_brand, yt_oauth):
         playlist = yt_oauth.get_watch_playlist(
@@ -14,3 +17,7 @@ class TestWatch:
         assert len(playlist["tracks"]) == config.getint("albums", "album_track_length")
         playlist = yt_brand.get_watch_playlist(playlistId=config["playlists"]["own"], shuffle=True)
         assert len(playlist["tracks"]) == config.getint("playlists", "own_length")
+
+    def test_get_watch_playlist_errors(self, config, yt):
+        with pytest.raises(Exception, match="No content returned by the server"):
+            yt.get_watch_playlist(playlistId="PL_NOT_EXIST")

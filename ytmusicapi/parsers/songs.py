@@ -53,7 +53,8 @@ def parse_song_runs(runs):
 
 def parse_song_album(data, index):
     flex_item = get_flex_column_item(data, index)
-    return None if not flex_item else {"name": get_item_text(data, index), "id": get_browse_id(flex_item, 0)}
+    browse_id = nav(flex_item, TEXT_RUN + NAVIGATION_BROWSE_ID, True)
+    return None if not flex_item else {"name": get_item_text(data, index), "id": browse_id}
 
 
 def parse_song_library_status(item) -> bool:

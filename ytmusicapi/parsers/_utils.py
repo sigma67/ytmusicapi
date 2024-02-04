@@ -51,19 +51,12 @@ def get_fixed_column_item(item, index):
     return item["fixedColumns"][index]["musicResponsiveListItemFixedColumnRenderer"]
 
 
-def get_browse_id(item, index):
-    if "navigationEndpoint" not in item["text"]["runs"][index]:
-        return None
-    else:
-        return nav(item["text"]["runs"][index], NAVIGATION_BROWSE_ID)
-
-
 def get_dot_separator_index(runs):
-    index = len(runs)
     try:
         index = runs.index({"text": " • "})
     except ValueError:
-        len(runs)
+        index = len(runs)
+
     return index
 
 
