@@ -1,0 +1,14 @@
+name: Update dependencies
+
+on:
+  schedule:
+    - cron: "5 3 * * 1"
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Update dependencies
+        uses: pdm-project/update-deps-action@main
