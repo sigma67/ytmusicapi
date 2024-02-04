@@ -29,15 +29,21 @@ def populate_account():
 
     # add some albums, which also populates songs and artists as a side effect
     unique_albums = set(track["album"]["id"] for track in yt_playlist["tracks"])
-    playlist_ids = [yt_brand.get_album(album)["audioPlaylistId"] for album in unique_albums if album]
+    albums = [yt_brand.get_album(album) for album in unique_albums if album]
+    playlist_ids = [album["audioPlaylistId"] for album in albums]
     for playlist_id in playlist_ids:
         print(f"Adding album {playlist_id}")
         yt_brand.rate_playlist(playlist_id, "LIKE")
 
     # like some songs
-    for track in yt_playlist["tracks"]:
-        print(f"liking track {track['videoId']}")
-        yt_brand.rate_song(track["videoId"], "LIKE")
+    videoIds = list(
+        set(
+            track["videoId"] for track in itertools.chain.from_iterable([album["tracks"] for album in albums])
+        )
+    )
+    for videoId in videoIds[:200]:
+        print(f"Liking track {videoId}")
+        yt_brand.rate_song(videoId, "LIKE")
 
     # create own playlist
     playlistId = yt_brand.create_playlist(
