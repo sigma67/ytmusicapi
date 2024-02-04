@@ -86,6 +86,10 @@ class TestBrowsing:
         album = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
         assert album["tracks"][7]["trackNumber"] is None
 
+    def test_get_album_errors(self, yt):
+        with pytest.raises(Exception, match="Invalid album browseId"):
+            yt.get_album("asdf")
+
     def test_get_album_other_versions(self, yt):
         # Eminem - Curtain Call: The Hits (Explicit Variant)
         album = yt.get_album("MPREb_LQCAymzbaKJ")
