@@ -1,5 +1,5 @@
 """protocol that defines the functions available to mixins"""
-from typing import Dict, Optional, Protocol
+from typing import Dict, Optional, Protocol, Union
 
 from requests import Response
 
@@ -9,6 +9,8 @@ from ytmusicapi.parsers.i18n import Parser
 
 class MixinProtocol(Protocol):
     """protocol that defines the functions available to mixins"""
+
+    auth: Optional[Union[str, Dict]]
 
     auth_type: AuthType
 

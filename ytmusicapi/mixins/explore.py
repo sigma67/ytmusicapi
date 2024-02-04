@@ -220,18 +220,15 @@ class ExploreMixin(MixinProtocol):
         charts_categories = ["videos", "artists"]
 
         has_genres = country == "US"
-        has_trending = country != "ZZ"
 
         # use result length to determine if songs category is present
         # could also be done via an is_premium attribute on YTMusic instance
-        has_songs = (len(results) - 1) > (len(charts_categories) + has_genres + has_trending)
+        has_songs = (len(results) - 1) > (len(charts_categories) + has_genres)
 
         if has_songs:
             charts_categories.insert(0, "songs")
         if has_genres:
             charts_categories.append("genres")
-        if has_trending:
-            charts_categories.append("trending")
 
         parse_chart = lambda i, parse_func, key: parse_content_list(
             nav(results[i + has_songs], CAROUSEL_CONTENTS), parse_func, key
@@ -249,8 +246,5 @@ class ExploreMixin(MixinProtocol):
 
         if has_genres:
             charts["genres"] = parse_chart(3, parse_playlist, MTRIR)
-
-        if has_trending:
-            charts["trending"]["items"] = parse_chart(3 + has_genres, parse_chart_trending, MRLIR)
 
         return charts
