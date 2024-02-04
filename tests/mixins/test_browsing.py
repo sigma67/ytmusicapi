@@ -89,8 +89,10 @@ class TestBrowsing:
     def test_get_album_other_versions(self, yt):
         # Eminem - Curtain Call: The Hits (Explicit Variant)
         album = yt.get_album("MPREb_LQCAymzbaKJ")
-        assert len(variants := album["other_versions"]) >= 1  # appears to be regional
-        assert (variant := variants[0])["type"] == "Album"
+        variants = album["other_versions"]
+        assert len(variants) >= 1  # appears to be regional
+        variant = variants[0]
+        assert variant["type"] == "Album"
         assert len(variant["artists"]) == 1
         assert variant["artists"][0] == {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}
         assert variant["audioPlaylistId"] is not None
@@ -99,7 +101,8 @@ class TestBrowsing:
         # Cassö & RAYE - Prada
         album = yt.get_album("MPREb_of3qfisa0yU")
         assert not album["isExplicit"]
-        assert (variant := album["other_versions"][0])["type"] == "Single"
+        variant = album["other_versions"][0]
+        assert variant["type"] == "Single"
         assert variant["isExplicit"]
         assert len(variant["artists"]) == 3
         assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"

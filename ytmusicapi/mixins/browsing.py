@@ -490,6 +490,9 @@ class BrowsingMixin(MixinProtocol):
               "duration_seconds": 4657
             }
         """
+        if not browseId or not browseId.startswith("MPRE"):
+            raise Exception("Invalid album browseId provided, must start with MPRE.")
+
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
