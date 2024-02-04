@@ -53,6 +53,8 @@ precision = 2
 
 [tool.ruff]
 line-length = 110
+
+[tool.ruff.lint]
 ignore = [ "F403", "F405", "F821", "E731" ]
 extend-select = [
     "I",   # isort

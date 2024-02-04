@@ -11,11 +11,15 @@ def get_resource(file: str) -> str:
     return data_dir.joinpath(file).as_posix()
 
 
-@pytest.fixture(name="config")
-def fixture_config() -> configparser.RawConfigParser:
+def get_config() -> configparser.RawConfigParser:
     config = configparser.RawConfigParser()
     config.read(get_resource("test.cfg"), "utf-8")
     return config
+
+
+@pytest.fixture(name="config")
+def fixture_config() -> configparser.RawConfigParser:
+    return get_config()
 
 
 @pytest.fixture(name="sample_album")

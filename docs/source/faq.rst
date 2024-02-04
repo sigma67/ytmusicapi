@@ -17,15 +17,17 @@ For more details see the :doc:`reference`.
 Usage
 -----------------------
 
-How do I add a song, album, artist or playlist to my library?
+How do I add content to my library?
 ***********************************************************************
-- **songs**: `edit_song_library_status <Reference.html#ytmusicapi.YTMusic.edit_song_library_status>`__ .
-  Liking a song using `rate_song <Reference.html#ytmusicapi.YTMusic.rate_song>`__
+- **songs**: `edit_song_library_status <reference.html#ytmusicapi.YTMusic.edit_song_library_status>`__ .
+  Liking a song using `rate_song <reference.html#ytmusicapi.YTMusic.rate_song>`__
   does *not* add it to your library, only to your liked songs playlist.
-- **albums, playlists**: `rate_playlist <Reference.html#ytmusicapi.YTMusic.rate_playlist>`__
-- **artists**: `subscribe_artists <Reference.html#ytmusicapi.YTMusic.subscribe_artists>`__ .
+- **albums, playlists**: `rate_playlist <reference.html#ytmusicapi.YTMusic.rate_playlist>`__
+- **artists**: `subscribe_artists <reference.html#ytmusicapi.YTMusic.subscribe_artists>`__ .
   This will add the artist to your Subscriptions tab. The Artists tab is determined by the songs/albums you have
   added to your library.
+- **podcasts**: `rate_playlist <reference.html#ytmusicapi.YTMusic.rate_playlist>`__
+- **episodes**: `add_playlist_items("SE", episode_id) <reference.html#ytmusicapi.YTMusic.add_playlist_items>`__
 
 
 
@@ -34,15 +36,17 @@ How can I get the radio playlist for a song, video, playlist or album?
 - **songs, videos**: ``RDAMVM`` + ``videoId``
 - **playlists, albums**: ``RDAMPL`` + ``playlistId``
 
+See also `What is a browseId <faq.html#what-is-a-browseid>`__ below.
+
 
 How can I get the shuffle playlist for a playlist or album?
 ***********************************************************************
-Use `get_watch_playlist_shuffle <Reference.html#ytmusicapi.YTMusic.get_watch_playlist_shuffle>`__
+Use `get_watch_playlist_shuffle <reference.html#ytmusicapi.YTMusic.get_watch_playlist_shuffle>`__
 with the ``playlistId`` or ``audioPlaylistId`` (albums).
 
 How can I get all my public playlists in a single request?
 ***********************************************************************
-Call `get_user_playlists <Reference.html#ytmusicapi.YTMusic.get_user_playlists>`__
+Call `get_user_playlists <reference.html#ytmusicapi.YTMusic.get_user_playlists>`__
 with your own ``channelId``.
 
 Can I download songs?
