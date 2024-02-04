@@ -1,4 +1,5 @@
 import re
+import warnings
 from typing import Any, Dict, List, Optional
 
 from ytmusicapi.continuations import (
@@ -423,7 +424,10 @@ class BrowsingMixin(MixinProtocol):
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
 
-        matches = re.search(r"\"MPRE.+?\"", response.text.encode("utf8").decode("unicode_escape"))
+        with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+            decoded = response.text.encode("utf8").decode("unicode_escape")
+
+        matches = re.search(r"\"MPRE.+?\"", decoded)
         browse_id = None
         if matches:
             browse_id = matches.group().strip('"')
