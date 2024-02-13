@@ -9,6 +9,21 @@ from ._utils import *
 
 
 class PodcastsMixin(MixinProtocol):
+    def get_channel(self, channelId: str, limit: Optional[int] = None) -> Dict:
+        """
+        Get a channel
+
+        :param channelId: channel id
+        :return:
+        """
+
+    def get_channel_episodes(self, channelId: str, params: str) -> List[Dict]:
+        """
+        Get all channel episodes
+
+        :return:
+        """
+
     def get_podcast(self, playlistId: str, limit: Optional[int] = 100) -> Dict:
         """
         Returns podcast metadata and episodes

@@ -15,7 +15,7 @@ brand_account = "114511851949139689139"
 yt_brand = YTMusic(Path(__file__).parent.joinpath("oauth.json").as_posix(), brand_account)
 
 
-def populate_account():
+def populate_music():
     """idempotent requests to populate an account"""
     # library
     playlist_id = "RDCLAK5uy_l9ex2d91-Qb1i-W7d0MLCEl_ZjRXss0Dk"  # fixed playlist with many artists
@@ -53,10 +53,14 @@ def populate_account():
     )
     print(f"Created playlist {playlistId}, don't forget to set this in test.cfg playlists/own")
 
-    # podcasts
-    yt_brand.rate_playlist(config["podcasts"]["podcast_id"], rating="LIKE")
-    yt_brand.add_playlist_items("SE", [config["podcasts"]["episode_id"]])
+
+def populate_podcasts():
+    # yt_brand.rate_playlist(config["podcasts"]["podcast_id"], rating="LIKE")
+    # yt_brand.add_playlist_items("SE", [config["podcasts"]["episode_id"]])
+
+
 
 
 if __name__ == "__main__":
-    populate_account()
+    populate_music()
+    populate_podcasts()
