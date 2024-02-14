@@ -92,14 +92,14 @@ def nav(root: Dict, items: List[Any], none_if_absent: Literal[True] = True) -> O
 
 def nav(root: Dict, items: List[Any], none_if_absent: bool = False) -> Optional[Any]:
     """Access a nested object in root by item sequence."""
-    for k in items:
-        try:
+    try:
+        for k in items:
             root = root[k]
-        except (KeyError, IndexError) as e:
-            if none_if_absent:
-                return None
-            raise type(e)(f"Unable to find '{k}' using path {items!r} on {root!r}, exception: {e}")
-    return root
+        return root
+    except (KeyError, IndexError) as e:
+        if none_if_absent:
+            return None
+        raise type(e)(f"Unable to find '{k}' using path {items!r} on {root!r}, exception: {e}")
 
 
 def find_object_by_key(object_list, key, nested=None, is_key=False):
