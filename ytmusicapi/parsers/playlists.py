@@ -46,9 +46,13 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
 
         artists = parse_song_artists(data, 1)
 
-        album = parse_song_album(data, 3)
+        album = parse_song_album(data, 2)
 
-        views = get_item_text(data, 2)
+        views = None
+        if album and album["id"] is None:
+            # views currently only present on albums and formatting is localization-dependent -> no parsing
+            if (views := (get_item_text(data, 2))) is not None:
+                album = None
 
         duration = None
         if "fixedColumns" in data:
