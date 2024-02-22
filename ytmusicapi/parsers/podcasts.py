@@ -87,7 +87,7 @@ def parse_podcast_header(header: Dict) -> Dict:
 def parse_episode_header(header: Dict) -> Dict:
     metadata = _parse_base_header(header)
     metadata["date"] = nav(header, [*SUBTITLE2])
-    metadata["duration"] = nav(header, [*SUBTITLE3])
+    metadata["duration"] = nav(header, [*SUBTITLE3], True)
     metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True)
 
     metadata["playlistId"] = None

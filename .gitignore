@@ -2,7 +2,7 @@
 .vscode
 **.json
 docs/build
-**.cfg
+test.cfg
 **.mp3
 .coverage
 **/__pycache__/

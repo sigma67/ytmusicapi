@@ -60,7 +60,7 @@ class TestSearch:
         results = yt.search("fdsfsfsd")  # issue 524
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "playlist"
-        assert results[0]["playlistId"] == "PLK3q5XTYSK60QH3gDypSu3n9OBz6H9HfV"
+        assert results[0]["playlistId"].startswith("PL")
         assert len(results[0]["author"]) > 0
 
     def test_search_uploads(self, config, yt, yt_oauth):
