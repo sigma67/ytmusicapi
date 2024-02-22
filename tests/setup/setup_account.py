@@ -17,7 +17,7 @@ yt_brand = YTMusic(Path(__file__).parent.joinpath("oauth.json").as_posix(), bran
 
 def populate_account():
     """idempotent requests to populate an account"""
-    # subscribe to some artists
+    # library
     playlist_id = "RDCLAK5uy_l9ex2d91-Qb1i-W7d0MLCEl_ZjRXss0Dk"  # fixed playlist with many artists
     yt_playlist = yt_brand.get_playlist(playlist_id)
     artists = [track["artists"] for track in yt_playlist["tracks"]]
