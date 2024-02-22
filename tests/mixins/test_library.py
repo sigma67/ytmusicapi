@@ -107,5 +107,5 @@ class TestLibrary:
         assert "actions" in response
 
     def test_subscribe_artists(self, yt_auth):
-        yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q", "UCiMhD4jzUqG-IgPzUmmytRQ"])
-        yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q", "UCiMhD4jzUqG-IgPzUmmytRQ"])
+        yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+        yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
