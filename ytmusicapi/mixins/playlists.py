@@ -112,10 +112,12 @@ class PlaylistsMixin(MixinProtocol):
         if not own_playlist:
             header = response["header"]["musicDetailHeaderRenderer"]
             playlist["privacy"] = "PUBLIC"
+            playlist["own_playlist"] = False
         else:
             header = response["header"]["musicEditablePlaylistDetailHeaderRenderer"]
             playlist["privacy"] = header["editHeader"]["musicPlaylistEditHeaderRenderer"]["privacy"]
             header = header["header"]["musicDetailHeaderRenderer"]
+            playlist["own_playlist"] = True
 
         playlist["title"] = nav(header, TITLE_TEXT)
         playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED)
