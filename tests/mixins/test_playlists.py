@@ -11,7 +11,7 @@ class TestPlaylists:
         assert len(playlist["duration"]) > 5
         assert len(playlist["tracks"]) > 200
         assert "suggestions" not in playlist
-        assert playlist["own_playlist"] == False
+        assert playlist["owned"] == False
 
         yt.get_playlist("RDATgXd-")
         assert len(playlist["tracks"]) >= 100
@@ -25,7 +25,7 @@ class TestPlaylists:
         assert len(playlist["tracks"]) < 100
         assert len(playlist["suggestions"]) == 21
         assert len(playlist["related"]) == 10
-        assert playlist["own_playlist"] == True
+        assert playlist["owned"] == True
 
     def test_edit_playlist(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"])
