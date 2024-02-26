@@ -48,7 +48,7 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
 
         artists = parse_song_artists(data, 1)
 
-        album = parse_song_album(data, flex_column_count-1) if not is_album else None
+        album = parse_song_album(data, flex_column_count - 1) if not is_album else None
 
         views = get_item_text(data, 2) if flex_column_count == 4 or is_album else None
 
