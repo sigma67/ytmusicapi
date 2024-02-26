@@ -103,7 +103,7 @@ def parse_episodes(results) -> List[Dict]:
     episodes = []
     for result in results:
         data = nav(result, ["musicMultiRowListItemRenderer"])
-        thumbnails = list(filter(lambda tn: "?" in tn["url"], nav(data, THUMBNAILS)))
+        thumbnails = nav(data, THUMBNAILS)
         if len(nav(data, SUBTITLE_RUNS)) == 1:
             duration = nav(data, SUBTITLE)
         else:
