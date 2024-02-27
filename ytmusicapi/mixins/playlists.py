@@ -116,6 +116,7 @@ class PlaylistsMixin(MixinProtocol):
             header = response["header"]["musicEditablePlaylistDetailHeaderRenderer"]
             playlist["privacy"] = header["editHeader"]["musicPlaylistEditHeaderRenderer"]["privacy"]
             header = header["header"]["musicDetailHeaderRenderer"]
+        playlist["owned"] = own_playlist
 
         playlist["title"] = nav(header, TITLE_TEXT)
         playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED)
