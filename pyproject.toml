@@ -31,7 +31,7 @@ readme = {file = ["README.rst"]}
 [tool.setuptools_scm]
 
 [tool.setuptools]
-include-package-data=false
+include-package-data=true
 
 [tool.setuptools.package-data]
 "*" = ["**.rst", "**.py", "**.mo"]
