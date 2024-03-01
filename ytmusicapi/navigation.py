@@ -1,4 +1,5 @@
 """commonly used navigation paths"""
+
 from typing import Any, Dict, List, Literal, Optional, overload
 
 CONTENT = ["contents", 0]
