@@ -1,4 +1,5 @@
 """protocol that defines the functions available to mixins"""
+
 from typing import Dict, Optional, Protocol
 
 from requests import Response
