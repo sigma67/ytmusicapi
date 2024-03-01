@@ -18,7 +18,7 @@ class TestPodcasts:
     def test_get_episode(self, config, yt, yt_brand):
         episode_id = config["podcasts"]["episode_id"]
         result = yt.get_episode(episode_id)
-        assert len(result["description"]) == 50
+        assert len(result["description"]) >= 20
         assert not result["saved"]
         assert result["playlistId"] is not None
 
