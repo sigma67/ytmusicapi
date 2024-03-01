@@ -88,6 +88,10 @@ def parse_episode_header(header: Dict) -> Dict:
     metadata = _parse_base_header(header)
     metadata["date"] = nav(header, [*SUBTITLE2])
     metadata["duration"] = nav(header, [*SUBTITLE3], True)
+    if not metadata["duration"]:  # progress started
+        progress_renderer = nav(header, ["progress", "musicPlaybackProgressRenderer"])
+        metadata["duration"] = nav(progress_renderer, ["durationText", "runs", 1, "text"], True)
+        metadata["progressPercentage"] = nav(progress_renderer, ["playbackProgressPercentage"])
     metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True)
 
     metadata["playlistId"] = None
