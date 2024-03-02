@@ -61,6 +61,7 @@ Library
 .. automethod:: YTMusic.rate_playlist
 .. automethod:: YTMusic.subscribe_artists
 .. automethod:: YTMusic.unsubscribe_artists
+.. automethod:: YTMusic.get_account_info
 
 Playlists
 ---------

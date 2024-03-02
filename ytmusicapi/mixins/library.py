@@ -324,3 +324,23 @@ class LibraryMixin(MixinProtocol):
         body = {"channelIds": channelIds}
         endpoint = "subscription/unsubscribe"
         return self._send_request(endpoint, body)
+
+    def get_account_info(self) -> Dict:
+        """
+        Gets information about the currently authenticated user's account.
+
+        :return: Dictionary with user's account name, channel handle, and URL of their account photo.
+
+        Example::
+
+            {
+                "accountName": "Sample User",
+                "channelHandle": "@SampleUser
+                "accountPhotoUrl": "https://yt3.ggpht.com/sample-user-photo"
+            }
+        """
+        self._check_auth()
+        endpoint = "account/account_menu"
+        response = self._send_request(endpoint, {})
+
+        return parse_account_info(response)
