@@ -112,7 +112,10 @@ class TestLibrary:
         yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
         yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
 
-    def test_get_account_info(self, config, yt_oauth):
+    def test_get_account_info(self, config, yt, yt_oauth):
+        with pytest.raises(Exception, match="Please provide authentication"):
+            yt.get_account_info()
+
         account_info = yt_oauth.get_account_info()
         assert account_info["accountName"] == config.get("auth", "account_name")
         assert account_info["channelHandle"] == config.get("auth", "channel_handle")
