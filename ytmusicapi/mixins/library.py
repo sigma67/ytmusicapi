@@ -366,4 +366,3 @@ class LibraryMixin(MixinProtocol):
             "channelHandle": channel_handle,
             "accountPhotoUrl": account_photo_url,
         }
-
