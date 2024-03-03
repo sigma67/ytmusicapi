@@ -78,19 +78,6 @@ CAROUSEL_CONTENTS = [*CAROUSEL, "contents"]
 CAROUSEL_TITLE = ["header", "musicCarouselShelfBasicHeaderRenderer", *TITLE]
 CARD_SHELF_TITLE = ["header", "musicCardShelfHeaderBasicRenderer", *TITLE_TEXT]
 FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
-ACCOUNT_INFO = [
-    "actions",
-    0,
-    "openPopupAction",
-    "popup",
-    "multiPageMenuRenderer",
-    "header",
-    "activeAccountHeaderRenderer",
-]
-ACCOUNT_RUNS_TEXT = ["runs", 0, "text"]
-ACCOUNT_NAME = [*ACCOUNT_INFO, "accountName", *ACCOUNT_RUNS_TEXT]
-ACCOUNT_CHANNEL_HANDLE = [*ACCOUNT_INFO, "channelHandle", *ACCOUNT_RUNS_TEXT]
-ACCOUNT_PHOTO_URL = [*ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
 
 
 @overload

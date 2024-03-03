@@ -109,15 +109,3 @@ def get_library_contents(response, renderer):
         else:
             contents = nav(results, ITEM_SECTION + renderer, True)
     return contents
-
-
-def parse_account_info(response):
-    account_name = nav(response, ACCOUNT_NAME)
-    channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE)
-    account_photo_url = nav(response, ACCOUNT_PHOTO_URL)
-
-    return {
-        "accountName": account_name,
-        "channelHandle": channel_handle,
-        "accountPhotoUrl": account_photo_url,
-    }

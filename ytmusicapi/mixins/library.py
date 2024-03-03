@@ -343,4 +343,27 @@ class LibraryMixin(MixinProtocol):
         endpoint = "account/account_menu"
         response = self._send_request(endpoint, {})
 
-        return parse_account_info(response)
+        ACCOUNT_INFO = [
+            "actions",
+            0,
+            "openPopupAction",
+            "popup",
+            "multiPageMenuRenderer",
+            "header",
+            "activeAccountHeaderRenderer",
+        ]
+        ACCOUNT_RUNS_TEXT = ["runs", 0, "text"]
+        ACCOUNT_NAME = [*ACCOUNT_INFO, "accountName", *ACCOUNT_RUNS_TEXT]
+        ACCOUNT_CHANNEL_HANDLE = [*ACCOUNT_INFO, "channelHandle", *ACCOUNT_RUNS_TEXT]
+        ACCOUNT_PHOTO_URL = [*ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
+
+        account_name = nav(response, ACCOUNT_NAME)
+        channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE)
+        account_photo_url = nav(response, ACCOUNT_PHOTO_URL)
+
+        return {
+            "accountName": account_name,
+            "channelHandle": channel_handle,
+            "accountPhotoUrl": account_photo_url,
+        }
+
