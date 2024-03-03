@@ -24,8 +24,8 @@ The entry descriptions should be self-explanatory.
 For the headers_raw, you need to indent the overflowing lines with a tab character. For the upload test you need a suitable music file in the test directory.
 Adjust the file to contain appropriate information for your YouTube account and local setup.
 
-The account name and channel handle for test.cfg can be obtained by visiting either YouTube or YouTube Music and
-clicking your profile picture icon in the top right.
+``account_name`` and ``channel_handle`` for test.cfg can be obtained by visiting either YouTube or YouTube Music and
+clicking your profile picture icon in the top right while signed in with your test account.
 
 Brand accounts can be created by first signing into the google account you wish to have as the parent/controlling
 account then navigating `here. <https://www.youtube.com/create_channel?action_create_new_channel_redirect=true>`_
