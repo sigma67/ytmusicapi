@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-11 16:22+0100\n"
+"POT-Creation-Date: 2024-03-05 20:13+0100\n"
 "PO-Revision-Date: 2023-01-01 11:04+0530\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,54 +17,62 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:22
 msgid "artist"
 msgstr "कलाकार"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:23
 msgid "playlist"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:24
 msgid "song"
 msgstr "गीत"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:25
 msgid "video"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:26
 msgid "station"
 msgstr "स्टेशन"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:27
 msgid "profile"
 msgstr "प्रोफ़ाइल"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:28
 msgid "podcast"
 msgstr "पॉडकास्ट"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:29
 msgid "episode"
 msgstr "एपिसोड"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "albums"
 msgstr "एलबम"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "singles"
 msgstr "एकल"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "videos"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "playlists"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "related"
 msgstr "सम्बंधित"
+
+#: parsers/i18n.py:35
+msgid "episodes"
+msgstr "सबसे नए एपिसोड"
+
+#: parsers/i18n.py:35
+msgid "podcasts"
+msgstr "पॉडकास्ट"

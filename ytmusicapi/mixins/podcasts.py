@@ -9,13 +9,25 @@ from ._utils import *
 
 
 class PodcastsMixin(MixinProtocol):
+    """Podcasts Mixin"""
+
     def get_channel(self, channelId: str, limit: Optional[int] = None) -> Dict:
         """
-        Get a channel
+        Get information about a podcast channel (episodes, podcasts). For episodes, a
+        maximum of 10 episodes are returned, the full list of episodes can be retrieved
+        via :py:func:`get_channel_episodes`
 
         :param channelId: channel id
-        :return:
+        :return: channel info
         """
+        body = {"browseId": channelId}
+        endpoint = "browse"
+        response = self._send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+
+        channel = self.parser.parse_channel_contents(results)
+
+        return channel
 
     def get_channel_episodes(self, channelId: str, params: str) -> List[Dict]:
         """
@@ -23,6 +35,7 @@ class PodcastsMixin(MixinProtocol):
 
         :return:
         """
+        return []
 
     def get_podcast(self, playlistId: str, limit: Optional[int] = 100) -> Dict:
         """
@@ -44,11 +57,11 @@ class PodcastsMixin(MixinProtocol):
         podcast = parse_podcast_header(header)
 
         results = nav(two_columns, ["secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        episodes = parse_episodes(results["contents"])
+        episodes = parse_podcast_episodes(results["contents"])
 
         if "continuations" in results:
             request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_episodes(contents)
+            parse_func = lambda contents: parse_podcast_episodes(contents)
             remaining_limit = None if limit is None else (limit - len(episodes))
             episodes.extend(
                 get_continuations(

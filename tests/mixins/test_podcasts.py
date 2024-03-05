@@ -1,4 +1,10 @@
 class TestPodcasts:
+    def test_get_channel(self, config, yt):
+        podcast_id = config["podcasts"]["channel_id"]
+        channel = yt.get_channel(podcast_id)
+        assert len(channel["episodes"]["results"]) == 10
+        assert len(channel["podcasts"]["results"]) > 5
+
     def test_get_podcast(self, config, yt, yt_brand):
         podcast_id = config["podcasts"]["podcast_id"]
         results = yt.get_podcast(podcast_id)

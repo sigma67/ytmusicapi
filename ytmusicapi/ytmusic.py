@@ -92,7 +92,9 @@ class YTMusicBase:
         self._headers = None  #: cache formed headers including auth
 
         self.auth = auth  #: raw auth
-        self._input_dict = CaseInsensitiveDict()  #: parsed auth arg value in dictionary format
+        self._input_dict: CaseInsensitiveDict = (
+            CaseInsensitiveDict()
+        )  #: parsed auth arg value in dictionary format
 
         self.auth_type: AuthType = AuthType.UNAUTHORIZED
 

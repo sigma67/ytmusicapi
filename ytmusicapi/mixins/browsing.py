@@ -253,7 +253,7 @@ class BrowsingMixin(MixinProtocol):
                 artist["songs"]["browseId"] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
             artist["songs"]["results"] = parse_playlist_items(musicShelf["contents"])
 
-        artist.update(self.parser.parse_artist_contents(results))
+        artist.update(self.parser.parse_channel_contents(results))
         return artist
 
     def get_artist_albums(
@@ -390,7 +390,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         user = {"name": nav(response, ["header", "musicVisualHeaderRenderer", *TITLE_TEXT])}
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        user.update(self.parser.parse_artist_contents(results))
+        user.update(self.parser.parse_channel_contents(results))
         return user
 
     def get_user_playlists(self, channelId: str, params: str) -> List[Dict]:

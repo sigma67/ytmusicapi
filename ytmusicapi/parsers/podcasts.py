@@ -103,34 +103,48 @@ def parse_episode_header(header: Dict) -> Dict:
     return metadata
 
 
-def parse_episodes(results) -> List[Dict]:
+def parse_episode(data):
+    """Parses a single episode under "Episodes" on a channel page or on a podcast page"""
+    thumbnails = nav(data, THUMBNAILS)
+    if len(nav(data, SUBTITLE_RUNS)) == 1:
+        duration = nav(data, SUBTITLE)
+    else:
+        date = nav(data, SUBTITLE)
+        duration = nav(data, SUBTITLE2, True)
+    title = nav(data, TITLE_TEXT)
+    description = nav(data, DESCRIPTION, True)
+    videoId = nav(data, ["onTap", *WATCH_VIDEO_ID], True)
+    browseId = nav(data, [*TITLE, *NAVIGATION_BROWSE_ID], True)
+    videoType = nav(data, ["onTap", *NAVIGATION_VIDEO_TYPE], True)
+    index = nav(data, ["onTap", "watchEndpoint", "index"])
+    return {
+        "index": index,
+        "title": title,
+        "description": description,
+        "duration": duration,
+        "videoId": videoId,
+        "browseId": browseId,
+        "videoType": videoType,
+        "date": date,
+        "thumbnails": thumbnails,
+    }
+
+
+def parse_podcast_episodes(results) -> List[Dict]:
     episodes = []
     for result in results:
-        data = nav(result, ["musicMultiRowListItemRenderer"])
-        thumbnails = nav(data, THUMBNAILS)
-        if len(nav(data, SUBTITLE_RUNS)) == 1:
-            duration = nav(data, SUBTITLE)
-        else:
-            date = nav(data, SUBTITLE)
-            duration = nav(data, SUBTITLE2, True)
-        title = nav(data, TITLE_TEXT)
-        description = nav(data, DESCRIPTION, True)
-        videoId = nav(data, ["onTap", *WATCH_VIDEO_ID], True)
-        browseId = nav(data, [*TITLE, *NAVIGATION_BROWSE_ID], True)
-        videoType = nav(data, ["onTap", *NAVIGATION_VIDEO_TYPE], True)
-        index = nav(data, ["onTap", "watchEndpoint", "index"])
-        episodes.append(
-            {
-                "index": index,
-                "title": title,
-                "description": description,
-                "duration": duration,
-                "videoId": videoId,
-                "browseId": browseId,
-                "videoType": videoType,
-                "date": date,
-                "thumbnails": thumbnails,
-            }
-        )
+        data = nav(result, [MMRIR])
+        episodes.append(parse_episode(data))
 
     return episodes
+
+
+def parse_channel_podcast(data):
+    """Parses a single podcast under "Podcasts" on a channel page"""
+    return {
+        "title": nav(data, TITLE_TEXT),
+        "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0])),
+        "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
+        "podcastId": nav(data, THUMBNAIL_OVERLAY, True),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+    }
