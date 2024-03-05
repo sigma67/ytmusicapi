@@ -106,6 +106,7 @@ def parse_episode_header(header: Dict) -> Dict:
 def parse_episode(data):
     """Parses a single episode under "Episodes" on a channel page or on a podcast page"""
     thumbnails = nav(data, THUMBNAILS)
+    date = None
     if len(nav(data, SUBTITLE_RUNS)) == 1:
         duration = nav(data, SUBTITLE)
     else:

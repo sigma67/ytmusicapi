@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:ef78505acc5689bac7e9d73819b1e70ca72e3422a79a50b5f2ea451279f0ec18"
+content_hash = "sha256:0685d381623716626cfb292c864b09d36ff40e8d2e7e0a285c97f236aa4d6ddb"
 
 [[package]]
 name = "alabaster"
@@ -485,6 +485,17 @@ groups = ["dev"]
 files = [
     {file = "pluggy-1.4.0-py3-none-any.whl", hash = "sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981"},
     {file = "pluggy-1.4.0.tar.gz", hash = "sha256:8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be"},
+]
+
+[[package]]
+name = "pycowsay"
+version = "0.0.0.2"
+requires_python = ">=3.6"
+summary = ""
+groups = ["default"]
+files = [
+    {file = "pycowsay-0.0.0.2-py3-none-any.whl", hash = "sha256:5c03d8a9c7666ec102aaed4bbd6c7d35228489ce236f95f6e5d079529c6a5050"},
+    {file = "pycowsay-0.0.0.2.tar.gz", hash = "sha256:d112c4ce55b04dbc363c5a8957b80a0dc7459e864866d6e0202d15a95633bcf4"},
 ]
 
 [[package]]
