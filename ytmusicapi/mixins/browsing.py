@@ -388,7 +388,7 @@ class BrowsingMixin(MixinProtocol):
         endpoint = "browse"
         body = {"browseId": channelId}
         response = self._send_request(endpoint, body)
-        user = {"name": nav(response, ["header", "musicVisualHeaderRenderer", *TITLE_TEXT])}
+        user = {"name": nav(response, [*HEADER_MUSIC_VISUAL, *TITLE_TEXT])}
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         user.update(self.parser.parse_channel_contents(results))
         return user

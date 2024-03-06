@@ -61,7 +61,7 @@ class TestLibrary:
         assert len(artists) == 0
 
     def test_get_library_podcasts(self, yt_brand):
-        podcasts = yt_brand.get_library_podcasts()
+        podcasts = yt_brand.get_library_podcasts(limit=50)
         assert podcasts
 
     def test_get_liked_songs(self, yt_brand, yt_empty):

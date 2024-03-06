@@ -1,7 +1,15 @@
 from gettext import gettext as _
 from typing import Any, Dict, List
 
-from ytmusicapi.navigation import CAROUSEL, CAROUSEL_TITLE, MMRIR, MTRIR, NAVIGATION_BROWSE_ID, nav
+from ytmusicapi.navigation import (
+    CAROUSEL,
+    CAROUSEL_TITLE,
+    MMRIR,
+    MTRIR,
+    NAVIGATION_BROWSE,
+    NAVIGATION_BROWSE_ID,
+    nav,
+)
 from ytmusicapi.parsers._utils import i18n
 from ytmusicapi.parsers.browsing import (
     parse_album,
@@ -11,7 +19,7 @@ from ytmusicapi.parsers.browsing import (
     parse_single,
     parse_video,
 )
-from ytmusicapi.parsers.podcasts import parse_channel_podcast, parse_episode
+from ytmusicapi.parsers.podcasts import parse_episode, parse_podcast
 
 
 class Parser:
@@ -41,7 +49,7 @@ class Parser:
             ("playlists", _("playlists"), parse_playlist, MTRIR),
             ("related", _("related"), parse_related_artist, MTRIR),
             ("episodes", _("episodes"), parse_episode, MMRIR),
-            ("podcasts", _("podcasts"), parse_channel_podcast, MTRIR),
+            ("podcasts", _("podcasts"), parse_podcast, MTRIR),
         ]
         artist: Dict[str, Any] = {}
         for category, category_local, category_parser, category_key in categories:
@@ -55,10 +63,9 @@ class Parser:
                 artist[category] = {"browseId": None, "results": []}
                 if "navigationEndpoint" in nav(data[0], CAROUSEL_TITLE):
                     artist[category]["browseId"] = nav(data[0], CAROUSEL_TITLE + NAVIGATION_BROWSE_ID)
-                    if category in ["albums", "singles", "playlists"]:
-                        artist[category]["params"] = nav(data[0], CAROUSEL_TITLE)["navigationEndpoint"][
-                            "browseEndpoint"
-                        ]["params"]
+                    artist[category]["params"] = nav(
+                        data[0], CAROUSEL_TITLE + NAVIGATION_BROWSE + ["params"], True
+                    )
 
                 artist[category]["results"] = parse_content_list(
                     data[0]["contents"], category_parser, key=category_key

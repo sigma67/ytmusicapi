@@ -131,16 +131,7 @@ def parse_episode(data):
     }
 
 
-def parse_podcast_episodes(results) -> List[Dict]:
-    episodes = []
-    for result in results:
-        data = nav(result, [MMRIR])
-        episodes.append(parse_episode(data))
-
-    return episodes
-
-
-def parse_channel_podcast(data):
+def parse_podcast(data):
     """Parses a single podcast under "Podcasts" on a channel page"""
     return {
         "title": nav(data, TITLE_TEXT),

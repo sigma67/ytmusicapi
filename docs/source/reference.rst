@@ -52,6 +52,7 @@ Library
 .. automethod:: YTMusic.get_library_albums
 .. automethod:: YTMusic.get_library_artists
 .. automethod:: YTMusic.get_library_subscriptions
+.. automethod:: YTMusic.get_library_podcasts
 .. automethod:: YTMusic.get_liked_songs
 .. automethod:: YTMusic.get_saved_episodes
 .. automethod:: YTMusic.get_history

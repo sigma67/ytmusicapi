@@ -57,6 +57,9 @@ def populate_music():
 def populate_podcasts():
     yt_brand.rate_playlist(config["podcasts"]["podcast_id"], rating="LIKE")
     yt_brand.add_playlist_items("SE", [config["podcasts"]["episode_id"]])
+    podcasts = yt_brand.search("podcast", filter="podcasts", limit=40)
+    for podcast in podcasts:
+        yt_brand.rate_playlist(podcast["browseId"][4:], rating="LIKE")
 
 
 if __name__ == "__main__":
