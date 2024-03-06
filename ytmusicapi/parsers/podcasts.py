@@ -26,12 +26,6 @@ class Description(List[DescriptionElement]):
     def __init__(self, *args, **kwargs):
         super().__init__(args[0])
 
-    def __len__(self):
-        return len(self)
-
-    def __getitem__(self, index):
-        return self[index]
-
     @property
     def text(self) -> str:
         return "".join(str(element) for element in self)
