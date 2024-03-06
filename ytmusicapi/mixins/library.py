@@ -218,14 +218,14 @@ class LibraryMixin(MixinProtocol):
 
     def get_library_channels(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
         """
-        Get podcasts the user has added to the library
+        Get channels the user has added to the library
 
         :param limit: Number of podcasts to return
         :param order: Order of podcasts to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of podcasts.
         """
         self._check_auth()
-        body = {"browseId": "FEmusic_library_non_music_audio_list"}
+        body = {"browseId": "FEmusic_library_non_music_audio_channels_list"}
         validate_order_parameter(order)
         if order is not None:
             body["params"] = prepare_order_params(order)

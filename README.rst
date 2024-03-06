@@ -47,7 +47,7 @@ Features
 
 | **Library management**:
 
-* get library contents: playlists, songs, artists, albums and subscriptions, podcasts, episodes
+* get library contents: playlists, songs, artists, albums and subscriptions, podcasts, channels
 * add/remove library content: rate songs, albums and playlists, subscribe/unsubscribe artists
 * get and modify play history
 

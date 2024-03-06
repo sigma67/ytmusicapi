@@ -62,7 +62,11 @@ class TestLibrary:
 
     def test_get_library_podcasts(self, yt_brand):
         podcasts = yt_brand.get_library_podcasts(limit=50)
-        assert podcasts
+        assert len(podcasts) > 25
+
+    def test_get_library_channels(self, yt_brand):
+        channels = yt_brand.get_library_channels(limit=50, order="recently_added")
+        assert len(channels) > 25
 
     def test_get_liked_songs(self, yt_brand, yt_empty):
         songs = yt_brand.get_liked_songs(200)
