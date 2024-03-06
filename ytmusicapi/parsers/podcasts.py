@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Sequence
 
 from .songs import *
 
@@ -23,18 +22,19 @@ class Timestamp(DescriptionElement):
 
 
 @dataclass
-class Description(Sequence):
+class Description(List[DescriptionElement]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args[0])
+
     def __len__(self):
-        return len(self.elements)
+        return len(self)
 
     def __getitem__(self, index):
-        return self.elements[index]
-
-    elements: Sequence[DescriptionElement]
+        return self[index]
 
     @property
     def text(self) -> str:
-        return "".join(str(element) for element in self.elements)
+        return "".join(str(element) for element in self)
 
     @classmethod
     def from_runs(cls, description_runs: List[Dict]) -> "Description":
@@ -44,7 +44,7 @@ class Description(Sequence):
 
         :return: List of text (str), timestamp (int) and link values (Link object)
         """
-        elements = []
+        elements: List[DescriptionElement] = []
         for run in description_runs:
             navigationEndpoint = nav(run, ["navigationEndpoint"], True)
             if navigationEndpoint:
@@ -61,7 +61,7 @@ class Description(Sequence):
 
             elements.append(element)
 
-        return cls(elements=elements)
+        return cls(elements)
 
 
 def _parse_base_header(header: Dict) -> Dict:
@@ -92,7 +92,7 @@ def parse_episode_header(header: Dict) -> Dict:
         progress_renderer = nav(header, ["progress", "musicPlaybackProgressRenderer"])
         metadata["duration"] = nav(progress_renderer, ["durationText", "runs", 1, "text"], True)
         metadata["progressPercentage"] = nav(progress_renderer, ["playbackProgressPercentage"])
-    metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True)
+    metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True) or False
 
     metadata["playlistId"] = None
     menu_buttons = nav(header, ["buttons", -1, "menuRenderer", "items"])

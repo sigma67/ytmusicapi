@@ -64,9 +64,6 @@ def parse_albums(results):
 
 def parse_library_podcasts(response, request_func, limit):
     results = get_library_contents(response, GRID)
-    if results is None:
-        return []
-
     parse_func = lambda contents: parse_content_list(contents, parse_podcast)
     podcasts = parse_func(results["items"][1:])  # skip first entry "Add podcast"
 

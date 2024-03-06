@@ -104,6 +104,34 @@ class PodcastsMixin(MixinProtocol):
 
         :param playlistId: Playlist id
         :param limit: How many songs to return. `None` retrieves them all. Default: 100
+        :return: Dict with podcast information
+
+        Example::
+
+            {
+                "author":
+                {
+                    "name": "Stanford Graduate School of Business",
+                    "id": "UCGwuxdEeCf0TIA2RbPOj-8g"
+                },
+                "title": "Think Fast, Talk Smart: The Podcast",
+                "description": "Join Matt Abrahams, a lecturer of...",
+                "saved": false,
+                "episodes":
+                [
+                    {
+                        "index": 0,
+                        "title": "132. Lean Into Failure: How to Make Mistakes That Work | Think Fast, Talk Smart: Communication...",
+                        "description": "Effective and productive teams and...",
+                        "duration": "25 min",
+                        "videoId": "xAEGaW2my7E",
+                        "browseId": "MPEDxAEGaW2my7E",
+                        "videoType": "MUSIC_VIDEO_TYPE_PODCAST_EPISODE",
+                        "date": "Mar 5, 2024",
+                        "thumbnails": [...]
+                    }
+                ]
+            }
         """
         browseId = "MPSP" + playlistId if not playlistId.startswith("MPSP") else playlistId
         body = {"browseId": browseId}
@@ -136,10 +164,54 @@ class PodcastsMixin(MixinProtocol):
 
         .. note::
 
-            To save an episode, you need to call `add_playlist_items` to add
-            it to the `SE` (saved episodes) playlist.
+           To save an episode, you need to call `add_playlist_items` to add
+           it to the `SE` (saved episodes) playlist.
 
         :param videoId: browseId (MPED..) or videoId for a single episode
+        :return: Dict containing information about the episode
+
+        The description elements are based on a custom dataclass, not shown in the example below
+        The description text items also contain "\n" to indicate newlines, removed below due to RST issues
+
+        Example::
+
+            {
+                "author":
+                {
+                    "name": "Stanford GSB Podcasts",
+                    "id": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
+                },
+                "title": "124. Making Meetings Me...",
+                "date": "Jan 16, 2024",
+                "duration": "25 min",
+                "saved": false,
+                "playlistId": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
+                "description":
+                [
+                    {
+                        "text": "Delve into why people hate meetings, ... Karin Reed ("
+                    },
+                    {
+                        "text": "https://speakerdynamics.com/team/",
+                        "url": "https://speakerdynamics.com/team/"
+                    },
+                    {
+                        "text": ")Chapters:("
+                    },
+                    {
+                        "text": "00:00",
+                        "seconds": 0
+                    },
+                    {
+                        "text": ") Introduction Host Matt Abrahams...("
+                    },
+                    {
+                        "text": "01:30",
+                        "seconds": 90
+                    },
+                ]
+            }
+
         """
         browseId = "MPED" + videoId if not videoId.startswith("MPED") else videoId
         body = {"browseId": browseId}
