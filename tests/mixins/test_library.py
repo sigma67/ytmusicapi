@@ -60,6 +60,20 @@ class TestLibrary:
         artists = yt_empty.get_library_subscriptions()
         assert len(artists) == 0
 
+    def test_get_library_podcasts(self, yt_brand, yt_empty):
+        podcasts = yt_brand.get_library_podcasts(limit=50, order="a_to_z")
+        assert len(podcasts) > 25
+
+        empty = yt_empty.get_library_podcasts()
+        assert len(empty) == 1  # saved episodes playlist is always there
+
+    def test_get_library_channels(self, yt_brand, yt_empty):
+        channels = yt_brand.get_library_channels(limit=50, order="recently_added")
+        assert len(channels) > 25
+
+        empty = yt_empty.get_library_channels()
+        assert len(empty) == 0
+
     def test_get_liked_songs(self, yt_brand, yt_empty):
         songs = yt_brand.get_liked_songs(200)
         assert len(songs["tracks"]) > 100

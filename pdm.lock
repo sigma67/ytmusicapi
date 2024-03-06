@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:ab467aa4e09402f8249d103fc719d3dd2f9bab661ea269227b9358a8c223fa6e"
+content_hash = "sha256:0685d381623716626cfb292c864b09d36ff40e8d2e7e0a285c97f236aa4d6ddb"
 
 [[package]]
 name = "alabaster"
@@ -488,6 +488,17 @@ files = [
 ]
 
 [[package]]
+name = "pycowsay"
+version = "0.0.0.2"
+requires_python = ">=3.6"
+summary = ""
+groups = ["default"]
+files = [
+    {file = "pycowsay-0.0.0.2-py3-none-any.whl", hash = "sha256:5c03d8a9c7666ec102aaed4bbd6c7d35228489ce236f95f6e5d079529c6a5050"},
+    {file = "pycowsay-0.0.0.2.tar.gz", hash = "sha256:d112c4ce55b04dbc363c5a8957b80a0dc7459e864866d6e0202d15a95633bcf4"},
+]
+
+[[package]]
 name = "pygments"
 version = "2.17.2"
 requires_python = ">=3.7"
@@ -732,6 +743,20 @@ marker = "python_version < \"3.11\""
 files = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+
+[[package]]
+name = "types-requests"
+version = "2.31.0.20240218"
+requires_python = ">=3.8"
+summary = "Typing stubs for requests"
+groups = ["dev"]
+dependencies = [
+    "urllib3>=2",
+]
+files = [
+    {file = "types-requests-2.31.0.20240218.tar.gz", hash = "sha256:f1721dba8385958f504a5386240b92de4734e047a08a40751c1654d1ac3349c5"},
+    {file = "types_requests-2.31.0.20240218-py3-none-any.whl", hash = "sha256:a82807ec6ddce8f00fe0e949da6d6bc1fbf1715420218a9640d695f70a9e5a9b"},
 ]
 
 [[package]]

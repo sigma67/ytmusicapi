@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-11 16:22+0100\n"
+"POT-Creation-Date: 2024-03-05 20:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,54 +17,62 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:22
 msgid "artist"
 msgstr "藝人"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:23
 msgid "playlist"
 msgstr "播放清單"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:24
 msgid "song"
 msgstr "歌曲"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:25
 msgid "video"
 msgstr "影片"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:26
 msgid "station"
 msgstr "電台"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:27
 msgid "profile"
 msgstr "個人資料"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:28
 msgid "podcast"
 msgstr ""
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:29
 msgid "episode"
 msgstr "單集"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "albums"
 msgstr "專輯"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "singles"
 msgstr "單曲"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "videos"
 msgstr "影片"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "playlists"
 msgstr "精選收錄"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "related"
 msgstr "粉絲可能也會喜歡"
+
+#: parsers/i18n.py:35
+msgid "episodes"
+msgstr "最新集數"
+
+#: parsers/i18n.py:35
+msgid "podcasts"
+msgstr "Podcast"

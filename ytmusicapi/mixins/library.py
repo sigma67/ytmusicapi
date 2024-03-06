@@ -197,6 +197,88 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
+    def get_library_podcasts(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+        """
+        Get podcasts the user has added to the library
+
+        :param limit: Number of podcasts to return
+        :param order: Order of podcasts to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :return: List of podcasts. New Episodes playlist is the first podcast returned, but only if subscribed to relevant podcasts.
+
+        Example::
+
+            [
+                {
+                    "title": "New Episodes",
+                    "channel":
+                    {
+                        "id": null,
+                        "name": "Auto playlist"
+                    },
+                    "browseId": "VLRDPN",
+                    "podcastId": "RDPN",
+                    "thumbnails": [...]
+                },
+                {
+                    "title": "5 Minuten Harry Podcast",
+                    "channel":
+                    {
+                        "id": "UCDIDXF4WM1qQzerrxeEfSdA",
+                        "name": "coldmirror"
+                    },
+                    "browseId": "MPSPPLDvBqWb1UAGeEt9n6vFH_zdGw65Obf3sH",
+                    "podcastId": "PLDvBqWb1UAGeEt9n6vFH_zdGw65Obf3sH",
+                    "thumbnails": [...]
+                }
+            ]
+        """
+        self._check_auth()
+        body = {"browseId": "FEmusic_library_non_music_audio_list"}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
+        endpoint = "browse"
+        response = self._send_request(endpoint, body)
+        return parse_library_podcasts(
+            response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+        )
+
+    def get_library_channels(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+        """
+        Get channels the user has added to the library
+
+        :param limit: Number of channels to return
+        :param order: Order of channels to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :return: List of channels.
+
+        Example::
+
+            [
+                {
+                    "browseId": "UCRFF8xw5dg9mL4r5ryFOtKw",
+                    "artist": "Jumpers Jump",
+                    "subscribers": "1.54M",
+                    "thumbnails": [...]
+                },
+                {
+                    "browseId": "UCQ3f2_sO3NJyDkuCxCNSOVA",
+                    "artist": "BROWN BAG",
+                    "subscribers": "74.2K",
+                    "thumbnails": [...]
+                }
+            ]
+        """
+        self._check_auth()
+        body = {"browseId": "FEmusic_library_non_music_audio_channels_list"}
+        validate_order_parameter(order)
+        if order is not None:
+            body["params"] = prepare_order_params(order)
+        endpoint = "browse"
+        response = self._send_request(endpoint, body)
+        return parse_library_artists(
+            response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+        )
+
     def get_history(self) -> List[Dict]:
         """
         Gets your play history in reverse chronological order

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-11 16:22+0100\n"
+"POT-Creation-Date: 2024-03-05 20:13+0100\n"
 "PO-Revision-Date: 2023-04-23 14:55+0200\n"
 "Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
 "Language-Team: \n"
@@ -18,54 +18,62 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:22
 msgid "artist"
 msgstr "artiest"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:23
 msgid "playlist"
 msgstr "afspeellijst"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:24
 msgid "song"
 msgstr "nummer"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:25
 msgid "video"
 msgstr "video"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:26
 msgid "station"
 msgstr "station"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:27
 msgid "profile"
 msgstr "profiel"
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:28
 msgid "podcast"
 msgstr ""
 
-#: parsers/i18n.py:16
+#: parsers/i18n.py:29
 msgid "episode"
 msgstr "Aflevering"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "albums"
 msgstr "albums"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "singles"
 msgstr "singles"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "videos"
 msgstr "video's"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "playlists"
 msgstr "afspeellijsten"
 
-#: parsers/i18n.py:21
+#: parsers/i18n.py:35
 msgid "related"
 msgstr "gerelateerd"
+
+#: parsers/i18n.py:35
+msgid "episodes"
+msgstr "nieuwste afleveringen"
+
+#: parsers/i18n.py:35
+msgid "podcasts"
+msgstr "podcasts"

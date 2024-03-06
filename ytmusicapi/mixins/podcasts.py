@@ -3,12 +3,97 @@ from typing import Dict
 from ytmusicapi.continuations import *
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.navigation import *
+from ytmusicapi.parsers.browsing import parse_content_list
 from ytmusicapi.parsers.podcasts import *
 
 from ._utils import *
 
 
 class PodcastsMixin(MixinProtocol):
+    """Podcasts Mixin"""
+
+    def get_channel(self, channelId: str) -> Dict:
+        """
+        Get information about a podcast channel (episodes, podcasts). For episodes, a
+        maximum of 10 episodes are returned, the full list of episodes can be retrieved
+        via :py:func:`get_channel_episodes`
+
+        :param channelId: channel id
+        :return: Dict containing channel info
+
+        Example::
+
+            {
+                "title": 'Stanford Graduate School of Business',
+                "thumbnails": [...]
+                "episodes":
+                {
+                    "browseId": "UCGwuxdEeCf0TIA2RbPOj-8g",
+                    "results":
+                    [
+                        {
+                            "index": 0,
+                            "title": "The Brain Gain: The Impact of Immigration on American Innovation with Rebecca Diamond",
+                            "description": "Immigrants' contributions to America ...",
+                            "duration": "24 min",
+                            "videoId": "TS3Ovvk3VAA",
+                            "browseId": "MPEDTS3Ovvk3VAA",
+                            "videoType": "MUSIC_VIDEO_TYPE_PODCAST_EPISODE",
+                            "date": "Mar 6, 2024",
+                            "thumbnails": [...]
+                        },
+                    ],
+                    "params": "6gPiAUdxWUJXcFlCQ3BN..."
+                },
+                "podcasts":
+                {
+                    "browseId": null,
+                    "results":
+                    [
+                        {
+                            "title": "Stanford GSB Podcasts",
+                            "channel":
+                            {
+                                "id": "UCGwuxdEeCf0TIA2RbPOj-8g",
+                                "name": "Stanford Graduate School of Business"
+                            },
+                            "browseId": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
+                            "podcastId": "PLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
+                            "thumbnails": [...]
+                        }
+                   ]
+                }
+            }
+        """
+        body = {"browseId": channelId}
+        endpoint = "browse"
+        response = self._send_request(endpoint, body)
+
+        channel = {
+            "title": nav(response, [*HEADER_MUSIC_VISUAL, *TITLE_TEXT]),
+            "thumbnails": nav(response, [*HEADER_MUSIC_VISUAL, *THUMBNAILS]),
+        }
+
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        channel.update(self.parser.parse_channel_contents(results))
+
+        return channel
+
+    def get_channel_episodes(self, channelId: str, params: str) -> List[Dict]:
+        """
+        Get all channel episodes. This endpoint is currently unlimited
+
+        :param channelId: channelId of the user
+        :param params: params obtained by :py:func:`get_channel`
+
+        :return: List of channel episodes in the format of :py:func:`get_channel` "episodes" key
+        """
+        body = {"browseId": channelId, "params": params}
+        endpoint = "browse"
+        response = self._send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
+        return parse_content_list(results, parse_episode, MMRIR)
+
     def get_podcast(self, playlistId: str, limit: Optional[int] = 100) -> Dict:
         """
         Returns podcast metadata and episodes
@@ -19,6 +104,34 @@ class PodcastsMixin(MixinProtocol):
 
         :param playlistId: Playlist id
         :param limit: How many songs to return. `None` retrieves them all. Default: 100
+        :return: Dict with podcast information
+
+        Example::
+
+            {
+                "author":
+                {
+                    "name": "Stanford Graduate School of Business",
+                    "id": "UCGwuxdEeCf0TIA2RbPOj-8g"
+                },
+                "title": "Think Fast, Talk Smart: The Podcast",
+                "description": "Join Matt Abrahams, a lecturer of...",
+                "saved": false,
+                "episodes":
+                [
+                    {
+                        "index": 0,
+                        "title": "132. Lean Into Failure: How to Make Mistakes That Work | Think Fast, Talk Smart: Communication...",
+                        "description": "Effective and productive teams and...",
+                        "duration": "25 min",
+                        "videoId": "xAEGaW2my7E",
+                        "browseId": "MPEDxAEGaW2my7E",
+                        "videoType": "MUSIC_VIDEO_TYPE_PODCAST_EPISODE",
+                        "date": "Mar 5, 2024",
+                        "thumbnails": [...]
+                    }
+                ]
+            }
         """
         browseId = "MPSP" + playlistId if not playlistId.startswith("MPSP") else playlistId
         body = {"browseId": browseId}
@@ -29,11 +142,11 @@ class PodcastsMixin(MixinProtocol):
         podcast = parse_podcast_header(header)
 
         results = nav(two_columns, ["secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        episodes = parse_episodes(results["contents"])
+        parse_func = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
+        episodes = parse_func(results["contents"])
 
         if "continuations" in results:
             request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_episodes(contents)
             remaining_limit = None if limit is None else (limit - len(episodes))
             episodes.extend(
                 get_continuations(
@@ -51,10 +164,54 @@ class PodcastsMixin(MixinProtocol):
 
         .. note::
 
-            To save an episode, you need to call `add_playlist_items` to add
-            it to the `SE` (saved episodes) playlist.
+           To save an episode, you need to call `add_playlist_items` to add
+           it to the `SE` (saved episodes) playlist.
 
         :param videoId: browseId (MPED..) or videoId for a single episode
+        :return: Dict containing information about the episode
+
+        The description elements are based on a custom dataclass, not shown in the example below
+        The description text items also contain "\n" to indicate newlines, removed below due to RST issues
+
+        Example::
+
+            {
+                "author":
+                {
+                    "name": "Stanford GSB Podcasts",
+                    "id": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
+                },
+                "title": "124. Making Meetings Me...",
+                "date": "Jan 16, 2024",
+                "duration": "25 min",
+                "saved": false,
+                "playlistId": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
+                "description":
+                [
+                    {
+                        "text": "Delve into why people hate meetings, ... Karin Reed ("
+                    },
+                    {
+                        "text": "https://speakerdynamics.com/team/",
+                        "url": "https://speakerdynamics.com/team/"
+                    },
+                    {
+                        "text": ")Chapters:("
+                    },
+                    {
+                        "text": "00:00",
+                        "seconds": 0
+                    },
+                    {
+                        "text": ") Introduction Host Matt Abrahams...("
+                    },
+                    {
+                        "text": "01:30",
+                        "seconds": 90
+                    },
+                ]
+            }
+
         """
         browseId = "MPED" + videoId if not videoId.startswith("MPED") else videoId
         body = {"browseId": browseId}

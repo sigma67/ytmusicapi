@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Sequence
 
 from .songs import *
 
@@ -23,18 +22,13 @@ class Timestamp(DescriptionElement):
 
 
 @dataclass
-class Description(Sequence):
-    def __len__(self):
-        return len(self.elements)
-
-    def __getitem__(self, index):
-        return self.elements[index]
-
-    elements: Sequence[DescriptionElement]
+class Description(List[DescriptionElement]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args[0])
 
     @property
     def text(self) -> str:
-        return "".join(str(element) for element in self.elements)
+        return "".join(str(element) for element in self)
 
     @classmethod
     def from_runs(cls, description_runs: List[Dict]) -> "Description":
@@ -44,7 +38,7 @@ class Description(Sequence):
 
         :return: List of text (str), timestamp (int) and link values (Link object)
         """
-        elements = []
+        elements: List[DescriptionElement] = []
         for run in description_runs:
             navigationEndpoint = nav(run, ["navigationEndpoint"], True)
             if navigationEndpoint:
@@ -61,7 +55,7 @@ class Description(Sequence):
 
             elements.append(element)
 
-        return cls(elements=elements)
+        return cls(elements)
 
 
 def _parse_base_header(header: Dict) -> Dict:
@@ -92,7 +86,7 @@ def parse_episode_header(header: Dict) -> Dict:
         progress_renderer = nav(header, ["progress", "musicPlaybackProgressRenderer"])
         metadata["duration"] = nav(progress_renderer, ["durationText", "runs", 1, "text"], True)
         metadata["progressPercentage"] = nav(progress_renderer, ["playbackProgressPercentage"])
-    metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True)
+    metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True) or False
 
     metadata["playlistId"] = None
     menu_buttons = nav(header, ["buttons", -1, "menuRenderer", "items"])
@@ -103,34 +97,40 @@ def parse_episode_header(header: Dict) -> Dict:
     return metadata
 
 
-def parse_episodes(results) -> List[Dict]:
-    episodes = []
-    for result in results:
-        data = nav(result, ["musicMultiRowListItemRenderer"])
-        thumbnails = nav(data, THUMBNAILS)
-        if len(nav(data, SUBTITLE_RUNS)) == 1:
-            duration = nav(data, SUBTITLE)
-        else:
-            date = nav(data, SUBTITLE)
-            duration = nav(data, SUBTITLE2, True)
-        title = nav(data, TITLE_TEXT)
-        description = nav(data, DESCRIPTION, True)
-        videoId = nav(data, ["onTap", *WATCH_VIDEO_ID], True)
-        browseId = nav(data, [*TITLE, *NAVIGATION_BROWSE_ID], True)
-        videoType = nav(data, ["onTap", *NAVIGATION_VIDEO_TYPE], True)
-        index = nav(data, ["onTap", "watchEndpoint", "index"])
-        episodes.append(
-            {
-                "index": index,
-                "title": title,
-                "description": description,
-                "duration": duration,
-                "videoId": videoId,
-                "browseId": browseId,
-                "videoType": videoType,
-                "date": date,
-                "thumbnails": thumbnails,
-            }
-        )
+def parse_episode(data):
+    """Parses a single episode under "Episodes" on a channel page or on a podcast page"""
+    thumbnails = nav(data, THUMBNAILS)
+    date = None
+    if len(nav(data, SUBTITLE_RUNS)) == 1:
+        duration = nav(data, SUBTITLE)
+    else:
+        date = nav(data, SUBTITLE)
+        duration = nav(data, SUBTITLE2, True)
+    title = nav(data, TITLE_TEXT)
+    description = nav(data, DESCRIPTION, True)
+    videoId = nav(data, ["onTap", *WATCH_VIDEO_ID], True)
+    browseId = nav(data, [*TITLE, *NAVIGATION_BROWSE_ID], True)
+    videoType = nav(data, ["onTap", *NAVIGATION_VIDEO_TYPE], True)
+    index = nav(data, ["onTap", "watchEndpoint", "index"])
+    return {
+        "index": index,
+        "title": title,
+        "description": description,
+        "duration": duration,
+        "videoId": videoId,
+        "browseId": browseId,
+        "videoType": videoType,
+        "date": date,
+        "thumbnails": thumbnails,
+    }
 
-    return episodes
+
+def parse_podcast(data):
+    """Parses a single podcast under "Podcasts" on a channel page"""
+    return {
+        "title": nav(data, TITLE_TEXT),
+        "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0])),
+        "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
+        "podcastId": nav(data, THUMBNAIL_OVERLAY, True),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+    }
