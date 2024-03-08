@@ -111,7 +111,7 @@ def parse_episode(data):
     videoId = nav(data, ["onTap", *WATCH_VIDEO_ID], True)
     browseId = nav(data, [*TITLE, *NAVIGATION_BROWSE_ID], True)
     videoType = nav(data, ["onTap", *NAVIGATION_VIDEO_TYPE], True)
-    index = nav(data, ["onTap", "watchEndpoint", "index"])
+    index = nav(data, ["onTap", "watchEndpoint", "index"], True)
     return {
         "index": index,
         "title": title,

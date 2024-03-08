@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ytmusicapi.continuations import *
-from ytmusicapi.helpers import sum_total_duration, to_int
+from ytmusicapi.helpers import sum_total_duration
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
@@ -108,44 +108,8 @@ class PlaylistsMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + ["musicPlaylistShelfRenderer"])
         playlist = {"id": results["playlistId"]}
-        own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in response["header"]
-        if not own_playlist:
-            header = response["header"]["musicDetailHeaderRenderer"]
-            playlist["privacy"] = "PUBLIC"
-        else:
-            header = response["header"]["musicEditablePlaylistDetailHeaderRenderer"]
-            playlist["privacy"] = header["editHeader"]["musicPlaylistEditHeaderRenderer"]["privacy"]
-            header = header["header"]["musicDetailHeaderRenderer"]
-        playlist["owned"] = own_playlist
-
-        playlist["title"] = nav(header, TITLE_TEXT)
-        playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED)
-        playlist["description"] = nav(header, DESCRIPTION, True)
-        run_count = len(nav(header, SUBTITLE_RUNS))
-        if run_count > 1:
-            playlist["author"] = {
-                "name": nav(header, SUBTITLE2),
-                "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
-            }
-            if run_count == 5:
-                playlist["year"] = nav(header, SUBTITLE3)
-
-        playlist["views"] = None
-        playlist["duration"] = None
-        if "runs" in header["secondSubtitle"]:
-            second_subtitle_runs = header["secondSubtitle"]["runs"]
-            has_views = (len(second_subtitle_runs) > 3) * 2
-            playlist["views"] = None if not has_views else to_int(second_subtitle_runs[0]["text"])
-            has_duration = (len(second_subtitle_runs) > 1) * 2
-            playlist["duration"] = (
-                None if not has_duration else second_subtitle_runs[has_views + has_duration]["text"]
-            )
-            song_count = second_subtitle_runs[has_views + 0]["text"].split(" ")
-            song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
-        else:
-            song_count = len(results["contents"])
-
-        playlist["trackCount"] = song_count
+        playlist.update(parse_playlist_header(response))
+        playlist["trackCount"] = playlist["trackCount"] or len(results["contents"])
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
@@ -154,6 +118,7 @@ class PlaylistsMixin(MixinProtocol):
         playlist["related"] = []
         if "continuations" in section_list:
             additionalParams = get_continuation_params(section_list)
+            own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in response["header"]
             if own_playlist and (suggestions_limit > 0 or related):
                 parse_func = lambda results: parse_playlist_items(results)
                 suggested = request_func(additionalParams)

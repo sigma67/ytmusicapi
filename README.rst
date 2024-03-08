@@ -63,6 +63,7 @@ Features
 * get podcasts
 * get episodes
 * get channels
+* get episodes playlists
 
 | **Uploads**:
 
