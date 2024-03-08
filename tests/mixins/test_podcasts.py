@@ -44,6 +44,6 @@ class TestPodcasts:
             result = yt.get_episode(result["videoId"])
             assert len(result["description"].text) > 0
 
-    def test_get_podcast_playlist(self, yt_brand):
+    def test_get_episodes_playlist(self, yt_brand):
         playlist = yt_brand.get_episodes_playlist()
         assert len(playlist["episodes"]) > 90

@@ -109,7 +109,8 @@ class PlaylistsMixin(MixinProtocol):
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + ["musicPlaylistShelfRenderer"])
         playlist = {"id": results["playlistId"]}
         playlist.update(parse_playlist_header(response))
-        playlist["trackCount"] = playlist["trackCount"] or len(results["contents"])
+        if playlist["trackCount"] is None:
+            playlist["trackCount"] = len(results["contents"])
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
