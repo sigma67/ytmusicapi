@@ -14,6 +14,11 @@ def parse_artists(results, uploaded=False):
         artist = {}
         artist["browseId"] = nav(data, NAVIGATION_BROWSE_ID)
         artist["artist"] = get_item_text(data, 0)
+        page_type = nav(data, NAVIGATION_BROWSE + PAGE_TYPE, True)
+        if page_type == "MUSIC_PAGE_TYPE_USER_CHANNEL":
+            artist["type"]="channel"
+        elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
+            artist["type"]="artist"
         parse_menu_playlists(data, artist)
         if uploaded:
             artist["songs"] = get_item_text(data, 1).split(" ")[0]
