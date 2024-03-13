@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-05 20:13+0100\n"
+"POT-Creation-Date: 2024-03-13 20:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,62 +17,66 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: parsers/i18n.py:22
+#: parsers/i18n.py:32
 msgid "artist"
 msgstr ""
 
-#: parsers/i18n.py:23
+#: parsers/i18n.py:33
 msgid "playlist"
 msgstr ""
 
-#: parsers/i18n.py:24
+#: parsers/i18n.py:34
 msgid "song"
 msgstr ""
 
-#: parsers/i18n.py:25
+#: parsers/i18n.py:35
 msgid "video"
 msgstr ""
 
-#: parsers/i18n.py:26
+#: parsers/i18n.py:36
 msgid "station"
 msgstr ""
 
-#: parsers/i18n.py:27
+#: parsers/i18n.py:37
 msgid "profile"
 msgstr ""
 
-#: parsers/i18n.py:28
+#: parsers/i18n.py:38
 msgid "podcast"
 msgstr ""
 
-#: parsers/i18n.py:29
+#: parsers/i18n.py:39
 msgid "episode"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:46
 msgid "albums"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:47
 msgid "singles"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:48
+msgid "shows"
+msgstr ""
+
+#: parsers/i18n.py:49
 msgid "videos"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:50
 msgid "playlists"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:51
 msgid "related"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:52
 msgid "episodes"
 msgstr ""
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:53
 msgid "podcasts"
 msgstr ""

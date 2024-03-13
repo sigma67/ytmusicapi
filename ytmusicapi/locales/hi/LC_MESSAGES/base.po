@@ -2,12 +2,12 @@
 # Copyright (C) 2023 sigma67
 # This file is distributed under the same license as ytmusicapi
 # sigma67 <ytmusicapi@gmail.com>
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-05 20:13+0100\n"
+"POT-Creation-Date: 2024-03-13 20:07+0100\n"
 "PO-Revision-Date: 2023-01-01 11:04+0530\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,62 +17,66 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: parsers/i18n.py:22
+#: parsers/i18n.py:32
 msgid "artist"
 msgstr "कलाकार"
 
-#: parsers/i18n.py:23
+#: parsers/i18n.py:33
 msgid "playlist"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:24
+#: parsers/i18n.py:34
 msgid "song"
 msgstr "गीत"
 
-#: parsers/i18n.py:25
+#: parsers/i18n.py:35
 msgid "video"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:26
+#: parsers/i18n.py:36
 msgid "station"
 msgstr "स्टेशन"
 
-#: parsers/i18n.py:27
+#: parsers/i18n.py:37
 msgid "profile"
 msgstr "प्रोफ़ाइल"
 
-#: parsers/i18n.py:28
+#: parsers/i18n.py:38
 msgid "podcast"
 msgstr "पॉडकास्ट"
 
-#: parsers/i18n.py:29
+#: parsers/i18n.py:39
 msgid "episode"
 msgstr "एपिसोड"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:46
 msgid "albums"
 msgstr "एलबम"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:47
 msgid "singles"
 msgstr "एकल"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:48
+msgid "shows"
+msgstr "ऑडियो बुक और ऑडियो शो"
+
+#: parsers/i18n.py:49
 msgid "videos"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:50
 msgid "playlists"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:51
 msgid "related"
 msgstr "सम्बंधित"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:52
 msgid "episodes"
 msgstr "सबसे नए एपिसोड"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:53
 msgid "podcasts"
 msgstr "पॉडकास्ट"

@@ -5,7 +5,7 @@ In some places, for example the search() or get_artist() features, there is no o
 offered other than parsing display text, which depends on the user's language. Changing the API language is desirable,
 since artist and song titles are also language dependent.
 
-This package uses the Linux command line utility xgettext, which you can install for example using your package manager.
+This package uses the Linux command line utility xgettext (install via package manager).
 
 Add new translatable texts from code
 ----------------------------------------
@@ -27,7 +27,7 @@ Copy the base template:
 Update translation
 ------------------
 
-``cd locales && sh update_po.sh``
+``cd locales && ./update_po.sh``
 
 Edit translation
 ----------------
@@ -37,4 +37,4 @@ Finalize translation
 ---------------------
 To generate mo files, run
 
-``cd locales && sh update_mo.sh``
+``cd locales && ./update_mo.sh``

@@ -23,6 +23,14 @@ class TestBrowsing:
         results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         assert len(results) >= 11
 
+    def test_get_artist_shows(self, yt_oauth):
+        # with audiobooks - only with authentication
+        results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
+        assert len(results["shows"]["results"]) == 10
+
+        results = yt_oauth.get_artist_albums(results["shows"]["browseId"], results["shows"]["params"])
+        assert len(results) == 100
+
     def test_get_artist_albums(self, yt):
         artist = yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
         results = yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"])

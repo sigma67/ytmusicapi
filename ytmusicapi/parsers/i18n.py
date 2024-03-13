@@ -45,6 +45,7 @@ class Parser:
         categories = [
             ("albums", _("albums"), parse_album, MTRIR),
             ("singles", _("singles"), parse_single, MTRIR),
+            ("shows", _("shows"), parse_album, MTRIR),
             ("videos", _("videos"), parse_video, MTRIR),
             ("playlists", _("playlists"), parse_playlist, MTRIR),
             ("related", _("related"), parse_related_artist, MTRIR),
@@ -57,7 +58,7 @@ class Parser:
                 r["musicCarouselShelfRenderer"]
                 for r in results
                 if "musicCarouselShelfRenderer" in r
-                and nav(r, CAROUSEL + CAROUSEL_TITLE)["text"].lower() == category_local
+                and nav(r, CAROUSEL + CAROUSEL_TITLE)["text"].lower() == category_local.lower()
             ]
             if len(data) > 0:
                 artist[category] = {"browseId": None, "results": []}

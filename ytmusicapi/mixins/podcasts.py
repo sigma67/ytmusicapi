@@ -172,7 +172,7 @@ class PodcastsMixin(MixinProtocol):
         :return: Dict containing information about the episode
 
         The description elements are based on a custom dataclass, not shown in the example below
-        The description text items also contain "\n" to indicate newlines, removed below due to RST issues
+        The description text items also contain "\\n" to indicate newlines, removed below due to RST issues
 
         Example::
 

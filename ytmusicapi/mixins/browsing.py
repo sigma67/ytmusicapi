@@ -131,8 +131,22 @@ class BrowsingMixin(MixinProtocol):
         albums, singles, videos, and related artists). The top lists
         contain pointers for getting the full list of releases.
 
-        For songs/videos, pass the browseId to :py:func:`get_playlist`.
-        For albums/singles, pass browseId and params to :py:func:`get_artist_albums`.
+        Possible content types for get_artist are:
+
+            - songs
+            - albums
+            - singles
+            - shows
+            - videos
+            - episodes
+            - podcasts
+            - related
+
+        Each of these content keys in the response contains
+        ``results`` and possibly ``browseId`` and ``params``.
+
+        - For songs/videos, pass the browseId to :py:func:`get_playlist`.
+        - For albums/singles/shows, pass browseId and params to :py:func:`get_artist_albums`.
 
         :param channelId: channel id of the artist
         :return: Dictionary with requested information.
@@ -260,7 +274,7 @@ class BrowsingMixin(MixinProtocol):
         self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[str] = None
     ) -> List[Dict]:
         """
-        Get the full list of an artist's albums or singles
+        Get the full list of an artist's albums, singles or shows
 
         :param channelId: browseId of the artist as returned by :py:func:`get_artist`
         :param params: params obtained by :py:func:`get_artist`
