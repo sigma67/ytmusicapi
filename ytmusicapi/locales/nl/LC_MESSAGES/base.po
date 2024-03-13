@@ -2,12 +2,12 @@
 # Copyright (C) 2023 sigma67
 # This file is distributed under the same license as ytmusicapi
 # sigma67 <ytmusicapi@gmail.com>
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-05 20:13+0100\n"
+"POT-Creation-Date: 2024-03-13 20:07+0100\n"
 "PO-Revision-Date: 2023-04-23 14:55+0200\n"
 "Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
 "Language-Team: \n"
@@ -18,62 +18,66 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: parsers/i18n.py:22
+#: parsers/i18n.py:32
 msgid "artist"
 msgstr "artiest"
 
-#: parsers/i18n.py:23
+#: parsers/i18n.py:33
 msgid "playlist"
 msgstr "afspeellijst"
 
-#: parsers/i18n.py:24
+#: parsers/i18n.py:34
 msgid "song"
 msgstr "nummer"
 
-#: parsers/i18n.py:25
+#: parsers/i18n.py:35
 msgid "video"
 msgstr "video"
 
-#: parsers/i18n.py:26
+#: parsers/i18n.py:36
 msgid "station"
 msgstr "station"
 
-#: parsers/i18n.py:27
+#: parsers/i18n.py:37
 msgid "profile"
 msgstr "profiel"
 
-#: parsers/i18n.py:28
+#: parsers/i18n.py:38
 msgid "podcast"
 msgstr ""
 
-#: parsers/i18n.py:29
+#: parsers/i18n.py:39
 msgid "episode"
 msgstr "Aflevering"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:46
 msgid "albums"
 msgstr "albums"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:47
 msgid "singles"
 msgstr "singles"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:48
+msgid "shows"
+msgstr "Audioboeken en -series"
+
+#: parsers/i18n.py:49
 msgid "videos"
 msgstr "video's"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:50
 msgid "playlists"
 msgstr "afspeellijsten"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:51
 msgid "related"
 msgstr "gerelateerd"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:52
 msgid "episodes"
 msgstr "nieuwste afleveringen"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:53
 msgid "podcasts"
 msgstr "podcasts"
