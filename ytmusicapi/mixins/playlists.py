@@ -12,7 +12,7 @@ from ._utils import *
 
 class PlaylistsMixin(MixinProtocol):
     def get_playlist(
-        self, playlistId: str, limit: int = 100, related: bool = False, suggestions_limit: int = 0
+        self, playlistId: str, limit: Optional[int] = 100, related: bool = False, suggestions_limit: int = 0
     ) -> Dict:
         """
         Returns a list of playlist items
