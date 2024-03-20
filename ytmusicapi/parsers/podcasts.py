@@ -58,7 +58,7 @@ class Description(List[DescriptionElement]):
         return cls(elements)
 
 
-def _parse_base_header(header: Dict) -> Dict:
+def parse_base_header(header: Dict) -> Dict:
     """parse common left hand side (header) items of an episode or podcast page"""
     strapline = nav(header, ["straplineTextOne"])
     return {
@@ -71,7 +71,7 @@ def _parse_base_header(header: Dict) -> Dict:
 
 
 def parse_podcast_header(header: Dict) -> Dict:
-    metadata = _parse_base_header(header)
+    metadata = parse_base_header(header)
     metadata["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
     metadata["saved"] = nav(header, ["buttons", 1, *TOGGLED_BUTTON])
 
@@ -79,7 +79,7 @@ def parse_podcast_header(header: Dict) -> Dict:
 
 
 def parse_episode_header(header: Dict) -> Dict:
-    metadata = _parse_base_header(header)
+    metadata = parse_base_header(header)
     metadata["date"] = nav(header, [*SUBTITLE2])
     metadata["duration"] = nav(header, [*SUBTITLE3], True)
     if not metadata["duration"]:  # progress started
