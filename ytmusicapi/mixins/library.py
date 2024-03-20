@@ -10,7 +10,7 @@ from ._utils import *
 
 
 class LibraryMixin(MixinProtocol):
-    def get_library_playlists(self, limit: int = 25) -> List[Dict]:
+    def get_library_playlists(self, limit: Optional[int] = 25) -> List[Dict]:
         """
         Retrieves the playlists in the user's library.
 

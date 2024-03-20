@@ -22,7 +22,7 @@ from ._utils import prepare_order_params, validate_order_parameter
 
 
 class UploadsMixin(MixinProtocol):
-    def get_library_upload_songs(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_upload_songs(self, limit: Optional[int] = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Returns a list of uploaded songs
 
@@ -69,7 +69,7 @@ class UploadsMixin(MixinProtocol):
 
         return songs
 
-    def get_library_upload_albums(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_upload_albums(self, limit: Optional[int] = 25, order: Optional[str] = None) -> List[Dict]:
         """
         Gets the albums of uploaded songs in the user's library.
 
@@ -88,7 +88,9 @@ class UploadsMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_upload_artists(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_upload_artists(
+        self, limit: Optional[int] = 25, order: Optional[str] = None
+    ) -> List[Dict]:
         """
         Gets the artists of uploaded songs in the user's library.
 
