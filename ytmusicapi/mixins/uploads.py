@@ -88,7 +88,9 @@ class UploadsMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_upload_artists(self, limit: Optional[int] = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_upload_artists(
+        self, limit: Optional[int] = 25, order: Optional[str] = None
+    ) -> List[Dict]:
         """
         Gets the artists of uploaded songs in the user's library.
 
