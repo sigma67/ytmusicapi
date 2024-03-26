@@ -186,9 +186,9 @@ class SearchMixin(MixinProtocol):
 
         if "tabbedSearchResultsRenderer" in response["contents"]:
             tab_index = 0 if not scope or filter else scopes.index(scope) + 1
-            results = response["contents"]["tabbedSearchResultsRenderer"]["tabs"][tab_index]["tabRenderer"][
-                "content"
-            ]
+            results = response["contents"]["tabbedSearchResultsRenderer"]["tabs"][
+                tab_index
+            ]["tabRenderer"]["content"]
         else:
             results = response["contents"]
 
@@ -214,7 +214,9 @@ class SearchMixin(MixinProtocol):
                     category = None
                     # category "more from youtube" is missing sometimes
                     if "messageRenderer" in results[0]:
-                        category = nav(results.pop(0), ["messageRenderer", *TEXT_RUN_TEXT])
+                        category = nav(
+                            results.pop(0), ["messageRenderer", *TEXT_RUN_TEXT]
+                        )
                     type = None
                 else:
                     continue
@@ -232,7 +234,9 @@ class SearchMixin(MixinProtocol):
                 continue
 
             search_result_types = self.parser.get_search_result_types()
-            search_results.extend(parse_search_results(results, search_result_types, type, category))
+            search_results.extend(
+                parse_search_results(results, search_result_types, type, category)
+            )
 
             if filter:  # if filter is set, there are continuations
 
@@ -240,7 +244,9 @@ class SearchMixin(MixinProtocol):
                     return self._send_request(endpoint, body, additionalParams)
 
                 def parse_func(contents):
-                    return parse_search_results(contents, search_result_types, type, category)
+                    return parse_search_results(
+                        contents, search_result_types, type, category
+                    )
 
                 search_results.extend(
                     get_continuations(
@@ -254,19 +260,14 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[List[str], List[Dict]]:
+    def get_search_suggestions(self, query: str) -> List[str]:
         """
         Get Search Suggestions
 
         :param query: Query string, i.e. 'faded'
-        :param detailed_runs: Whether to return detailed runs of each suggestion.
-            If True, it returns the query that the user typed and the remaining
-            suggestion along with the complete text (like many search services
-            usually bold the text typed by the user).
-            Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on ``detailed_runs`` param.
+        :return: List of search suggestions as strings.
 
-          Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
+          Example response when ``query`` is 'fade'::
 
               [
                 "faded",
@@ -277,54 +278,12 @@ class SearchMixin(MixinProtocol):
                 "faded lyrics",
                 "faded instrumental"
               ]
-
-          Example response when ``detailed_runs`` is set to ``True``::
-
-              [
-                {
-                  "text": "faded",
-                  "runs": [
-                    {
-                      "text": "fade",
-                      "bold": true
-                    },
-                    {
-                      "text": "d"
-                    }
-                  ]
-                },
-                {
-                  "text": "faded alan walker lyrics",
-                  "runs": [
-                    {
-                      "text": "fade",
-                      "bold": true
-                    },
-                    {
-                      "text": "d alan walker lyrics"
-                    }
-                  ]
-                },
-                {
-                  "text": "faded alan walker",
-                  "runs": [
-                    {
-                      "text": "fade",
-                      "bold": true
-                    },
-                    {
-                      "text": "d alan walker"
-                    }
-                  ]
-                },
-                ...
-              ]
         """
 
         body = {"input": query}
         endpoint = "music/get_search_suggestions"
 
         response = self._send_request(endpoint, body)
-        search_suggestions = parse_search_suggestions(response, detailed_runs)
+        search_suggestions = parse_search_suggestions(response)
 
         return search_suggestions
