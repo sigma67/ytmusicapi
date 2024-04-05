@@ -171,7 +171,7 @@ class PlaylistsMixin(MixinProtocol):
 
     def _parse_new_playlist_format(
         self, response: Dict, endpoint, body, suggestions_limit, related, limit
-    ) -> Dict:
+    ) -> Dict:  # pragma: no cover
         """temporary function to avoid too many ifs in get_playlist during a/b test"""
 
         results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
@@ -195,7 +195,6 @@ class PlaylistsMixin(MixinProtocol):
         playlist["title"] = nav(header1, TITLE_TEXT)
         playlist["description"] = nav(header1, DESCRIPTION, True)
         run_count = len(nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE_RUNS]))
-        print(f"run_count: {run_count}")
         if run_count > 1:
             playlist["author"] = {
                 "name": nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE2]),

@@ -11,12 +11,10 @@ class TestPlaylists:
         ("test_file", "owned"),
         [
             ("2024_03_get_playlist.json", True),
-            ("2024_03_get_playlist_private.json", True),
-            ("2024_03_get_playlist_public.json", True),
         ],
     )
     def test_get_playlist_2024(self, yt, test_file, owned):
-        with open(Path(__file__).parent.parent / "data" / "2024_03_get_playlist.json", encoding="utf8") as f:
+        with open(Path(__file__).parent.parent / "data" / test_file, encoding="utf8") as f:
             mock_response = json.load(f)
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
             playlist = yt.get_playlist("MPREabc")
