@@ -1,6 +1,7 @@
 .idea
 .vscode
-**.json
+tests/*.json
+tests/setup/*.json
 docs/build
 test.cfg
 **.mp3

@@ -7,7 +7,7 @@ from ytmusicapi.continuations import (
     get_reloadable_continuation_params,
 )
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi.parsers.albums import parse_album_header
+from ytmusicapi.parsers.albums import parse_album_header, parse_album_header_2024
 from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
@@ -516,8 +516,15 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        album = parse_album_header(response)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
+        if "header" in response:
+            album = parse_album_header(response)
+        else:
+            album = parse_album_header_2024(response)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF, True) or nav(
+            # fallback for 2024 format
+            response,
+            [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF],
+        )
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + CAROUSEL, True)
         if results is not None:
