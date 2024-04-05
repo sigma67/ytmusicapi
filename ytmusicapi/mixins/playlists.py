@@ -106,7 +106,12 @@ class PlaylistsMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + ["musicPlaylistShelfRenderer"])
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + ["musicPlaylistShelfRenderer"], True)
+        if not results:
+            return self._parse_new_playlist_format(
+                response, endpoint, body, suggestions_limit, related, limit
+            )
+
         playlist = {"id": results["playlistId"]}
         playlist.update(parse_playlist_header(response))
         if playlist["trackCount"] is None:
@@ -158,6 +163,112 @@ class PlaylistsMixin(MixinProtocol):
                 playlist["tracks"].extend(
                     get_continuations(
                         results, "musicPlaylistShelfContinuation", limit, request_func, parse_func
+                    )
+                )
+
+        playlist["duration_seconds"] = sum_total_duration(playlist)
+        return playlist
+
+    def _parse_new_playlist_format(
+        self, response: Dict, endpoint, body, suggestions_limit, related, limit
+    ) -> Dict:
+        """temporary function to avoid too many ifs in get_playlist during a/b test"""
+
+        results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
+        playlist = {}
+        own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in results
+        if not own_playlist:
+            playlist["id"] = results["musicDetailHeaderRenderer"]["playlistId"]
+            header = response["musicDetailHeaderRenderer"]["header"]
+            playlist["privacy"] = "PUBLIC"
+        else:
+            playlist["id"] = results["musicEditablePlaylistDetailHeaderRenderer"]["playlistId"]
+            header = results["musicEditablePlaylistDetailHeaderRenderer"]["header"]
+            playlist["privacy"] = results["musicEditablePlaylistDetailHeaderRenderer"]["editHeader"][
+                "musicPlaylistEditHeaderRenderer"
+            ]["privacy"]
+            header1 = results["musicEditablePlaylistDetailHeaderRenderer"]["editHeader"][
+                "musicPlaylistEditHeaderRenderer"
+            ]
+
+        playlist["owned"] = own_playlist
+        playlist["title"] = nav(header1, TITLE_TEXT)
+        playlist["description"] = nav(header1, DESCRIPTION, True)
+        run_count = len(nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE_RUNS]))
+        print(f"run_count: {run_count}")
+        if run_count > 1:
+            playlist["author"] = {
+                "name": nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE2]),
+                "id": nav(
+                    header, ["musicResponsiveHeaderRenderer", *SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True
+                ),
+            }
+            if run_count == 5:
+                playlist["year"] = nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE3])
+
+        playlist["views"] = None
+        playlist["duration"] = None
+        if "runs" in header["musicResponsiveHeaderRenderer"]["secondSubtitle"]:
+            second_subtitle_runs = header["musicResponsiveHeaderRenderer"]["secondSubtitle"]["runs"]
+            has_views = (len(second_subtitle_runs) > 3) * 2
+            playlist["views"] = None if not has_views else to_int(second_subtitle_runs[0]["text"])
+            has_duration = (len(second_subtitle_runs) > 1) * 2
+            playlist["duration"] = (
+                None if not has_duration else second_subtitle_runs[has_views + has_duration]["text"]
+            )
+            song_count = second_subtitle_runs[has_views + 0]["text"].split(" ")
+            song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
+        else:
+            song_count = len(results["contents"])
+
+        playlist["trackCount"] = song_count
+
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+
+        # suggestions and related are missing e.g. on liked songs
+        section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+        playlist["related"] = []
+        if "continuations" in section_list:
+            additionalParams = get_continuation_params(section_list)
+            if own_playlist and (suggestions_limit > 0 or related):
+                parse_func = lambda results: parse_playlist_items(results)
+                suggested = request_func(additionalParams)
+                continuation = nav(suggested, SECTION_LIST_CONTINUATION)
+                additionalParams = get_continuation_params(continuation)
+                suggestions_shelf = nav(continuation, CONTENT + MUSIC_SHELF)
+                playlist["suggestions"] = get_continuation_contents(suggestions_shelf, parse_func)
+
+                parse_func = lambda results: parse_playlist_items(results)
+                playlist["suggestions"].extend(
+                    get_continuations(
+                        suggestions_shelf,
+                        "musicShelfContinuation",
+                        suggestions_limit - len(playlist["suggestions"]),
+                        request_func,
+                        parse_func,
+                        reloadable=True,
+                    )
+                )
+
+            if related:
+                response = request_func(additionalParams)
+                continuation = nav(response, SECTION_LIST_CONTINUATION, True)
+                if continuation:
+                    parse_func = lambda results: parse_content_list(results, parse_playlist)
+                    playlist["related"] = get_continuation_contents(
+                        nav(continuation, CONTENT + CAROUSEL), parse_func
+                    )
+
+        playlist["tracks"] = []
+        content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
+        if "contents" in content_data:
+            playlist["tracks"] = parse_playlist_items(content_data["contents"])
+
+            parse_func = lambda contents: parse_playlist_items(contents)
+            if "continuations" in content_data:
+                playlist["tracks"].extend(
+                    get_continuations(
+                        content_data, "musicPlaylistShelfContinuation", limit, request_func, parse_func
                     )
                 )
 
