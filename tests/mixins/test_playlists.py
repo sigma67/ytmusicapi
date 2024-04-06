@@ -11,6 +11,7 @@ class TestPlaylists:
         ("test_file", "owned"),
         [
             ("2024_03_get_playlist.json", True),
+            ("2024_03_get_playlist_public.json", False),
         ],
     )
     def test_get_playlist_2024(self, yt, test_file, owned):
@@ -21,7 +22,8 @@ class TestPlaylists:
             assert playlist["year"] == "2024"
             assert playlist["owned"] == owned
             assert "hours" in playlist["duration"]
-            assert len(playlist) == 13
+            assert playlist["id"]
+            assert isinstance(playlist["description"], str)
 
     def test_get_playlist_foreign(self, yt, yt_auth, yt_oauth):
         with pytest.raises(Exception):

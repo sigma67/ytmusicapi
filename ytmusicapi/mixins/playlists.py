@@ -175,40 +175,47 @@ class PlaylistsMixin(MixinProtocol):
         """temporary function to avoid too many ifs in get_playlist during a/b test"""
 
         results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
-        playlist = {}
+        playlist: Dict = {}
         own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in results
         if not own_playlist:
-            playlist["id"] = results["musicDetailHeaderRenderer"]["playlistId"]
-            header = response["musicDetailHeaderRenderer"]["header"]
+            header = results["musicResponsiveHeaderRenderer"]
+            playlist["id"] = nav(
+                header,
+                ["buttons", 1, "musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+                True,
+            )
             playlist["privacy"] = "PUBLIC"
         else:
             playlist["id"] = results["musicEditablePlaylistDetailHeaderRenderer"]["playlistId"]
-            header = results["musicEditablePlaylistDetailHeaderRenderer"]["header"]
+            header = results["musicEditablePlaylistDetailHeaderRenderer"]["header"][
+                "musicResponsiveHeaderRenderer"
+            ]
             playlist["privacy"] = results["musicEditablePlaylistDetailHeaderRenderer"]["editHeader"][
                 "musicPlaylistEditHeaderRenderer"
             ]["privacy"]
-            header1 = results["musicEditablePlaylistDetailHeaderRenderer"]["editHeader"][
-                "musicPlaylistEditHeaderRenderer"
-            ]
 
+        description_shelf = nav(header, ["description", *DESCRIPTION_SHELF], True)
+        playlist["description"] = (
+            "".join([run["text"] for run in description_shelf["description"]["runs"]])
+            if description_shelf
+            else None
+        )
         playlist["owned"] = own_playlist
-        playlist["title"] = nav(header1, TITLE_TEXT)
-        playlist["description"] = nav(header1, DESCRIPTION, True)
-        run_count = len(nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE_RUNS]))
+        playlist["title"] = nav(header, TITLE_TEXT)
+        run_count = len(nav(header, SUBTITLE_RUNS))
         if run_count > 1:
+            # TODO rework parsing to regex-based
             playlist["author"] = {
-                "name": nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE2]),
-                "id": nav(
-                    header, ["musicResponsiveHeaderRenderer", *SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True
-                ),
+                "name": nav(header, SUBTITLE2),
+                "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
             }
             if run_count == 5:
-                playlist["year"] = nav(header, ["musicResponsiveHeaderRenderer", *SUBTITLE3])
+                playlist["year"] = nav(header, SUBTITLE3)
 
         playlist["views"] = None
         playlist["duration"] = None
-        if "runs" in header["musicResponsiveHeaderRenderer"]["secondSubtitle"]:
-            second_subtitle_runs = header["musicResponsiveHeaderRenderer"]["secondSubtitle"]["runs"]
+        if "runs" in header["secondSubtitle"]:
+            second_subtitle_runs = header["secondSubtitle"]["runs"]
             has_views = (len(second_subtitle_runs) > 3) * 2
             playlist["views"] = None if not has_views else to_int(second_subtitle_runs[0]["text"])
             has_duration = (len(second_subtitle_runs) > 1) * 2
