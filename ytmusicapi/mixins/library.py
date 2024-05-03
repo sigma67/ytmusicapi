@@ -440,7 +440,7 @@ class LibraryMixin(MixinProtocol):
         ACCOUNT_PHOTO_URL = [*ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
 
         account_name = nav(response, ACCOUNT_NAME)
-        channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE)
+        channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE, none_if_absent=True)
         account_photo_url = nav(response, ACCOUNT_PHOTO_URL)
 
         return {
