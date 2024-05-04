@@ -6,12 +6,14 @@ from .songs import *
 
 def parse_playlist_header(response: Dict) -> Dict[str, Any]:
     playlist: Dict[str, Any] = {}
-    header = nav(response, HEADER_DETAIL)
     editable_header = nav(response, [*HEADER, *EDITABLE_PLAYLIST_DETAIL_HEADER], True)
     playlist["owned"] = editable_header is not None
     playlist["privacy"] = "PUBLIC"
-    if editable_header is not None:
+    if editable_header is not None:  # owned playlist
+        header = nav(editable_header, HEADER_DETAIL)
         playlist["privacy"] = editable_header["editHeader"]["musicPlaylistEditHeaderRenderer"]["privacy"]
+    else:
+        header = nav(response, HEADER_DETAIL, True)
 
     playlist["title"] = nav(header, TITLE_TEXT)
     playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED)

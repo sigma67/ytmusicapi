@@ -89,7 +89,7 @@ class TestPlaylists:
         )
         assert response == "STATUS_SUCCEEDED", "Playlist edit failed"
 
-    def test_end2end(self, config, yt_brand, sample_video):
+    def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
             "test",
             "test description",
