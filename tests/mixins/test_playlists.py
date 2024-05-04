@@ -41,6 +41,22 @@ class TestPlaylists:
         assert len(playlist["tracks"]) > 200
         assert len(playlist["related"]) == 0
 
+    def test_get_playlist_foreign_new_format(self, yt_empty):
+        with pytest.raises(Exception):
+            yt_empty.get_playlist("PLABC")
+        playlist = yt_empty.get_playlist("PLk5BdzXBUiUe8Q5I13ZSCD8HbxMqJUUQA", limit=300, suggestions_limit=7)
+        assert len(playlist["duration"]) > 5
+        assert len(playlist["tracks"]) > 200
+        assert "suggestions" not in playlist
+        assert playlist["owned"] is False
+
+        playlist = yt_empty.get_playlist("RDATgXd-")
+        assert len(playlist["tracks"]) >= 100
+
+        playlist = yt_empty.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
+        assert len(playlist["tracks"]) > 200
+        assert len(playlist["related"]) == 0
+
     def test_get_playlist_owned(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"], related=True, suggestions_limit=21)
         assert len(playlist["tracks"]) < 100

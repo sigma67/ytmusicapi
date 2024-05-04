@@ -124,8 +124,7 @@ class PlaylistsMixin(MixinProtocol):
         playlist["related"] = []
         if "continuations" in section_list:
             additionalParams = get_continuation_params(section_list)
-            own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in response["header"]
-            if own_playlist and (suggestions_limit > 0 or related):
+            if playlist["owned"] and (suggestions_limit > 0 or related):
                 parse_func = lambda results: parse_playlist_items(results)
                 suggested = request_func(additionalParams)
                 continuation = nav(suggested, SECTION_LIST_CONTINUATION)
@@ -174,11 +173,12 @@ class PlaylistsMixin(MixinProtocol):
     ) -> Dict:  # pragma: no cover
         """temporary function to avoid too many ifs in get_playlist during a/b test"""
 
-        results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
+        header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
+        section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
         playlist: Dict = {}
-        own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in results
-        if not own_playlist:
-            header = results["musicResponsiveHeaderRenderer"]
+        playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
+        if not playlist["owned"]:
+            header = nav(header_data, RESPONSIVE_HEADER)
             playlist["id"] = nav(
                 header,
                 ["buttons", 1, "musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
@@ -186,11 +186,9 @@ class PlaylistsMixin(MixinProtocol):
             )
             playlist["privacy"] = "PUBLIC"
         else:
-            playlist["id"] = results["musicEditablePlaylistDetailHeaderRenderer"]["playlistId"]
-            header = results["musicEditablePlaylistDetailHeaderRenderer"]["header"][
-                "musicResponsiveHeaderRenderer"
-            ]
-            playlist["privacy"] = results["musicEditablePlaylistDetailHeaderRenderer"]["editHeader"][
+            playlist["id"] = nav(header_data, [*EDITABLE_PLAYLIST_DETAIL_HEADER, *PLAYLIST_ID])
+            header = nav(header_data, [*EDITABLE_PLAYLIST_DETAIL_HEADER, *HEADER, *RESPONSIVE_HEADER])
+            playlist["privacy"] = header_data[EDITABLE_PLAYLIST_DETAIL_HEADER[0]]["editHeader"][
                 "musicPlaylistEditHeaderRenderer"
             ]["privacy"]
 
@@ -200,17 +198,8 @@ class PlaylistsMixin(MixinProtocol):
             if description_shelf
             else None
         )
-        playlist["owned"] = own_playlist
         playlist["title"] = nav(header, TITLE_TEXT)
-        run_count = len(nav(header, SUBTITLE_RUNS))
-        if run_count > 1:
-            # TODO rework parsing to regex-based
-            playlist["author"] = {
-                "name": nav(header, SUBTITLE2),
-                "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
-            }
-            if run_count == 5:
-                playlist["year"] = nav(header, SUBTITLE3)
+        playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
 
         playlist["views"] = None
         playlist["duration"] = None
@@ -225,18 +214,17 @@ class PlaylistsMixin(MixinProtocol):
             song_count = second_subtitle_runs[has_views + 0]["text"].split(" ")
             song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
         else:
-            song_count = len(results["contents"])
+            song_count = len(section_list["contents"])
 
         playlist["trackCount"] = song_count
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
-        section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
         playlist["related"] = []
         if "continuations" in section_list:
             additionalParams = get_continuation_params(section_list)
-            if own_playlist and (suggestions_limit > 0 or related):
+            if playlist["owned"] and (suggestions_limit > 0 or related):
                 parse_func = lambda results: parse_playlist_items(results)
                 suggested = request_func(additionalParams)
                 continuation = nav(suggested, SECTION_LIST_CONTINUATION)
