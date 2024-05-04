@@ -22,7 +22,7 @@ ytmusicapi: Unofficial API for YouTube Music
     :target: https://github.com/sigma67/ytmusicapi/commits
 
 
-|pypi-downloads||gitter||code-coverage||latest-release||commits-since-latest| 
+|pypi-downloads| |gitter| |code-coverage| |latest-release| |commits-since-latest|
 
 ytmusicapi is a Python 3 library to send requests to the YouTube Music API.
 It emulates YouTube Music web client requests using the user's cookie data for authentication.
