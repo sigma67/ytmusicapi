@@ -1,9 +1,30 @@
+import json
 import time
+from pathlib import Path
+from unittest import mock
 
 import pytest
 
 
 class TestPlaylists:
+    @pytest.mark.parametrize(
+        ("test_file", "owned"),
+        [
+            ("2024_03_get_playlist.json", True),
+            ("2024_03_get_playlist_public.json", False),
+        ],
+    )
+    def test_get_playlist_2024(self, yt, test_file, owned):
+        with open(Path(__file__).parent.parent / "data" / test_file, encoding="utf8") as f:
+            mock_response = json.load(f)
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            playlist = yt.get_playlist("MPREabc")
+            assert playlist["year"] == "2024"
+            assert playlist["owned"] == owned
+            assert "hours" in playlist["duration"]
+            assert playlist["id"]
+            assert isinstance(playlist["description"], str)
+
     def test_get_playlist_foreign(self, yt, yt_auth, yt_oauth):
         with pytest.raises(Exception):
             yt.get_playlist("PLABC")
@@ -17,6 +38,22 @@ class TestPlaylists:
         assert len(playlist["tracks"]) >= 100
 
         playlist = yt_oauth.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
+        assert len(playlist["tracks"]) > 200
+        assert len(playlist["related"]) == 0
+
+    def test_get_playlist_foreign_new_format(self, yt_empty):
+        with pytest.raises(Exception):
+            yt_empty.get_playlist("PLABC")
+        playlist = yt_empty.get_playlist("PLk5BdzXBUiUe8Q5I13ZSCD8HbxMqJUUQA", limit=300, suggestions_limit=7)
+        assert len(playlist["duration"]) > 5
+        assert len(playlist["tracks"]) > 200
+        assert "suggestions" not in playlist
+        assert playlist["owned"] is False
+
+        playlist = yt_empty.get_playlist("RDATgXd-")
+        assert len(playlist["tracks"]) >= 100
+
+        playlist = yt_empty.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
         assert len(playlist["tracks"]) > 200
         assert len(playlist["related"]) == 0
 
@@ -52,7 +89,7 @@ class TestPlaylists:
         )
         assert response == "STATUS_SUCCEEDED", "Playlist edit failed"
 
-    def test_end2end(self, config, yt_brand, sample_video):
+    def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
             "test",
             "test description",
