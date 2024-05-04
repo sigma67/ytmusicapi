@@ -221,9 +221,7 @@ class UploadsMixin(MixinProtocol):
             )
 
         headers = self.headers.copy()
-        upload_url = (
-            "https://upload.youtube.com/upload/usermusic/http?authuser=%s" % headers["x-goog-authuser"]
-        )
+        upload_url = f"https://upload.youtube.com/upload/usermusic/http?authuser={headers['x-goog-authuser']}"
         filesize = os.path.getsize(filepath)
         body = ("filename=" + ntpath.basename(filepath)).encode("utf-8")
         headers.pop("content-encoding", None)
