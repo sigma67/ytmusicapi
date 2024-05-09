@@ -30,7 +30,9 @@ def parse_uploaded_items(results):
         title = get_item_text(data, 0)
         like = nav(data, MENU_LIKE_STATUS)
         thumbnails = nav(data, THUMBNAILS) if "thumbnail" in data else None
-        duration = get_fixed_column_item(data, 0)["text"]["runs"][0]["text"]
+        duration = None
+        if "fixedColumns" in data:
+            duration = get_fixed_column_item(data, 0)["text"]["runs"][0]["text"]
         song = {
             "entityId": entityId,
             "videoId": videoId,
