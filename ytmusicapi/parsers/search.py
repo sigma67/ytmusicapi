@@ -1,17 +1,19 @@
 from ._utils import *
 from .songs import *
 
+UNIQUE_RESULT_TYPES = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
+ALL_RESULT_TYPES = ["album", *UNIQUE_RESULT_TYPES]
+
 
 def get_search_result_type(result_type_local, result_types_local):
     if not result_type_local:
         return None
-    result_types = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
     result_type_local = result_type_local.lower()
     # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
     if result_type_local not in result_types_local:
         result_type = "album"
     else:
-        result_type = result_types[result_types_local.index(result_type_local)]
+        result_type = UNIQUE_RESULT_TYPES[result_types_local.index(result_type_local)]
 
     return result_type
 
@@ -39,7 +41,7 @@ def parse_top_result(data, search_result_types):
 
         search_result["title"] = nav(data, TITLE_TEXT)
         runs = nav(data, ["subtitle", "runs"])
-        song_info = parse_song_runs(runs)
+        song_info = parse_song_runs(runs[2:])
         search_result.update(song_info)
 
     if result_type in ["album"]:
@@ -58,14 +60,29 @@ def parse_search_result(data, search_result_types, result_type, category):
     default_offset = (not result_type or result_type == "album") * 2
     search_result = {"category": category}
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
-    if not result_type and video_type:
-        result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
 
-    result_type = (
-        get_search_result_type(get_item_text(data, 1), search_result_types)
-        if not result_type
-        else result_type
-    )
+    # try to determine the result type based on the first run
+    if result_type not in ALL_RESULT_TYPES:  # i.e. localized result_type
+        result_type = get_search_result_type(get_item_text(data, 1), search_result_types)
+
+    # determine result type based on browseId
+    #  if there was no category title (i.e. for extra results in Top Result)
+    if not result_type:
+        if browse_id := nav(data, NAVIGATION_BROWSE_ID, True):
+            mapping = {
+                "VMPL": "playlist",
+                "RD": "playlist",
+                "MPLA": "artist",
+                "MPRE": "album",
+                "MPSP": "podcast",
+                "MPED": "episode",
+            }
+            result_type = next(
+                iter(type for prefix, type in mapping.items() if browse_id.startswith(prefix)), None
+            )
+        else:
+            result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
+
     search_result["resultType"] = result_type
 
     if result_type != "artist":
@@ -134,7 +151,8 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result["year"] = None
         flex_item = get_flex_column_item(data, 1)
         runs = flex_item["text"]["runs"]
-        song_info = parse_song_runs(runs)
+        runs_offset = (len(runs[0]) == 1) * 2  # ignore the first run if it is a type specifier (like "Song")
+        song_info = parse_song_runs(runs[runs_offset:])
         search_result.update(song_info)
 
     if result_type in ["artist", "album", "playlist", "profile", "podcast"]:
