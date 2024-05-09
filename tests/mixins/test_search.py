@@ -1,6 +1,7 @@
 import pytest
 
-from ytmusicapi.parsers.search import RESULT_TYPES
+from ytmusicapi import YTMusic
+from ytmusicapi.parsers.search import ALL_RESULT_TYPES
 
 
 class TestSearch:
@@ -17,7 +18,7 @@ class TestSearch:
         assert ["resultType" in r for r in results] == [True] * len(results)
         assert len(results) >= 10
         assert not any(
-            artist["name"].lower() in RESULT_TYPES
+            artist["name"].lower() in ALL_RESULT_TYPES
             for result in results
             if "artists" in result
             for artist in result["artists"]
@@ -25,7 +26,7 @@ class TestSearch:
         results = yt.search(query)
         assert len(results) >= 10
         assert not any(
-            artist["name"].lower() in RESULT_TYPES
+            artist["name"].lower() in ALL_RESULT_TYPES
             for result in results
             if "artists" in result
             for artist in result["artists"]
@@ -34,6 +35,11 @@ class TestSearch:
     def test_search_ignore_spelling(self, yt_auth):
         results = yt_auth.search("Martin Stig Andersen - Deteriation", ignore_spelling=True)
         assert len(results) > 0
+
+    def test_search_localized(self):
+        yt_local = YTMusic(language="it")
+        results = yt_local.search("ABBA")
+        assert all(result["resultType"] in ALL_RESULT_TYPES for result in results)
 
     def test_search_filters(self, yt_auth):
         query = "hip hop playlist"

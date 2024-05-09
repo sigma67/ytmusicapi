@@ -1,7 +1,8 @@
 from ._utils import *
 from .songs import *
 
-RESULT_TYPES = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
+UNIQUE_RESULT_TYPES = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
+ALL_RESULT_TYPES = ["album", *UNIQUE_RESULT_TYPES]
 
 
 def get_search_result_type(result_type_local, result_types_local):
@@ -12,7 +13,7 @@ def get_search_result_type(result_type_local, result_types_local):
     if result_type_local not in result_types_local:
         result_type = "album"
     else:
-        result_type = RESULT_TYPES[result_types_local.index(result_type_local)]
+        result_type = UNIQUE_RESULT_TYPES[result_types_local.index(result_type_local)]
 
     return result_type
 
@@ -61,8 +62,8 @@ def parse_search_result(data, search_result_types, result_type, category):
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
 
     # try to determine the result type based on the first run
-    if result_type not in RESULT_TYPES:  # i.e. localized result_type
-        get_search_result_type(get_item_text(data, 1), search_result_types)
+    if result_type not in ALL_RESULT_TYPES:  # i.e. localized result_type
+        result_type = get_search_result_type(get_item_text(data, 1), search_result_types)
 
     # determine result type based on browseId
     #  if there was no category title (i.e. for extra results in Top Result)
