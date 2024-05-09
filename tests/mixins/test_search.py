@@ -1,5 +1,7 @@
 import pytest
 
+from ytmusicapi.parsers.search import RESULT_TYPES
+
 
 class TestSearch:
     def test_search_exceptions(self, yt_auth):
@@ -14,8 +16,20 @@ class TestSearch:
         results = yt_brand.search(query)
         assert ["resultType" in r for r in results] == [True] * len(results)
         assert len(results) >= 10
+        assert not any(
+            artist["name"].lower() in RESULT_TYPES
+            for result in results
+            if "artists" in result
+            for artist in result["artists"]
+        )
         results = yt.search(query)
         assert len(results) >= 10
+        assert not any(
+            artist["name"].lower() in RESULT_TYPES
+            for result in results
+            if "artists" in result
+            for artist in result["artists"]
+        )
 
     def test_search_ignore_spelling(self, yt_auth):
         results = yt_auth.search("Martin Stig Andersen - Deteriation", ignore_spelling=True)

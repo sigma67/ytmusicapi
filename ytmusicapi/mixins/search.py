@@ -192,10 +192,10 @@ class SearchMixin(MixinProtocol):
         else:
             results = response["contents"]
 
-        results = nav(results, SECTION_LIST)
+        section_list = nav(results, SECTION_LIST)
 
         # no results
-        if len(results) == 1 and "itemSectionRenderer" in results:
+        if len(section_list) == 1 and "itemSectionRenderer" in section_list:
             return search_results
 
         # set filter for parser
@@ -204,27 +204,23 @@ class SearchMixin(MixinProtocol):
         elif scope == scopes[1]:
             filter = scopes[1]
 
-        for res in results:
+        for res in section_list:
             if "musicCardShelfRenderer" in res:
                 top_result = parse_top_result(
                     res["musicCardShelfRenderer"], self.parser.get_search_result_types()
                 )
                 search_results.append(top_result)
-                if results := nav(res, ["musicCardShelfRenderer", "contents"], True):
-                    category = None
-                    # category "more from youtube" is missing sometimes
-                    if "messageRenderer" in results[0]:
-                        category = nav(results.pop(0), ["messageRenderer", *TEXT_RUN_TEXT])
-                    type = None
-                else:
+                if not (shelf_contents := nav(res, ["musicCardShelfRenderer", "contents"], True)):
                     continue
+                type = category = None
+                # if "more from youtube" is present, remove it - it's not parseable
+                if "messageRenderer" in shelf_contents[0]:
+                    category = nav(shelf_contents.pop(0), ["messageRenderer", *TEXT_RUN_TEXT])
 
             elif "musicShelfRenderer" in res:
-                results = res["musicShelfRenderer"]["contents"]
-                type_filter = filter
+                shelf_contents = res["musicShelfRenderer"]["contents"]
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
-                if not type_filter and scope == scopes[0]:
-                    type_filter = category
+                type_filter = filter or category
 
                 type = type_filter[:-1].lower() if type_filter else None
 
@@ -232,7 +228,7 @@ class SearchMixin(MixinProtocol):
                 continue
 
             search_result_types = self.parser.get_search_result_types()
-            search_results.extend(parse_search_results(results, search_result_types, type, category))
+            search_results.extend(parse_search_results(shelf_contents, search_result_types, type, category))
 
             if filter:  # if filter is set, there are continuations
 
