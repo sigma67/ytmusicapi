@@ -1,4 +1,5 @@
 import tempfile
+import time
 
 import pytest
 
@@ -46,6 +47,26 @@ class TestUploads:
     def test_upload_song(self, config, yt_auth):
         response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
         assert response.status_code == 409
+
+    def test_upload_song_and_verify(self, config, yt_auth):
+        """Upload a song and verify it can be retrieved after it finishes processing."""
+        response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
+        if not isinstance(response, str) and response.status_code == 409:
+            raise AssertionError(f"{config['uploads']['file']!r} was already uploaded. Delete it and re-run.")
+
+        assert response == "STATUS_SUCCEEDED" or response.status_code == 200, "Song failed to upload."
+
+        # Wait for upload to finish processing and verify it can be retrieved
+        retries_remaining = 15
+        while retries_remaining:
+            time.sleep(3)
+            songs = yt_auth.get_library_upload_songs()
+            for song in songs:
+                if song.get("title") in config["uploads"]["file"]:
+                    return
+            retries_remaining -= 1
+
+        raise AssertionError("Uploaded song was not found in library")
 
     @pytest.mark.skip(reason="Do not delete uploads")
     def test_delete_upload_entity(self, yt_oauth):
