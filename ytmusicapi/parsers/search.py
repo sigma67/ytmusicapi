@@ -59,7 +59,14 @@ def parse_search_result(data, search_result_types, result_type, category):
     default_offset = (not result_type or result_type == "album") * 2
     search_result = {"category": category}
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
-    if not result_type:  # for extra results in Top Result
+
+    # try to determine the result type based on the first run
+    if result_type not in RESULT_TYPES:  # i.e. localized result_type
+        get_search_result_type(get_item_text(data, 1), search_result_types)
+
+    # determine result type based on browseId
+    #  if there was no category title (i.e. for extra results in Top Result)
+    if not result_type:
         if browse_id := nav(data, NAVIGATION_BROWSE_ID, True):
             mapping = {
                 "VMPL": "playlist",
@@ -74,9 +81,6 @@ def parse_search_result(data, search_result_types, result_type, category):
             )
         else:
             result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
-
-    if not result_type:
-        result_type = get_search_result_type(get_item_text(data, 1), search_result_types)
 
     search_result["resultType"] = result_type
 
