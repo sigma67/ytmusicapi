@@ -1,5 +1,6 @@
 import tempfile
 import time
+from pathlib import Path
 
 import pytest
 
@@ -54,7 +55,7 @@ class TestUploads:
         upload_response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
         if not isinstance(upload_response, str) and upload_response.status_code == 409:
             # Song is already in uploads. Delete it and re-upload
-            songs = yt_auth.get_library_upload_songs()
+            songs = yt_auth.get_library_upload_songs(limit=None, order="recently_added")
             delete_response = None
             for song in songs:
                 if song.get("title") in config["uploads"]["file"]:
@@ -70,10 +71,10 @@ class TestUploads:
         ), f"Song failed to upload {upload_response}"
 
         # Wait for upload to finish processing and verify it can be retrieved
-        retries_remaining = 15
+        retries_remaining = 5
         while retries_remaining:
-            time.sleep(3)
-            songs = yt_auth.get_library_upload_songs()
+            time.sleep(5)
+            songs = yt_auth.get_library_upload_songs(limit=None, order="recently_added")
             for song in songs:
                 if song.get("title") in config["uploads"]["file"]:
                     # Uploaded song found
