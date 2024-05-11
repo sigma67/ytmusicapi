@@ -107,6 +107,7 @@ class TestPlaylists:
         assert len(response["playlistEditResults"]) > 0, "Adding playlist item failed"
         time.sleep(3)
         yt_brand.edit_playlist(playlist_id, addToTop=False)
+        time.sleep(3)
         playlist = yt_brand.get_playlist(playlist_id, related=True)
         assert len(playlist["tracks"]) == 46, "Getting playlist items failed"
         response = yt_brand.remove_playlist_items(playlist_id, playlist["tracks"])
