@@ -63,9 +63,7 @@ class TestUploads:
             # Need to wait for song to be fully deleted
             time.sleep(10)
             # Now re-upload
-            upload_response = yt_auth.upload_song(
-                get_resource(config["uploads"]["file"])
-            )
+            upload_response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
 
         assert (
             upload_response == "STATUS_SUCCEEDED" or upload_response.status_code == 200
