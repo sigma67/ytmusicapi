@@ -61,23 +61,19 @@ def parse_search_result(data, search_result_types, result_type, category):
     search_result = {"category": category}
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
 
-    # try to determine the result type based on the first run
-    if result_type not in ALL_RESULT_TYPES:  # i.e. localized result_type
-        if not result_type:
-            result_type = get_item_text(data, 1)
-        result_type = get_search_result_type(result_type, search_result_types)
-
     # determine result type based on browseId
     #  if there was no category title (i.e. for extra results in Top Result)
     if not result_type:
         if browse_id := nav(data, NAVIGATION_BROWSE_ID, True):
             mapping = {
-                "VMPL": "playlist",
+                "VM": "playlist",
                 "RD": "playlist",
+                "VL": "playlist",
                 "MPLA": "artist",
                 "MPRE": "album",
                 "MPSP": "podcast",
                 "MPED": "episode",
+                "UC": "artist",
             }
             result_type = next(
                 iter(type for prefix, type in mapping.items() if browse_id.startswith(prefix)), None
