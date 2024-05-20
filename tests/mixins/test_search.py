@@ -40,6 +40,10 @@ class TestSearch:
         yt_local = YTMusic(language="it")
         results = yt_local.search("ABBA")
         assert all(result["resultType"] in ALL_RESULT_TYPES for result in results)
+        assert len([x for x in results if x["resultType"] == "album"]) <= 10  # album is default fallback
+
+        results = yt_local.search("ABBA", filter="songs")
+        assert all(item["resultType"] == "song" for item in results)
 
     def test_search_filters(self, yt_auth):
         query = "hip hop playlist"

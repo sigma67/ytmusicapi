@@ -205,6 +205,9 @@ class SearchMixin(MixinProtocol):
             filter = scopes[1]
 
         for res in section_list:
+            result_type = category = None
+            search_result_types = self.parser.get_search_result_types()
+
             if "musicCardShelfRenderer" in res:
                 top_result = parse_top_result(
                     res["musicCardShelfRenderer"], self.parser.get_search_result_types()
@@ -212,7 +215,6 @@ class SearchMixin(MixinProtocol):
                 search_results.append(top_result)
                 if not (shelf_contents := nav(res, ["musicCardShelfRenderer", "contents"], True)):
                     continue
-                type = category = None
                 # if "more from youtube" is present, remove it - it's not parseable
                 if "messageRenderer" in shelf_contents[0]:
                     category = nav(shelf_contents.pop(0), ["messageRenderer", *TEXT_RUN_TEXT])
@@ -220,15 +222,19 @@ class SearchMixin(MixinProtocol):
             elif "musicShelfRenderer" in res:
                 shelf_contents = res["musicShelfRenderer"]["contents"]
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
-                type_filter = filter or category
 
-                type = type_filter[:-1].lower() if type_filter else None
+                # if we know the filter it's easy to set the result type
+                # unfortunately uploads is modeled as a filter (historical reasons),
+                #  so we take care to not set the result type for that scope
+                if filter and not scope == scopes[1]:
+                    result_type = filter[:-1].lower()
 
             else:
                 continue
 
-            search_result_types = self.parser.get_search_result_types()
-            search_results.extend(parse_search_results(shelf_contents, search_result_types, type, category))
+            search_results.extend(
+                parse_search_results(shelf_contents, search_result_types, result_type, category)
+            )
 
             if filter:  # if filter is set, there are continuations
 
@@ -236,7 +242,7 @@ class SearchMixin(MixinProtocol):
                     return self._send_request(endpoint, body, additionalParams)
 
                 def parse_func(contents):
-                    return parse_search_results(contents, search_result_types, type, category)
+                    return parse_search_results(contents, search_result_types, result_type, category)
 
                 search_results.extend(
                     get_continuations(
