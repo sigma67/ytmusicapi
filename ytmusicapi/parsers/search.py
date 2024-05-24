@@ -96,7 +96,9 @@ def parse_search_result(data, search_result_types, result_type, category):
     elif result_type == "playlist":
         flex_item = get_flex_column_item(data, 1)["text"]["runs"]
         has_author = len(flex_item) == default_offset + 3
-        search_result["itemCount"] = get_item_text(data, 1, default_offset + has_author * 2).split(" ")[0]
+        search_result["itemCount"] = int(
+            get_item_text(data, 1, default_offset + has_author * 2).split(" ")[0]
+        )
         search_result["author"] = None if not has_author else get_item_text(data, 1, default_offset)
 
     elif result_type == "station":
