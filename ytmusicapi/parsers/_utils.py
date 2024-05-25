@@ -4,7 +4,10 @@ from ytmusicapi.navigation import *
 
 
 def parse_menu_playlists(data, result):
-    watch_menu = find_objects_by_key(nav(data, MENU_ITEMS), MNIR)
+    menu_items = nav(data, MENU_ITEMS, True)
+    if menu_items is None:
+        return
+    watch_menu = find_objects_by_key(menu_items, MNIR)
     for item in [_x[MNIR] for _x in watch_menu]:
         icon = nav(item, ICON_TYPE)
         if icon == "MUSIC_SHUFFLE":
