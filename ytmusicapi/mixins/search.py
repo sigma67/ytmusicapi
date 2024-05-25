@@ -83,8 +83,9 @@ class SearchMixin(MixinProtocol):
               {
                 "category": "Albums",
                 "resultType": "album",
-                "browseId": "MPREb_9nqEki4ZDpp",
-                "title": "(What's The Story) Morning Glory? (Remastered)",
+                "browseId": "MPREb_IInSY5QXXrW",
+                "playlistId": "OLAK5uy_kunInnOpcKECWIBQGB0Qj6ZjquxDvfckg",
+                "title": "(What's The Story) Morning Glory?",
                 "type": "Album",
                 "artist": "Oasis",
                 "year": "1995",
