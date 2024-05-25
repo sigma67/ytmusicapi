@@ -46,6 +46,7 @@ def parse_top_result(data, search_result_types):
 
     if result_type in ["album"]:
         search_result["browseId"] = nav(data, TITLE + NAVIGATION_BROWSE_ID, True)
+        search_result["playlistId"] = nav(data, ["buttons", 0, "buttonRenderer", "command", *WATCH_PID], True)
 
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
