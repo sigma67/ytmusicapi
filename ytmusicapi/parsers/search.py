@@ -46,6 +46,7 @@ def parse_top_result(data, search_result_types):
 
     if result_type in ["album"]:
         search_result["browseId"] = nav(data, TITLE + NAVIGATION_BROWSE_ID, True)
+        search_result["playlistId"] = nav(data, ["buttons", 0, "buttonRenderer", "command", *WATCH_PID], True)
 
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
@@ -158,6 +159,13 @@ def parse_search_result(data, search_result_types, result_type, category):
 
     if result_type in ["song", "album"]:
         search_result["isExplicit"] = nav(data, BADGE_LABEL, True) is not None
+
+    if result_type in ["album"]:
+        search_result["playlistId"] = nav(
+            data,
+            [*PLAY_BUTTON, "playNavigationEndpoint", "watchEndpoint", "playlistId"],
+            True,
+        )
 
     if result_type in ["episode"]:
         flex_item = get_flex_column_item(data, 1)
