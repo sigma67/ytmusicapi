@@ -1,7 +1,6 @@
 """enum representing types of authentication supported by this library"""
 
 from enum import Enum, auto
-from typing import List
 
 
 class AuthType(int, Enum):
@@ -21,5 +20,5 @@ class AuthType(int, Enum):
     OAUTH_CUSTOM_FULL = auto()
 
     @classmethod
-    def oauth_types(cls) -> List["AuthType"]:
+    def oauth_types(cls) -> list["AuthType"]:
         return [cls.OAUTH_DEFAULT, cls.OAUTH_CUSTOM_CLIENT, cls.OAUTH_CUSTOM_FULL]

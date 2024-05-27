@@ -5,7 +5,7 @@ import os
 import time
 from contextlib import suppress
 from functools import partial
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import requests
 from requests import Response
@@ -42,10 +42,10 @@ from .auth.types import AuthType
 class YTMusicBase:
     def __init__(
         self,
-        auth: Optional[Union[str, Dict]] = None,
+        auth: Optional[Union[str, dict]] = None,
         user: Optional[str] = None,
         requests_session=True,
-        proxies: Optional[Dict[str, str]] = None,
+        proxies: Optional[dict[str, str]] = None,
         language: str = "en",
         location: str = "",
         oauth_credentials: Optional[OAuthCredentials] = None,
@@ -102,7 +102,7 @@ class YTMusicBase:
         self.oauth_credentials: OAuthCredentials  #: Client used for OAuth refreshing
 
         self._session: requests.Session  #: request session for connection pooling
-        self.proxies: Optional[Dict[str, str]] = proxies  #: params for session modification
+        self.proxies: Optional[dict[str, str]] = proxies  #: params for session modification
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
@@ -220,7 +220,7 @@ class YTMusicBase:
 
         return self._headers
 
-    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+    def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
         body.update(self.context)
 
         # only required for post requests (?)
@@ -241,7 +241,7 @@ class YTMusicBase:
             raise Exception(message + error)
         return response_text
 
-    def _send_get_request(self, url: str, params: Optional[Dict] = None) -> Response:
+    def _send_get_request(self, url: str, params: Optional[dict] = None) -> Response:
         response = self._session.get(
             url,
             params=params,

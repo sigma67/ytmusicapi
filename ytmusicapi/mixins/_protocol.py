@@ -1,6 +1,6 @@
 """protocol that defines the functions available to mixins"""
 
-from typing import Dict, Optional, Protocol
+from typing import Optional, Protocol
 
 from requests import Response
 
@@ -15,17 +15,17 @@ class MixinProtocol(Protocol):
 
     parser: Parser
 
-    proxies: Optional[Dict[str, str]]
+    proxies: Optional[dict[str, str]]
 
     def _check_auth(self) -> None:
         """checks if self has authentication"""
 
-    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+    def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
         """for sending post requests to YouTube Music"""
 
-    def _send_get_request(self, url: str, params: Optional[Dict] = None) -> Response:
+    def _send_get_request(self, url: str, params: Optional[dict] = None) -> Response:
         """for sending get requests to YouTube Music"""
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> dict[str, str]:
         """property for getting request headers"""

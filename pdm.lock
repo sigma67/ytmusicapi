@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:ef78505acc5689bac7e9d73819b1e70ca72e3422a79a50b5f2ea451279f0ec18"
+content_hash = "sha256:7375fe5e1420835e66238e967fce65350f0f776a6bc37e5c7ecb62e109f02852"
 
 [[package]]
 name = "alabaster"
@@ -24,9 +24,6 @@ version = "2.14.0"
 requires_python = ">=3.7"
 summary = "Internationalization utilities"
 groups = ["dev"]
-dependencies = [
-    "pytz>=2015.7; python_version < \"3.9\"",
-]
 files = [
     {file = "Babel-2.14.0-py3-none-any.whl", hash = "sha256:efb1a25b7118e67ce3a259bed20545c29cb68be8ad2c784c83689981b7a57287"},
     {file = "Babel-2.14.0.tar.gz", hash = "sha256:6919867db036398ba21eb5c7a0f6b28ab8cbc3ae7a73a44ebe34ae74a4e7d363"},
@@ -533,14 +530,17 @@ files = [
 ]
 
 [[package]]
-name = "pytz"
-version = "2024.1"
-summary = "World timezone definitions, modern and historical"
+name = "pytest-retry"
+version = "1.6.3"
+requires_python = ">=3.9"
+summary = "Adds the ability to retry flaky tests in CI environments"
 groups = ["dev"]
-marker = "python_version < \"3.9\""
+dependencies = [
+    "pytest>=7.0.0",
+]
 files = [
-    {file = "pytz-2024.1-py2.py3-none-any.whl", hash = "sha256:328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319"},
-    {file = "pytz-2024.1.tar.gz", hash = "sha256:2a29735ea9c18baf14b448846bde5a48030ed267578472d8955cd0e7443a9812"},
+    {file = "pytest_retry-1.6.3-py3-none-any.whl", hash = "sha256:e96f7df77ee70b0838d1085f9c3b8b5b7d74bf8947a0baf32e2b8c71b27683c8"},
+    {file = "pytest_retry-1.6.3.tar.gz", hash = "sha256:36ccfa11c8c8f9ddad5e20375182146d040c20c4a791745139c5a99ddf1b557d"},
 ]
 
 [[package]]
