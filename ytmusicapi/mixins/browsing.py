@@ -35,7 +35,6 @@ class BrowsingMixin(MixinProtocol):
                     "contents": [
                         { //album result
                             "title": "Sentiment",
-                            "year": "Said The Sky",
                             "browseId": "MPREb_QtqXtd2xZMR",
                             "thumbnails": [...]
                         },
