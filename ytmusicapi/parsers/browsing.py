@@ -65,7 +65,7 @@ def parse_album(result):
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
     }
 
-    if (year := nav(result, SUBTITLE2, True)).isnumeric():
+    if (year := nav(result, SUBTITLE2, True)) and year.isnumeric():
         album["year"] = year
 
     return album
