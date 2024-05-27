@@ -1,11 +1,11 @@
-from typing import List, Optional
+from typing import Optional
 
 from ..helpers import to_int
 from .songs import *
 
 
-def parse_playlist_header(response: Dict) -> Dict[str, Any]:
-    playlist: Dict[str, Any] = {}
+def parse_playlist_header(response: dict) -> dict[str, Any]:
+    playlist: dict[str, Any] = {}
     editable_header = nav(response, [*HEADER, *EDITABLE_PLAYLIST_DETAIL_HEADER], True)
     playlist["owned"] = editable_header is not None
     playlist["privacy"] = "PUBLIC"
@@ -45,7 +45,7 @@ def parse_playlist_header(response: Dict) -> Dict[str, Any]:
     return playlist
 
 
-def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_album=False):
+def parse_playlist_items(results, menu_entries: Optional[list[list]] = None, is_album=False):
     songs = []
     for result in results:
         if MRLIR not in result:
@@ -59,8 +59,8 @@ def parse_playlist_items(results, menu_entries: Optional[List[List]] = None, is_
 
 
 def parse_playlist_item(
-    data: Dict, menu_entries: Optional[List[List]] = None, is_album=False
-) -> Optional[Dict]:
+    data: dict, menu_entries: Optional[list[list]] = None, is_album=False
+) -> Optional[dict]:
     videoId = setVideoId = None
     like = None
     feedback_tokens = None

@@ -76,7 +76,7 @@ class TestPlaylists:
                 playlist["tracks"][0]["setVideoId"],
             ),
         )
-        assert response == "STATUS_SUCCEEDED", "Playlist edit failed"
+        assert response == ResponseStatus.SUCCEEDED, "Playlist edit failed"
         yt_brand.edit_playlist(
             playlist["id"],
             title=playlist["title"],
@@ -87,7 +87,7 @@ class TestPlaylists:
                 playlist["tracks"][1]["setVideoId"],
             ),
         )
-        assert response == "STATUS_SUCCEEDED", "Playlist edit failed"
+        assert response == ResponseStatus.SUCCEEDED, "Playlist edit failed"
 
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
@@ -103,7 +103,7 @@ class TestPlaylists:
             source_playlist="OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow",
             duplicates=True,
         )
-        assert response["status"] == "STATUS_SUCCEEDED", "Adding playlist item failed"
+        assert response["status"] == ResponseStatus.SUCCEEDED, "Adding playlist item failed"
         assert len(response["playlistEditResults"]) > 0, "Adding playlist item failed"
         time.sleep(3)
         yt_brand.edit_playlist(playlist_id, addToTop=False)
@@ -111,5 +111,5 @@ class TestPlaylists:
         playlist = yt_brand.get_playlist(playlist_id, related=True)
         assert len(playlist["tracks"]) == 46, "Getting playlist items failed"
         response = yt_brand.remove_playlist_items(playlist_id, playlist["tracks"])
-        assert response == "STATUS_SUCCEEDED", "Playlist item removal failed"
+        assert response == ResponseStatus.SUCCEEDED, "Playlist item removal failed"
         yt_brand.delete_playlist(playlist_id)

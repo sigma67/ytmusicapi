@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.mixins._protocol import MixinProtocol
@@ -14,7 +14,7 @@ class WatchMixin(MixinProtocol):
         limit=25,
         radio: bool = False,
         shuffle: bool = False,
-    ) -> Dict[str, Union[List[Dict], str, None]]:
+    ) -> dict[str, Union[list[dict], str, None]]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
