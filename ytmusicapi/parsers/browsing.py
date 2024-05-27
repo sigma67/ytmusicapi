@@ -1,3 +1,4 @@
+from .podcasts import parse_episode, parse_podcast
 from .songs import *
 
 
@@ -30,11 +31,14 @@ def parse_mixed_content(rows):
                         content = parse_related_artist(data)
                     elif page_type == "MUSIC_PAGE_TYPE_PLAYLIST":
                         content = parse_playlist(data)
-                else:
-                    data = nav(result, [MRLIR], True)
-                    if not data:
-                        continue
+                    elif page_type == "MUSIC_PAGE_TYPE_PODCAST_SHOW_DETAIL_PAGE":
+                        content = parse_podcast(data)
+                elif data := nav(result, [MRLIR], True):
                     content = parse_song_flat(data)
+                elif data := nav(result, [MMRIR], True):
+                    content = parse_episode(data)
+                else:
+                    continue
 
                 contents.append(content)
 
@@ -51,16 +55,20 @@ def parse_content_list(results, parse_func, key=MTRIR):
 
 
 def parse_album(result):
-    return {
+    album = {
         "title": nav(result, TITLE_TEXT),
         "type": nav(result, SUBTITLE),
-        "year": nav(result, SUBTITLE2, True),
         "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
         "audioPlaylistId": nav(result, THUMBNAIL_OVERLAY, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
     }
+
+    if (year := nav(result, SUBTITLE2, True)).isnumeric():
+        album["year"] = year
+
+    return album
 
 
 def parse_single(result):

@@ -129,7 +129,7 @@ def parse_podcast(data):
     """Parses a single podcast under "Podcasts" on a channel page"""
     return {
         "title": nav(data, TITLE_TEXT),
-        "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0])),
+        "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0], True)),
         "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
         "podcastId": nav(data, THUMBNAIL_OVERLAY, True),
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
