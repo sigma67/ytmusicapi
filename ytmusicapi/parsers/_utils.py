@@ -24,7 +24,7 @@ def parse_menu_playlists(data, result):
             result[watch_key] = watch_id
 
 
-def get_item_text(item, index, run_index=0, none_if_absent=False):
+def get_item_text(item, index, run_index=0, none_if_absent=False) -> str | None:
     column = get_flex_column_item(item, index)
     if not column:
         return None
