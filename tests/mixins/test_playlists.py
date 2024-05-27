@@ -5,6 +5,8 @@ from unittest import mock
 
 import pytest
 
+from ytmusicapi.enums import ResponseStatus
+
 
 class TestPlaylists:
     @pytest.mark.parametrize(
