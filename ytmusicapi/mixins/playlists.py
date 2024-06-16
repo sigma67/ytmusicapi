@@ -327,7 +327,7 @@ class PlaylistsMixin(MixinProtocol):
         title: Optional[str] = None,
         description: Optional[str] = None,
         privacyStatus: Optional[str] = None,
-        moveItem: Optional[Tuple[str, str]] = None,
+        moveItem: Optional[Union[str, Tuple[str, str]]] = None,
         addPlaylistId: Optional[str] = None,
         addToTop: Optional[bool] = None,
     ) -> Union[str, Dict]:
@@ -358,13 +358,13 @@ class PlaylistsMixin(MixinProtocol):
             actions.append({"action": "ACTION_SET_PLAYLIST_PRIVACY", "playlistPrivacy": privacyStatus})
 
         if moveItem:
-            actions.append(
-                {
-                    "action": "ACTION_MOVE_VIDEO_BEFORE",
-                    "setVideoId": moveItem[0],
-                    "movedSetVideoIdSuccessor": moveItem[1],
-                }
-            )
+            action = {
+                "action": "ACTION_MOVE_VIDEO_BEFORE",
+                "setVideoId": moveItem if isinstance(moveItem, str) else moveItem[0],
+            }
+            if isinstance(moveItem, tuple) and len(moveItem) > 1:
+                action["movedSetVideoIdSuccessor"] = moveItem[1]
+            actions.append(action)
 
         if addPlaylistId:
             actions.append({"action": "ACTION_ADD_PLAYLIST", "addedFullListId": addPlaylistId})
