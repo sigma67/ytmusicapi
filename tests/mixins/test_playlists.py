@@ -66,7 +66,7 @@ class TestPlaylists:
 
     def test_edit_playlist(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"])
-        response = yt_brand.edit_playlist(
+        response1 = yt_brand.edit_playlist(
             playlist["id"],
             title="",
             description="",
@@ -76,8 +76,8 @@ class TestPlaylists:
                 playlist["tracks"][0]["setVideoId"],
             ),
         )
-        assert response == "STATUS_SUCCEEDED", "Playlist edit failed"
-        yt_brand.edit_playlist(
+        assert response1 == "STATUS_SUCCEEDED", "Playlist edit 1 failed"
+        response2 = yt_brand.edit_playlist(
             playlist["id"],
             title=playlist["title"],
             description=playlist["description"],
@@ -87,7 +87,15 @@ class TestPlaylists:
                 playlist["tracks"][1]["setVideoId"],
             ),
         )
-        assert response == "STATUS_SUCCEEDED", "Playlist edit failed"
+        assert response2 == "STATUS_SUCCEEDED", "Playlist edit 2 failed"
+        response3 = yt_brand.edit_playlist(
+            playlist["id"],
+            title=playlist["title"],
+            description=playlist["description"],
+            privacyStatus=playlist["privacy"],
+            moveItem=playlist["tracks"][0]["setVideoId"],
+        )
+        assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
 
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
