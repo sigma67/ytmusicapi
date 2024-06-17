@@ -9,13 +9,7 @@ on:
       - tests/**
   pull_request_target:
     types:
-    - labeled
-    paths:
-      - ytmusicapi/**
-      - tests/**
-  pull_request:
-    branches:
-      - main
+      - labeled
     paths:
       - ytmusicapi/**
       - tests/**
