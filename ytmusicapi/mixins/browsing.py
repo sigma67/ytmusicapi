@@ -521,7 +521,7 @@ class BrowsingMixin(MixinProtocol):
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
 
         other_versions = nav(
-            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST, 1, *CAROUSEL]
+            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST, 1, *CAROUSEL], True
         )
         if other_versions is not None:
             album["other_versions"] = parse_content_list(other_versions["contents"], parse_album)
