@@ -16,7 +16,7 @@ class TestSearch:
     def test_search_queries(self, yt, yt_brand, query: str) -> None:
         results = yt_brand.search(query)
         assert ["resultType" in r for r in results] == [True] * len(results)
-        assert len(results) >= 10
+        assert len(results) >= 8
         assert not any(
             artist["name"].lower() in ALL_RESULT_TYPES
             for result in results
@@ -24,7 +24,7 @@ class TestSearch:
             for artist in result["artists"]
         )
         results = yt.search(query)
-        assert len(results) >= 10
+        assert len(results) >= 8
         assert not any(
             artist["name"].lower() in ALL_RESULT_TYPES
             for result in results

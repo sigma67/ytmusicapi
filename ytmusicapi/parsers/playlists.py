@@ -14,9 +14,15 @@ def parse_playlist_header(response: Dict) -> Dict[str, Any]:
         playlist["privacy"] = editable_header["editHeader"]["musicPlaylistEditHeaderRenderer"]["privacy"]
     else:
         header = nav(response, HEADER_DETAIL, True)
+        if header is None:
+            header = nav(
+                response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER]
+            )
 
     playlist["title"] = nav(header, TITLE_TEXT)
-    playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED)
+    playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED, True)
+    if playlist["thumbnails"] is None:
+        playlist["thumbnails"] = nav(header, THUMBNAILS)
     playlist["description"] = nav(header, DESCRIPTION, True)
     run_count = len(nav(header, SUBTITLE_RUNS))
     if run_count > 1:
