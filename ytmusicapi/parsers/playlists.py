@@ -95,17 +95,65 @@ def parse_playlist_item(
             if "menu" in data:
                 like = nav(data, MENU_LIKE_STATUS, True)
 
-    title = get_item_text(data, 0)
+    isAvailable = True
+    if "musicItemRendererDisplayPolicy" in data:
+        isAvailable = data["musicItemRendererDisplayPolicy"] != "MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT"
+
+    # For unavailable items indexes are preset,
+    # because meaning of the flex column cannot be found using navigationEndpoint
+    title_index = 0 if isAvailable is False else None
+    artist_index = 1 if isAvailable is False else None
+    album_index = 2 if isAvailable is False else None
+    user_channel_indexes = []
+    unrecognized_index = None
+
+    for index in range(len(data["flexColumns"])):
+        flex_column_item = get_flex_column_item(data, index)
+        navigation_endpoint = nav(flex_column_item, [*TEXT_RUN, "navigationEndpoint"], True)
+
+        if not navigation_endpoint:
+            if nav(flex_column_item, TEXT_RUN_TEXT, True) is not None:
+                unrecognized_index = index if unrecognized_index is None else unrecognized_index
+            continue
+
+        if "watchEndpoint" in navigation_endpoint:
+            title_index = index
+        elif "browseEndpoint" in navigation_endpoint:
+            page_type = nav(
+                navigation_endpoint,
+                [
+                    "browseEndpoint",
+                    "browseEndpointContextSupportedConfigs",
+                    "browseEndpointContextMusicConfig",
+                    "pageType",
+                ],
+            )
+
+            # MUSIC_PAGE_TYPE_ARTIST for regular songs, MUSIC_PAGE_TYPE_UNKNOWN for uploads
+            if page_type == "MUSIC_PAGE_TYPE_ARTIST" or page_type == "MUSIC_PAGE_TYPE_UNKNOWN":
+                artist_index = index
+            elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
+                album_index = index
+            elif page_type == "MUSIC_PAGE_TYPE_USER_CHANNEL":
+                user_channel_indexes.append(index)
+
+    # Extra check for rare songs, where artist is non-clickable and does not have navigationEndpoint
+    if artist_index is None and unrecognized_index is not None:
+        artist_index = unrecognized_index
+
+    # Extra check for non-song videos, last channel is treated as artist
+    if artist_index is None and user_channel_indexes:
+        artist_index = user_channel_indexes[-1]
+
+    title = get_item_text(data, title_index) if title_index is not None else None
     if title == "Song deleted":
         return None
 
-    flex_column_count = len(data["flexColumns"])
+    artists = parse_song_artists(data, artist_index) if artist_index is not None else None
 
-    artists = parse_song_artists(data, 1)
+    album = parse_song_album(data, album_index) if album_index is not None else None
 
-    album = parse_song_album(data, flex_column_count - 1) if not is_album else None
-
-    views = get_item_text(data, 2) if flex_column_count == 4 or is_album else None
+    views = get_item_text(data, 2) if is_album else None
 
     duration = None
     if "fixedColumns" in data:
@@ -115,10 +163,6 @@ def parse_playlist_item(
             duration = get_fixed_column_item(data, 0)["text"]["runs"][0]["text"]
 
     thumbnails = nav(data, THUMBNAILS, True)
-
-    isAvailable = True
-    if "musicItemRendererDisplayPolicy" in data:
-        isAvailable = data["musicItemRendererDisplayPolicy"] != "MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT"
 
     isExplicit = nav(data, BADGE_LABEL, True) is not None
 
