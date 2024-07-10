@@ -61,14 +61,10 @@ class Description(List[DescriptionElement]):
 def parse_base_header(header: Dict) -> Dict:
     """parse common left hand side (header) items of an episode or podcast page"""
     strapline = nav(header, ["straplineTextOne"])
-    try:
-        author_id = nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID])
-    except KeyError:
-        author_id = ""
     return {
         "author": {
             "name": nav(strapline, [*RUN_TEXT]),
-            "id": author_id,
+            "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID]),
         },
         "title": nav(header, TITLE_TEXT),
     }
