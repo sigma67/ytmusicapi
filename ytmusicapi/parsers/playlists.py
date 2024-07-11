@@ -112,8 +112,7 @@ def parse_playlist_item(
         navigation_endpoint = nav(flex_column_item, [*TEXT_RUN, "navigationEndpoint"], True)
 
         if not navigation_endpoint:
-            if nav(flex_column_item, TEXT_RUN_TEXT, True) is not None:
-                unrecognized_index = index if unrecognized_index is None else unrecognized_index
+            unrecognized_index = index if unrecognized_index is None else unrecognized_index
             continue
 
         if "watchEndpoint" in navigation_endpoint:
