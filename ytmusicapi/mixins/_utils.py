@@ -1,6 +1,8 @@
 import re
 from datetime import date
 
+from ytmusicapi.exceptions import YTMusicUserError
+
 
 def prepare_like_endpoint(rating):
     if rating == "LIKE":
@@ -16,7 +18,7 @@ def prepare_like_endpoint(rating):
 def validate_order_parameter(order):
     orders = ["a_to_z", "z_to_a", "recently_added"]
     if order and order not in orders:
-        raise Exception(
+        raise YTMusicUserError(
             "Invalid order provided. Please use one of the following orders or leave out the parameter: "
             + ", ".join(orders)
         )

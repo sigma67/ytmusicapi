@@ -348,7 +348,9 @@ class PlaylistsMixin(MixinProtocol):
         self._check_auth()
         body: dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
         if not videoIds and not source_playlist:
-            raise Exception("You must provide either videoIds or a source_playlist to add to the playlist")
+            raise YTMusicUserError(
+                "You must provide either videoIds or a source_playlist to add to the playlist"
+            )
 
         if videoIds:
             for videoId in videoIds:
@@ -388,7 +390,9 @@ class PlaylistsMixin(MixinProtocol):
         self._check_auth()
         videos = list(filter(lambda x: "videoId" in x and "setVideoId" in x, videos))
         if len(videos) == 0:
-            raise Exception("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
+            raise YTMusicUserError(
+                "Cannot remove songs, because setVideoId is missing. Do you own this playlist?"
+            )
 
         body: dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
         for video in videos:

@@ -1,6 +1,7 @@
 from typing import Any, Optional, Union
 
 from ytmusicapi.continuations import get_continuations
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.search import *
 
@@ -150,26 +151,26 @@ class SearchMixin(MixinProtocol):
             "episodes",
         ]
         if filter and filter not in filters:
-            raise Exception(
+            raise YTMusicUserError(
                 "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
                 + ", ".join(filters)
             )
 
         scopes = ["library", "uploads"]
         if scope and scope not in scopes:
-            raise Exception(
+            raise YTMusicUserError(
                 "Invalid scope provided. Please use one of the following scopes or leave out the parameter: "
                 + ", ".join(scopes)
             )
 
         if scope == scopes[1] and filter:
-            raise Exception(
+            raise YTMusicUserError(
                 "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to "
                 "uploads. "
             )
 
         if scope == scopes[0] and filter in filters[3:5]:
-            raise Exception(
+            raise YTMusicUserError(
                 f"{filter} cannot be set when searching library. "
                 f"Please use one of the following filters or leave out the parameter: "
                 + ", ".join(filters[0:3] + filters[5:])
