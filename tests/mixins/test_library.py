@@ -26,6 +26,10 @@ class TestLibrary:
         songs = yt_empty.get_library_songs()
         assert len(songs) == 0
 
+    def test_get_library_albums_invalid_order(self, yt):
+        with pytest.raises(Exception):
+            yt.get_library_albums(100, order="invalid")
+
     def test_get_library_albums(self, yt_oauth, yt_brand, yt_empty):
         albums = yt_oauth.get_library_albums(100)
         assert len(albums) > 50
@@ -102,8 +106,12 @@ class TestLibrary:
     def test_rate_song(self, yt_auth, sample_video):
         response = yt_auth.rate_song(sample_video, "LIKE")
         assert "actions" in response
-        response = yt_auth.rate_song(sample_video, "INDIFFERENT")
+        response = yt_auth.rate_song(sample_video, "DISLIKE")
         assert "actions" in response
+        response = yt_auth.rate_song(sample_video, "INDIFFERENT")
+        assert response
+        response = yt_auth.rate_song(sample_video, "notexist")
+        assert not response
 
     def test_edit_song_library_status(self, yt_brand, sample_album):
         album = yt_brand.get_album(sample_album)
