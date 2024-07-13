@@ -211,8 +211,10 @@ class PlaylistsMixin(MixinProtocol):
             playlist["duration"] = (
                 None if not has_duration else second_subtitle_runs[has_views + has_duration]["text"]
             )
-            song_count = second_subtitle_runs[has_views + 0]["text"].split(" ")
-            song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
+            song_count_text = second_subtitle_runs[has_views + 0]["text"]
+            song_count_search = re.search(r"\d+", song_count_text)
+            # extract the digits from the text, return 0 if no match
+            song_count = to_int(song_count_search.group()) if song_count_search is not None else 0
         else:
             song_count = len(section_list["contents"])
 
