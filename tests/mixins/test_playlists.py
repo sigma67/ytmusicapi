@@ -5,6 +5,9 @@ from unittest import mock
 
 import pytest
 
+from ytmusicapi import YTMusic
+from ytmusicapi.constants import SUPPORTED_LANGUAGES
+
 
 class TestPlaylists:
     @pytest.mark.parametrize(
@@ -56,6 +59,12 @@ class TestPlaylists:
         playlist = yt_empty.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
         assert len(playlist["tracks"]) > 200
         assert len(playlist["related"]) == 0
+
+    @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
+    def test_get_playlist_languages(self, language):
+        yt = YTMusic(language=language)
+        result = yt.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk")
+        assert result["trackCount"] == 255
 
     def test_get_playlist_owned(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"], related=True, suggestions_limit=21)
