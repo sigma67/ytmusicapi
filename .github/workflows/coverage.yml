@@ -39,8 +39,7 @@ jobs:
         curl -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/browser.json
         cat <<< "$TEST_CFG" > tests/test.cfg
-        (echo "===== tests attempt: 1 ====" && pdm run pytest) || \
-        (echo "===== tests attempt: 2 ====" && pdm run pytest)
+        pdm run pytest
         pdm run coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

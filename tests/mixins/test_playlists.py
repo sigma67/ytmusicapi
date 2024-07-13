@@ -7,6 +7,7 @@ import pytest
 
 from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
+from ytmusicapi.enums import ResponseStatus
 
 
 class TestPlaylists:
@@ -85,7 +86,7 @@ class TestPlaylists:
                 playlist["tracks"][0]["setVideoId"],
             ),
         )
-        assert response1 == "STATUS_SUCCEEDED", "Playlist edit 1 failed"
+        assert response1 == ResponseStatus.SUCCEEDED, "Playlist edit 1 failed"
         response2 = yt_brand.edit_playlist(
             playlist["id"],
             title=playlist["title"],
@@ -96,7 +97,7 @@ class TestPlaylists:
                 playlist["tracks"][1]["setVideoId"],
             ),
         )
-        assert response2 == "STATUS_SUCCEEDED", "Playlist edit 2 failed"
+        assert response2 == ResponseStatus.SUCCEEDED, "Playlist edit 2 failed"
         response3 = yt_brand.edit_playlist(
             playlist["id"],
             title=playlist["title"],
@@ -120,7 +121,7 @@ class TestPlaylists:
             source_playlist="OLAK5uy_nvjTE32aFYdFN7HCyMv3cGqD3wqBb4Jow",
             duplicates=True,
         )
-        assert response["status"] == "STATUS_SUCCEEDED", "Adding playlist item failed"
+        assert response["status"] == ResponseStatus.SUCCEEDED, "Adding playlist item failed"
         assert len(response["playlistEditResults"]) > 0, "Adding playlist item failed"
         time.sleep(3)
         yt_brand.edit_playlist(playlist_id, addToTop=False)
@@ -128,5 +129,5 @@ class TestPlaylists:
         playlist = yt_brand.get_playlist(playlist_id, related=True)
         assert len(playlist["tracks"]) == 46, "Getting playlist items failed"
         response = yt_brand.remove_playlist_items(playlist_id, playlist["tracks"])
-        assert response == "STATUS_SUCCEEDED", "Playlist item removal failed"
+        assert response == ResponseStatus.SUCCEEDED, "Playlist item removal failed"
         yt_brand.delete_playlist(playlist_id)

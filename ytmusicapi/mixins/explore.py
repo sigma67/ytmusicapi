@@ -1,11 +1,11 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.explore import *
 
 
 class ExploreMixin(MixinProtocol):
-    def get_mood_categories(self) -> Dict:
+    def get_mood_categories(self) -> dict:
         """
         Fetch "Moods & Genres" categories from YouTube Music.
 
@@ -50,7 +50,7 @@ class ExploreMixin(MixinProtocol):
             }
 
         """
-        sections: Dict[str, Any] = {}
+        sections: dict[str, Any] = {}
         response = self._send_request("browse", {"browseId": "FEmusic_moods_and_genres"})
         for section in nav(response, SINGLE_COLUMN_TAB + SECTION_LIST):
             title = nav(section, [*GRID, "header", "gridHeaderRenderer", *TITLE_TEXT])
@@ -62,7 +62,7 @@ class ExploreMixin(MixinProtocol):
 
         return sections
 
-    def get_mood_playlists(self, params: str) -> List[Dict]:
+    def get_mood_playlists(self, params: str) -> list[dict]:
         """
         Retrieve a list of playlists for a given "Moods & Genres" category.
 
@@ -88,7 +88,7 @@ class ExploreMixin(MixinProtocol):
 
         return playlists
 
-    def get_charts(self, country: str = "ZZ") -> Dict:
+    def get_charts(self, country: str = "ZZ") -> dict:
         """
         Get latest charts data from YouTube Music: Top songs, top videos, top artists and top trending videos.
         Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
@@ -188,13 +188,13 @@ class ExploreMixin(MixinProtocol):
             }
 
         """
-        body: Dict[str, Any] = {"browseId": "FEmusic_charts"}
+        body: dict[str, Any] = {"browseId": "FEmusic_charts"}
         if country:
             body["formData"] = {"selectedValues": [country]}
 
         response = self._send_request("browse", body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        charts: Dict[str, Any] = {"countries": {}}
+        charts: dict[str, Any] = {"countries": {}}
         menu = nav(
             results[0],
             [

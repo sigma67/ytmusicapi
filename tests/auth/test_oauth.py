@@ -3,7 +3,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -17,7 +17,7 @@ from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
 
 
 @pytest.fixture(name="blank_code")
-def fixture_blank_code() -> Dict[str, Any]:
+def fixture_blank_code() -> dict[str, Any]:
     return {
         "device_code": "",
         "user_code": "",
@@ -46,9 +46,11 @@ class TestOAuth:
         json_mock.side_effect = [blank_code, token_code]
         oauth_file = tempfile.NamedTemporaryFile(delete=False)
         oauth_filepath = oauth_file.name
-        with mock.patch("builtins.input", return_value="y"), mock.patch(
-            "sys.argv", ["ytmusicapi", "oauth", "--file", oauth_filepath]
-        ), mock.patch("webbrowser.open"):
+        with (
+            mock.patch("builtins.input", return_value="y"),
+            mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", oauth_filepath]),
+            mock.patch("webbrowser.open"),
+        ):
             main()
             assert Path(oauth_filepath).exists()
 

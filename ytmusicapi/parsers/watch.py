@@ -1,9 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from .songs import *
 
 
-def parse_watch_playlist(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def parse_watch_playlist(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     tracks = []
     PPVWR = "playlistPanelVideoWrapperRenderer"
     PPVR = "playlistPanelVideoRenderer"
