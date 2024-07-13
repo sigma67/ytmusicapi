@@ -64,7 +64,7 @@ def parse_base_header(header: dict) -> dict:
     return {
         "author": {
             "name": nav(strapline, [*RUN_TEXT]),
-            "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID]),
+            "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID], True),
         },
         "title": nav(header, TITLE_TEXT),
     }

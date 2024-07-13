@@ -211,8 +211,10 @@ class PlaylistsMixin(MixinProtocol):
             playlist["duration"] = (
                 None if not has_duration else second_subtitle_runs[has_views + has_duration]["text"]
             )
-            song_count = second_subtitle_runs[has_views + 0]["text"].split(" ")
-            song_count = to_int(song_count[0]) if len(song_count) > 1 else 0
+            song_count_text = second_subtitle_runs[has_views + 0]["text"]
+            song_count_search = re.search(r"\d+", song_count_text)
+            # extract the digits from the text, return 0 if no match
+            song_count = to_int(song_count_search.group()) if song_count_search is not None else 0
         else:
             song_count = len(section_list["contents"])
 
@@ -327,7 +329,7 @@ class PlaylistsMixin(MixinProtocol):
         title: Optional[str] = None,
         description: Optional[str] = None,
         privacyStatus: Optional[str] = None,
-        moveItem: Optional[tuple[str, str]] = None,
+        moveItem: Optional[Union[str, tuple[str, str]]] = None,
         addPlaylistId: Optional[str] = None,
         addToTop: Optional[bool] = None,
     ) -> Union[str, dict]:
@@ -358,13 +360,13 @@ class PlaylistsMixin(MixinProtocol):
             actions.append({"action": "ACTION_SET_PLAYLIST_PRIVACY", "playlistPrivacy": privacyStatus})
 
         if moveItem:
-            actions.append(
-                {
-                    "action": "ACTION_MOVE_VIDEO_BEFORE",
-                    "setVideoId": moveItem[0],
-                    "movedSetVideoIdSuccessor": moveItem[1],
-                }
-            )
+            action = {
+                "action": "ACTION_MOVE_VIDEO_BEFORE",
+                "setVideoId": moveItem if isinstance(moveItem, str) else moveItem[0],
+            }
+            if isinstance(moveItem, tuple) and len(moveItem) > 1:
+                action["movedSetVideoIdSuccessor"] = moveItem[1]
+            actions.append(action)
 
         if addPlaylistId:
             actions.append({"action": "ACTION_ADD_PLAYLIST", "addedFullListId": addPlaylistId})

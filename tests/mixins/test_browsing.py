@@ -84,7 +84,7 @@ class TestBrowsing:
             album = yt.get_album("MPREabc")
             assert len(album["tracks"]) == 19
             assert len(album["artists"]) == 1
-            assert len(album) == 13
+            assert len(album) == 14
 
     def test_get_album(self, yt, yt_auth, sample_album):
         album = yt_auth.get_album(sample_album)

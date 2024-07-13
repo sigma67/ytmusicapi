@@ -242,7 +242,7 @@ class PodcastsMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         playlist = parse_playlist_header(response)
 
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
+        results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         parse_func = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
         playlist["episodes"] = parse_func(results["contents"])
 

@@ -5,6 +5,8 @@ from unittest import mock
 
 import pytest
 
+from ytmusicapi import YTMusic
+from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
 
 
@@ -59,6 +61,12 @@ class TestPlaylists:
         assert len(playlist["tracks"]) > 200
         assert len(playlist["related"]) == 0
 
+    @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
+    def test_get_playlist_languages(self, language):
+        yt = YTMusic(language=language)
+        result = yt.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk")
+        assert result["trackCount"] == 255
+
     def test_get_playlist_owned(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"], related=True, suggestions_limit=21)
         assert len(playlist["tracks"]) < 100
@@ -68,7 +76,7 @@ class TestPlaylists:
 
     def test_edit_playlist(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"])
-        response = yt_brand.edit_playlist(
+        response1 = yt_brand.edit_playlist(
             playlist["id"],
             title="",
             description="",
@@ -78,8 +86,8 @@ class TestPlaylists:
                 playlist["tracks"][0]["setVideoId"],
             ),
         )
-        assert response == ResponseStatus.SUCCEEDED, "Playlist edit failed"
-        yt_brand.edit_playlist(
+        assert response1 == ResponseStatus.SUCCEEDED, "Playlist edit 1 failed"
+        response2 = yt_brand.edit_playlist(
             playlist["id"],
             title=playlist["title"],
             description=playlist["description"],
@@ -89,7 +97,15 @@ class TestPlaylists:
                 playlist["tracks"][1]["setVideoId"],
             ),
         )
-        assert response == ResponseStatus.SUCCEEDED, "Playlist edit failed"
+        assert response2 == ResponseStatus.SUCCEEDED, "Playlist edit 2 failed"
+        response3 = yt_brand.edit_playlist(
+            playlist["id"],
+            title=playlist["title"],
+            description=playlist["description"],
+            privacyStatus=playlist["privacy"],
+            moveItem=playlist["tracks"][0]["setVideoId"],
+        )
+        assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
 
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
