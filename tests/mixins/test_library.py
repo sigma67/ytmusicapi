@@ -26,6 +26,10 @@ class TestLibrary:
         songs = yt_empty.get_library_songs()
         assert len(songs) == 0
 
+    def test_get_library_albums_invalid_order(self, yt):
+        with pytest.raises(Exception):
+            yt.get_library_albums(100, order="invalid")
+
     def test_get_library_albums(self, yt_oauth, yt_brand, yt_empty):
         albums = yt_oauth.get_library_albums(100)
         assert len(albums) > 50
