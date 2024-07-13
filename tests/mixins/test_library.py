@@ -102,8 +102,12 @@ class TestLibrary:
     def test_rate_song(self, yt_auth, sample_video):
         response = yt_auth.rate_song(sample_video, "LIKE")
         assert "actions" in response
-        response = yt_auth.rate_song(sample_video, "INDIFFERENT")
+        response = yt_auth.rate_song(sample_video, "DISLIKE")
         assert "actions" in response
+        response = yt_auth.rate_song(sample_video, "INDIFFERENT")
+        assert response
+        response = yt_auth.rate_song(sample_video, "notexist")
+        assert not response
 
     def test_edit_song_library_status(self, yt_brand, sample_album):
         album = yt_brand.get_album(sample_album)
