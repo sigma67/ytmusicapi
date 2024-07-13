@@ -12,6 +12,7 @@ from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_m
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
 
+from ..exceptions import YTMusicError, YTMusicUserError
 from ..navigation import *
 from ._protocol import MixinProtocol
 from ._utils import get_datestamp
@@ -510,7 +511,7 @@ class BrowsingMixin(MixinProtocol):
             }
         """
         if not browseId or not browseId.startswith("MPRE"):
-            raise Exception("Invalid album browseId provided, must start with MPRE.")
+            raise YTMusicUserError("Invalid album browseId provided, must start with MPRE.")
 
         body = {"browseId": browseId}
         endpoint = "browse"
@@ -793,7 +794,7 @@ class BrowsingMixin(MixinProtocol):
             ]
         """
         if not browseId:
-            raise Exception("Invalid browseId provided.")
+            raise YTMusicUserError("Invalid browseId provided.")
 
         response = self._send_request("browse", {"browseId": browseId})
         sections = nav(response, ["contents", *SECTION_LIST])
@@ -816,7 +817,7 @@ class BrowsingMixin(MixinProtocol):
         """
         lyrics = {}
         if not browseId:
-            raise Exception("Invalid browseId provided. This song might not have lyrics.")
+            raise YTMusicUserError("Invalid browseId provided. This song might not have lyrics.")
 
         response = self._send_request("browse", {"browseId": browseId})
         lyrics["lyrics"] = nav(
@@ -837,7 +838,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_get_request(url=YTM_DOMAIN)
         match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response.text)
         if match is None:
-            raise Exception("Could not identify the URL for base.js player.")
+            raise YTMusicError("Could not identify the URL for base.js player.")
 
         return YTM_DOMAIN + match.group(1)
 
@@ -855,7 +856,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_get_request(url=url)
         match = re.search(r"signatureTimestamp[:=](\d+)", response.text)
         if match is None:
-            raise Exception("Unable to identify the signatureTimestamp.")
+            raise YTMusicError("Unable to identify the signatureTimestamp.")
 
         return int(match.group(1))
 
@@ -911,7 +912,7 @@ class BrowsingMixin(MixinProtocol):
 
         for artist in artists:
             if artist not in taste_profile:
-                raise Exception(f"The artist, {artist}, was not present in taste!")
+                raise YTMusicUserError(f"The artist {artist} was not present in taste!")
             formData["selectedValues"].append(taste_profile[artist]["selectionValue"])
 
         body = {"browseId": "FEmusic_home", "formData": formData}

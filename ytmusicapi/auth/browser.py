@@ -4,6 +4,7 @@ from typing import Optional
 
 from requests.structures import CaseInsensitiveDict
 
+from ytmusicapi.exceptions import YTMusicError, YTMusicUserError
 from ytmusicapi.helpers import *
 
 path = os.path.dirname(os.path.realpath(__file__)) + os.sep
@@ -46,11 +47,11 @@ def setup_browser(filepath: Optional[str] = None, headers_raw: Optional[str] = N
             user_headers[header[0].lower()] = ": ".join(header[1:])
 
     except Exception as e:
-        raise Exception(f"Error parsing your input, please try again. Full error: {e}") from e
+        raise YTMusicError(f"Error parsing your input, please try again. Full error: {e}") from e
 
     missing_headers = {"cookie", "x-goog-authuser"} - set(k.lower() for k in user_headers.keys())
     if missing_headers:
-        raise Exception(
+        raise YTMusicUserError(
             "The following entries are missing in your headers: "
             + ", ".join(missing_headers)
             + ". Please try a different request (such as /browse) and make sure you are logged in."

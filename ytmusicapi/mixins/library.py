@@ -5,6 +5,7 @@ from ytmusicapi.continuations import *
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import *
 
+from ..exceptions import YTMusicServerError
 from ._protocol import MixinProtocol
 from ._utils import *
 
@@ -69,7 +70,7 @@ class LibraryMixin(MixinProtocol):
         parse_func = lambda raw_response: parse_library_songs(raw_response)
 
         if validate_responses and limit is None:
-            raise Exception("Validation is not supported without a limit parameter.")
+            raise YTMusicUserError("Validation is not supported without a limit parameter.")
 
         if validate_responses:
             validate_func = lambda parsed: validate_response(parsed, per_page, limit, 0)
@@ -297,7 +298,7 @@ class LibraryMixin(MixinProtocol):
             data = nav(content, [*MUSIC_SHELF, "contents"], True)
             if not data:
                 error = nav(content, ["musicNotifierShelfRenderer", *TITLE], True)
-                raise Exception(error)
+                raise YTMusicServerError(error)
             menu_entries = [[-1, *MENU_SERVICE, *FEEDBACK_TOKEN]]
             songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:

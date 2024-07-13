@@ -14,6 +14,7 @@ from ytmusicapi.constants import (
     OAUTH_USER_AGENT,
 )
 
+from ...exceptions import YTMusicServerError
 from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
 from .models import AuthCodeDict, BaseTokenDict, RefreshableTokenDict
 
@@ -94,7 +95,7 @@ class OAuthCredentials(Credentials):
                     "YouTubeData API is not enabled."
                 )
             else:
-                raise Exception(
+                raise YTMusicServerError(
                     f"OAuth request error. status_code: {response.status_code}, url: {url}, content: {data}"
                 )
         return response

@@ -18,6 +18,7 @@ from ytmusicapi.parsers.uploads import parse_uploaded_items
 
 from ..auth.types import AuthType
 from ..enums import ResponseStatus
+from ..exceptions import YTMusicUserError
 from ._protocol import MixinProtocol
 from ._utils import prepare_order_params, validate_order_parameter
 
@@ -210,13 +211,13 @@ class UploadsMixin(MixinProtocol):
         """
         self._check_auth()
         if not self.auth_type == AuthType.BROWSER:
-            raise Exception("Please provide browser authentication before using this function")
+            raise YTMusicUserError("Please provide browser authentication before using this function")
         if not os.path.isfile(filepath):
-            raise Exception("The provided file does not exist.")
+            raise YTMusicUserError("The provided file does not exist.")
 
         supported_filetypes = ["mp3", "m4a", "wma", "flac", "ogg"]
         if os.path.splitext(filepath)[1][1:] not in supported_filetypes:
-            raise Exception(
+            raise YTMusicUserError(
                 "The provided file type is not supported by YouTube Music. Supported file types are "
                 + ", ".join(supported_filetypes)
             )
