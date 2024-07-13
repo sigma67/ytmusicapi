@@ -17,10 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+      with:
+        ref: ${{ github.event.workflow_run.head_sha }}
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Setup PDM
       uses: pdm-project/setup-pdm@v4
     - name: create-json
