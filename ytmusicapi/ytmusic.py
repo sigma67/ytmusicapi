@@ -5,7 +5,7 @@ import os
 import time
 from contextlib import suppress
 from functools import partial
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import requests
 from requests import Response
@@ -37,15 +37,16 @@ from ytmusicapi.parsers.i18n import Parser
 from .auth.oauth import OAuthCredentials, OAuthToken, RefreshingToken
 from .auth.oauth.token import Token
 from .auth.types import AuthType
+from .exceptions import YTMusicServerError, YTMusicUserError
 
 
 class YTMusicBase:
     def __init__(
         self,
-        auth: Optional[Union[str, Dict]] = None,
+        auth: Optional[Union[str, dict]] = None,
         user: Optional[str] = None,
         requests_session=True,
-        proxies: Optional[Dict[str, str]] = None,
+        proxies: Optional[dict[str, str]] = None,
         language: str = "en",
         location: str = "",
         oauth_credentials: Optional[OAuthCredentials] = None,
@@ -102,7 +103,7 @@ class YTMusicBase:
         self.oauth_credentials: OAuthCredentials  #: Client used for OAuth refreshing
 
         self._session: requests.Session  #: request session for connection pooling
-        self.proxies: Optional[Dict[str, str]] = proxies  #: params for session modification
+        self.proxies: Optional[dict[str, str]] = proxies  #: params for session modification
 
         if isinstance(requests_session, requests.Session):
             self._session = requests_session
@@ -145,11 +146,11 @@ class YTMusicBase:
 
         if location:
             if location not in SUPPORTED_LOCATIONS:
-                raise Exception("Location not supported. Check the FAQ for supported locations.")
+                raise YTMusicUserError("Location not supported. Check the FAQ for supported locations.")
             self.context["context"]["client"]["gl"] = location
 
         if language not in SUPPORTED_LANGUAGES:
-            raise Exception(
+            raise YTMusicUserError(
                 "Language not supported. Supported languages are " + (", ".join(SUPPORTED_LANGUAGES)) + "."
             )
         self.context["context"]["client"]["hl"] = language
@@ -183,7 +184,7 @@ class YTMusicBase:
                 self.sapisid = sapisid_from_cookie(cookie)
                 self.origin = self.base_headers.get("origin", self.base_headers.get("x-origin"))
             except KeyError:
-                raise Exception("Your cookie is missing the required value __Secure-3PAPISID")
+                raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
     @property
     def base_headers(self):
@@ -220,7 +221,7 @@ class YTMusicBase:
 
         return self._headers
 
-    def _send_request(self, endpoint: str, body: Dict, additionalParams: str = "") -> Dict:
+    def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
         body.update(self.context)
 
         # only required for post requests (?)
@@ -238,10 +239,10 @@ class YTMusicBase:
         if response.status_code >= 400:
             message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
             error = response_text.get("error", {}).get("message")
-            raise Exception(message + error)
+            raise YTMusicServerError(message + error)
         return response_text
 
-    def _send_get_request(self, url: str, params: Optional[Dict] = None) -> Response:
+    def _send_get_request(self, url: str, params: Optional[dict] = None) -> Response:
         response = self._session.get(
             url,
             params=params,
@@ -254,7 +255,7 @@ class YTMusicBase:
 
     def _check_auth(self):
         if not self.auth:
-            raise Exception("Please provide authentication before using this function")
+            raise YTMusicUserError("Please provide authentication before using this function")
 
     def __enter__(self):
         return self

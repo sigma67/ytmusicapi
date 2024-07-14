@@ -1,13 +1,9 @@
-from __future__ import annotations
-
-from typing import List, Optional
-
 from pydantic import BaseModel, Field
 
 
 class Artist(BaseModel):
     name: str
-    id: Optional[str]
+    id: str | None
 
 
 class Thumbnail(BaseModel):
@@ -30,8 +26,8 @@ class SearchResult(BaseModel):
     category: str
     result_type: str = Field(..., alias="resultType")
     subscribers: str
-    artists: List[Artist] = []
-    thumbnails: List[Thumbnail]
+    artists: list[Artist] = []
+    thumbnails: list[Thumbnail]
     title: str
     album: Album
     in_library: bool = Field(..., alias="inLibrary")
@@ -55,10 +51,10 @@ class SearchResult(BaseModel):
 
 class Run(BaseModel):
     text: str
-    bold: Optional[bool] = None
+    bold: bool | None = None
 
 
 class ModelItem(BaseModel):
     text: str
-    runs: List[Run]
+    runs: list[Run]
     from_history: bool = Field(..., alias="fromHistory")

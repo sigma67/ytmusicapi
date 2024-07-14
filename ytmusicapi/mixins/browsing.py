@@ -1,24 +1,25 @@
 import re
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ytmusicapi.continuations import (
     get_continuations,
     get_reloadable_continuation_params,
 )
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi.parsers.albums import parse_album_header
+from ytmusicapi.parsers.albums import parse_album_header_2024
 from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
 
+from ..exceptions import YTMusicError, YTMusicUserError
 from ..navigation import *
 from ._protocol import MixinProtocol
 from ._utils import get_datestamp
 
 
 class BrowsingMixin(MixinProtocol):
-    def get_home(self, limit=3) -> List[Dict]:
+    def get_home(self, limit=3) -> list[dict]:
         """
         Get the home page.
         The home page is structured as titled rows, returning 3 rows of music suggestions at a time.
@@ -35,7 +36,6 @@ class BrowsingMixin(MixinProtocol):
                     "contents": [
                         { //album result
                             "title": "Sentiment",
-                            "year": "Said The Sky",
                             "browseId": "MPREb_QtqXtd2xZMR",
                             "thumbnails": [...]
                         },
@@ -125,7 +125,7 @@ class BrowsingMixin(MixinProtocol):
 
         return home
 
-    def get_artist(self, channelId: str) -> Dict:
+    def get_artist(self, channelId: str) -> dict:
         """
         Get information about an artist and their top releases (songs,
         albums, singles, videos, and related artists). The top lists
@@ -238,7 +238,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
-        artist: Dict[str, Any] = {"description": None, "views": None}
+        artist: dict[str, Any] = {"description": None, "views": None}
         header = response["header"]["musicImmersiveHeaderRenderer"]
         artist["name"] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
@@ -272,7 +272,7 @@ class BrowsingMixin(MixinProtocol):
 
     def get_artist_albums(
         self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[str] = None
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Get the full list of an artist's albums, singles or shows
 
@@ -351,7 +351,7 @@ class BrowsingMixin(MixinProtocol):
 
         return albums
 
-    def get_user(self, channelId: str) -> Dict:
+    def get_user(self, channelId: str) -> dict:
         """
         Retrieve a user's page. A user may own videos or playlists.
 
@@ -407,7 +407,7 @@ class BrowsingMixin(MixinProtocol):
         user.update(self.parser.parse_channel_contents(results))
         return user
 
-    def get_user_playlists(self, channelId: str, params: str) -> List[Dict]:
+    def get_user_playlists(self, channelId: str, params: str) -> list[dict]:
         """
         Retrieve a list of playlists for a given user.
         Call this function again with the returned ``params`` to get the full list.
@@ -449,7 +449,7 @@ class BrowsingMixin(MixinProtocol):
             browse_id = matches.group().strip('"')
         return browse_id
 
-    def get_album(self, browseId: str) -> Dict:
+    def get_album(self, browseId: str) -> dict:
         """
         Get information and tracks of an album
 
@@ -511,17 +511,21 @@ class BrowsingMixin(MixinProtocol):
             }
         """
         if not browseId or not browseId.startswith("MPRE"):
-            raise Exception("Invalid album browseId provided, must start with MPRE.")
+            raise YTMusicUserError("Invalid album browseId provided, must start with MPRE.")
 
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        album = parse_album_header(response)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
+        album = parse_album_header_2024(response)
+
+        results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST + [1] + CAROUSEL, True)
-        if results is not None:
-            album["other_versions"] = parse_content_list(results["contents"], parse_album)
+
+        other_versions = nav(
+            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST, 1, *CAROUSEL], True
+        )
+        if other_versions is not None:
+            album["other_versions"] = parse_content_list(other_versions["contents"], parse_album)
         album["duration_seconds"] = sum_total_duration(album)
         for i, track in enumerate(album["tracks"]):
             album["tracks"][i]["album"] = album["title"]
@@ -529,7 +533,7 @@ class BrowsingMixin(MixinProtocol):
 
         return album
 
-    def get_song(self, videoId: str, signatureTimestamp: Optional[int] = None) -> Dict:
+    def get_song(self, videoId: str, signatureTimestamp: Optional[int] = None) -> dict:
         """
         Returns metadata and streaming information about a song or video.
 
@@ -790,13 +794,13 @@ class BrowsingMixin(MixinProtocol):
             ]
         """
         if not browseId:
-            raise Exception("Invalid browseId provided.")
+            raise YTMusicUserError("Invalid browseId provided.")
 
         response = self._send_request("browse", {"browseId": browseId})
         sections = nav(response, ["contents", *SECTION_LIST])
         return parse_mixed_content(sections)
 
-    def get_lyrics(self, browseId: str) -> Dict:
+    def get_lyrics(self, browseId: str) -> dict:
         """
         Returns lyrics of a song or video.
 
@@ -813,7 +817,7 @@ class BrowsingMixin(MixinProtocol):
         """
         lyrics = {}
         if not browseId:
-            raise Exception("Invalid browseId provided. This song might not have lyrics.")
+            raise YTMusicUserError("Invalid browseId provided. This song might not have lyrics.")
 
         response = self._send_request("browse", {"browseId": browseId})
         lyrics["lyrics"] = nav(
@@ -834,7 +838,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_get_request(url=YTM_DOMAIN)
         match = re.search(r'jsUrl"\s*:\s*"([^"]+)"', response.text)
         if match is None:
-            raise Exception("Could not identify the URL for base.js player.")
+            raise YTMusicError("Could not identify the URL for base.js player.")
 
         return YTM_DOMAIN + match.group(1)
 
@@ -852,11 +856,11 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_get_request(url=url)
         match = re.search(r"signatureTimestamp[:=](\d+)", response.text)
         if match is None:
-            raise Exception("Unable to identify the signatureTimestamp.")
+            raise YTMusicError("Unable to identify the signatureTimestamp.")
 
         return int(match.group(1))
 
-    def get_tasteprofile(self) -> Dict:
+    def get_tasteprofile(self) -> dict:
         """
         Fetches suggested artists from taste profile (music.youtube.com/tasteprofile).
         Tasteprofile allows users to pick artists to update their recommendations.
@@ -888,7 +892,7 @@ class BrowsingMixin(MixinProtocol):
                 }
         return taste_profiles
 
-    def set_tasteprofile(self, artists: List[str], taste_profile: Optional[Dict] = None) -> None:
+    def set_tasteprofile(self, artists: list[str], taste_profile: Optional[dict] = None) -> None:
         """
         Favorites artists to see more recommendations from the artist.
         Use :py:func:`get_tasteprofile` to see which artists are available to be recommended
@@ -908,7 +912,7 @@ class BrowsingMixin(MixinProtocol):
 
         for artist in artists:
             if artist not in taste_profile:
-                raise Exception(f"The artist, {artist}, was not present in taste!")
+                raise YTMusicUserError(f"The artist {artist} was not present in taste!")
             formData["selectedValues"].append(taste_profile[artist]["selectionValue"])
 
         body = {"browseId": "FEmusic_home", "formData": formData}

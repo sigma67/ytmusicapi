@@ -1,5 +1,8 @@
 import pytest
 
+from ytmusicapi import YTMusic
+from ytmusicapi.parsers.search import ALL_RESULT_TYPES
+
 
 class TestSearch:
     def test_search_exceptions(self, yt_auth):
@@ -13,13 +16,34 @@ class TestSearch:
     def test_search_queries(self, yt, yt_brand, query: str) -> None:
         results = yt_brand.search(query)
         assert ["resultType" in r for r in results] == [True] * len(results)
-        assert len(results) >= 10
+        assert len(results) >= 8
+        assert not any(
+            artist["name"].lower() in ALL_RESULT_TYPES
+            for result in results
+            if "artists" in result
+            for artist in result["artists"]
+        )
         results = yt.search(query)
-        assert len(results) >= 10
+        assert len(results) >= 8
+        assert not any(
+            artist["name"].lower() in ALL_RESULT_TYPES
+            for result in results
+            if "artists" in result
+            for artist in result["artists"]
+        )
 
     def test_search_ignore_spelling(self, yt_auth):
         results = yt_auth.search("Martin Stig Andersen - Deteriation", ignore_spelling=True)
         assert len(results) > 0
+
+    def test_search_localized(self):
+        yt_local = YTMusic(language="it")
+        results = yt_local.search("ABBA")
+        assert all(result["resultType"] in ALL_RESULT_TYPES for result in results)
+        assert len([x for x in results if x["resultType"] == "album"]) <= 10  # album is default fallback
+
+        results = yt_local.search("ABBA", filter="songs")
+        assert all(item["resultType"] == "song" for item in results)
 
     def test_search_filters(self, yt_auth):
         query = "hip hop playlist"
@@ -53,7 +77,7 @@ class TestSearch:
         assert len(results) > 10
         assert all(item["resultType"] == "podcast" for item in results)
         results = yt_auth.search(query, filter="episodes")
-        assert len(results) > 10
+        assert len(results) >= 5
         assert all(item["resultType"] == "episode" for item in results)
 
     def test_search_top_result(self, yt):

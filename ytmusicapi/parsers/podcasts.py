@@ -22,7 +22,7 @@ class Timestamp(DescriptionElement):
 
 
 @dataclass
-class Description(List[DescriptionElement]):
+class Description(list[DescriptionElement]):
     def __init__(self, *args, **kwargs):
         super().__init__(args[0])
 
@@ -31,14 +31,14 @@ class Description(List[DescriptionElement]):
         return "".join(str(element) for element in self)
 
     @classmethod
-    def from_runs(cls, description_runs: List[Dict]) -> "Description":
+    def from_runs(cls, description_runs: list[dict]) -> "Description":
         """parse the description runs into a usable format
 
         :param description_runs: the original description runs
 
         :return: List of text (str), timestamp (int) and link values (Link object)
         """
-        elements: List[DescriptionElement] = []
+        elements: list[DescriptionElement] = []
         for run in description_runs:
             navigationEndpoint = nav(run, ["navigationEndpoint"], True)
             if navigationEndpoint:
@@ -58,28 +58,28 @@ class Description(List[DescriptionElement]):
         return cls(elements)
 
 
-def _parse_base_header(header: Dict) -> Dict:
+def parse_base_header(header: dict) -> dict:
     """parse common left hand side (header) items of an episode or podcast page"""
     strapline = nav(header, ["straplineTextOne"])
     return {
         "author": {
             "name": nav(strapline, [*RUN_TEXT]),
-            "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID]),
+            "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID], True),
         },
         "title": nav(header, TITLE_TEXT),
     }
 
 
-def parse_podcast_header(header: Dict) -> Dict:
-    metadata = _parse_base_header(header)
+def parse_podcast_header(header: dict) -> dict:
+    metadata = parse_base_header(header)
     metadata["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
     metadata["saved"] = nav(header, ["buttons", 1, *TOGGLED_BUTTON])
 
     return metadata
 
 
-def parse_episode_header(header: Dict) -> Dict:
-    metadata = _parse_base_header(header)
+def parse_episode_header(header: dict) -> dict:
+    metadata = parse_base_header(header)
     metadata["date"] = nav(header, [*SUBTITLE2])
     metadata["duration"] = nav(header, [*SUBTITLE3], True)
     if not metadata["duration"]:  # progress started
@@ -129,7 +129,7 @@ def parse_podcast(data):
     """Parses a single podcast under "Podcasts" on a channel page"""
     return {
         "title": nav(data, TITLE_TEXT),
-        "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0])),
+        "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0], True)),
         "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
         "podcastId": nav(data, THUMBNAIL_OVERLAY, True),
         "thumbnails": nav(data, THUMBNAIL_RENDERER),

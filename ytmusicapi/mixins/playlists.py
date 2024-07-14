@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from ytmusicapi.continuations import *
 from ytmusicapi.helpers import sum_total_duration
@@ -13,7 +13,7 @@ from ._utils import *
 class PlaylistsMixin(MixinProtocol):
     def get_playlist(
         self, playlistId: str, limit: Optional[int] = 100, related: bool = False, suggestions_limit: int = 0
-    ) -> Dict:
+    ) -> dict:
         """
         Returns a list of playlist items
 
@@ -106,21 +106,61 @@ class PlaylistsMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + ["musicPlaylistShelfRenderer"])
-        playlist = {"id": results["playlistId"]}
-        playlist.update(parse_playlist_header(response))
-        if playlist["trackCount"] is None:
-            playlist["trackCount"] = len(results["contents"])
+
+        header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
+        section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+        playlist: dict = {}
+        playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
+        if not playlist["owned"]:
+            header = nav(header_data, RESPONSIVE_HEADER)
+            playlist["id"] = nav(
+                header,
+                ["buttons", 1, "musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+                True,
+            )
+            playlist["privacy"] = "PUBLIC"
+        else:
+            playlist["id"] = nav(header_data, [*EDITABLE_PLAYLIST_DETAIL_HEADER, *PLAYLIST_ID])
+            header = nav(header_data, [*EDITABLE_PLAYLIST_DETAIL_HEADER, *HEADER, *RESPONSIVE_HEADER])
+            playlist["privacy"] = header_data[EDITABLE_PLAYLIST_DETAIL_HEADER[0]]["editHeader"][
+                "musicPlaylistEditHeaderRenderer"
+            ]["privacy"]
+
+        description_shelf = nav(header, ["description", *DESCRIPTION_SHELF], True)
+        playlist["description"] = (
+            "".join([run["text"] for run in description_shelf["description"]["runs"]])
+            if description_shelf
+            else None
+        )
+        playlist["title"] = nav(header, TITLE_TEXT)
+        playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
+
+        playlist["views"] = None
+        playlist["duration"] = None
+        if "runs" in header["secondSubtitle"]:
+            second_subtitle_runs = header["secondSubtitle"]["runs"]
+            has_views = (len(second_subtitle_runs) > 3) * 2
+            playlist["views"] = None if not has_views else to_int(second_subtitle_runs[0]["text"])
+            has_duration = (len(second_subtitle_runs) > 1) * 2
+            playlist["duration"] = (
+                None if not has_duration else second_subtitle_runs[has_views + has_duration]["text"]
+            )
+            song_count_text = second_subtitle_runs[has_views + 0]["text"]
+            song_count_search = re.search(r"\d+", song_count_text)
+            # extract the digits from the text, return 0 if no match
+            song_count = to_int(song_count_search.group()) if song_count_search is not None else 0
+        else:
+            song_count = len(section_list["contents"])
+
+        playlist["trackCount"] = song_count
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
-        section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         playlist["related"] = []
         if "continuations" in section_list:
             additionalParams = get_continuation_params(section_list)
-            own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in response["header"]
-            if own_playlist and (suggestions_limit > 0 or related):
+            if playlist["owned"] and (suggestions_limit > 0 or related):
                 parse_func = lambda results: parse_playlist_items(results)
                 suggested = request_func(additionalParams)
                 continuation = nav(suggested, SECTION_LIST_CONTINUATION)
@@ -150,21 +190,22 @@ class PlaylistsMixin(MixinProtocol):
                     )
 
         playlist["tracks"] = []
-        if "contents" in results:
-            playlist["tracks"] = parse_playlist_items(results["contents"])
+        content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
+        if "contents" in content_data:
+            playlist["tracks"] = parse_playlist_items(content_data["contents"])
 
             parse_func = lambda contents: parse_playlist_items(contents)
-            if "continuations" in results:
+            if "continuations" in content_data:
                 playlist["tracks"].extend(
                     get_continuations(
-                        results, "musicPlaylistShelfContinuation", limit, request_func, parse_func
+                        content_data, "musicPlaylistShelfContinuation", limit, request_func, parse_func
                     )
                 )
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist
 
-    def get_liked_songs(self, limit: int = 100) -> Dict:
+    def get_liked_songs(self, limit: int = 100) -> dict:
         """
         Gets playlist items for the 'Liked Songs' playlist
 
@@ -173,7 +214,7 @@ class PlaylistsMixin(MixinProtocol):
         """
         return self.get_playlist("LM", limit)
 
-    def get_saved_episodes(self, limit: int = 100) -> Dict:
+    def get_saved_episodes(self, limit: int = 100) -> dict:
         """
         Gets playlist items for the 'Liked Songs' playlist
 
@@ -187,9 +228,9 @@ class PlaylistsMixin(MixinProtocol):
         title: str,
         description: str,
         privacy_status: str = "PRIVATE",
-        video_ids: Optional[List] = None,
+        video_ids: Optional[list] = None,
         source_playlist: Optional[str] = None,
-    ) -> Union[str, Dict]:
+    ) -> Union[str, dict]:
         """
         Creates a new empty playlist and returns its id.
 
@@ -222,10 +263,10 @@ class PlaylistsMixin(MixinProtocol):
         title: Optional[str] = None,
         description: Optional[str] = None,
         privacyStatus: Optional[str] = None,
-        moveItem: Optional[Tuple[str, str]] = None,
+        moveItem: Optional[Union[str, tuple[str, str]]] = None,
         addPlaylistId: Optional[str] = None,
         addToTop: Optional[bool] = None,
-    ) -> Union[str, Dict]:
+    ) -> Union[str, dict]:
         """
         Edit title, description or privacyStatus of a playlist.
         You may also move an item within a playlist or append another playlist to this playlist.
@@ -241,7 +282,7 @@ class PlaylistsMixin(MixinProtocol):
         :return: Status String or full response
         """
         self._check_auth()
-        body: Dict[str, Any] = {"playlistId": validate_playlist_id(playlistId)}
+        body: dict[str, Any] = {"playlistId": validate_playlist_id(playlistId)}
         actions = []
         if title:
             actions.append({"action": "ACTION_SET_PLAYLIST_NAME", "playlistName": title})
@@ -253,13 +294,13 @@ class PlaylistsMixin(MixinProtocol):
             actions.append({"action": "ACTION_SET_PLAYLIST_PRIVACY", "playlistPrivacy": privacyStatus})
 
         if moveItem:
-            actions.append(
-                {
-                    "action": "ACTION_MOVE_VIDEO_BEFORE",
-                    "setVideoId": moveItem[0],
-                    "movedSetVideoIdSuccessor": moveItem[1],
-                }
-            )
+            action = {
+                "action": "ACTION_MOVE_VIDEO_BEFORE",
+                "setVideoId": moveItem if isinstance(moveItem, str) else moveItem[0],
+            }
+            if isinstance(moveItem, tuple) and len(moveItem) > 1:
+                action["movedSetVideoIdSuccessor"] = moveItem[1]
+            actions.append(action)
 
         if addPlaylistId:
             actions.append({"action": "ACTION_ADD_PLAYLIST", "addedFullListId": addPlaylistId})
@@ -275,7 +316,7 @@ class PlaylistsMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         return response["status"] if "status" in response else response
 
-    def delete_playlist(self, playlistId: str) -> Union[str, Dict]:
+    def delete_playlist(self, playlistId: str) -> Union[str, dict]:
         """
         Delete a playlist.
 
@@ -291,10 +332,10 @@ class PlaylistsMixin(MixinProtocol):
     def add_playlist_items(
         self,
         playlistId: str,
-        videoIds: Optional[List[str]] = None,
+        videoIds: Optional[list[str]] = None,
         source_playlist: Optional[str] = None,
         duplicates: bool = False,
-    ) -> Union[str, Dict]:
+    ) -> Union[str, dict]:
         """
         Add songs to an existing playlist
 
@@ -305,9 +346,11 @@ class PlaylistsMixin(MixinProtocol):
         :return: Status String and a dict containing the new setVideoId for each videoId or full response
         """
         self._check_auth()
-        body: Dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
+        body: dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
         if not videoIds and not source_playlist:
-            raise Exception("You must provide either videoIds or a source_playlist to add to the playlist")
+            raise YTMusicUserError(
+                "You must provide either videoIds or a source_playlist to add to the playlist"
+            )
 
         if videoIds:
             for videoId in videoIds:
@@ -335,7 +378,7 @@ class PlaylistsMixin(MixinProtocol):
         else:
             return response
 
-    def remove_playlist_items(self, playlistId: str, videos: List[Dict]) -> Union[str, Dict]:
+    def remove_playlist_items(self, playlistId: str, videos: list[dict]) -> Union[str, dict]:
         """
         Remove songs from an existing playlist
 
@@ -347,9 +390,11 @@ class PlaylistsMixin(MixinProtocol):
         self._check_auth()
         videos = list(filter(lambda x: "videoId" in x and "setVideoId" in x, videos))
         if len(videos) == 0:
-            raise Exception("Cannot remove songs, because setVideoId is missing. Do you own this playlist?")
+            raise YTMusicUserError(
+                "Cannot remove songs, because setVideoId is missing. Do you own this playlist?"
+            )
 
-        body: Dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
+        body: dict[str, Any] = {"playlistId": validate_playlist_id(playlistId), "actions": []}
         for video in videos:
             body["actions"].append(
                 {

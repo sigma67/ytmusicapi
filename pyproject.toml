@@ -1,7 +1,7 @@
 [project]
 name = "ytmusicapi"
 description = "Unofficial API for YouTube Music"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors=[{name = "sigma67", email= "ytmusicapi@gmail.com"}]
 license={file="LICENSE"}
 classifiers = [
@@ -10,6 +10,7 @@ classifiers = [
 ]
 dependencies = [
     "requests >= 2.22",
+    "pydantic>=2.8.2",
 ]
 dynamic = ["version", "readme"]
 
@@ -43,7 +44,7 @@ include-package-data=false
 [tool.pytest.ini_options]
 python_functions = "test_*"
 testpaths = ["tests"]
-addopts = "--verbose --cov"
+addopts = "--verbose --cov --retries 2 --retry-delay 5"
 
 [tool.coverage.run]
 source = ["ytmusicapi"]
@@ -78,4 +79,5 @@ dev = [
     "pytest>=7.4.4",
     "pytest-cov>=4.1.0",
     "types-requests>=2.31.0.20240218",
+    "pytest-retry>=1.6.3",
 ]

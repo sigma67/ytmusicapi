@@ -1,26 +1,28 @@
 ytmusicapi: Unofficial API for YouTube Music
 ############################################
 
-.. image:: https://img.shields.io/pypi/dm/ytmusicapi?style=flat-square
+.. |pypi-downloads| image:: https://img.shields.io/pypi/dm/ytmusicapi?style=flat-square
     :alt: PyPI Downloads
     :target: https://pypi.org/project/ytmusicapi/
 
-.. image:: https://badges.gitter.im/sigma67/ytmusicapi.svg
+.. |gitter| image:: https://badges.gitter.im/sigma67/ytmusicapi.svg
    :alt: Ask questions at https://gitter.im/sigma67/ytmusicapi
    :target: https://gitter.im/sigma67/ytmusicapi
 
-.. image:: https://img.shields.io/codecov/c/github/sigma67/ytmusicapi?style=flat-square
+.. |code-coverage| image:: https://img.shields.io/codecov/c/github/sigma67/ytmusicapi?style=flat-square
     :alt: Code coverage
     :target: https://codecov.io/gh/sigma67/ytmusicapi
 
-.. image:: https://img.shields.io/github/v/release/sigma67/ytmusicapi?style=flat-square
+.. |latest-release| image:: https://img.shields.io/github/v/release/sigma67/ytmusicapi?style=flat-square
     :alt: Latest release
     :target: https://github.com/sigma67/ytmusicapi/releases/latest
 
-.. image:: https://img.shields.io/github/commits-since/sigma67/ytmusicapi/latest?style=flat-square
+.. |commits-since-latest| image:: https://img.shields.io/github/commits-since/sigma67/ytmusicapi/latest?style=flat-square
     :alt: Commits since latest release
     :target: https://github.com/sigma67/ytmusicapi/commits
 
+
+|pypi-downloads| |gitter| |code-coverage| |latest-release| |commits-since-latest|
 
 ytmusicapi is a Python 3 library to send requests to the YouTube Music API.
 It emulates YouTube Music web client requests using the user's cookie data for authentication.

@@ -1,6 +1,7 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 from ytmusicapi.continuations import get_continuations
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.search import *
 
@@ -13,7 +14,7 @@ class SearchMixin(MixinProtocol):
         scope: Optional[str] = None,
         limit: int = 20,
         ignore_spelling: bool = False,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Search YouTube music
         Returns results within the provided category.
@@ -83,8 +84,9 @@ class SearchMixin(MixinProtocol):
               {
                 "category": "Albums",
                 "resultType": "album",
-                "browseId": "MPREb_9nqEki4ZDpp",
-                "title": "(What's The Story) Morning Glory? (Remastered)",
+                "browseId": "MPREb_IInSY5QXXrW",
+                "playlistId": "OLAK5uy_kunInnOpcKECWIBQGB0Qj6ZjquxDvfckg",
+                "title": "(What's The Story) Morning Glory?",
                 "type": "Album",
                 "artist": "Oasis",
                 "year": "1995",
@@ -135,7 +137,7 @@ class SearchMixin(MixinProtocol):
         """
         body = {"query": query}
         endpoint = "search"
-        search_results: List[Dict[str, Any]] = []
+        search_results: list[dict[str, Any]] = []
         filters = [
             "albums",
             "artists",
@@ -149,26 +151,26 @@ class SearchMixin(MixinProtocol):
             "episodes",
         ]
         if filter and filter not in filters:
-            raise Exception(
+            raise YTMusicUserError(
                 "Invalid filter provided. Please use one of the following filters or leave out the parameter: "
                 + ", ".join(filters)
             )
 
         scopes = ["library", "uploads"]
         if scope and scope not in scopes:
-            raise Exception(
+            raise YTMusicUserError(
                 "Invalid scope provided. Please use one of the following scopes or leave out the parameter: "
                 + ", ".join(scopes)
             )
 
         if scope == scopes[1] and filter:
-            raise Exception(
+            raise YTMusicUserError(
                 "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to "
                 "uploads. "
             )
 
         if scope == scopes[0] and filter in filters[3:5]:
-            raise Exception(
+            raise YTMusicUserError(
                 f"{filter} cannot be set when searching library. "
                 f"Please use one of the following filters or leave out the parameter: "
                 + ", ".join(filters[0:3] + filters[5:])
@@ -186,16 +188,16 @@ class SearchMixin(MixinProtocol):
 
         if "tabbedSearchResultsRenderer" in response["contents"]:
             tab_index = 0 if not scope or filter else scopes.index(scope) + 1
-            results = response["contents"]["tabbedSearchResultsRenderer"]["tabs"][
-                tab_index
-            ]["tabRenderer"]["content"]
+            results = response["contents"]["tabbedSearchResultsRenderer"]["tabs"][tab_index]["tabRenderer"][
+                "content"
+            ]
         else:
             results = response["contents"]
 
-        results = nav(results, SECTION_LIST)
+        section_list = nav(results, SECTION_LIST)
 
         # no results
-        if len(results) == 1 and "itemSectionRenderer" in results:
+        if len(section_list) == 1 and "itemSectionRenderer" in section_list:
             return search_results
 
         # set filter for parser
@@ -204,38 +206,36 @@ class SearchMixin(MixinProtocol):
         elif scope == scopes[1]:
             filter = scopes[1]
 
-        for res in results:
+        for res in section_list:
+            result_type = category = None
+            search_result_types = self.parser.get_search_result_types()
+
             if "musicCardShelfRenderer" in res:
                 top_result = parse_top_result(
                     res["musicCardShelfRenderer"], self.parser.get_search_result_types()
                 )
                 search_results.append(top_result)
-                if results := nav(res, ["musicCardShelfRenderer", "contents"], True):
-                    category = None
-                    # category "more from youtube" is missing sometimes
-                    if "messageRenderer" in results[0]:
-                        category = nav(
-                            results.pop(0), ["messageRenderer", *TEXT_RUN_TEXT]
-                        )
-                    type = None
-                else:
+                if not (shelf_contents := nav(res, ["musicCardShelfRenderer", "contents"], True)):
                     continue
+                # if "more from youtube" is present, remove it - it's not parseable
+                if "messageRenderer" in shelf_contents[0]:
+                    category = nav(shelf_contents.pop(0), ["messageRenderer", *TEXT_RUN_TEXT])
 
             elif "musicShelfRenderer" in res:
-                results = res["musicShelfRenderer"]["contents"]
-                type_filter = filter
+                shelf_contents = res["musicShelfRenderer"]["contents"]
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
-                if not type_filter and scope == scopes[0]:
-                    type_filter = category
 
-                type = type_filter[:-1].lower() if type_filter else None
+                # if we know the filter it's easy to set the result type
+                # unfortunately uploads is modeled as a filter (historical reasons),
+                #  so we take care to not set the result type for that scope
+                if filter and not scope == scopes[1]:
+                    result_type = filter[:-1].lower()
 
             else:
                 continue
 
-            search_result_types = self.parser.get_search_result_types()
             search_results.extend(
-                parse_search_results(results, search_result_types, type, category)
+                parse_search_results(shelf_contents, search_result_types, result_type, category)
             )
 
             if filter:  # if filter is set, there are continuations
@@ -244,9 +244,7 @@ class SearchMixin(MixinProtocol):
                     return self._send_request(endpoint, body, additionalParams)
 
                 def parse_func(contents):
-                    return parse_search_results(
-                        contents, search_result_types, type, category
-                    )
+                    return parse_search_results(contents, search_result_types, result_type, category)
 
                 search_results.extend(
                     get_continuations(
@@ -260,7 +258,7 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(self, query: str) -> List[str]:
+    def get_search_suggestions(self, query: str) -> list[str]:
         """
         Get Search Suggestions
 

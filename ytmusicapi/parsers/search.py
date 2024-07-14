@@ -1,26 +1,20 @@
+from ..helpers import to_int
 from ._utils import *
 from .songs import *
+
+UNIQUE_RESULT_TYPES = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
+ALL_RESULT_TYPES = ["album", *UNIQUE_RESULT_TYPES]
 
 
 def get_search_result_type(result_type_local, result_types_local):
     if not result_type_local:
         return None
-    result_types = [
-        "artist",
-        "playlist",
-        "song",
-        "video",
-        "station",
-        "profile",
-        "podcast",
-        "episode",
-    ]
     result_type_local = result_type_local.lower()
     # default to album since it's labeled with multiple values ('Single', 'EP', etc.)
     if result_type_local not in result_types_local:
         result_type = "album"
     else:
-        result_type = result_types[result_types_local.index(result_type_local)]
+        result_type = UNIQUE_RESULT_TYPES[result_types_local.index(result_type_local)]
 
     return result_type
 
@@ -48,18 +42,17 @@ def parse_top_result(data, search_result_types):
 
         search_result["title"] = nav(data, TITLE_TEXT)
         runs = nav(data, ["subtitle", "runs"])
-        song_info = parse_song_runs(runs)
+        song_info = parse_song_runs(runs[2:])
         search_result.update(song_info)
 
     if result_type in ["album"]:
         search_result["browseId"] = nav(data, TITLE + NAVIGATION_BROWSE_ID, True)
+        search_result["playlistId"] = nav(data, ["buttons", 0, "buttonRenderer", "command", *WATCH_PID], True)
 
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
         search_result["title"] = nav(data, TITLE_TEXT)
-        search_result["author"] = parse_song_artists_runs(
-            nav(data, ["subtitle", "runs"])[2:]
-        )
+        search_result["author"] = parse_song_artists_runs(nav(data, ["subtitle", "runs"])[2:])
 
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
     return search_result
@@ -68,17 +61,28 @@ def parse_top_result(data, search_result_types):
 def parse_search_result(data, search_result_types, result_type, category):
     default_offset = (not result_type or result_type == "album") * 2
     search_result = {"category": category}
-    video_type = nav(
-        data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True
-    )
-    if not result_type and video_type:
-        result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
+    video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
 
-    result_type = (
-        get_search_result_type(get_item_text(data, 1), search_result_types)
-        if not result_type
-        else result_type
-    )
+    # determine result type based on browseId
+    #  if there was no category title (i.e. for extra results in Top Result)
+    if not result_type:
+        if browse_id := nav(data, NAVIGATION_BROWSE_ID, True):
+            mapping = {
+                "VM": "playlist",
+                "RD": "playlist",
+                "VL": "playlist",
+                "MPLA": "artist",
+                "MPRE": "album",
+                "MPSP": "podcast",
+                "MPED": "episode",
+                "UC": "artist",
+            }
+            result_type = next(
+                iter(type for prefix, type in mapping.items() if browse_id.startswith(prefix)), None
+            )
+        else:
+            result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
+
     search_result["resultType"] = result_type
 
     if result_type != "artist":
@@ -94,12 +98,10 @@ def parse_search_result(data, search_result_types, result_type, category):
     elif result_type == "playlist":
         flex_item = get_flex_column_item(data, 1)["text"]["runs"]
         has_author = len(flex_item) == default_offset + 3
-        search_result["itemCount"] = get_item_text(
-            data, 1, default_offset + has_author * 2
-        ).split(" ")[0]
-        search_result["author"] = (
-            None if not has_author else get_item_text(data, 1, default_offset)
-        )
+        search_result["itemCount"] = get_item_text(data, 1, default_offset + has_author * 2).split(" ")[0]
+        if search_result["itemCount"] and search_result["itemCount"].isnumeric():
+            search_result["itemCount"] = to_int(search_result["itemCount"])
+        search_result["author"] = None if not has_author else get_item_text(data, 1, default_offset)
 
     elif result_type == "station":
         search_result["videoId"] = nav(data, NAVIGATION_VIDEO_ID)
@@ -119,17 +121,10 @@ def parse_search_result(data, search_result_types, result_type, category):
     elif result_type == "upload":
         browse_id = nav(data, NAVIGATION_BROWSE_ID, True)
         if not browse_id:  # song result
-            flex_items = [
-                nav(get_flex_column_item(data, i), ["text", "runs"], True)
-                for i in range(2)
-            ]
+            flex_items = [nav(get_flex_column_item(data, i), ["text", "runs"], True) for i in range(2)]
             if flex_items[0]:
-                search_result["videoId"] = nav(
-                    flex_items[0][0], NAVIGATION_VIDEO_ID, True
-                )
-                search_result["playlistId"] = nav(
-                    flex_items[0][0], NAVIGATION_PLAYLIST_ID, True
-                )
+                search_result["videoId"] = nav(flex_items[0][0], NAVIGATION_VIDEO_ID, True)
+                search_result["playlistId"] = nav(flex_items[0][0], NAVIGATION_PLAYLIST_ID, True)
             if flex_items[1]:
                 search_result.update(parse_song_runs(flex_items[1]))
             search_result["resultType"] = "song"
@@ -140,11 +135,7 @@ def parse_search_result(data, search_result_types, result_type, category):
                 search_result["resultType"] = "artist"
             else:
                 flex_item2 = get_flex_column_item(data, 1)
-                runs = [
-                    run["text"]
-                    for i, run in enumerate(flex_item2["text"]["runs"])
-                    if i % 2 == 0
-                ]
+                runs = [run["text"] for i, run in enumerate(flex_item2["text"]["runs"]) if i % 2 == 0]
                 if len(runs) > 1:
                     search_result["artist"] = runs[1]
                 if len(runs) > 2:  # date may be missing
@@ -164,7 +155,8 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result["year"] = None
         flex_item = get_flex_column_item(data, 1)
         runs = flex_item["text"]["runs"]
-        song_info = parse_song_runs(runs)
+        runs_offset = (len(runs[0]) == 1) * 2  # ignore the first run if it is a type specifier (like "Song")
+        song_info = parse_song_runs(runs[runs_offset:])
         search_result.update(song_info)
 
     if result_type in ["artist", "album", "playlist", "profile", "podcast"]:
@@ -173,18 +165,21 @@ def parse_search_result(data, search_result_types, result_type, category):
     if result_type in ["song", "album"]:
         search_result["isExplicit"] = nav(data, BADGE_LABEL, True) is not None
 
+    if result_type in ["album"]:
+        search_result["playlistId"] = nav(
+            data,
+            [*PLAY_BUTTON, "playNavigationEndpoint", "watchEndpoint", "playlistId"],
+            True,
+        )
+
     if result_type in ["episode"]:
         flex_item = get_flex_column_item(data, 1)
         has_date = int(len(nav(flex_item, TEXT_RUNS)) > 1)
-        search_result["live"] = bool(
-            nav(data, ["badges", 0, "liveBadgeRenderer"], True)
-        )
+        search_result["live"] = bool(nav(data, ["badges", 0, "liveBadgeRenderer"], True))
         if has_date:
             search_result["date"] = nav(flex_item, TEXT_RUN_TEXT)
 
-        search_result["podcast"] = parse_id_name(
-            nav(flex_item, ["text", "runs", has_date * 2])
-        )
+        search_result["podcast"] = parse_id_name(nav(flex_item, ["text", "runs", has_date * 2]))
 
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
 
@@ -193,8 +188,7 @@ def parse_search_result(data, search_result_types, result_type, category):
 
 def parse_search_results(results, search_result_types, resultType=None, category=None):
     return [
-        parse_search_result(result[MRLIR], search_result_types, resultType, category)
-        for result in results
+        parse_search_result(result[MRLIR], search_result_types, resultType, category) for result in results
     ]
 
 
@@ -264,16 +258,10 @@ def _get_param2(filter):
 
 
 def parse_search_suggestions(results):
-    if (
-        not results.get("contents", [{}])[0]
-        .get("searchSuggestionsSectionRenderer", {})
-        .get("contents", [])
-    ):
+    if not results.get("contents", [{}])[0].get("searchSuggestionsSectionRenderer", {}).get("contents", []):
         return []
 
-    raw_suggestions = results["contents"][0]["searchSuggestionsSectionRenderer"][
-        "contents"
-    ]
+    raw_suggestions = results["contents"][0]["searchSuggestionsSectionRenderer"]["contents"]
     suggestions = []
 
     for raw_suggestion in raw_suggestions:

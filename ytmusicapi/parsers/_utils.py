@@ -4,7 +4,10 @@ from ytmusicapi.navigation import *
 
 
 def parse_menu_playlists(data, result):
-    watch_menu = find_objects_by_key(nav(data, MENU_ITEMS), MNIR)
+    menu_items = nav(data, MENU_ITEMS, True)
+    if menu_items is None:
+        return
+    watch_menu = find_objects_by_key(menu_items, MNIR)
     for item in [_x[MNIR] for _x in watch_menu]:
         icon = nav(item, ICON_TYPE)
         if icon == "MUSIC_SHUFFLE":
@@ -61,7 +64,8 @@ def get_dot_separator_index(runs):
 
 
 def parse_duration(duration):
-    if duration is None:
+    # duration may be falsy or a single space: ' '
+    if not duration or not duration.strip():
         return duration
     mapped_increments = zip([1, 60, 3600], reversed(duration.split(":")))
     seconds = sum(multiplier * int(time) for multiplier, time in mapped_increments)

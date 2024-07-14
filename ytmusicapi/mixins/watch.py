@@ -1,6 +1,7 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from ytmusicapi.continuations import get_continuations
+from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.playlists import validate_playlist_id
 from ytmusicapi.parsers.watch import *
@@ -14,7 +15,7 @@ class WatchMixin(MixinProtocol):
         limit=25,
         radio: bool = False,
         shuffle: bool = False,
-    ) -> Dict[str, Union[List[Dict], str, None]]:
+    ) -> dict[str, Union[list[dict], str, None]]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -109,7 +110,7 @@ class WatchMixin(MixinProtocol):
             "tunerSettingValue": "AUTOMIX_SETTING_NORMAL",
         }
         if not videoId and not playlistId:
-            raise Exception("You must provide either a video id, a playlist id, or both")
+            raise YTMusicUserError("You must provide either a video id, a playlist id, or both")
         if videoId:
             body["videoId"] = videoId
             if not playlistId:
@@ -153,7 +154,7 @@ class WatchMixin(MixinProtocol):
             msg = "No content returned by the server."
             if playlistId:
                 msg += f"\nEnsure you have access to {playlistId} - a private playlist may cause this."
-            raise Exception(msg)
+            raise YTMusicServerError(msg)
 
         playlist = next(
             filter(

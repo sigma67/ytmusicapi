@@ -1,16 +1,17 @@
 from random import randint
-from typing import Dict, List, Optional
+from typing import Optional
 
 from ytmusicapi.continuations import *
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import *
 
+from ..exceptions import YTMusicServerError
 from ._protocol import MixinProtocol
 from ._utils import *
 
 
 class LibraryMixin(MixinProtocol):
-    def get_library_playlists(self, limit: Optional[int] = 25) -> List[Dict]:
+    def get_library_playlists(self, limit: Optional[int] = 25) -> list[dict]:
         """
         Retrieves the playlists in the user's library.
 
@@ -46,7 +47,7 @@ class LibraryMixin(MixinProtocol):
 
     def get_library_songs(
         self, limit: int = 25, validate_responses: bool = False, order: Optional[str] = None
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Gets the songs in the user's library (liked videos are not included).
         To get liked songs and videos, use :py:func:`get_liked_songs`
@@ -69,7 +70,7 @@ class LibraryMixin(MixinProtocol):
         parse_func = lambda raw_response: parse_library_songs(raw_response)
 
         if validate_responses and limit is None:
-            raise Exception("Validation is not supported without a limit parameter.")
+            raise YTMusicUserError("Validation is not supported without a limit parameter.")
 
         if validate_responses:
             validate_func = lambda parsed: validate_response(parsed, per_page, limit, 0)
@@ -115,7 +116,7 @@ class LibraryMixin(MixinProtocol):
 
         return songs
 
-    def get_library_albums(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_albums(self, limit: int = 25, order: Optional[str] = None) -> list[dict]:
         """
         Gets the albums in the user's library.
 
@@ -150,7 +151,7 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_artists(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_artists(self, limit: int = 25, order: Optional[str] = None) -> list[dict]:
         """
         Gets the artists of the songs in the user's library.
 
@@ -178,7 +179,7 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_subscriptions(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_subscriptions(self, limit: int = 25, order: Optional[str] = None) -> list[dict]:
         """
         Gets the artists the user has subscribed to.
 
@@ -197,7 +198,7 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_podcasts(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_podcasts(self, limit: int = 25, order: Optional[str] = None) -> list[dict]:
         """
         Get podcasts the user has added to the library
 
@@ -243,7 +244,7 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_channels(self, limit: int = 25, order: Optional[str] = None) -> List[Dict]:
+    def get_library_channels(self, limit: int = 25, order: Optional[str] = None) -> list[dict]:
         """
         Get channels the user has added to the library
 
@@ -279,7 +280,7 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_history(self) -> List[Dict]:
+    def get_history(self) -> list[dict]:
         """
         Gets your play history in reverse chronological order
 
@@ -297,7 +298,7 @@ class LibraryMixin(MixinProtocol):
             data = nav(content, [*MUSIC_SHELF, "contents"], True)
             if not data:
                 error = nav(content, ["musicNotifierShelfRenderer", *TITLE], True)
-                raise Exception(error)
+                raise YTMusicServerError(error)
             menu_entries = [[-1, *MENU_SERVICE, *FEEDBACK_TOKEN]]
             songlist = parse_playlist_items(data, menu_entries)
             for song in songlist:
@@ -320,7 +321,7 @@ class LibraryMixin(MixinProtocol):
         params = {"ver": 2, "c": "WEB_REMIX", "cpn": cpn}
         return self._send_get_request(url, params)
 
-    def remove_history_items(self, feedbackTokens: List[str]) -> Dict:  # pragma: no cover
+    def remove_history_items(self, feedbackTokens: list[str]) -> dict:  # pragma: no cover
         """
         Remove an item from the account's history. This method does currently not work with brand accounts
 
@@ -334,7 +335,7 @@ class LibraryMixin(MixinProtocol):
 
         return response
 
-    def rate_song(self, videoId: str, rating: str = "INDIFFERENT") -> Optional[Dict]:
+    def rate_song(self, videoId: str, rating: str = "INDIFFERENT") -> Optional[dict]:
         """
         Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
 
@@ -353,7 +354,7 @@ class LibraryMixin(MixinProtocol):
 
         return self._send_request(endpoint, body)
 
-    def edit_song_library_status(self, feedbackTokens: Optional[List[str]] = None) -> Dict:
+    def edit_song_library_status(self, feedbackTokens: Optional[list[str]] = None) -> dict:
         """
         Adds or removes a song from your library depending on the token provided.
 
@@ -366,7 +367,7 @@ class LibraryMixin(MixinProtocol):
         endpoint = "feedback"
         return self._send_request(endpoint, body)
 
-    def rate_playlist(self, playlistId: str, rating: str = "INDIFFERENT") -> Dict:
+    def rate_playlist(self, playlistId: str, rating: str = "INDIFFERENT") -> dict:
         """
         Rates a playlist/album ("Add to library"/"Remove from library" interactions on YouTube Music)
         You can also dislike a playlist/album, which has an effect on your recommendations
@@ -383,7 +384,7 @@ class LibraryMixin(MixinProtocol):
         endpoint = prepare_like_endpoint(rating)
         return endpoint if not endpoint else self._send_request(endpoint, body)
 
-    def subscribe_artists(self, channelIds: List[str]) -> Dict:
+    def subscribe_artists(self, channelIds: list[str]) -> dict:
         """
         Subscribe to artists. Adds the artists to your library
 
@@ -395,7 +396,7 @@ class LibraryMixin(MixinProtocol):
         endpoint = "subscription/subscribe"
         return self._send_request(endpoint, body)
 
-    def unsubscribe_artists(self, channelIds: List[str]) -> Dict:
+    def unsubscribe_artists(self, channelIds: list[str]) -> dict:
         """
         Unsubscribe from artists. Removes the artists from your library
 
@@ -407,7 +408,7 @@ class LibraryMixin(MixinProtocol):
         endpoint = "subscription/unsubscribe"
         return self._send_request(endpoint, body)
 
-    def get_account_info(self) -> Dict:
+    def get_account_info(self) -> dict:
         """
         Gets information about the currently authenticated user's account.
 
@@ -440,7 +441,7 @@ class LibraryMixin(MixinProtocol):
         ACCOUNT_PHOTO_URL = [*ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
 
         account_name = nav(response, ACCOUNT_NAME)
-        channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE)
+        channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE, none_if_absent=True)
         account_photo_url = nav(response, ACCOUNT_PHOTO_URL)
 
         return {

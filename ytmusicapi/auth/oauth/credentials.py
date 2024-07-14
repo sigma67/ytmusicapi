@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Dict, Mapping, Optional
+from typing import Optional
 
 import requests
 
@@ -13,6 +14,7 @@ from ytmusicapi.constants import (
     OAUTH_USER_AGENT,
 )
 
+from ...exceptions import YTMusicServerError
 from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
 from .models import AuthCodeDict, BaseTokenDict, RefreshableTokenDict
 
@@ -48,7 +50,7 @@ class OAuthCredentials(Credentials):
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
         session: Optional[requests.Session] = None,
-        proxies: Optional[Dict] = None,
+        proxies: Optional[dict] = None,
     ):
         """
         :param client_id: Optional. Set the GoogleAPI client_id used for auth flows.
@@ -93,7 +95,7 @@ class OAuthCredentials(Credentials):
                     "YouTubeData API is not enabled."
                 )
             else:
-                raise Exception(
+                raise YTMusicServerError(
                     f"OAuth request error. status_code: {response.status_code}, url: {url}, content: {data}"
                 )
         return response

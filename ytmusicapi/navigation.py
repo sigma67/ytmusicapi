@@ -1,6 +1,6 @@
 """commonly used navigation paths"""
 
-from typing import Any, Dict, List, Literal, Optional, overload
+from typing import Any, Literal, Optional, overload
 
 CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]
@@ -28,10 +28,12 @@ NAVIGATION_BROWSE = ["navigationEndpoint", "browseEndpoint"]
 NAVIGATION_BROWSE_ID = [*NAVIGATION_BROWSE, "browseId"]
 PAGE_TYPE = ["browseEndpointContextSupportedConfigs", "browseEndpointContextMusicConfig", "pageType"]
 WATCH_VIDEO_ID = ["watchEndpoint", "videoId"]
+PLAYLIST_ID = ["playlistId"]
+WATCH_PLAYLIST_ID = ["watchEndpoint", *PLAYLIST_ID]
 NAVIGATION_VIDEO_ID = ["navigationEndpoint", *WATCH_VIDEO_ID]
 QUEUE_VIDEO_ID = ["queueAddEndpoint", "queueTarget", "videoId"]
-NAVIGATION_PLAYLIST_ID = ["navigationEndpoint", "watchEndpoint", "playlistId"]
-WATCH_PID = ["watchPlaylistEndpoint", "playlistId"]
+NAVIGATION_PLAYLIST_ID = ["navigationEndpoint", *WATCH_PLAYLIST_ID]
+WATCH_PID = ["watchPlaylistEndpoint", *PLAYLIST_ID]
 NAVIGATION_WATCH_PLAYLIST_ID = ["navigationEndpoint", *WATCH_PID]
 NAVIGATION_VIDEO_TYPE = [
     "watchEndpoint",
@@ -71,30 +73,33 @@ TASTE_PROFILE_ARTIST = ["title", "runs"]
 SECTION_LIST_CONTINUATION = ["continuationContents", "sectionListContinuation"]
 MENU_PLAYLIST_ID = [*MENU_ITEMS, 0, MNIR, *NAVIGATION_WATCH_PLAYLIST_ID]
 MULTI_SELECT = ["musicMultiSelectMenuItemRenderer"]
-HEADER_DETAIL = ["header", "musicDetailHeaderRenderer"]
-HEADER_SIDE = ["header", "musicSideAlignedItemRenderer"]
-HEADER_MUSIC_VISUAL = ["header", "musicVisualHeaderRenderer"]
+HEADER = ["header"]
+HEADER_DETAIL = [*HEADER, "musicDetailHeaderRenderer"]
+EDITABLE_PLAYLIST_DETAIL_HEADER = ["musicEditablePlaylistDetailHeaderRenderer"]
+HEADER_EDITABLE_DETAIL = [*HEADER, *EDITABLE_PLAYLIST_DETAIL_HEADER]
+HEADER_SIDE = [*HEADER, "musicSideAlignedItemRenderer"]
+HEADER_MUSIC_VISUAL = [*HEADER, "musicVisualHeaderRenderer"]
 DESCRIPTION_SHELF = ["musicDescriptionShelfRenderer"]
 DESCRIPTION = ["description", *RUN_TEXT]
 CAROUSEL = ["musicCarouselShelfRenderer"]
 IMMERSIVE_CAROUSEL = ["musicImmersiveCarouselShelfRenderer"]
 CAROUSEL_CONTENTS = [*CAROUSEL, "contents"]
-CAROUSEL_TITLE = ["header", "musicCarouselShelfBasicHeaderRenderer", *TITLE]
-CARD_SHELF_TITLE = ["header", "musicCardShelfHeaderBasicRenderer", *TITLE_TEXT]
+CAROUSEL_TITLE = [*HEADER, "musicCarouselShelfBasicHeaderRenderer", *TITLE]
+CARD_SHELF_TITLE = [*HEADER, "musicCardShelfHeaderBasicRenderer", *TITLE_TEXT]
 FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
 
 
 @overload
-def nav(root: Dict[str, Any], items: List[Any], none_if_absent: Literal[False] = False) -> Any:
+def nav(root: dict[str, Any], items: list[Any], none_if_absent: Literal[False] = False) -> Any:
     """overload for mypy only"""
 
 
 @overload
-def nav(root: Dict, items: List[Any], none_if_absent: Literal[True] = True) -> Optional[Any]:
+def nav(root: dict, items: list[Any], none_if_absent: Literal[True] = True) -> Optional[Any]:
     """overload for mypy only"""
 
 
-def nav(root: Dict, items: List[Any], none_if_absent: bool = False) -> Optional[Any]:
+def nav(root: dict, items: list[Any], none_if_absent: bool = False) -> Optional[Any]:
     """Access a nested object in root by item sequence."""
     try:
         for k in items:
