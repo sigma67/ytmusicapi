@@ -137,6 +137,9 @@ def parse_playlist_item(
                 album_index = index
             elif page_type == "MUSIC_PAGE_TYPE_USER_CHANNEL":
                 user_channel_indexes.append(index)
+            # Non music videos, for example: podcast episodes
+            elif page_type == "MUSIC_PAGE_TYPE_NON_MUSIC_AUDIO_TRACK_PAGE":
+                title_index = index
 
     # Extra check for rare songs, where artist is non-clickable and does not have navigationEndpoint
     if artist_index is None and unrecognized_index is not None:
