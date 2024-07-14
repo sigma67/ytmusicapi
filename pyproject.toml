@@ -10,6 +10,7 @@ classifiers = [
 ]
 dependencies = [
     "requests >= 2.22",
+    "pydantic>=2.8.2",
 ]
 dynamic = ["version", "readme"]
 

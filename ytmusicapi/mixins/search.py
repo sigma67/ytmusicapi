@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.exceptions import YTMusicUserError
@@ -258,19 +258,14 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[list[str], list[dict]]:
+    def get_search_suggestions(self, query: str) -> list[str]:
         """
         Get Search Suggestions
 
         :param query: Query string, i.e. 'faded'
-        :param detailed_runs: Whether to return detailed runs of each suggestion.
-            If True, it returns the query that the user typed and the remaining
-            suggestion along with the complete text (like many search services
-            usually bold the text typed by the user).
-            Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on ``detailed_runs`` param.
+        :return: List of search suggestions as strings.
 
-          Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
+          Example response when ``query`` is 'fade'::
 
               [
                 "faded",
@@ -281,54 +276,12 @@ class SearchMixin(MixinProtocol):
                 "faded lyrics",
                 "faded instrumental"
               ]
-
-          Example response when ``detailed_runs`` is set to ``True``::
-
-              [
-                {
-                  "text": "faded",
-                  "runs": [
-                    {
-                      "text": "fade",
-                      "bold": true
-                    },
-                    {
-                      "text": "d"
-                    }
-                  ]
-                },
-                {
-                  "text": "faded alan walker lyrics",
-                  "runs": [
-                    {
-                      "text": "fade",
-                      "bold": true
-                    },
-                    {
-                      "text": "d alan walker lyrics"
-                    }
-                  ]
-                },
-                {
-                  "text": "faded alan walker",
-                  "runs": [
-                    {
-                      "text": "fade",
-                      "bold": true
-                    },
-                    {
-                      "text": "d alan walker"
-                    }
-                  ]
-                },
-                ...
-              ]
         """
 
         body = {"input": query}
         endpoint = "music/get_search_suggestions"
 
         response = self._send_request(endpoint, body)
-        search_suggestions = parse_search_suggestions(response, detailed_runs)
+        search_suggestions = parse_search_suggestions(response)
 
         return search_suggestions

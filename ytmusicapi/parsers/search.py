@@ -144,7 +144,9 @@ def parse_search_result(data, search_result_types, result_type, category):
 
     if result_type in ["song", "video", "episode"]:
         search_result["videoId"] = nav(
-            data, [*PLAY_BUTTON, "playNavigationEndpoint", "watchEndpoint", "videoId"], True
+            data,
+            [*PLAY_BUTTON, "playNavigationEndpoint", "watchEndpoint", "videoId"],
+            True,
         )
         search_result["videoType"] = video_type
 
@@ -255,7 +257,7 @@ def _get_param2(filter):
     return filter_params[filter]
 
 
-def parse_search_suggestions(results, detailed_runs):
+def parse_search_suggestions(results):
     if not results.get("contents", [{}])[0].get("searchSuggestionsSectionRenderer", {}).get("contents", []):
         return []
 
@@ -265,17 +267,11 @@ def parse_search_suggestions(results, detailed_runs):
     for raw_suggestion in raw_suggestions:
         if "historySuggestionRenderer" in raw_suggestion:
             suggestion_content = raw_suggestion["historySuggestionRenderer"]
-            from_history = True
         else:
             suggestion_content = raw_suggestion["searchSuggestionRenderer"]
-            from_history = False
 
         text = suggestion_content["navigationEndpoint"]["searchEndpoint"]["query"]
-        runs = suggestion_content["suggestion"]["runs"]
 
-        if detailed_runs:
-            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history})
-        else:
-            suggestions.append(text)
+        suggestions.append(text)
 
     return suggestions
