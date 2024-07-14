@@ -6,6 +6,7 @@ from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
 
+from ..models.playlist import PlaylistResult
 from ._protocol import MixinProtocol
 from ._utils import *
 
@@ -13,7 +14,7 @@ from ._utils import *
 class PlaylistsMixin(MixinProtocol):
     def get_playlist(
         self, playlistId: str, limit: Optional[int] = 100, related: bool = False, suggestions_limit: int = 0
-    ) -> dict:
+    ) -> PlaylistResult:
         """
         Returns a list of playlist items
 
@@ -109,6 +110,7 @@ class PlaylistsMixin(MixinProtocol):
 
         header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
         section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+
         playlist: dict = {}
         playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
         if not playlist["owned"]:
@@ -132,6 +134,7 @@ class PlaylistsMixin(MixinProtocol):
             if description_shelf
             else None
         )
+        playlist["thumbnails"] = nav(header, THUMBNAILS)
         playlist["title"] = nav(header, TITLE_TEXT)
         playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
 
@@ -203,7 +206,8 @@ class PlaylistsMixin(MixinProtocol):
                 )
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
-        return playlist
+
+        return PlaylistResult(**playlist)
 
     def get_liked_songs(self, limit: int = 100) -> dict:
         """
