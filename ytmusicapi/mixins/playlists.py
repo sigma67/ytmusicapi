@@ -132,6 +132,7 @@ class PlaylistsMixin(MixinProtocol):
             if description_shelf
             else None
         )
+        playlist["thumbnails"] = nav(header, THUMBNAILS)
         playlist["title"] = nav(header, TITLE_TEXT)
         playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
 
