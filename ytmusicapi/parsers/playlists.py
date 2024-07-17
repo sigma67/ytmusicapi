@@ -101,11 +101,13 @@ def parse_playlist_item(
     if "musicItemRendererDisplayPolicy" in data:
         isAvailable = data["musicItemRendererDisplayPolicy"] != "MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT"
 
-    # For unavailable items indexes are preset,
-    # because meaning of the flex column cannot be found using navigationEndpoint
-    title_index = 0 if isAvailable is False else None
-    artist_index = 1 if isAvailable is False else None
-    album_index = 2 if isAvailable is False else None
+    # For unavailable items and for album track lists indexes are preset,
+    # because meaning of the flex column cannot be reliably found using navigationEndpoint
+    use_preset_columns = True if isAvailable is False or is_album is True else None
+
+    title_index = 0 if use_preset_columns else None
+    artist_index = 1 if use_preset_columns else None
+    album_index = 2 if use_preset_columns else None
     user_channel_indexes = []
     unrecognized_index = None
 
@@ -114,7 +116,8 @@ def parse_playlist_item(
         navigation_endpoint = nav(flex_column_item, [*TEXT_RUN, "navigationEndpoint"], True)
 
         if not navigation_endpoint:
-            unrecognized_index = index if unrecognized_index is None else unrecognized_index
+            if nav(flex_column_item, TEXT_RUN_TEXT, True) is not None:
+                unrecognized_index = index if unrecognized_index is None else unrecognized_index
             continue
 
         if "watchEndpoint" in navigation_endpoint:
