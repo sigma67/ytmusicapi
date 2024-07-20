@@ -16,6 +16,7 @@ class TestPlaylists:
         [
             ("2024_03_get_playlist.json", True),
             ("2024_03_get_playlist_public.json", False),
+            ("2024_07_get_playlist_collaborative.json", True),
         ],
     )
     def test_get_playlist_2024(self, yt, test_file, owned):
@@ -25,9 +26,20 @@ class TestPlaylists:
             playlist = yt.get_playlist("MPREabc")
             assert playlist["year"] == "2024"
             assert playlist["owned"] == owned
-            assert "hours" in playlist["duration"]
+            assert "hours" in playlist["duration"] or "minutes" in playlist["duration"]
             assert playlist["id"]
-            assert isinstance(playlist["description"], str)
+            assert isinstance(playlist["description"], str) and playlist["description"]
+            assert len(playlist["tracks"]) > 0
+
+            for track in playlist["tracks"]:
+                assert isinstance(track["title"], str) and track["title"]
+
+                assert len(track["artists"]) > 0
+                for artist in track["artists"]:
+                    assert isinstance(artist["name"], str) and artist["name"]
+
+                if track["videoType"] == "MUSIC_VIDEO_TYPE_ATV":
+                    assert isinstance(track["album"]["name"], str) and track["album"]["name"]
 
     def test_get_playlist_foreign(self, yt, yt_auth, yt_oauth):
         with pytest.raises(Exception):
