@@ -85,6 +85,12 @@ class TestBrowsing:
             assert len(album["tracks"]) == 19
             assert len(album["artists"]) == 1
             assert len(album) == 14
+            for track in album["tracks"]:
+                assert isinstance(track["title"], str) and track["title"]
+                assert len(track["artists"]) > 0
+                for artist in track["artists"]:
+                    assert "name" in artist
+                    assert isinstance(artist["name"], str) and artist["name"]
 
     def test_get_album(self, yt, yt_auth, sample_album):
         album = yt_auth.get_album(sample_album)
