@@ -6,6 +6,7 @@ CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]
 TAB_CONTENT = ["tabs", 0, "tabRenderer", "content"]
 TAB_1_CONTENT = ["tabs", 1, "tabRenderer", "content"]
+TAB_2_CONTENT = ["tabs", 2, "tabRenderer", "content"]
 TWO_COLUMN_RENDERER = ["contents", "twoColumnBrowseResultsRenderer"]
 SINGLE_COLUMN = ["contents", "singleColumnBrowseResultsRenderer"]
 SINGLE_COLUMN_TAB = SINGLE_COLUMN + TAB_CONTENT
