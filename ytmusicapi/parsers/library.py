@@ -122,7 +122,7 @@ def get_library_contents(response, renderer):
     section = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
     contents = None
     if section is None:  # empty library
-        contents = nav(response, SINGLE_COLUMN + TAB_1_CONTENT + SECTION_LIST_ITEM + renderer, True)
+        contents = nav(response, SINGLE_COLUMN + TAB_2_CONTENT + SECTION_LIST_ITEM + renderer, True)
     else:
         results = find_object_by_key(section, "itemSectionRenderer")
         if results is None:
