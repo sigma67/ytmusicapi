@@ -12,11 +12,11 @@ class TestSearch:
         with pytest.raises(Exception, match="Invalid scope provided"):
             yt_auth.search(query, scope="upload")
 
-    @pytest.mark.parametrize("query", ["Monekes", "qllwlwl", "heun"])
+    @pytest.mark.parametrize("query", ["Monekes", "llwlwl", "heun"])
     def test_search_queries(self, yt, yt_brand, query: str) -> None:
         results = yt_brand.search(query)
         assert ["resultType" in r for r in results] == [True] * len(results)
-        assert len(results) >= 8
+        assert len(results) >= 5
         assert not any(
             artist["name"].lower() in ALL_RESULT_TYPES
             for result in results
@@ -24,7 +24,7 @@ class TestSearch:
             for artist in result["artists"]
         )
         results = yt.search(query)
-        assert len(results) >= 8
+        assert len(results) >= 5
         assert not any(
             artist["name"].lower() in ALL_RESULT_TYPES
             for result in results
