@@ -428,7 +428,7 @@ class BrowsingMixin(MixinProtocol):
         Call this function again with the returned ``params`` to get the full list.
 
         :param channelId: channelId of the user.
-        :param params: params obtained by :py:func:`get_artist`
+        :param params: params obtained by :py:func:`get_user`
         :return: List of user playlists in the format of :py:func:`get_library_playlists`
 
         """
@@ -449,8 +449,8 @@ class BrowsingMixin(MixinProtocol):
         Call this function again with the returned ``params`` to get the full list.
 
         :param channelId: channelId of the user.
-        :param params: params obtained by :py:func:`get_artist`
-        :return: List of user playlists in the format of :py:func:`get_library_playlists`
+        :param params: params obtained by :py:func:`get_user`
+        :return: List of user videos
 
         """
         endpoint = "browse"
