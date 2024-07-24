@@ -8,7 +8,13 @@ from ytmusicapi.continuations import (
 )
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
 from ytmusicapi.parsers.albums import parse_album_header_2024
-from ytmusicapi.parsers.browsing import parse_album, parse_content_list, parse_mixed_content, parse_playlist
+from ytmusicapi.parsers.browsing import (
+    parse_album,
+    parse_content_list,
+    parse_mixed_content,
+    parse_playlist,
+    parse_video,
+)
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
 
@@ -355,6 +361,15 @@ class BrowsingMixin(MixinProtocol):
         """
         Retrieve a user's page. A user may own videos or playlists.
 
+        Use :py:func:`get_user_playlists` to retrieve all playlists::
+
+            result = get_user(channelId)
+            get_user_playlists(channelId, result["playlists"]["params"])
+
+        Similarly, use :py:func:`get_user_videos` to retrieve all videos::
+
+            get_user_videos(channelId, result["videos"]["params"])
+
         :param channelId: channelId of the user
         :return: Dictionary with information about a user.
 
@@ -427,6 +442,27 @@ class BrowsingMixin(MixinProtocol):
         user_playlists = parse_content_list(results, parse_playlist)
 
         return user_playlists
+
+    def get_user_videos(self, channelId: str, params: str) -> list[dict]:
+        """
+        Retrieve a list of videos for a given user.
+        Call this function again with the returned ``params`` to get the full list.
+
+        :param channelId: channelId of the user.
+        :param params: params obtained by :py:func:`get_artist`
+        :return: List of user playlists in the format of :py:func:`get_library_playlists`
+
+        """
+        endpoint = "browse"
+        body = {"browseId": channelId, "params": params}
+        response = self._send_request(endpoint, body)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS, True)
+        if not results:
+            return []
+
+        user_videos = parse_content_list(results, parse_video)
+
+        return user_videos
 
     def get_album_browse_id(self, audioPlaylistId: str) -> Optional[str]:
         """
