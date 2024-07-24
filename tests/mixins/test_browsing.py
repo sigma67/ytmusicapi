@@ -68,6 +68,15 @@ class TestBrowsing:
         results_empty = yt.get_user_playlists(channel, user["playlists"]["params"])
         assert len(results_empty) == 0
 
+    def test_get_user_videos(self, yt, yt_auth):
+        channel = "UCus8EVJ7Oc9zINhs-fg8l1Q"  # Turbo
+        user = yt_auth.get_user(channel)
+        results = yt_auth.get_user_videos(channel, user["videos"]["params"])
+        assert len(results) > 100
+
+        results_empty = yt.get_user_videos(channel, user["videos"]["params"])
+        assert len(results_empty) == 0
+
     def test_get_album_browse_id(self, yt, sample_album):
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         browse_id = yt.get_album_browse_id("OLAK5uy_nMr9h2VlS-2PULNz3M3XVXQj_P3C2bqaY")
