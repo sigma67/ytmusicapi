@@ -87,6 +87,8 @@ class PlaylistsMixin(MixinProtocol):
                     "id": "MPREb_PxmzvDuqOnC"
                   },
                   "duration": "2:58",
+                  "duration_seconds": 178,
+                  "setVideoId": "748EE8..."
                   "likeStatus": "INDIFFERENT",
                   "thumbnails": [...],
                   "isAvailable": True,
@@ -276,7 +278,8 @@ class PlaylistsMixin(MixinProtocol):
         :param title: Optional. New title for the playlist
         :param description: Optional. New description for the playlist
         :param privacyStatus: Optional. New privacy status for the playlist
-        :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, see :py:func:`get_playlist`
+        :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, which is the 
+            unique id of this playlist item. See :py:func:`get_playlist`
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
             or the bottom of the playlist (if False - this is also the default of a new playlist).
