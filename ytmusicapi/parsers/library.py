@@ -121,8 +121,11 @@ def get_library_contents(response, renderer):
     """
     section = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
     contents = None
-    if section is None:  # empty library
-        contents = nav(response, SINGLE_COLUMN + TAB_2_CONTENT + SECTION_LIST_ITEM + renderer, True)
+    if section is None:  # empty library or uploads
+        # covers the case of non-premium subscribers - no downloads tab
+        num_tabs = len(nav(response, [*SINGLE_COLUMN, "tabs"]))
+        LIBRARY_TAB = TAB_1_CONTENT if num_tabs < 3 else TAB_2_CONTENT
+        contents = nav(response, SINGLE_COLUMN + LIBRARY_TAB + SECTION_LIST_ITEM + renderer, True)
     else:
         results = find_object_by_key(section, "itemSectionRenderer")
         if results is None:
