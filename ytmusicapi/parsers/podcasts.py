@@ -83,12 +83,10 @@ def parse_podcast_header(header: dict) -> dict:
 
 def parse_episode_header(header: dict) -> dict:
     metadata = parse_base_header(header)
-    metadata["date"] = nav(header, [*SUBTITLE2])
-    metadata["duration"] = nav(header, [*SUBTITLE3], True)
-    if not metadata["duration"]:  # progress started
-        progress_renderer = nav(header, ["progress", *PROGRESS_RENDERER])
-        metadata["duration"] = nav(progress_renderer, DURATION_TEXT, True)
-        metadata["progressPercentage"] = nav(progress_renderer, ["playbackProgressPercentage"])
+    metadata["date"] = nav(header, [*SUBTITLE])
+    progress_renderer = nav(header, ["progress", *PROGRESS_RENDERER])
+    metadata["duration"] = nav(progress_renderer, DURATION_TEXT, True)
+    metadata["progressPercentage"] = nav(progress_renderer, ["playbackProgressPercentage"])
     metadata["saved"] = nav(header, ["buttons", 0, *TOGGLED_BUTTON], True) or False
 
     metadata["playlistId"] = None
