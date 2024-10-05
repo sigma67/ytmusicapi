@@ -2,4 +2,4 @@ import os
 
 
 def is_ci() -> bool:
-    return "CI" in os.environ
+    return "GITHUB_ACTIONS" in os.environ
