@@ -245,6 +245,13 @@ class PlaylistsMixin(MixinProtocol):
         :return: ID of the YouTube playlist or full response if there was an error
         """
         self._check_auth()
+
+        invalid_characters = ["<", ">"]  # ytmusic will crash if these are part of the title
+        invalid_characters_found = [invalid for invalid in invalid_characters if invalid in title]
+        if invalid_characters_found:
+            msg = f"{title} contains invalid characters: {', '.join(invalid_characters_found)}"
+            raise YTMusicUserError(msg)
+
         body = {
             "title": title,
             "description": html_to_txt(description),  # YT does not allow HTML tags
