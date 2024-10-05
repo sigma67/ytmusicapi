@@ -1,8 +1,8 @@
 import json
-import os
 import time
 import webbrowser
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from requests.structures import CaseInsensitiveDict
@@ -68,8 +68,8 @@ class OAuthToken(Token):
         return self.expires_at - int(time.time()) < 60
 
     @classmethod
-    def from_json(cls, file_path: str) -> "OAuthToken":
-        if os.path.isfile(file_path):
+    def from_json(cls, file_path: Path) -> "OAuthToken":
+        if file_path.is_file():
             with open(file_path) as json_file:
                 file_pack = json.load(json_file)
 
@@ -88,7 +88,7 @@ class RefreshingToken(OAuthToken):
     credentials: Optional[Credentials] = None
 
     #: protected/property attribute enables auto writing token values to new file location via setter
-    _local_cache: Optional[str] = None
+    _local_cache: Optional[Path] = None
 
     def __getattribute__(self, item):
         """access token setter to auto-refresh if it is expiring"""
@@ -100,11 +100,11 @@ class RefreshingToken(OAuthToken):
         return super().__getattribute__(item)
 
     @property
-    def local_cache(self) -> Optional[str]:
+    def local_cache(self) -> Optional[Path]:
         return self._local_cache
 
     @local_cache.setter
-    def local_cache(self, path: str):
+    def local_cache(self, path: Path):
         """Update attribute and dump token to new path."""
         self._local_cache = path
         self.store_token()
@@ -130,7 +130,7 @@ class RefreshingToken(OAuthToken):
         ref_token = cls(credentials=credentials, **raw_token)
         ref_token.update(ref_token.as_dict())
         if to_file:
-            ref_token.local_cache = to_file
+            ref_token.local_cache = Path(to_file)
         return ref_token
 
     def store_token(self, path: Optional[str] = None) -> None:

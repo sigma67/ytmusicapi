@@ -1,5 +1,4 @@
-import ntpath
-import os
+from pathlib import Path
 from typing import Optional, Union
 
 import requests
@@ -212,11 +211,12 @@ class UploadsMixin(MixinProtocol):
         self._check_auth()
         if not self.auth_type == AuthType.BROWSER:
             raise YTMusicUserError("Please provide browser authentication before using this function")
-        if not os.path.isfile(filepath):
+        fp = Path(filepath)
+        if not fp.is_file():
             raise YTMusicUserError("The provided file does not exist.")
 
         supported_filetypes = ["mp3", "m4a", "wma", "flac", "ogg"]
-        if os.path.splitext(filepath)[1][1:] not in supported_filetypes:
+        if fp.suffix[1:] not in supported_filetypes:
             raise YTMusicUserError(
                 "The provided file type is not supported by YouTube Music. Supported file types are "
                 + ", ".join(supported_filetypes)
@@ -224,12 +224,12 @@ class UploadsMixin(MixinProtocol):
 
         headers = self.headers.copy()
         upload_url = f"https://upload.youtube.com/upload/usermusic/http?authuser={headers['x-goog-authuser']}"
-        filesize = os.path.getsize(filepath)
+        filesize = fp.stat().st_size
         if filesize >= 314572800:  # 300MB in bytes
-            msg = f"File {filepath} has size {filesize} bytes, which is larger than the limit of 300MB"
+            msg = f"File {fp} has size {filesize} bytes, which is larger than the limit of 300MB"
             raise YTMusicUserError(msg)
 
-        body = ("filename=" + ntpath.basename(filepath)).encode("utf-8")
+        body = ("filename=" + fp.name).encode("utf-8")
         headers.pop("content-encoding", None)
         headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
         headers["X-Goog-Upload-Command"] = "start"
@@ -239,7 +239,7 @@ class UploadsMixin(MixinProtocol):
         headers["X-Goog-Upload-Command"] = "upload, finalize"
         headers["X-Goog-Upload-Offset"] = "0"
         upload_url = response.headers["X-Goog-Upload-URL"]
-        with open(filepath, "rb") as file:
+        with open(fp, "rb") as file:
             response = requests.post(upload_url, data=file, headers=headers, proxies=self.proxies)
 
         if response.status_code == 200:

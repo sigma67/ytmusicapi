@@ -1,5 +1,4 @@
 import json
-import os
 import tempfile
 import time
 from pathlib import Path
@@ -62,7 +61,7 @@ class TestOAuth:
         assert OAuthToken.is_oauth(oauth_token)
 
         oauth_file.close()
-        os.unlink(oauth_filepath)
+        Path(oauth_file.name).unlink()
 
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
         # ensure instance initialized token
