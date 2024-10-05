@@ -1,3 +1,5 @@
+import os
+import stat
 import tempfile
 import time
 from unittest import mock
@@ -53,8 +55,16 @@ class TestUploads:
         response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
         assert response.status_code == 409
 
+    def test_upload_song_file_too_large(self, config, yt_auth):
+        orig_os_stat = os.stat
+
+        def fake_stat(arg, **kwargs):
+            faked = list(orig_os_stat(arg))
+            faked[stat.ST_SIZE] = 4 * 10**9
+            return os.stat_result(faked)
+
         with (
-            mock.patch("os.path.getsize", return_value=4 * 10**9),
+            mock.patch("os.stat", side_effect=fake_stat),
             pytest.raises(YTMusicUserError, match="larger than the limit of 300MB"),
         ):
             yt_auth.upload_song(get_resource(config["uploads"]["file"]))
