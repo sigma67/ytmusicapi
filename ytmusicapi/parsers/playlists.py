@@ -19,7 +19,9 @@ def parse_playlist_header(response: dict) -> dict[str, Any]:
                 response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER]
             )
 
-    playlist["title"] = nav(header, TITLE_TEXT)
+    playlist["title"] = nav(header, TITLE_TEXT, none_if_absent=True) or nav(
+        header, SUBTITLE, none_if_absent=False
+    )
     playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED, True)
     if playlist["thumbnails"] is None:
         playlist["thumbnails"] = nav(header, THUMBNAILS)

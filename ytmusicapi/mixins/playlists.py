@@ -135,7 +135,10 @@ class PlaylistsMixin(MixinProtocol):
             else None
         )
         playlist["thumbnails"] = nav(header, THUMBNAILS)
-        playlist["title"] = nav(header, TITLE_TEXT)
+        playlist["title"] = nav(header, TITLE_TEXT, none_if_absent=True) or nav(
+            header, SUBTITLE, none_if_absent=False
+        )
+
         playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
 
         playlist["views"] = None
