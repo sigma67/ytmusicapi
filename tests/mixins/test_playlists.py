@@ -8,6 +8,7 @@ import pytest
 from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
+from ytmusicapi.exceptions import YTMusicUserError
 
 
 class TestPlaylists:
@@ -112,6 +113,10 @@ class TestPlaylists:
             moveItem=playlist["tracks"][0]["setVideoId"],
         )
         assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
+
+    def test_create_playlist_invalid_title(self, yt_brand):
+        with pytest.raises(YTMusicUserError, match="invalid characters"):
+            yt_brand.create_playlist("test >", description="test")
 
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
