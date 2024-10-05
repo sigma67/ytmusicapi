@@ -1,4 +1,3 @@
-import os
 import platform
 from typing import Optional
 
@@ -6,8 +5,6 @@ from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.exceptions import YTMusicError, YTMusicUserError
 from ytmusicapi.helpers import *
-
-path = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
 
 def is_browser(headers: CaseInsensitiveDict) -> bool:

@@ -55,11 +55,12 @@ precision = 2
 line-length = 110
 
 [tool.ruff.lint]
-ignore = [ "F403", "F405", "F821", "E731" ]
+ignore = [ "F403", "F405", "F821", "E731", "PTH123" ]
 extend-select = [
     "I",   # isort
     "UP",  # pyupgrade
     "RUF", # ruff
+    "PTH", # pathlib
 ]
 
 [tool.mypy]
