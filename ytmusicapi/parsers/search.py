@@ -154,7 +154,8 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result["year"] = None
         flex_item = get_flex_column_item(data, 1)
         runs = flex_item["text"]["runs"]
-        runs_offset = (len(runs[0]) == 1) * 2  # ignore the first run if it is a type specifier (like "Song")
+        # ignore the first run if it is a type specifier (like "Single" or "Album")
+        runs_offset = (len(runs[0]) == 1) * 2 * int(result_type == "album")
         song_info = parse_song_runs(runs[runs_offset:])
         search_result.update(song_info)
 
