@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
       with:
-        ref: ${{ github.event.workflow_run.head_sha }}
+        ref: ${{ github.event.pull_request.head.sha }}
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
