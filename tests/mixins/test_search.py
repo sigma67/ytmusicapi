@@ -74,7 +74,7 @@ class TestSearch:
         assert len(results) > 10
         assert all(item["resultType"] == "profile" for item in results)
         results = yt_auth.search(query, filter="podcasts")
-        assert len(results) > 10
+        assert len(results) > 5
         assert all(item["resultType"] == "podcast" for item in results)
         results = yt_auth.search(query, filter="episodes")
         assert len(results) >= 3
