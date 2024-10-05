@@ -4,7 +4,8 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
-from test_helpers import is_ci
+
+from tests.test_helpers import is_ci
 
 
 class TestBrowsing:
