@@ -14,7 +14,7 @@ def get_search_result_type(result_type_local, result_types_local):
     if result_type_local not in result_types_local:
         result_type = "album"
     else:
-        result_type = UNIQUE_RESULT_TYPES[result_types_local.index(result_type_local)]
+        result_type = ALL_RESULT_TYPES[result_types_local.index(result_type_local)]
 
     return result_type
 
@@ -155,7 +155,7 @@ def parse_search_result(data, search_result_types, result_type, category):
         flex_item = get_flex_column_item(data, 1)
         runs = flex_item["text"]["runs"]
         # ignore the first run if it is a type specifier (like "Single" or "Album")
-        runs_offset = (len(runs[0]) == 1) * 2 * int(result_type == "album")
+        runs_offset = (len(runs[0]) == 1 and runs[0]["text"].lower() in search_result_types) * 2
         song_info = parse_song_runs(runs[runs_offset:])
         search_result.update(song_info)
 
