@@ -151,9 +151,9 @@ class PlaylistsMixin(MixinProtocol):
             song_count_text = second_subtitle_runs[has_views + 0]["text"]
             song_count_search = re.findall(r"\d+", song_count_text)
             # extract the digits from the text, return 0 if no match
-            song_count = to_int("".join(song_count_search)) if song_count_search is not None else 0
+            song_count = to_int("".join(song_count_search)) if song_count_search is not None else None
         else:
-            song_count = len(section_list["contents"])
+            song_count = None
 
         playlist["trackCount"] = song_count
 
@@ -278,7 +278,7 @@ class PlaylistsMixin(MixinProtocol):
         :param title: Optional. New title for the playlist
         :param description: Optional. New description for the playlist
         :param privacyStatus: Optional. New privacy status for the playlist
-        :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, which is the 
+        :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, which is the
             unique id of this playlist item. See :py:func:`get_playlist`
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)

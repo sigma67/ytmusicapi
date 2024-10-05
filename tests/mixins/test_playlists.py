@@ -54,7 +54,7 @@ class TestPlaylists:
         assert playlist["owned"] is False
 
         playlist = yt_oauth.get_playlist("RDATgXd-")
-        assert playlist["trackCount"] >= 100
+        assert playlist["trackCount"] is None  # playlist has no trackCount
         assert len(playlist["tracks"]) >= 100
 
         playlist = yt_oauth.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
