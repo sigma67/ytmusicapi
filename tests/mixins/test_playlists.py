@@ -41,36 +41,30 @@ class TestPlaylists:
                 if track["videoType"] == "MUSIC_VIDEO_TYPE_ATV":
                     assert isinstance(track["album"]["name"], str) and track["album"]["name"]
 
-    def test_get_playlist_foreign(self, yt, yt_auth, yt_oauth):
+    def test_get_playlist_foreign(self, yt_empty, yt_oauth, sample_playlist):
         with pytest.raises(Exception):
-            yt.get_playlist("PLABC")
-        playlist = yt_auth.get_playlist("PLk5BdzXBUiUe8Q5I13ZSCD8HbxMqJUUQA", limit=300, suggestions_limit=7)
+            yt_empty.get_playlist("PLABC")
+        playlist = yt_empty.get_playlist(
+            "RDCLAK5uy_nfjzC9YC1NVPPZHvdoAtKVBOILMDOuxOs", limit=300, suggestions_limit=7
+        )
         assert len(playlist["duration"]) > 5
+        assert playlist["trackCount"] > 200
         assert len(playlist["tracks"]) > 200
         assert "suggestions" not in playlist
         assert playlist["owned"] is False
 
-        yt.get_playlist("RDATgXd-")
+        playlist = yt_oauth.get_playlist("RDATgXd-")
+        assert playlist["trackCount"] >= 100
         assert len(playlist["tracks"]) >= 100
 
         playlist = yt_oauth.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
+        assert playlist["trackCount"] > 200
         assert len(playlist["tracks"]) > 200
         assert len(playlist["related"]) == 0
 
-    def test_get_playlist_foreign_new_format(self, yt_empty):
-        with pytest.raises(Exception):
-            yt_empty.get_playlist("PLABC")
-        playlist = yt_empty.get_playlist("PLk5BdzXBUiUe8Q5I13ZSCD8HbxMqJUUQA", limit=300, suggestions_limit=7)
-        assert len(playlist["duration"]) > 5
-        assert len(playlist["tracks"]) > 200
-        assert "suggestions" not in playlist
-        assert playlist["owned"] is False
-
-        playlist = yt_empty.get_playlist("RDATgXd-")
-        assert len(playlist["tracks"]) >= 100
-
-        playlist = yt_empty.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", limit=None, related=True)
-        assert len(playlist["tracks"]) > 200
+        playlist = yt_oauth.get_playlist(sample_playlist, limit=1100)
+        assert playlist["trackCount"] > 1000
+        assert len(playlist["tracks"]) > 1000
         assert len(playlist["related"]) == 0
 
     @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
