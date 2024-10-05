@@ -29,6 +29,7 @@ class Parser:
     @i18n
     def get_search_result_types(self):
         return [
+            _("album"),
             _("artist"),
             _("playlist"),
             _("song"),
