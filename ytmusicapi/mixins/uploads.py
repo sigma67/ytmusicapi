@@ -225,6 +225,10 @@ class UploadsMixin(MixinProtocol):
         headers = self.headers.copy()
         upload_url = f"https://upload.youtube.com/upload/usermusic/http?authuser={headers['x-goog-authuser']}"
         filesize = os.path.getsize(filepath)
+        if filesize >= 314572800:  # 300MB in bytes
+            msg = f"File {filepath} has size {filesize} bytes, which is larger than the limit of 300MB"
+            raise YTMusicUserError(msg)
+
         body = ("filename=" + ntpath.basename(filepath)).encode("utf-8")
         headers.pop("content-encoding", None)
         headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"

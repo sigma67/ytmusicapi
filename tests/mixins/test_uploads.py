@@ -1,10 +1,12 @@
 import tempfile
 import time
+from unittest import mock
 
 import pytest
 
 from tests.conftest import get_resource
 from ytmusicapi.enums import ResponseStatus
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.ytmusic import YTMusic
 
 
@@ -50,6 +52,12 @@ class TestUploads:
     def test_upload_song(self, config, yt_auth):
         response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
         assert response.status_code == 409
+
+        with (
+            mock.patch("os.path.getsize", return_value=4 * 10**9),
+            pytest.raises(YTMusicUserError, match="larger than the limit of 300MB"),
+        ):
+            yt_auth.upload_song(get_resource(config["uploads"]["file"]))
 
     def test_upload_song_and_verify(self, config, yt_auth: YTMusic):
         """Upload a song and verify it can be retrieved after it finishes processing."""
