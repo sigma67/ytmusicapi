@@ -13,17 +13,12 @@ class TestSearch:
             yt_auth.search(query, scope="upload")
 
     @pytest.mark.parametrize("query", ["Monekes", "llwlwl", "heun"])
-    def test_search_queries(self, yt, yt_brand, query: str) -> None:
-        results = yt_brand.search(query)
-        assert ["resultType" in r for r in results] == [True] * len(results)
-        assert len(results) >= 5
-        assert not any(
-            artist["name"].lower() in ALL_RESULT_TYPES
-            for result in results
-            if "artists" in result
-            for artist in result["artists"]
-        )
+    @pytest.mark.parametrize("yt_instance", ["yt", "yt_brand"])
+    def test_search_queries(self, query: str, yt_instance: str, request: pytest.FixtureRequest) -> None:
+        yt: YTMusic = request.getfixturevalue(yt_instance)
         results = yt.search(query)
+        assert all(album["playlistId"] is not None for album in results if album["resultType"] == "album")
+        assert ["resultType" in r for r in results] == [True] * len(results)
         assert len(results) >= 5
         assert not any(
             artist["name"].lower() in ALL_RESULT_TYPES
