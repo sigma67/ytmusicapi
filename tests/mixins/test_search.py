@@ -15,6 +15,7 @@ class TestSearch:
     @pytest.mark.parametrize("query", ["Monekes", "llwlwl", "heun"])
     def test_search_queries(self, yt, yt_brand, query: str) -> None:
         results = yt_brand.search(query)
+        assert all(album["playlistId"] is not None for album in results if album["resultType"] == "album")
         assert ["resultType" in r for r in results] == [True] * len(results)
         assert len(results) >= 5
         assert not any(

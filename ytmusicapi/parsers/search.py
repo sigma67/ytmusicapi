@@ -47,7 +47,8 @@ def parse_top_result(data, search_result_types):
 
     if result_type in ["album"]:
         search_result["browseId"] = nav(data, TITLE + NAVIGATION_BROWSE_ID, True)
-        search_result["playlistId"] = nav(data, ["buttons", 0, "buttonRenderer", "command", *WATCH_PID], True)
+        button_command = nav(data, ["buttons", 0, "buttonRenderer", "command"], True)
+        search_result["playlistId"] = parse_album_playlistid_if_exists(button_command)
 
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
@@ -94,7 +95,8 @@ def parse_search_result(data, search_result_types, result_type, category):
 
     elif result_type == "album":
         search_result["type"] = get_item_text(data, 1)
-        search_result["playlistId"] = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PID], True)
+        play_navigation = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint"], True)
+        search_result["playlistId"] = parse_album_playlistid_if_exists(play_navigation)
 
     elif result_type == "playlist":
         flex_item = get_flex_column_item(data, 1)["text"]["runs"]
@@ -177,6 +179,11 @@ def parse_search_result(data, search_result_types, result_type, category):
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
 
     return search_result
+
+
+def parse_album_playlistid_if_exists(data: dict[str, Any]) -> Optional[str]:
+    """the content of the data changes based on whether the user is authenticated or not"""
+    return nav(data, WATCH_PID, True) or nav(data, WATCH_PLAYLIST_ID, True) if data else None
 
 
 def parse_search_results(results, search_result_types, resultType=None, category=None):
