@@ -40,7 +40,7 @@ def parse_playlist_header_meta(header: dict[str, Any]) -> dict[str, Any]:
         "views": None,
         "duration": None,
         "trackCount": None,
-        "title": nav(header, TITLE_TEXT, none_if_absent=True) or nav(header, SUBTITLE, none_if_absent=False),
+        "title": nav(header, TITLE_TEXT, none_if_absent=True),
         "thumbnails": nav(header, THUMBNAILS),
     }
     if "runs" in header["secondSubtitle"]:
