@@ -134,28 +134,10 @@ class PlaylistsMixin(MixinProtocol):
             if description_shelf
             else None
         )
-        playlist["thumbnails"] = nav(header, THUMBNAILS)
-        playlist["title"] = nav(header, TITLE_TEXT)
+
+        playlist.update(parse_playlist_header_meta(header))
+
         playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
-
-        playlist["views"] = None
-        playlist["duration"] = None
-        if "runs" in header["secondSubtitle"]:
-            second_subtitle_runs = header["secondSubtitle"]["runs"]
-            has_views = (len(second_subtitle_runs) > 3) * 2
-            playlist["views"] = None if not has_views else to_int(second_subtitle_runs[0]["text"])
-            has_duration = (len(second_subtitle_runs) > 1) * 2
-            playlist["duration"] = (
-                None if not has_duration else second_subtitle_runs[has_views + has_duration]["text"]
-            )
-            song_count_text = second_subtitle_runs[has_views + 0]["text"]
-            song_count_search = re.findall(r"\d+", song_count_text)
-            # extract the digits from the text, return 0 if no match
-            song_count = to_int("".join(song_count_search)) if song_count_search is not None else None
-        else:
-            song_count = None
-
-        playlist["trackCount"] = song_count
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 

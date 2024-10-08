@@ -34,12 +34,6 @@ def fixture_sample_video() -> str:
     return "hpSrLjc5SMs"
 
 
-@pytest.fixture(name="sample_playlist")
-def fixture_sample_playlist() -> str:
-    """very large playlist"""
-    return "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"
-
-
 @pytest.fixture(name="browser_filepath")
 def fixture_browser_filepath(config) -> str:
     return get_resource(config["auth"]["browser_file"])
