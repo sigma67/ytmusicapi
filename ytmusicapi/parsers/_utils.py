@@ -67,6 +67,7 @@ def parse_duration(duration):
     # duration may be falsy or a single space: ' '
     if not duration or not duration.strip():
         return duration
+    duration = duration.replace(",", "") # may be more than thousand hours
     mapped_increments = zip([1, 60, 3600], reversed(duration.split(":")))
     seconds = sum(multiplier * int(time) for multiplier, time in mapped_increments)
     return seconds
