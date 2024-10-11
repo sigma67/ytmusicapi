@@ -865,7 +865,7 @@ class BrowsingMixin(MixinProtocol):
 
         return lyrics
 
-        def get_lyrics_with_timestamps(self, browseId: str) -> dict:
+    def get_lyrics_with_timestamps(self, browseId: str) -> dict:
         """
         Returns lyrics of a song with timestamps, if available.
         If no timestaps are given, this method won't replicate the behavior of `get_lyrics`!
