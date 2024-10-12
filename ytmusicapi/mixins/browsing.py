@@ -885,13 +885,91 @@ class BrowsingMixin(MixinProtocol):
 
     @overload
     def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Optional[Lyrics]:
-            """overload for mypy only"""
+        """
+        Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
+        timestamps, if available.
+
+        :param browseId: Lyrics browse-id obtained from :py:func:`get_watch_playlist` (startswith `MPLYt`).
+        :param timestamps: Whether to return bare lyrics or lyrics with timestamps, if available.
+        :return: Dictionary with song lyrics or `None`, if no lyrics are found. 
+            The `hasTimestamps`-key determines the format of the data.
+
+        
+            Example when `timestamps` is set to `False`, or not timestamps are available::
+
+                {
+                    "lyrics": "Today is gonna be the day\\nThat they're gonna throw it back to you\\n",
+                    "source": "Source: LyricFind",
+                    "hasTimestamps": False
+                }
+            
+            Example when `timestamps` is set to `True` and timestamps are available::
+
+                {
+                    "lyrics": [
+                        LyricLine(
+                            text="I was a liar",
+                            start_time=9200,
+                            end_time=10630,
+                            id=1
+                        ),
+                        LyricLine(
+                            text="I gave in to the fire",
+                            start_time=10680,
+                            end_time=12540,
+                            id=2
+                        ),
+                    ],
+                    "source": "Source: LyricFind",
+                    "hasTimestamps": True
+                }
+
+        """
 
     @overload
-    def get_lyrics(self, browseId: str, timestamps: Literal[True] = True) -> Optional[Lyrics |TimedLyrics]:
-        """overload for mypy only"""
+    def get_lyrics(self, browseId: str, timestamps: Literal[True] = True) -> Optional[Lyrics|TimedLyrics]:
+        """
+        Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
+        timestamps, if available.
 
-    def get_lyrics(self, browseId: str, timestamps: bool = False) -> Optional[Lyrics |TimedLyrics]:
+        :param browseId: Lyrics browse-id obtained from :py:func:`get_watch_playlist` (startswith `MPLYt`).
+        :param timestamps: Whether to return bare lyrics or lyrics with timestamps, if available.
+        :return: Dictionary with song lyrics or `None`, if no lyrics are found. 
+            The `hasTimestamps`-key determines the format of the data.
+
+        
+            Example when `timestamps` is set to `False`, or not timestamps are available::
+
+                {
+                    "lyrics": "Today is gonna be the day\\nThat they're gonna throw it back to you\\n",
+                    "source": "Source: LyricFind",
+                    "hasTimestamps": False
+                }
+            
+            Example when `timestamps` is set to `True` and timestamps are available::
+
+                {
+                    "lyrics": [
+                        LyricLine(
+                            text="I was a liar",
+                            start_time=9200,
+                            end_time=10630,
+                            id=1
+                        ),
+                        LyricLine(
+                            text="I gave in to the fire",
+                            start_time=10680,
+                            end_time=12540,
+                            id=2
+                        ),
+                    ],
+                    "source": "Source: LyricFind",
+                    "hasTimestamps": True
+                }
+
+        """
+
+    def get_lyrics(self, browseId: str, timestamps: bool = False) -> Optional[Lyrics|TimedLyrics]:
         """
         Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
         timestamps, if available.
@@ -975,6 +1053,7 @@ class BrowsingMixin(MixinProtocol):
             lyrics["source"] = nav(
                 response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "footer", *RUN_TEXT], True
             )
+            lyrics["hasTimestamps"] = False
 
         return cast(Lyrics | TimedLyrics, lyrics)
 
