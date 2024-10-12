@@ -6,12 +6,14 @@ from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.search import *
 
 
+FilterType = Literal['songs', 'videos', 'albums', 'artists', 'playlists', 'community_playlists', 'featured_playlists', 'uploads']
+
 class SearchMixin(MixinProtocol):
     def search(
         self,
         query: str,
-        filter: Optional[str] = None,
-        scope: Optional[str] = None,
+        filter: Optional[FilterType] = None,
+        scope: Optional[Literal["library", "uploads"]] = None,
         limit: int = 20,
         ignore_spelling: bool = False,
     ) -> list[dict]:
@@ -204,7 +206,7 @@ class SearchMixin(MixinProtocol):
         if filter and "playlists" in filter:
             filter = "playlists"
         elif scope == scopes[1]:
-            filter = scopes[1]
+            filter = scopes[1] # type:ignore
 
         for res in section_list:
             result_type = category = None
