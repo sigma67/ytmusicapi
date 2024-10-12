@@ -1057,65 +1057,6 @@ class BrowsingMixin(MixinProtocol):
 
         return cast(Lyrics | TimedLyrics, lyrics)
 
-    def get_lyrics_with_timestamps(self, browseId: str) -> dict:
-        """
-        Returns lyrics of a song with timestamps, if available.
-        If no timestaps are given, this method won't replicate the behavior of `get_lyrics`!
-
-        :param browseId: Lyrics browse id obtained from `get_watch_playlist` (startswith `MPLYt`)
-        :return: Dictionary with song lyrics.
-
-        Example::
-
-            {
-                "lyrics": [
-                    {
-                        "lyricLine": "I was a liar",
-                        "cueRange": {
-                            "startTimeMilliseconds": "9200",
-                            "endTimeMilliseconds": "10630",
-                            "metadata": {
-                                "id": "1"
-                            }
-                        }
-                    },
-                    {
-                        "lyricLine": "I gave in to the fire",
-                        "cueRange": {
-                            "startTimeMilliseconds": "10680",
-                            "endTimeMilliseconds": "12540",
-                            "metadata": {
-                                "id": "2"
-                            }
-                        }
-                    },
-                ],
-                "source": "Source: LyricFind"
-            }
-
-        """
-        lyrics = {}
-        if not browseId:
-            raise YTMusicUserError(
-                "Invalid browseId provided. This song might not have lyrics.")
-
-        # change the Client to get lyrics with timestamps (mobile only)
-        copied_context_client = self.context["context"]["client"].copy()
-        self.context["context"]["client"].update({
-            "clientName": "ANDROID_MUSIC",
-            "clientVersion": "7.21.50"
-        })
-        response = self._send_request("browse", {"browseId": browseId})
-        # restore the old context
-        self.context["context"]["client"] = copied_context_client
-
-        base_path = ["contents", "elementRenderer", "newElement", "type", 
-                     "componentType", "model", "timedLyricsModel", "lyricsData"]
-        lyrics["lyrics"] = nav(response, [*base_path, "timedLyricsData"], True)
-        lyrics["source"] = nav(response, [*base_path, "sourceMessage"], True)
-
-        return lyrics
-
     def get_basejs_url(self):
         """
         Extract the URL for the `base.js` script from YouTube Music.
