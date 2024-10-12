@@ -9,7 +9,7 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-__copyright__ = "Copyright 2023 sigma67"
+__copyright__ = "Copyright 2024 sigma67"
 __license__ = "MIT"
 __title__ = "ytmusicapi"
 __all__ = ["YTMusic", "setup", "setup_oauth"]

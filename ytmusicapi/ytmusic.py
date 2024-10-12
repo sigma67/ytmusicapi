@@ -5,7 +5,7 @@ import time
 from contextlib import suppress
 from functools import partial
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import requests
 from requests import Response
@@ -179,7 +179,7 @@ class YTMusicBase:
             try:
                 cookie = self.base_headers.get("cookie")
                 self.sapisid = sapisid_from_cookie(cookie)
-                self.origin = self.base_headers.get("origin", self.base_headers.get("x-origin"))
+                self.origin = cast(str, self.base_headers.get("origin", self.base_headers.get("x-origin")))
             except KeyError:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
@@ -189,16 +189,16 @@ class YTMusicBase:
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
                 self._base_headers = self._input_dict
             else:
-                self._base_headers = {
+                self._base_headers = CaseInsensitiveDict({
                     "user-agent": USER_AGENT,
                     "accept": "*/*",
                     "accept-encoding": "gzip, deflate",
                     "content-type": "application/json",
                     "content-encoding": "gzip",
                     "origin": YTM_DOMAIN,
-                }
+                })
 
-        return self._base_headers
+        return cast(CaseInsensitiveDict[str], self._base_headers)
 
     @property
     def headers(self):
