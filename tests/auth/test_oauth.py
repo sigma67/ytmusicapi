@@ -6,7 +6,7 @@ from typing import Any
 from unittest import mock
 
 import pytest
-from requests import Response
+from niquests import Response
 
 from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
@@ -37,8 +37,8 @@ def fixture_yt_alt_oauth(browser_filepath: str, alt_oauth_credentials: OAuthCred
 
 
 class TestOAuth:
-    @mock.patch("requests.Response.json")
-    @mock.patch("requests.Session.post")
+    @mock.patch("niquests.Response.json")
+    @mock.patch("niquests.Session.post")
     def test_setup_oauth(self, session_mock, json_mock, blank_code, config):
         session_mock.return_value = Response()
         token_code = json.loads(config["auth"]["oauth_token"])

@@ -7,9 +7,9 @@ from functools import partial
 from pathlib import Path
 from typing import Optional, Union
 
-import requests
-from requests import Response
-from requests.structures import CaseInsensitiveDict
+import niquests as requests
+from niquests import Response
+from niquests.structures import CaseInsensitiveDict
 
 from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,

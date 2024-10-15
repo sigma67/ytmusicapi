@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import requests
+import niquests as requests
 
 from ytmusicapi.auth.browser import setup_browser
 from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken

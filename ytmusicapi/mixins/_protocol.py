@@ -2,7 +2,7 @@
 
 from typing import Optional, Protocol
 
-from requests import Response
+from niquests import Response
 
 from ytmusicapi.auth.types import AuthType
 from ytmusicapi.parsers.i18n import Parser

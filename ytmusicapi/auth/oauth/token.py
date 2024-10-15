@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from requests.structures import CaseInsensitiveDict
+from niquests.structures import CaseInsensitiveDict
 
 from ytmusicapi.auth.oauth.credentials import Credentials
 from ytmusicapi.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict

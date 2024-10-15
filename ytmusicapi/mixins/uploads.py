@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional, Union
 
-import requests
+import niquests as requests
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import *
