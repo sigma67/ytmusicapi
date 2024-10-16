@@ -6,6 +6,7 @@ from contextlib import suppress
 from functools import partial
 from pathlib import Path
 from typing import Optional, Union, cast
+from contextlib import contextmanager
 
 import requests
 from requests import Response
@@ -219,6 +220,43 @@ class YTMusicBase:
             self._headers["X-Goog-Request-Time"] = str(int(time.time()))
 
         return self._headers
+
+    @contextmanager
+    def as_mobile(self):
+        """
+        Not thread-safe!
+        ----------------
+
+        Temporarily changes the `context` to enable different results
+        from the API, meant for the Android mobile-app.
+        All calls inside the `with`-statement with emulate mobile behavior.
+
+        This context-manager has no `enter_result`, as it operates in-place
+        and only temporarily alters the underlying `YTMusic`-object.
+
+
+        Example::
+
+            with yt.as_mobile():
+                yt._send_request(...)  # results as mobile-app
+
+            yt._send_request(...)  # back to normal, like web-app
+
+        """
+
+        # change the context to emulate a mobile-app (Android)
+        copied_context_client = self.context["context"]["client"].copy()
+        self.context["context"]["client"].update({
+            "clientName": "ANDROID_MUSIC",
+            "clientVersion": "7.21.50"
+        })
+
+        # this will not catch errors
+        try:
+            yield None
+        finally:
+            # safely restore the old context
+            self.context["context"]["client"] = copied_context_client
 
     def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
         body.update(self.context)

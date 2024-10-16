@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from tests.test_helpers import is_ci
-from ytmusicapi import LyricLine
+from ytmusicapi.models.lyrics import LyricLine
 
 
 class TestBrowsing:
@@ -174,15 +174,14 @@ class TestBrowsing:
         # test lyrics with timestamps
         lyrics_song = yt.get_lyrics(playlist["lyrics"], timestamps = True)
         assert lyrics_song is not None
-        assert isinstance(lyrics_song["lyrics"], list)
+        assert len(lyrics_song["lyrics"]) >= 1
         assert lyrics_song["hasTimestamps"] is True
 
         # check the LyricLine object
         song = lyrics_song["lyrics"][0]
         assert isinstance(song, LyricLine)
         assert isinstance(song.text, str)
-        assert isinstance(song.start_time, int)
-        assert isinstance(song.end_time, int)
+        assert song.start_time <= song.end_time
         assert isinstance(song.id, int)
 
         playlist = yt.get_watch_playlist(config["uploads"]["private_upload_id"])
