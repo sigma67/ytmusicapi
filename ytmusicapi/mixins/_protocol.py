@@ -19,8 +19,6 @@ class MixinProtocol(Protocol):
 
     proxies: Optional[dict[str, str]]
 
-    context: dict
-
     def _check_auth(self) -> None:
         """checks if self has authentication"""
 
