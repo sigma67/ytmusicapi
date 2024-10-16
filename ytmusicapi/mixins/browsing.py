@@ -285,7 +285,7 @@ class BrowsingMixin(MixinProtocol):
         :param channelId: browseId of the artist as returned by :py:func:`get_artist`
         :param params: params obtained by :py:func:`get_artist`
         :param limit: Number of albums to return. `None` retrieves them all. Default: 100
-        :param order: Order of albums to return. Allowed values: 'Recency', 'Popularity', 'Alphabetical order'. Default: Default order.
+        :param order: Order of albums to return. Allowed values: `Recency`, `Popularity`, `Alphabetical order`. Default: Default order.
         :return: List of albums in the format of :py:func:`get_library_albums`,
           except artists key is missing.
 

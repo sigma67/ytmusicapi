@@ -20,9 +20,9 @@ class SearchMixin(MixinProtocol):
         Returns results within the provided category.
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
-        :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``community_playlists``, ``featured_playlists``, ``uploads``.
+        :param filter: Filter for item types. Allowed values: `songs`, `videos`, `albums`, `artists`, `playlists`, `community_playlists`, `featured_playlists`, `uploads`.
           Default: Default search, including all types of items.
-        :param scope: Search scope. Allowed values: ``library``, ``uploads``.
+        :param scope: Search scope. Allowed values: `library`, `uploads`.
             Default: Search the public YouTube Music catalogue.
             Changing scope from the default will reduce the number of settable filters. Setting a filter that is not permitted will throw an exception.
             For uploads, no filter can be set.
@@ -31,15 +31,15 @@ class SearchMixin(MixinProtocol):
           Default: 20
         :param ignore_spelling: Whether to ignore YTM spelling suggestions.
           If True, the exact search term will be searched for, and will not be corrected.
-          This does not have any effect when the filter is set to ``uploads``.
+          This does not have any effect when the filter is set to `uploads`.
           Default: False, will use YTM's default behavior of autocorrecting the search.
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
           albums, artists and playlists additionally contain a browseId, corresponding to
-          albumId, channelId and playlistId (browseId=``VL``+playlistId)
+          albumId, channelId and playlistId (browseId=`VL`+playlistId)
 
           Example list for default search with one result per resultType for brevity. Normally
-          there are 3 results per resultType and an additional ``thumbnails`` key::
+          there are 3 results per resultType and an additional `thumbnails` key::
 
             [
               {
@@ -268,9 +268,9 @@ class SearchMixin(MixinProtocol):
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on ``detailed_runs`` param.
+        :return: List of search suggestion results depending on `detailed_runs` param.
 
-          Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
+          Example response when `query` is 'fade' and `detailed_runs` is set to `False`::
 
               [
                 "faded",

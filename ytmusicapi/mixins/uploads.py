@@ -75,7 +75,7 @@ class UploadsMixin(MixinProtocol):
         Gets the albums of uploaded songs in the user's library.
 
         :param limit: Number of albums to return. `None` retrives them all. Default: 25
-        :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of albums to return. Allowed values: `a_to_z`, `z_to_a`, `recently_added`. Default: Default order.
         :return: List of albums as returned by :py:func:`get_library_albums`
         """
         self._check_auth()
@@ -96,7 +96,7 @@ class UploadsMixin(MixinProtocol):
         Gets the artists of uploaded songs in the user's library.
 
         :param limit: Number of artists to return. `None` retrieves them all. Default: 25
-        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of artists to return. Allowed values: `a_to_z`, `z_to_a`, `recently_added`. Default: Default order.
         :return: List of artists as returned by :py:func:`get_library_artists`
         """
         self._check_auth()

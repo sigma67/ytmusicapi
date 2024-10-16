@@ -117,8 +117,8 @@ class RefreshingToken(OAuthToken):
         Method for CLI token creation via user inputs.
 
         :param credentials: Client credentials
-        :param open_browser: Optional. Open browser to OAuth consent url automatically. (Default = False).
-        :param to_file: Optional. Path to store/sync json version of resulting token. (Default = None).
+        :param open_browser: Optional. Open browser to OAuth consent url automatically. (Default: `False`).
+        :param to_file: Optional. Path to store/sync json version of resulting token. (Default: `None`).
         """
 
         code = credentials.get_code()
