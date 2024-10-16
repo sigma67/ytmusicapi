@@ -28,7 +28,7 @@ class UploadsMixin(MixinProtocol):
         Returns a list of uploaded songs
 
         :param limit: How many songs to return. `None` retrieves them all. Default: 25
-        :param order: Order of songs to return. Allowed values: `a_to_z`, `z_to_a`, `recently_added`. Default: Default order.
+        :param order: Order of songs to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
         :return: List of uploaded songs.
 
         Each item is in the following format::
