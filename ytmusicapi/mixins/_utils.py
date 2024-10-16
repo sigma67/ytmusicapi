@@ -5,7 +5,7 @@ from typing import Literal
 from ytmusicapi.exceptions import YTMusicUserError
 
 
-OrderType = Literal['a_to_z', 'z_to_a', 'recently_added']
+LibraryOrderType = Literal['a_to_z', 'z_to_a', 'recently_added']
 
 
 def prepare_like_endpoint(rating):
@@ -28,7 +28,7 @@ def validate_order_parameter(order):
         )
 
 
-def prepare_order_params(order: OrderType):
+def prepare_order_params(order: LibraryOrderType):
     orders = ["a_to_z", "z_to_a", "recently_added"]
     if order is not None:
         # determine order_params via `.contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[1].itemSectionRenderer.header.itemSectionTabbedHeaderRenderer.endItems[1].dropdownRenderer.entries[].dropdownItemRenderer.onSelectCommand.browseEndpoint.params` of `/youtubei/v1/browse` response
