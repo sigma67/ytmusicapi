@@ -86,7 +86,7 @@ class TestUploads:
             upload_response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
 
         assert (
-            upload_response == ResponseStatus.SUCCEEDED or upload_response.status_code == 200
+            upload_response == ResponseStatus.SUCCEEDED or upload_response.status_code == 200  # type: ignore[union-attr]
         ), f"Song failed to upload {upload_response}"
 
         # Wait for upload to finish processing and verify it can be retrieved

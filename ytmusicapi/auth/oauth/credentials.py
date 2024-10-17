@@ -3,7 +3,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Optional
 
-import requests
+import niquests as requests
 
 from ytmusicapi.constants import (
     OAUTH_CLIENT_ID,

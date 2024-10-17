@@ -2,14 +2,14 @@ import gettext
 import json
 import locale
 import time
+import typing
 from contextlib import suppress
 from functools import partial
 from pathlib import Path
 from typing import Optional, Union
 
-import requests
-from requests import Response
-from requests.structures import CaseInsensitiveDict
+import niquests as requests
+from niquests import Response
 
 from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,
@@ -93,9 +93,7 @@ class YTMusicBase:
         self._headers = None  #: cache formed headers including auth
 
         self.auth = auth  #: raw auth
-        self._input_dict: CaseInsensitiveDict = (
-            CaseInsensitiveDict()
-        )  #: parsed auth arg value in dictionary format
+        self._input_dict: dict[str, typing.Any] = {}  #: parsed auth arg value in dictionary format
 
         self.auth_type: AuthType = AuthType.UNAUTHORIZED
 
@@ -129,10 +127,9 @@ class YTMusicBase:
                         input_json = json.load(json_file)
                 else:
                     input_json = json.loads(auth_str)
-                self._input_dict = CaseInsensitiveDict(input_json)
-
+                self._input_dict = {k.lower(): v for k, v in input_json.items()}
             else:
-                self._input_dict = CaseInsensitiveDict(self.auth)
+                self._input_dict = {k.lower(): v for k, v in self.auth.items()}
 
             if OAuthToken.is_oauth(self._input_dict):
                 self._token = RefreshingToken(
@@ -234,9 +231,15 @@ class YTMusicBase:
             proxies=self.proxies,
             cookies=self.cookies,
         )
-        response_text = json.loads(response.text)
-        if response.status_code >= 400:
-            message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
+        response_text = response.json()
+        if response.status_code is None or response.status_code >= 400:
+            message = (
+                "Server returned HTTP "
+                + str(response.status_code)
+                + ": "
+                + (response.reason or "Unspecified")
+                + ".\n"
+            )
             error = response_text.get("error", {}).get("message")
             raise YTMusicServerError(message + error)
         return response_text

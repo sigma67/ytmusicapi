@@ -1,7 +1,7 @@
 import platform
 from typing import Optional
 
-from requests.structures import CaseInsensitiveDict
+from niquests.structures import CaseInsensitiveDict
 
 from ytmusicapi.exceptions import YTMusicError, YTMusicUserError
 from ytmusicapi.helpers import *
