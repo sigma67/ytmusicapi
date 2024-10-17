@@ -941,7 +941,7 @@ files = [
 
 [[package]]
 name = "urllib3-future"
-version = "2.10.905"
+version = "2.10.906"
 requires_python = ">=3.7"
 summary = "urllib3.future is a powerful HTTP 1.1, 2, and 3 client with both sync and async interfaces"
 groups = ["default"]
@@ -951,8 +951,8 @@ dependencies = [
     "qh3<2.0.0,>=1.2.0; (platform_system == \"Darwin\" or platform_system == \"Windows\" or platform_system == \"Linux\") and platform_python_implementation == \"PyPy\" and (platform_machine == \"x86_64\" or platform_machine == \"s390x\" or platform_machine == \"aarch64\" or platform_machine == \"armv7l\" or platform_machine == \"ppc64le\" or platform_machine == \"ppc64\" or platform_machine == \"AMD64\" or platform_machine == \"arm64\" or platform_machine == \"ARM64\") and python_version < \"3.11\" or (platform_system == \"Darwin\" or platform_system == \"Windows\" or platform_system == \"Linux\") and python_full_version > \"3.7.10\" and (platform_machine == \"x86_64\" or platform_machine == \"s390x\" or platform_machine == \"aarch64\" or platform_machine == \"armv7l\" or platform_machine == \"ppc64le\" or platform_machine == \"ppc64\" or platform_machine == \"AMD64\" or platform_machine == \"arm64\" or platform_machine == \"ARM64\") and platform_python_implementation == \"CPython\"",
 ]
 files = [
-    {file = "urllib3_future-2.10.905-py3-none-any.whl", hash = "sha256:685cc917fef37876c53450ff4638fefd8ad7e4525ee9e1bda26e59acf79eef95"},
-    {file = "urllib3_future-2.10.905.tar.gz", hash = "sha256:b4955f1ccea20f76a762cec2d1800148256f9fe5fe057987f90de733c3afe48d"},
+    {file = "urllib3_future-2.10.906-py3-none-any.whl", hash = "sha256:c7372afdc07301482f9a62d5cd0f3a10df76b32791baf5f86d45aff4fd924fa7"},
+    {file = "urllib3_future-2.10.906.tar.gz", hash = "sha256:16581dfd0c5d0a0602ae1305a1942fb06e929aea6ffcd588bc1b57090661d0b4"},
 ]
 
 [[package]]
