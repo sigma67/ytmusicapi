@@ -482,7 +482,8 @@ class BrowsingMixin(MixinProtocol):
 
             # the server sent nothing or content cannot be decoded
             if decoded_body is None:
-                return None
+                # this is unlikely. only defensive.
+                raise YTMusicError("Unable to read response body (album_browse_id)")
 
             decoded = decoded_body.encode("utf8").decode("unicode_escape")
 
