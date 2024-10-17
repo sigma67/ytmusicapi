@@ -129,7 +129,7 @@ class YTMusicBase:
                     input_json = json.loads(auth_str)
                 self._input_dict = {k.lower(): v for k, v in input_json.items()}
             else:
-                self._input_dict = {k.lower(): v for k, v in self.auth}
+                self._input_dict = {k.lower(): v for k, v in self.auth.items()}
 
             if OAuthToken.is_oauth(self._input_dict):
                 self._token = RefreshingToken(
