@@ -477,7 +477,14 @@ class BrowsingMixin(MixinProtocol):
         with warnings.catch_warnings():
             # merge this with statement with catch_warnings on Python>=3.11
             warnings.simplefilter(action="ignore", category=DeprecationWarning)
-            decoded = response.text.encode("utf8").decode("unicode_escape")
+
+            decoded_body = response.text
+
+            # the server sent nothing or content cannot be decoded
+            if decoded_body is None:
+                return None
+
+            decoded = decoded_body.encode("utf8").decode("unicode_escape")
 
         matches = re.search(r"\"MPRE.+?\"", decoded)
         browse_id = None
@@ -890,6 +897,10 @@ class BrowsingMixin(MixinProtocol):
         if url is None:
             url = self.get_basejs_url()
         response = self._send_get_request(url=url)
+
+        if response.text is None:
+            raise YTMusicError("Unable to decode response body as text for signatureTimestamp")
+
         match = re.search(r"signatureTimestamp[:=](\d+)", response.text)
         if match is None:
             raise YTMusicError("Unable to identify the signatureTimestamp.")

@@ -231,9 +231,15 @@ class YTMusicBase:
             proxies=self.proxies,
             cookies=self.cookies,
         )
-        response_text = json.loads(response.text)
-        if response.status_code >= 400:
-            message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
+        response_text = response.json()
+        if response.status_code is None or response.status_code >= 400:
+            message = (
+                "Server returned HTTP "
+                + str(response.status_code)
+                + ": "
+                + (response.reason or "Unspecified")
+                + ".\n"
+            )
             error = response_text.get("error", {}).get("message")
             raise YTMusicServerError(message + error)
         return response_text

@@ -28,4 +28,5 @@ jobs:
         with:
           python-version: "3.9"
       - run: pip install mypy==1.10.0
-      - run:  mypy --install-types --non-interactive
+      - run: pip install .
+      - run: mypy --install-types --non-interactive

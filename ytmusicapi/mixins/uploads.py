@@ -238,7 +238,7 @@ class UploadsMixin(MixinProtocol):
         response = requests.post(upload_url, data=body, headers=headers, proxies=self.proxies)
         headers["X-Goog-Upload-Command"] = "upload, finalize"
         headers["X-Goog-Upload-Offset"] = "0"
-        upload_url = response.headers["X-Goog-Upload-URL"]
+        upload_url = response.headers["X-Goog-Upload-URL"]  # type: ignore[assignment]
         with open(fp, "rb") as file:
             response = requests.post(upload_url, data=file, headers=headers, proxies=self.proxies)
 

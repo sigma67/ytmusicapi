@@ -1,11 +1,10 @@
 import json
 import time
+import typing
 import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-
-from niquests.structures import CaseInsensitiveDict
 
 from ytmusicapi.auth.oauth.credentials import Credentials
 from ytmusicapi.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
@@ -51,7 +50,7 @@ class OAuthToken(Token):
     """Wrapper for an OAuth token implementing expiration methods."""
 
     @staticmethod
-    def is_oauth(headers: CaseInsensitiveDict) -> bool:
+    def is_oauth(headers: dict[str, typing.Any]) -> bool:
         return all(key in headers for key in Token.members())
 
     def update(self, fresh_access: BaseTokenDict):
