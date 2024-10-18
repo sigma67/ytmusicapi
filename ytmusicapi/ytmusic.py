@@ -2,11 +2,10 @@ import gettext
 import json
 import locale
 import time
-from contextlib import suppress
+from contextlib import suppress, contextmanager
 from functools import partial
 from pathlib import Path
-from typing import Optional, Union, cast
-from contextlib import contextmanager
+from typing import cast, Optional, Union
 
 import requests
 from requests import Response

@@ -1,7 +1,7 @@
 """protocol that defines the functions available to mixins"""
 
-from typing import Optional, Protocol
 from contextlib import contextmanager
+from typing import Optional, Protocol
 
 from requests import Response
 from requests.structures import CaseInsensitiveDict
