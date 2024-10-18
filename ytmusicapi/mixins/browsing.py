@@ -1,12 +1,13 @@
 import re
 import warnings
-from typing import Any, Optional, cast
+from typing import Any, cast, Optional, Union
 
 from ytmusicapi.continuations import (
     get_continuations,
     get_reloadable_continuation_params,
 )
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
+from ytmusicapi.models.lyrics import Lyrics, LyricLine, TimedLyrics
 from ytmusicapi.parsers.albums import parse_album_header_2024
 from ytmusicapi.parsers.browsing import (
     parse_album,
@@ -17,7 +18,6 @@ from ytmusicapi.parsers.browsing import (
 )
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
-from ytmusicapi.models.lyrics import Lyrics, TimedLyrics, LyricLine
 
 from ..exceptions import YTMusicError, YTMusicUserError
 from ..navigation import *
@@ -908,7 +908,7 @@ class BrowsingMixin(MixinProtocol):
         if timestamps and (data := nav(response, TIMESTAMPED_LYRICS, True)) is not None:
             assert isinstance(data, dict)
 
-            if not "timedLyricsData" in data:
+            if "timedLyricsData" not in data:
                 return None
 
             lyrics["lyrics"] = list(map(LyricLine.from_raw, data["timedLyricsData"]))
@@ -927,7 +927,7 @@ class BrowsingMixin(MixinProtocol):
             )
             lyrics["hasTimestamps"] = False
 
-        return cast(Lyrics | TimedLyrics, lyrics)
+        return cast(Union[Lyrics, TimedLyrics], lyrics)
 
     def get_basejs_url(self) -> str:
         """
