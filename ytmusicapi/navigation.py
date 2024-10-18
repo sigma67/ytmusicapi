@@ -88,6 +88,8 @@ CAROUSEL_CONTENTS = [*CAROUSEL, "contents"]
 CAROUSEL_TITLE = [*HEADER, "musicCarouselShelfBasicHeaderRenderer", *TITLE]
 CARD_SHELF_TITLE = [*HEADER, "musicCardShelfHeaderBasicRenderer", *TITLE_TEXT]
 FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
+TIMESTAMPED_LYRICS = ["contents", "elementRenderer", "newElement", "type",
+                      "componentType", "model", "timedLyricsModel", "lyricsData"]
 
 
 @overload

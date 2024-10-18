@@ -2,10 +2,10 @@ import gettext
 import json
 import locale
 import time
-from contextlib import suppress
+from contextlib import suppress, contextmanager
 from functools import partial
 from pathlib import Path
-from typing import Optional, Union
+from typing import cast, Optional, Union
 
 import requests
 from requests import Response
@@ -181,7 +181,7 @@ class YTMusicBase:
             try:
                 cookie = self.base_headers.get("cookie")
                 self.sapisid = sapisid_from_cookie(cookie)
-                self.origin = self.base_headers.get("origin", self.base_headers.get("x-origin"))
+                self.origin = cast(str, self.base_headers.get("origin", self.base_headers.get("x-origin")))
             except KeyError:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
@@ -191,16 +191,16 @@ class YTMusicBase:
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
                 self._base_headers = self._input_dict
             else:
-                self._base_headers = {
+                self._base_headers = CaseInsensitiveDict({
                     "user-agent": USER_AGENT,
                     "accept": "*/*",
                     "accept-encoding": "gzip, deflate",
                     "content-type": "application/json",
                     "content-encoding": "gzip",
                     "origin": YTM_DOMAIN,
-                }
+                })
 
-        return self._base_headers
+        return cast(CaseInsensitiveDict[str], self._base_headers)
 
     @property
     def headers(self):
@@ -219,6 +219,43 @@ class YTMusicBase:
             self._headers["X-Goog-Request-Time"] = str(int(time.time()))
 
         return self._headers
+
+    @contextmanager
+    def as_mobile(self):
+        """
+        Not thread-safe!
+        ----------------
+
+        Temporarily changes the `context` to enable different results
+        from the API, meant for the Android mobile-app.
+        All calls inside the `with`-statement with emulate mobile behavior.
+
+        This context-manager has no `enter_result`, as it operates in-place
+        and only temporarily alters the underlying `YTMusic`-object.
+
+
+        Example::
+
+            with yt.as_mobile():
+                yt._send_request(...)  # results as mobile-app
+
+            yt._send_request(...)  # back to normal, like web-app
+
+        """
+
+        # change the context to emulate a mobile-app (Android)
+        copied_context_client = self.context["context"]["client"].copy()
+        self.context["context"]["client"].update({
+            "clientName": "ANDROID_MUSIC",
+            "clientVersion": "7.21.50"
+        })
+
+        # this will not catch errors
+        try:
+            yield None
+        finally:
+            # safely restore the old context
+            self.context["context"]["client"] = copied_context_client
 
     def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
         body.update(self.context)
