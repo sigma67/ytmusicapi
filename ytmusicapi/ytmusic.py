@@ -2,10 +2,10 @@ import gettext
 import json
 import locale
 import time
-from contextlib import suppress, contextmanager
+from contextlib import contextmanager, suppress
 from functools import partial
 from pathlib import Path
-from typing import cast, Optional, Union
+from typing import Optional, Union, cast
 
 import requests
 from requests import Response
@@ -189,14 +189,16 @@ class YTMusicBase:
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
                 self._base_headers = self._input_dict
             else:
-                self._base_headers = CaseInsensitiveDict({
-                    "user-agent": USER_AGENT,
-                    "accept": "*/*",
-                    "accept-encoding": "gzip, deflate",
-                    "content-type": "application/json",
-                    "content-encoding": "gzip",
-                    "origin": YTM_DOMAIN,
-                })
+                self._base_headers = CaseInsensitiveDict(
+                    {
+                        "user-agent": USER_AGENT,
+                        "accept": "*/*",
+                        "accept-encoding": "gzip, deflate",
+                        "content-type": "application/json",
+                        "content-encoding": "gzip",
+                        "origin": YTM_DOMAIN,
+                    }
+                )
 
         return cast(CaseInsensitiveDict[str], self._base_headers)
 
@@ -243,10 +245,7 @@ class YTMusicBase:
 
         # change the context to emulate a mobile-app (Android)
         copied_context_client = self.context["context"]["client"].copy()
-        self.context["context"]["client"].update({
-            "clientName": "ANDROID_MUSIC",
-            "clientVersion": "7.21.50"
-        })
+        self.context["context"]["client"].update({"clientName": "ANDROID_MUSIC", "clientVersion": "7.21.50"})
 
         # this will not catch errors
         try:

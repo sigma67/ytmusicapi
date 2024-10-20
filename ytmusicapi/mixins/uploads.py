@@ -23,7 +23,9 @@ from ._utils import LibraryOrderType, prepare_order_params, validate_order_param
 
 
 class UploadsMixin(MixinProtocol):
-    def get_library_upload_songs(self, limit: Optional[int] = 25, order: Optional[LibraryOrderType] = None) -> list[dict]:
+    def get_library_upload_songs(
+        self, limit: Optional[int] = 25, order: Optional[LibraryOrderType] = None
+    ) -> list[dict]:
         """
         Returns a list of uploaded songs
 
@@ -70,7 +72,9 @@ class UploadsMixin(MixinProtocol):
 
         return songs
 
-    def get_library_upload_albums(self, limit: Optional[int] = 25, order: Optional[LibraryOrderType] = None) -> list[dict]:
+    def get_library_upload_albums(
+        self, limit: Optional[int] = 25, order: Optional[LibraryOrderType] = None
+    ) -> list[dict]:
         """
         Gets the albums of uploaded songs in the user's library.
 

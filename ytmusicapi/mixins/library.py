@@ -179,7 +179,9 @@ class LibraryMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_subscriptions(self, limit: int = 25, order: Optional[LibraryOrderType] = None) -> list[dict]:
+    def get_library_subscriptions(
+        self, limit: int = 25, order: Optional[LibraryOrderType] = None
+    ) -> list[dict]:
         """
         Gets the artists the user has subscribed to.
 
