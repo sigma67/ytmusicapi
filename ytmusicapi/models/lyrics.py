@@ -5,13 +5,14 @@ from typing import Literal, Optional, TypedDict
 @dataclass
 class LyricLine:
     """Represents a line of lyrics with timestamps (in milliseconds).
-    
+
     Args:
         text (str): The Songtext.
         start_time (int): Begin of the lyric in milliseconds.
         end_time (int): End of the lyric in milliseconds.
         id (int): A Metadata-Id that probably uniquely identifies each lyric line.
     """
+
     text: str
     start_time: int
     end_time: int

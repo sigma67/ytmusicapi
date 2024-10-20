@@ -4,8 +4,7 @@ from typing import Literal
 
 from ytmusicapi.exceptions import YTMusicUserError
 
-
-LibraryOrderType = Literal['a_to_z', 'z_to_a', 'recently_added']
+LibraryOrderType = Literal["a_to_z", "z_to_a", "recently_added"]
 
 
 def prepare_like_endpoint(rating):

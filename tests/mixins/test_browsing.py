@@ -172,7 +172,7 @@ class TestBrowsing:
         assert lyrics_song["hasTimestamps"] is False
 
         # test lyrics with timestamps
-        lyrics_song = yt.get_lyrics(playlist["lyrics"], timestamps = True)
+        lyrics_song = yt.get_lyrics(playlist["lyrics"], timestamps=True)
         assert lyrics_song is not None
         assert len(lyrics_song["lyrics"]) >= 1
         assert lyrics_song["hasTimestamps"] is True

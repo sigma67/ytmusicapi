@@ -1,13 +1,13 @@
 import re
 import warnings
-from typing import Any, cast, Optional, Union
+from typing import Any, Optional, Union, cast, overload
 
 from ytmusicapi.continuations import (
     get_continuations,
     get_reloadable_continuation_params,
 )
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi.models.lyrics import Lyrics, LyricLine, TimedLyrics
+from ytmusicapi.models.lyrics import LyricLine, Lyrics, TimedLyrics
 from ytmusicapi.parsers.albums import parse_album_header_2024
 from ytmusicapi.parsers.browsing import (
     parse_album,
@@ -277,7 +277,7 @@ class BrowsingMixin(MixinProtocol):
         artist.update(self.parser.parse_channel_contents(results))
         return artist
 
-    ArtistOrderType = Literal['Recency', 'Popularity', 'Alphabetical order']
+    ArtistOrderType = Literal["Recency", "Popularity", "Alphabetical order"]
 
     def get_artist_albums(
         self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[ArtistOrderType] = None
@@ -839,26 +839,25 @@ class BrowsingMixin(MixinProtocol):
         sections = nav(response, ["contents", *SECTION_LIST])
         return parse_mixed_content(sections)
 
-
     @overload
     def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Optional[Lyrics]:
         """overload for mypy only"""
 
     @overload
-    def get_lyrics(self, browseId: str, timestamps: Literal[True] = True) -> Optional[Lyrics|TimedLyrics]:
+    def get_lyrics(self, browseId: str, timestamps: Literal[True] = True) -> Optional[Lyrics | TimedLyrics]:
         """overload for mypy only"""
 
-    def get_lyrics(self, browseId: str, timestamps: Optional[bool] = False) -> Optional[Lyrics|TimedLyrics]:
+    def get_lyrics(self, browseId: str, timestamps: Optional[bool] = False) -> Optional[Lyrics | TimedLyrics]:
         """
         Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
         timestamps, if available.
 
         :param browseId: Lyrics browse-id obtained from :py:func:`get_watch_playlist` (startswith `MPLYt...`).
         :param timestamps: Optional. Whether to return bare lyrics or lyrics with timestamps, if available. (Default: `False`)
-        :return: Dictionary with song lyrics or `None`, if no lyrics are found. 
+        :return: Dictionary with song lyrics or `None`, if no lyrics are found.
             The `hasTimestamps`-key determines the format of the data.
 
-        
+
             Example when `timestamps=False`, or no timestamps are available::
 
                 {
@@ -866,7 +865,7 @@ class BrowsingMixin(MixinProtocol):
                     "source": "Source: LyricFind",
                     "hasTimestamps": False
                 }
-            
+
             Example when `timestamps` is set to `True` and timestamps are available::
 
                 {
@@ -892,8 +891,7 @@ class BrowsingMixin(MixinProtocol):
 
         lyrics: dict = {}
         if not browseId:
-            raise YTMusicUserError(
-                "Invalid browseId provided. This song might not have lyrics.")
+            raise YTMusicUserError("Invalid browseId provided. This song might not have lyrics.")
 
         if timestamps:
             # changes and restores the client to get lyrics with timestamps (mobile only)
