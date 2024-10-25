@@ -18,6 +18,7 @@ class TestPlaylists:
             "2024_03_get_playlist.json",
             "2024_03_get_playlist_public.json",
             "2024_07_get_playlist_collaborative.json",
+            "2024_12_get_playlist_audio.json",
         ],
     )
     def test_get_playlist(self, yt, test_file):
