@@ -4,6 +4,7 @@ from .songs import *
 
 UNIQUE_RESULT_TYPES = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
 ALL_RESULT_TYPES = ["album", *UNIQUE_RESULT_TYPES]
+FEEDBACK_TOKENS: dict[int, str] = {}
 
 
 def get_search_result_type(result_type_local, result_types_local):
@@ -257,17 +258,25 @@ def _get_param2(filter):
     return filter_params[filter]
 
 
-def parse_search_suggestions(results, detailed_runs):
+def parse_search_suggestions(results, detailed_runs, feedback_tokens):
     if not results.get("contents", [{}])[0].get("searchSuggestionsSectionRenderer", {}).get("contents", []):
         return []
 
     raw_suggestions = results["contents"][0]["searchSuggestionsSectionRenderer"]["contents"]
     suggestions = []
 
+    count = 1  # Used for deleting a search suggestion
     for raw_suggestion in raw_suggestions:
         if "historySuggestionRenderer" in raw_suggestion:
             suggestion_content = raw_suggestion["historySuggestionRenderer"]
             from_history = True
+            feedback_token = (
+                suggestion_content.get("serviceEndpoint", {}).get("feedbackEndpoint", {}).get("feedbackToken")
+            )  # Extract feedbackToken if present
+ 
+            # Store the feedback token in the provided dictionary if it exists
+            if feedback_token:
+                feedback_tokens[count] = feedback_token
         else:
             suggestion_content = raw_suggestion["searchSuggestionRenderer"]
             from_history = False
@@ -276,8 +285,14 @@ def parse_search_suggestions(results, detailed_runs):
         runs = suggestion_content["suggestion"]["runs"]
 
         if detailed_runs:
-            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history})
+            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history, "number": count})
         else:
             suggestions.append(text)
 
+        count += 1
+
     return suggestions
+
+
+def get_feedback_token(suggestion_number):
+    return FEEDBACK_TOKENS.get(suggestion_number)
