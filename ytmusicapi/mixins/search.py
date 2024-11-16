@@ -7,10 +7,6 @@ from ytmusicapi.parsers.search import *
 
 
 class SearchMixin(MixinProtocol):
-    def __init__(self):
-        self._latest_suggestions = None
-        self._latest_feedback_tokens = None
-
     def search(
         self,
         query: str,
@@ -262,7 +258,7 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[list[str], list[dict]]:
+    def get_search_suggestions(self, query: str, detailed_runs=False) -> tuple[Union[list[str], list[dict]], dict[int, str]]:
         """
         Get Search Suggestions
 
@@ -272,7 +268,10 @@ class SearchMixin(MixinProtocol):
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on ``detailed_runs`` param.
+        :return: A tuple containing:
+            - A list of search suggestions. If ``detailed_runs`` is False, it returns plain text suggestions.
+              If ``detailed_runs`` is True, it returns a list of dictionaries with detailed information.
+            - A dictionary of feedback tokens that can be used to remove suggestions later.
 
           Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
 
@@ -300,7 +299,7 @@ class SearchMixin(MixinProtocol):
                       "text": "d"
                     }
                   ],
-                  "number": 1
+                  "index": 0
                 },
                 {
                   "text": "faded alan walker lyrics",
@@ -313,7 +312,7 @@ class SearchMixin(MixinProtocol):
                       "text": "d alan walker lyrics"
                     }
                   ],
-                  "number": 2
+                  "index": 1
                 },
                 {
                   "text": "faded alan walker",
@@ -326,7 +325,7 @@ class SearchMixin(MixinProtocol):
                       "text": "d alan walker"
                     }
                   ],
-                  "number": 3
+                  "index": 2
                 },
                 ...
               ]
@@ -340,36 +339,33 @@ class SearchMixin(MixinProtocol):
         feedback_tokens: dict[int, str] = {}
         search_suggestions = parse_search_suggestions(response, detailed_runs, feedback_tokens)
 
-        # Store the suggestions and feedback tokens for later use
-        self._latest_suggestions = search_suggestions
-        self._latest_feedback_tokens = feedback_tokens
+        return search_suggestions, feedback_tokens
 
-        return search_suggestions
-
-    def remove_search_suggestion(self, number: int) -> bool:
+    def remove_search_suggestion(self, index: int, feedback_tokens: dict[int, str]) -> bool:
         """
         Remove a search suggestion from the user search history based on the number displayed next to it.
 
-        :param number: The number of the suggestion to be removed.
+        :param index: The number of the suggestion to be removed.
             This number is displayed when the `detailed_runs` and `display_numbers` parameters are set to True
             in the `get_search_suggestions` method.
+        :param feedback_tokens: A dictionary containing feedback tokens for each suggestion.
+            This dictionary is obtained from the `get_search_suggestions` method.
         :return: True if the operation was successful, False otherwise.
 
-          Example usage:
+          Example usage::
 
-              # Assuming you want to remove suggestion number 1
-              success = ytmusic.remove_search_suggestion(number=1)
+              # Assuming you want to remove suggestion number 0
+              suggestions, feedback_tokens = ytmusic.get_search_suggestions(query="fade", detailed_runs=True)
+              success = ytmusic.remove_search_suggestion(index=0, feedback_tokens=feedback_tokens)
               if success:
                   print("Suggestion removed successfully")
               else:
                   print("Failed to remove suggestion")
         """
-        if self._latest_suggestions is None or self._latest_feedback_tokens is None:
-            raise ValueError(
-                "No suggestions available. Please run get_search_suggestions first to retrieve suggestions."
-            )
-
-        feedback_token = self._latest_feedback_tokens.get(number)
+        if not feedback_tokens:
+            raise YTMusicUserError("No feedback tokens provided. Please run get_search_suggestions first to retrieve suggestions.")
+        
+        feedback_token = feedback_tokens.get(index)
 
         if not feedback_token:
             return False
@@ -379,7 +375,4 @@ class SearchMixin(MixinProtocol):
 
         response = self._send_request(endpoint, body)
 
-        if "feedbackResponses" in response and response["feedbackResponses"][0].get("isProcessed", False):
-            return True
-
-        return False
+        return bool(nav(response, ["feedbackResponses", 0, "isProcessed"], none_if_absent=True))
