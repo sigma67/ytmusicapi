@@ -60,6 +60,8 @@ def parse_args(args):
     parser = argparse.ArgumentParser(description="Setup ytmusicapi.")
     parser.add_argument("setup_type", type=str, choices=["oauth", "browser"], help="choose a setup type.")
     parser.add_argument("--file", type=Path, help="optional path to output file.")
+    parser.add_argument("--client_id", type=str, help="optional Google OAuth client ID.")
+    parser.add_argument("--client_secret", type=str, help="optional Google OAuth client secret.")
 
     return parser.parse_args(args)
 
@@ -69,6 +71,6 @@ def main():
     filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
     print(f"Creating {filename} with your authentication credentials...")
     if args.setup_type == "oauth":
-        return setup_oauth(filename, open_browser=True)
+        return setup_oauth(filename, open_browser=True, client_id=args.client_id, client_secret=args.client_secret)
     else:
         return setup(filename)
