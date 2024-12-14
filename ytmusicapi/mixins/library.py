@@ -299,8 +299,7 @@ class LibraryMixin(MixinProtocol):
             if not data:
                 error = nav(content, ["musicNotifierShelfRenderer", *TITLE], True)
                 raise YTMusicServerError(error)
-            menu_entries = [[-1, *MENU_SERVICE, *FEEDBACK_TOKEN]]
-            songlist = parse_playlist_items(data, menu_entries)
+            songlist = parse_playlist_items(data)
             for song in songlist:
                 song["played"] = nav(content["musicShelfRenderer"], TITLE_TEXT)
             songs.extend(songlist)
