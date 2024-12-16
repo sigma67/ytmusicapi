@@ -118,9 +118,7 @@ class YTMusicBase:
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
         self.cookies = {"SOCS": "CAI"}
         if self.auth is not None:
-            self.oauth_credentials = (
-                oauth_credentials if oauth_credentials is not None else OAuthCredentials()
-            )
+            self.oauth_credentials = oauth_credentials
             auth_path: Optional[Path] = None
             if isinstance(self.auth, str):
                 auth_str: str = self.auth

@@ -10,7 +10,6 @@ from requests import Response
 
 from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
-from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 from ytmusicapi.setup import main
 from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
 
@@ -27,8 +26,8 @@ def fixture_blank_code() -> dict[str, Any]:
 
 
 @pytest.fixture(name="alt_oauth_credentials")
-def fixture_alt_oauth_credentials() -> OAuthCredentials:
-    return OAuthCredentials(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
+def fixture_alt_oauth_credentials(config) -> OAuthCredentials:
+    return OAuthCredentials(config["auth"]["client_id"], config["auth"]["client_secret"])
 
 
 @pytest.fixture(name="yt_alt_oauth")
