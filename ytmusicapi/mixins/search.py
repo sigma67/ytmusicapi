@@ -36,7 +36,7 @@ class SearchMixin(MixinProtocol):
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
           albums, artists and playlists additionally contain a browseId, corresponding to
-          albumId, channelId and playlistId (browseId=``VL``+playlistId)
+          albumId, channelId and playlistId (browseId=`VL`+playlistId)
 
           Example list for default search with one result per resultType for brevity. Normally
           there are 3 results per resultType and an additional ``thumbnails`` key::

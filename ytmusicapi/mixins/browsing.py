@@ -284,8 +284,8 @@ class BrowsingMixin(MixinProtocol):
 
         :param channelId: browseId of the artist as returned by :py:func:`get_artist`
         :param params: params obtained by :py:func:`get_artist`
-        :param limit: Number of albums to return. `None` retrieves them all. Default: 100
-        :param order: Order of albums to return. Allowed values: 'Recency', 'Popularity', 'Alphabetical order'. Default: Default order.
+        :param limit: Number of albums to return. ``None`` retrieves them all. Default: 100
+        :param order: Order of albums to return. Allowed values: ``Recency``, ``Popularity``, `Alphabetical order`. Default: Default order.
         :return: List of albums in the format of :py:func:`get_library_albums`,
           except artists key is missing.
 
@@ -469,7 +469,7 @@ class BrowsingMixin(MixinProtocol):
         Get an album's browseId based on its audioPlaylistId
 
         :param audioPlaylistId: id of the audio playlist  (starting with `OLAK5uy_`)
-        :return: browseId (starting with `MPREb_`)
+        :return: browseId (starting with ``MPREb_``)
         """
         params = {"list": audioPlaylistId}
         response = self._send_get_request(YTM_DOMAIN + "/playlist", params)
@@ -760,7 +760,7 @@ class BrowsingMixin(MixinProtocol):
         Gets related content for a song. Equivalent to the content
         shown in the "Related" tab of the watch panel.
 
-        :param browseId: The `related` key  in the `get_watch_playlist` response.
+        :param browseId: The ``related`` key  in the ``get_watch_playlist`` response.
 
         Example::
 
@@ -840,7 +840,7 @@ class BrowsingMixin(MixinProtocol):
         """
         Returns lyrics of a song or video.
 
-        :param browseId: Lyrics browse id obtained from `get_watch_playlist`
+        :param browseId: Lyrics browse id obtained from ``get_watch_playlist``
         :return: Dictionary with song lyrics.
 
         Example::
@@ -881,11 +881,11 @@ class BrowsingMixin(MixinProtocol):
     def get_signatureTimestamp(self, url: Optional[str] = None) -> int:
         """
         Fetch the `base.js` script from YouTube Music and parse out the
-        `signatureTimestamp` for use with :py:func:`get_song`.
+        ``signatureTimestamp`` for use with :py:func:`get_song`.
 
         :param url: Optional. Provide the URL of the `base.js` script. If this
             isn't specified a call will be made to :py:func:`get_basejs_url`.
-        :return: `signatureTimestamp` string
+        :return: ``signatureTimestamp`` string
         """
         if url is None:
             url = self.get_basejs_url()

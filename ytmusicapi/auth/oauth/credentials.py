@@ -51,9 +51,9 @@ class OAuthCredentials(Credentials):
         proxies: Optional[dict] = None,
     ):
         """
-        :param client_id: Optional. Set the GoogleAPI client_id used for auth flows.
-            Requires client_secret also be provided if set.
-        :param client_secret: Optional. Corresponding secret for provided client_id.
+        :param client_id: Optional. Set the GoogleAPI ``client_id`` used for auth flows.
+            Requires ``client_secret`` also be provided if set.
+        :param client_secret: Optional. Corresponding secret for provided ``client_id``.
         :param session: Optional. Connection pooling with an active session.
         :param proxies: Optional. Modify the session with proxy parameters.
         """
@@ -112,10 +112,10 @@ class OAuthCredentials(Credentials):
 
     def refresh_token(self, refresh_token: str) -> BaseTokenDict:
         """
-        Method for requesting a new access token for a given refresh_token.
+        Method for requesting a new access token for a given ``refresh_token``.
         Token must have been created by the same OAuth client.
 
-        :param refresh_token: Corresponding refresh_token for a matching access_token.
+        :param refresh_token: Corresponding ``refresh_token`` for a matching ``access_token``.
             Obtained via
         """
         response = self._send_request(
