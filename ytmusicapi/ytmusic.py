@@ -100,7 +100,7 @@ class YTMusicBase:
         self.auth_type: AuthType = AuthType.UNAUTHORIZED
 
         self._token: Token  #: OAuth credential handler
-        self.oauth_credentials: OAuthCredentials  #: Client used for OAuth refreshing
+        self.oauth_credentials: Optional[OAuthCredentials]  #: Client used for OAuth refreshing
 
         self._session: requests.Session  #: request session for connection pooling
         self.proxies: Optional[dict[str, str]] = proxies  #: params for session modification
@@ -118,9 +118,7 @@ class YTMusicBase:
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
         self.cookies = {"SOCS": "CAI"}
         if self.auth is not None:
-            self.oauth_credentials = (
-                oauth_credentials if oauth_credentials is not None else OAuthCredentials()
-            )
+            self.oauth_credentials = oauth_credentials
             auth_path: Optional[Path] = None
             if isinstance(self.auth, str):
                 auth_str: str = self.auth
@@ -134,7 +132,7 @@ class YTMusicBase:
             else:
                 self._input_dict = CaseInsensitiveDict(self.auth)
 
-            if OAuthToken.is_oauth(self._input_dict):
+            if self.oauth_credentials is not None and OAuthToken.is_oauth(self._input_dict):
                 self._token = RefreshingToken(
                     credentials=self.oauth_credentials, _local_cache=auth_path, **self._input_dict
                 )

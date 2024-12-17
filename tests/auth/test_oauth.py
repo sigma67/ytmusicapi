@@ -10,7 +10,6 @@ from requests import Response
 
 from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
-from ytmusicapi.constants import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
 from ytmusicapi.setup import main
 from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
 
@@ -27,8 +26,8 @@ def fixture_blank_code() -> dict[str, Any]:
 
 
 @pytest.fixture(name="alt_oauth_credentials")
-def fixture_alt_oauth_credentials() -> OAuthCredentials:
-    return OAuthCredentials(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
+def fixture_alt_oauth_credentials(config) -> OAuthCredentials:
+    return OAuthCredentials(config["auth"]["client_id"], config["auth"]["client_secret"])
 
 
 @pytest.fixture(name="yt_alt_oauth")
@@ -47,7 +46,19 @@ class TestOAuth:
         oauth_filepath = oauth_file.name
         with (
             mock.patch("builtins.input", return_value="y"),
-            mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", oauth_filepath]),
+            mock.patch(
+                "sys.argv",
+                [
+                    "ytmusicapi",
+                    "oauth",
+                    "--file",
+                    oauth_filepath,
+                    "--client-id",
+                    "test_id",
+                    "--client-secret",
+                    "test_secret",
+                ],
+            ),
             mock.patch("webbrowser.open"),
         ):
             main()
@@ -63,7 +74,6 @@ class TestOAuth:
         oauth_file.close()
         Path(oauth_file.name).unlink()
 
-    @pytest.mark.skip(reason="this test needs to be fixed with the oauth update")
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
         # ensure instance initialized token
         assert yt_oauth._token is not None
