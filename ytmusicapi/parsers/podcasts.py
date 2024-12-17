@@ -70,6 +70,7 @@ def parse_base_header(header: dict) -> dict:
             "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID], True),
         },
         "title": nav(header, TITLE_TEXT),
+        "thumbnails": nav(header, THUMBNAILS),
     }
 
 
