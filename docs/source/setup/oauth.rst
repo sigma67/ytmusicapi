@@ -20,5 +20,11 @@ and follow the instructions. This will create a file ``oauth.json`` in the curre
 
 You can pass this file to :py:class:`YTMusic` as explained in :doc:`../usage`.
 
+You will also need to pass ``client_id`` and ``client_secret`` to :py:class:`YTMusic`:
+
+.. code-block::
+
+    ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret)
+
 This OAuth flow uses the
 `Google API flow for TV devices <https://developers.google.com/youtube/v3/guides/auth/devices>`_.
