@@ -17,6 +17,7 @@ class TestPodcasts:
         podcast = yt.get_podcast(podcast_id)
         assert len(podcast["episodes"]) == 100
         assert not podcast["saved"]
+        assert podcast["thumbnails"]
 
         podcast = yt_brand.get_podcast(podcast_id, limit=None)
         assert len(podcast["episodes"]) > 100
@@ -34,6 +35,7 @@ class TestPodcasts:
         assert len(episode["description"]) >= 20
         assert not episode["saved"]
         assert episode["playlistId"] is not None
+        assert episode["thumbnails"]
 
         episode = yt_brand.get_episode(episode_id)
         assert episode["saved"]
