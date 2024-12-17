@@ -46,7 +46,19 @@ class TestOAuth:
         oauth_filepath = oauth_file.name
         with (
             mock.patch("builtins.input", return_value="y"),
-            mock.patch("sys.argv", ["ytmusicapi", "oauth", "--file", oauth_filepath]),
+            mock.patch(
+                "sys.argv",
+                [
+                    "ytmusicapi",
+                    "oauth",
+                    "--file",
+                    oauth_filepath,
+                    "--client-id",
+                    "test_id",
+                    "--client-secret",
+                    "test_secret",
+                ],
+            ),
             mock.patch("webbrowser.open"),
         ):
             main()

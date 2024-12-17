@@ -100,7 +100,7 @@ class YTMusicBase:
         self.auth_type: AuthType = AuthType.UNAUTHORIZED
 
         self._token: Token  #: OAuth credential handler
-        self.oauth_credentials: OAuthCredentials | None  #: Client used for OAuth refreshing
+        self.oauth_credentials: Optional[OAuthCredentials]  #: Client used for OAuth refreshing
 
         self._session: requests.Session  #: request session for connection pooling
         self.proxies: Optional[dict[str, str]] = proxies  #: params for session modification

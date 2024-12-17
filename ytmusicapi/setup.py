@@ -61,8 +61,8 @@ def parse_args(args):
         help="create an oauth token using your Google Youtube API credentials; type 'ytmusicapi oauth -h' for details.",
     )
     oauth_parser.add_argument("--file", type=Path, help="optional path to output file")
-    oauth_parser.add_argument("--client_id", type=str, help="use your Google Youtube API client ID.")
-    oauth_parser.add_argument("--client_secret", type=str, help="use your Google Youtube API client secret.")
+    oauth_parser.add_argument("--client-id", type=str, help="use your Google Youtube API client ID.")
+    oauth_parser.add_argument("--client-secret", type=str, help="use your Google Youtube API client secret.")
     browser_parser = subparsers.add_parser(
         "browser",
         help="use cookies from request headers (deprecated); type 'ytmusicapi browser -h' for details.",
@@ -83,7 +83,7 @@ def main():
     print(f"Creating {filename} with your authentication credentials...")
     if args.setup_type == "oauth":
         return setup_oauth(
-            filename, open_browser=True, client_id=args.client_id, client_secret=args.client_secret
+            client_id=args.client_id, client_secret=args.client_secret, filepath=filename, open_browser=True
         )
     else:
         return setup(filename)
