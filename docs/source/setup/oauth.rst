@@ -1,7 +1,16 @@
 OAuth authentication
 ====================
 
-After you have installed ``ytmusicapi``, simply run
+.. attention::
+
+   As of November 2024, YouTube Music requires a Client Id and Secret for the YouTube Data API to connect to the API.
+
+   Go to the `YouTube Data API docs <https://developers.google.com/youtube/registering_an_application>`_ to
+   obtain the credentials. This requires a Google Cloud Console account and project.
+
+   For your new credentials, select ``OAuth client ID`` and pick ``TVs and Limited Input devices``.
+
+After you have installed ``ytmusicapi``, run
 
 .. code-block:: bash
 

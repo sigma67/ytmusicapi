@@ -74,11 +74,10 @@ def parse_args(args):
 
 def main():
     args = parse_args(sys.argv[1:])
-    if args.setup_type == "oauth" and (args.client_id is None or args.client_secret is None):
-        print(
-            "You have to supply both your Google Youtube API client ID and client secret to create a valid oauth token."
-        )
-        return
+    if args.client_id is None:
+        args.client_id = input("Enter your Google Youtube Data API client ID: ")
+    if args.client_secret is None:
+        args.client_secret = input("Enter your Google Youtube Data API client secret: ")
     filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
     print(f"Creating {filename} with your authentication credentials...")
     if args.setup_type == "oauth":
