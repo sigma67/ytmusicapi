@@ -1,7 +1,7 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 
@@ -72,16 +72,15 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def main():
+def main() -> Union[RefreshingToken, str]:
     args = parse_args(sys.argv[1:])
-    if args.setup_type == "oauth" and (args.client_id is None or args.client_secret is None):
-        print(
-            "You have to supply both your Google Youtube API client ID and client secret to create a valid oauth token."
-        )
-        return
     filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
-    print(f"Creating {filename} with your authentication credentials...")
+    print(f"Creating {Path(filename).as_uri()} with your authentication credentials...")
     if args.setup_type == "oauth":
+        if args.client_id is None:
+            args.client_id = input("Enter your Google Youtube Data API client ID: ")
+        if args.client_secret is None:
+            args.client_secret = input("Enter your Google Youtube Data API client secret: ")
         return setup_oauth(
             client_id=args.client_id, client_secret=args.client_secret, filepath=filename, open_browser=True
         )
