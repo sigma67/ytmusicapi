@@ -6,8 +6,6 @@ from typing import Optional
 import requests
 
 from ytmusicapi.constants import (
-    OAUTH_CLIENT_ID,
-    OAUTH_CLIENT_SECRET,
     OAUTH_CODE_URL,
     OAUTH_SCOPE,
     OAUTH_TOKEN_URL,
@@ -47,15 +45,15 @@ class OAuthCredentials(Credentials):
 
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
+        client_id: str,
+        client_secret: str,
         session: Optional[requests.Session] = None,
         proxies: Optional[dict] = None,
     ):
         """
-        :param client_id: Optional. Set the GoogleAPI `client_id` used for auth flows.
-            Requires `client_secret` also be provided if set.
-        :param client_secret: Optional. Corresponding secret for provided `client_id`.
+        :param client_id: Optional. Set the GoogleAPI ``client_id`` used for auth flows.
+            Requires ``client_secret`` also be provided if set.
+        :param client_secret: Optional. Corresponding secret for provided ``client_id``.
         :param session: Optional. Connection pooling with an active session.
         :param proxies: Optional. Modify the session with proxy parameters.
         """
@@ -66,8 +64,8 @@ class OAuthCredentials(Credentials):
             )
 
         # bind instance to OAuth client for auth flows
-        self.client_id = client_id if client_id else OAUTH_CLIENT_ID
-        self.client_secret = client_secret if client_secret else OAUTH_CLIENT_SECRET
+        self.client_id = client_id
+        self.client_secret = client_secret
 
         self._session = session if session else requests.Session()  # for auth requests
         if proxies:
@@ -114,10 +112,10 @@ class OAuthCredentials(Credentials):
 
     def refresh_token(self, refresh_token: str) -> BaseTokenDict:
         """
-        Method for requesting a new access token for a given `refresh_token`.
+        Method for requesting a new access token for a given ``refresh_token``.
         Token must have been created by the same OAuth client.
 
-        :param refresh_token: Corresponding `refresh_token` for a matching `access_token`.
+        :param refresh_token: Corresponding ``refresh_token`` for a matching ``access_token``.
             Obtained via
         """
         response = self._send_request(

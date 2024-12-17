@@ -18,13 +18,13 @@ class PlaylistsMixin(MixinProtocol):
         Returns a list of playlist items
 
         :param playlistId: Playlist id
-        :param limit: How many songs to return. `None` retrieves them all. Default: 100
+        :param limit: How many songs to return. ``None`` retrieves them all. Default: 100
         :param related: Whether to fetch 10 related playlists or not. Default: False
         :param suggestions_limit: How many suggestions to return. The result is a list of
             suggested playlist items (videos) contained in a "suggestions" key.
             7 items are retrieved in each internal request. Default: 0
         :return: Dictionary with information about the playlist.
-            The key `tracks` contains a List of playlistItem dictionaries
+            The key ``tracks`` contains a List of playlistItem dictionaries
 
         The result is in the following format::
 
@@ -221,7 +221,7 @@ class PlaylistsMixin(MixinProtocol):
 
         :param title: Playlist title
         :param description: Playlist description
-        :param privacy_status: Playlists can be `PUBLIC`, `PRIVATE`, or `UNLISTED`. Default: `PRIVATE`
+        :param privacy_status: Playlists can be ``PUBLIC``, ``PRIVATE``, or ``UNLISTED``. Default: ``PRIVATE``
         :param video_ids: IDs of songs to create the playlist with
         :param source_playlist: Another playlist whose songs should be added to the new playlist
         :return: ID of the YouTube playlist or full response if there was an error

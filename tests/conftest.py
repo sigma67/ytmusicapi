@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from ytmusicapi import YTMusic
+from ytmusicapi.auth.oauth import OAuthCredentials
 
 
 def get_resource(file: str) -> str:
@@ -56,8 +57,11 @@ def fixture_yt_auth(browser_filepath) -> YTMusic:
 
 
 @pytest.fixture(name="yt_oauth")
-def fixture_yt_oauth(oauth_filepath) -> YTMusic:
-    return YTMusic(oauth_filepath)
+def fixture_yt_oauth(oauth_filepath, config) -> YTMusic:
+    credentials = OAuthCredentials(
+        client_id=config["auth"]["client_id"], client_secret=config["auth"]["client_secret"]
+    )
+    return YTMusic(oauth_filepath, oauth_credentials=credentials)
 
 
 @pytest.fixture(name="yt_brand")

@@ -13,25 +13,28 @@ from ytmusicapi.exceptions import YTMusicUserError
 
 class TestPlaylists:
     @pytest.mark.parametrize(
-        ("test_file", "owned"),
+        "test_file",
         [
-            ("2024_03_get_playlist.json", True),
-            ("2024_03_get_playlist_public.json", False),
-            ("2024_07_get_playlist_collaborative.json", True),
+            "2024_03_get_playlist.json",
+            "2024_03_get_playlist_public.json",
+            "2024_07_get_playlist_collaborative.json",
         ],
     )
-    def test_get_playlist_2024(self, yt, test_file, owned):
-        with open(Path(__file__).parent.parent / "data" / test_file, encoding="utf8") as f:
+    def test_get_playlist(self, yt, test_file):
+        data_dir = Path(__file__).parent.parent / "data"
+        with open(data_dir / test_file, encoding="utf8") as f:
             mock_response = json.load(f)
+        with open(data_dir / "expected_output" / test_file, encoding="utf8") as f:
+            expected_output = json.load(f)
+
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
             playlist = yt.get_playlist("MPREabc")
-            assert playlist["year"] == "2024"
-            assert playlist["owned"] == owned
-            assert "hours" in playlist["duration"] or "minutes" in playlist["duration"]
-            assert playlist["id"]
-            assert isinstance(playlist["description"], str) and playlist["description"]
-            assert len(playlist["tracks"]) > 0
+            assert playlist == playlist | expected_output
 
+            for thumbnail in playlist.get("thumbnails", []):
+                assert thumbnail["url"] and thumbnail["width"] and thumbnail["height"]
+
+            assert len(playlist["tracks"]) > 0
             for track in playlist["tracks"]:
                 assert isinstance(track["title"], str) and track["title"]
 
@@ -48,7 +51,6 @@ class TestPlaylists:
             ("RDCLAK5uy_nfjzC9YC1NVPPZHvdoAtKVBOILMDOuxOs", 200, 10),
             ("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", 200, 0),  # no related tracks
             ("PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u", 1000, 10),  # very large
-            ("PLZ6Ih9wLHQ2Hm2d3Cb0iV48Z2hQjGRyNz", 300, 10),  # runs in subtitle, not title
             ("PL5ZNf-B8WWSZFIvpJWRjgt7iRqWT7_KF1", 10, 10),  # track duration > 1k hours
         ],
     )

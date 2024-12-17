@@ -20,8 +20,8 @@ class WatchMixin(MixinProtocol):
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
 
-        Please note that the `INDIFFERENT` likeStatus of tracks returned by this
-        endpoint may be either `INDIFFERENT` or `DISLIKE`, due to ambiguous data
+        Please note that the ``INDIFFERENT`` likeStatus of tracks returned by this
+        endpoint may be either ``INDIFFERENT`` or ``DISLIKE``, due to ambiguous data
         returned by YouTube Music.
 
         :param videoId: videoId of the played video

@@ -1,6 +1,7 @@
 import pytest
 
 from ytmusicapi import YTMusic
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.parsers.search import ALL_RESULT_TYPES
 
 
@@ -115,3 +116,31 @@ class TestSearch:
             yt_oauth.search("beatles", filter="community_playlists", scope="library", limit=40)
         with pytest.raises(Exception):
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
+
+    def test_remove_search_suggestions_valid(self, yt_auth):
+        first_pass = yt_auth.search("b")  # Populate the suggestion history
+        assert len(first_pass) > 0, "Search returned no results"
+
+        results = yt_auth.get_search_suggestions("b", detailed_runs=True)
+        assert len(results) > 0, "No search suggestions returned"
+        assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
+
+        response = yt_auth.remove_search_suggestions(results)
+        assert response is True, "Failed to remove search suggestions"
+
+    def test_remove_search_suggestions_errors(self, yt_auth, yt):
+        first_pass = yt_auth.search("a")
+        assert len(first_pass) > 0, "Search returned no results"
+
+        results = yt_auth.get_search_suggestions("a", detailed_runs=True)
+        assert len(results) > 0, "No search suggestions returned"
+        assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
+
+        suggestion_to_remove = [99]
+        with pytest.raises(YTMusicUserError, match="Index out of range."):
+            yt_auth.remove_search_suggestions(results, suggestion_to_remove)
+
+        suggestion_to_remove = [0]
+        with pytest.raises(YTMusicUserError, match="No search result from history provided."):
+            results = yt.get_search_suggestions("a", detailed_runs=True)
+            yt.remove_search_suggestions(results, suggestion_to_remove)

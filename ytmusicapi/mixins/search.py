@@ -20,9 +20,9 @@ class SearchMixin(MixinProtocol):
         Returns results within the provided category.
 
         :param query: Query string, i.e. 'Oasis Wonderwall'
-        :param filter: Filter for item types. Allowed values: `songs`, `videos`, `albums`, `artists`, `playlists`, `community_playlists`, `featured_playlists`, `uploads`.
+        :param filter: Filter for item types. Allowed values: ``songs``, ``videos``, ``albums``, ``artists``, ``playlists``, ``community_playlists``, ``featured_playlists``, ``uploads``.
           Default: Default search, including all types of items.
-        :param scope: Search scope. Allowed values: `library`, `uploads`.
+        :param scope: Search scope. Allowed values: ``library``, ``uploads``.
             Default: Search the public YouTube Music catalogue.
             Changing scope from the default will reduce the number of settable filters. Setting a filter that is not permitted will throw an exception.
             For uploads, no filter can be set.
@@ -31,7 +31,7 @@ class SearchMixin(MixinProtocol):
           Default: 20
         :param ignore_spelling: Whether to ignore YTM spelling suggestions.
           If True, the exact search term will be searched for, and will not be corrected.
-          This does not have any effect when the filter is set to `uploads`.
+          This does not have any effect when the filter is set to ``uploads``.
           Default: False, will use YTM's default behavior of autocorrecting the search.
         :return: List of results depending on filter.
           resultType specifies the type of item (important for default search).
@@ -39,7 +39,7 @@ class SearchMixin(MixinProtocol):
           albumId, channelId and playlistId (browseId=`VL`+playlistId)
 
           Example list for default search with one result per resultType for brevity. Normally
-          there are 3 results per resultType and an additional `thumbnails` key::
+          there are 3 results per resultType and an additional ``thumbnails`` key::
 
             [
               {
@@ -268,9 +268,10 @@ class SearchMixin(MixinProtocol):
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on `detailed_runs` param.
+        :return: A list of search suggestions. If ``detailed_runs`` is False, it returns plain text suggestions.
+              If ``detailed_runs`` is True, it returns a list of dictionaries with detailed information.
 
-          Example response when `query` is 'fade' and `detailed_runs` is set to `False`::
+          Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
 
               [
                 "faded",
@@ -295,7 +296,9 @@ class SearchMixin(MixinProtocol):
                     {
                       "text": "d"
                     }
-                  ]
+                  ],
+                  "fromHistory": true,
+                  "feedbackToken": "AEEJK..."
                 },
                 {
                   "text": "faded alan walker lyrics",
@@ -307,7 +310,9 @@ class SearchMixin(MixinProtocol):
                     {
                       "text": "d alan walker lyrics"
                     }
-                  ]
+                  ],
+                  "fromHistory": false,
+                  "feedbackToken": None
                 },
                 {
                   "text": "faded alan walker",
@@ -319,16 +324,64 @@ class SearchMixin(MixinProtocol):
                     {
                       "text": "d alan walker"
                     }
-                  ]
+                  ],
+                  "fromHistory": false,
+                  "feedbackToken": None
                 },
                 ...
               ]
         """
-
         body = {"input": query}
         endpoint = "music/get_search_suggestions"
 
         response = self._send_request(endpoint, body)
-        search_suggestions = parse_search_suggestions(response, detailed_runs)
 
-        return search_suggestions
+        return parse_search_suggestions(response, detailed_runs)
+
+    def remove_search_suggestions(
+        self, suggestions: list[dict[str, Any]], indices: Optional[list[int]] = None
+    ) -> bool:
+        """
+        Remove search suggestion from the user search history.
+
+        :param suggestions: The dictionary obtained from the :py:func:`get_search_suggestions`
+            (with detailed_runs=True)`
+        :param indices: Optional. The indices of the suggestions to be removed. Default: remove all suggestions.
+        :return: True if the operation was successful, False otherwise.
+
+          Example usage::
+
+              # Removing suggestion number 0
+              suggestions = ytmusic.get_search_suggestions(query="fade", detailed_runs=True)
+              success = ytmusic.remove_search_suggestions(suggestions=suggestions, indices=[0])
+              if success:
+                  print("Suggestion removed successfully")
+              else:
+                  print("Failed to remove suggestion")
+        """
+        if not any(run["fromHistory"] for run in suggestions):
+            raise YTMusicUserError(
+                "No search result from history provided. "
+                "Please run get_search_suggestions first to retrieve suggestions. "
+                "Ensure that you have searched a similar term before."
+            )
+
+        if indices is None:
+            indices = list(range(len(suggestions)))
+
+        if any(index >= len(suggestions) for index in indices):
+            raise YTMusicUserError("Index out of range. Index must be smaller than the length of suggestions")
+
+        feedback_tokens = [suggestions[index]["feedbackToken"] for index in indices]
+        if all(feedback_token is None for feedback_token in feedback_tokens):
+            return False
+
+        # filter None tokens
+        feedback_tokens = [token for token in feedback_tokens if token is not None]
+
+        body = {"feedbackTokens": feedback_tokens}
+        endpoint = "feedback"
+
+        response = self._send_request(endpoint, body)
+
+        return bool(nav(response, ["feedbackResponses", 0, "isProcessed"], none_if_absent=True))
