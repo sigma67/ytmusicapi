@@ -2,10 +2,11 @@ import gettext
 import json
 import locale
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from functools import partial
 from pathlib import Path
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 import requests
 from requests import Response
@@ -89,8 +90,10 @@ class YTMusicBase:
             used for authentication flow.
         """
 
-        self._base_headers = None  #: for authless initializing requests during OAuth flow
-        self._headers = None  #: cache formed headers including auth
+        self._base_headers: Optional[CaseInsensitiveDict] = (
+            None  #: for authless initializing requests during OAuth flow
+        )
+        self._headers: Optional[CaseInsensitiveDict] = None  #: cache formed headers including auth
 
         self.auth = auth  #: raw auth
         self._input_dict: CaseInsensitiveDict = (
@@ -179,12 +182,12 @@ class YTMusicBase:
             try:
                 cookie = self.base_headers.get("cookie")
                 self.sapisid = sapisid_from_cookie(cookie)
-                self.origin = cast(str, self.base_headers.get("origin", self.base_headers.get("x-origin")))
+                self.origin = self.base_headers.get("origin", self.base_headers.get("x-origin"))
             except KeyError:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
     @property
-    def base_headers(self):
+    def base_headers(self) -> CaseInsensitiveDict:
         if not self._base_headers:
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
                 self._base_headers = self._input_dict
@@ -200,10 +203,10 @@ class YTMusicBase:
                     }
                 )
 
-        return cast(CaseInsensitiveDict[str], self._base_headers)
+        return self._base_headers
 
     @property
-    def headers(self):
+    def headers(self) -> CaseInsensitiveDict:
         # set on first use
         if not self._headers:
             self._headers = self.base_headers
@@ -221,7 +224,7 @@ class YTMusicBase:
         return self._headers
 
     @contextmanager
-    def as_mobile(self):
+    def as_mobile(self) -> Iterator[None]:
         """
         Not thread-safe!
         ----------------

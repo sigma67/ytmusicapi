@@ -1,5 +1,6 @@
 """protocol that defines the functions available to mixins"""
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Optional, Protocol
 
@@ -29,7 +30,7 @@ class MixinProtocol(Protocol):
         """for sending get requests to YouTube Music"""
 
     @contextmanager
-    def as_mobile(self):
+    def as_mobile(self) -> Iterator[None]:
         """context-manager, that allows requests as the YouTube Music Mobile-App"""
 
     @property
