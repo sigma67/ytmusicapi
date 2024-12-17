@@ -258,9 +258,7 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(
-        self, query: str, detailed_runs=False
-    ) -> tuple[Union[list[str], list[dict]], dict[int, str]]:
+    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[list[str], list[dict]]:
         """
         Get Search Suggestions
 
@@ -270,10 +268,8 @@ class SearchMixin(MixinProtocol):
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
-        :return: A tuple containing:
-            - A list of search suggestions. If ``detailed_runs`` is False, it returns plain text suggestions.
+        :return: A list of search suggestions. If ``detailed_runs`` is False, it returns plain text suggestions.
               If ``detailed_runs`` is True, it returns a list of dictionaries with detailed information.
-            - A dictionary of feedback tokens that can be used to remove suggestions later.
 
           Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
 
@@ -301,7 +297,8 @@ class SearchMixin(MixinProtocol):
                       "text": "d"
                     }
                   ],
-                  "index": 0
+                  "fromHistory": true,
+                  "feedbackToken": "AEEJK..."
                 },
                 {
                   "text": "faded alan walker lyrics",
@@ -314,7 +311,8 @@ class SearchMixin(MixinProtocol):
                       "text": "d alan walker lyrics"
                     }
                   ],
-                  "index": 1
+                  "fromHistory": true,
+                  "feedbackToken": None
                 },
                 {
                   "text": "faded alan walker",
@@ -327,54 +325,56 @@ class SearchMixin(MixinProtocol):
                       "text": "d alan walker"
                     }
                   ],
-                  "index": 2
+                  "fromHistory": false,
+                  "feedbackToken": None
                 },
                 ...
               ]
         """
-
         body = {"input": query}
         endpoint = "music/get_search_suggestions"
 
         response = self._send_request(endpoint, body)
-        # Pass feedback_tokens as a dictionary to store tokens for deletion
-        feedback_tokens: dict[int, str] = {}
-        search_suggestions = parse_search_suggestions(response, detailed_runs, feedback_tokens)
 
-        return search_suggestions, feedback_tokens
+        return parse_search_suggestions(response, detailed_runs)
 
-    def remove_search_suggestion(self, index: int, feedback_tokens: dict[int, str]) -> bool:
+    def remove_search_suggestions(self, suggestions: list[dict[str, Any]], indices: list[int]) -> bool:
         """
         Remove a search suggestion from the user search history based on the number displayed next to it.
 
-        :param index: The number of the suggestion to be removed.
-            This number is displayed when the `detailed_runs` and `display_numbers` parameters are set to True
-            in the `get_search_suggestions` method.
-        :param feedback_tokens: A dictionary containing feedback tokens for each suggestion.
-            This dictionary is obtained from the `get_search_suggestions` method.
+        :param suggestions: The dictionary obtained from the :py:func:`get_search_suggestions`
+            (with detailed_runs=True)`
+        :param indices: The indices of the suggestions to be removed.
         :return: True if the operation was successful, False otherwise.
 
           Example usage::
 
               # Assuming you want to remove suggestion number 0
-              suggestions, feedback_tokens = ytmusic.get_search_suggestions(query="fade", detailed_runs=True)
-              success = ytmusic.remove_search_suggestion(index=0, feedback_tokens=feedback_tokens)
+              suggestions = ytmusic.get_search_suggestions(query="fade", detailed_runs=True)
+              success = ytmusic.remove_search_suggestion(suggestions=suggestions, index=0)
               if success:
                   print("Suggestion removed successfully")
               else:
                   print("Failed to remove suggestion")
         """
-        if not feedback_tokens:
+        if not any(run["fromHistory"] for run in suggestions):
             raise YTMusicUserError(
-                "No feedback tokens provided. Please run get_search_suggestions first to retrieve suggestions."
+                "No search result from history provided. "
+                "Please run get_search_suggestions first to retrieve suggestions. "
+                "Ensure that you have searched a similar term before."
             )
 
-        feedback_token = feedback_tokens.get(index)
+        if any(index >= len(suggestions) for index in indices):
+            raise YTMusicUserError("Index out of range. Index must be smaller than the length of suggestions")
 
-        if not feedback_token:
+        feedback_tokens = [suggestions[index]["feedbackToken"] for index in indices]
+        if all(feedback_token is None for feedback_token in feedback_tokens):
             return False
 
-        body = {"feedbackTokens": [feedback_token]}
+        # filter None tokens
+        feedback_tokens = [token for token in feedback_tokens if token is not None]
+
+        body = {"feedbackTokens": feedback_tokens}
         endpoint = "feedback"
 
         response = self._send_request(endpoint, body)
