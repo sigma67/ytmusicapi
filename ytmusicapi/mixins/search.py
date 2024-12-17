@@ -311,7 +311,7 @@ class SearchMixin(MixinProtocol):
                       "text": "d alan walker lyrics"
                     }
                   ],
-                  "fromHistory": true,
+                  "fromHistory": false,
                   "feedbackToken": None
                 },
                 {
@@ -338,20 +338,22 @@ class SearchMixin(MixinProtocol):
 
         return parse_search_suggestions(response, detailed_runs)
 
-    def remove_search_suggestions(self, suggestions: list[dict[str, Any]], indices: list[int]) -> bool:
+    def remove_search_suggestions(
+        self, suggestions: list[dict[str, Any]], indices: Optional[list[int]] = None
+    ) -> bool:
         """
-        Remove a search suggestion from the user search history based on the number displayed next to it.
+        Remove search suggestion from the user search history.
 
         :param suggestions: The dictionary obtained from the :py:func:`get_search_suggestions`
             (with detailed_runs=True)`
-        :param indices: The indices of the suggestions to be removed.
+        :param indices: Optional. The indices of the suggestions to be removed. Default: remove all suggestions.
         :return: True if the operation was successful, False otherwise.
 
           Example usage::
 
-              # Assuming you want to remove suggestion number 0
+              # Removing suggestion number 0
               suggestions = ytmusic.get_search_suggestions(query="fade", detailed_runs=True)
-              success = ytmusic.remove_search_suggestion(suggestions=suggestions, index=0)
+              success = ytmusic.remove_search_suggestions(suggestions=suggestions, indices=[0])
               if success:
                   print("Suggestion removed successfully")
               else:
@@ -363,6 +365,9 @@ class SearchMixin(MixinProtocol):
                 "Please run get_search_suggestions first to retrieve suggestions. "
                 "Ensure that you have searched a similar term before."
             )
+
+        if indices is None:
+            indices = list(range(len(suggestions)))
 
         if any(index >= len(suggestions) for index in indices):
             raise YTMusicUserError("Index out of range. Index must be smaller than the length of suggestions")

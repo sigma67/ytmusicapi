@@ -125,9 +125,8 @@ class TestSearch:
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
 
-        suggestion_to_remove = [0]
-        response = yt_auth.remove_search_suggestions(results, suggestion_to_remove)
-        assert response is True, "Failed to remove search suggestion"
+        response = yt_auth.remove_search_suggestions(results)
+        assert response is True, "Failed to remove search suggestions"
 
     def test_remove_search_suggestions_errors(self, yt_auth, yt):
         first_pass = yt_auth.search("a")
