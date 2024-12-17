@@ -892,8 +892,6 @@ class BrowsingMixin(MixinProtocol):
                 }
 
         """
-
-        lyrics: dict = {}
         if not browseId:
             raise YTMusicUserError("Invalid browseId provided. This song might not have lyrics.")
 
@@ -905,29 +903,32 @@ class BrowsingMixin(MixinProtocol):
             response = self._send_request("browse", {"browseId": browseId})
 
         # unpack the response
-
-        # we got lyrics with timestamps
+        lyrics: Union[Lyrics, TimedLyrics]
         if timestamps and (data := nav(response, TIMESTAMPED_LYRICS, True)) is not None:
+            # we got lyrics with timestamps
             assert isinstance(data, dict)
 
-            if "timedLyricsData" not in data:
+            if "timedLyricsData" not in data:  # pragma: no cover
                 return None
 
-            lyrics["lyrics"] = list(map(LyricLine.from_raw, data["timedLyricsData"]))
-            lyrics["source"] = data.get("sourceMessage")
-            lyrics["hasTimestamps"] = True
+            lyrics = TimedLyrics(
+                lyrics=list(map(LyricLine.from_raw, data["timedLyricsData"])),
+                source=data.get("sourceMessage"),
+                hasTimestamps=True,
+            )
         else:
-            lyrics["lyrics"] = nav(
+            lyrics_str = nav(
                 response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *DESCRIPTION], True
             )
 
-            if lyrics["lyrics"] is None:
+            if lyrics_str is None:  # pragma: no cover
                 return None
 
-            lyrics["source"] = nav(
-                response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "footer", *RUN_TEXT], True
+            lyrics = Lyrics(
+                lyrics=lyrics_str,
+                source=nav(response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *RUN_TEXT], True),
+                hasTimestamps=False,
             )
-            lyrics["hasTimestamps"] = False
 
         return cast(Union[Lyrics, TimedLyrics], lyrics)
 
