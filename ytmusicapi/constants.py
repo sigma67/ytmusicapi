@@ -18,8 +18,6 @@ SUPPORTED_LOCATIONS = {
     "TN", "TR", "TW", "TZ", "UA", "UG", "US", "UY", "VE", "VN", "YE", "ZA", "ZW"
 }
 # fmt: on
-OAUTH_CLIENT_ID = "861556708454-d6dlm3lh05idd8npek18k6be8ba3oc68.apps.googleusercontent.com"
-OAUTH_CLIENT_SECRET = "SboVhoG9s0rNafixCSGGKXAT"
 OAUTH_SCOPE = "https://www.googleapis.com/auth/youtube"
 OAUTH_CODE_URL = "https://www.youtube.com/o/oauth2/device/code"
 OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"

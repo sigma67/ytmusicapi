@@ -111,17 +111,26 @@ class TestBrowsing:
         assert album["tracks"][0]["isExplicit"]
         assert all(item["views"] is not None for item in album["tracks"])
         assert all(item["album"] is not None for item in album["tracks"])
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert album["tracks"][0]["trackNumber"] == 1
         assert "feedbackTokens" in album["tracks"][0]
         album = yt.get_album("MPREb_BQZvl3BFGay")
+        assert album["audioPlaylistId"] is not None
         assert len(album["tracks"]) == 7
         assert len(album["tracks"][0]["artists"]) == 1
         album = yt.get_album("MPREb_rqH94Zr3NN0")
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert len(album["tracks"][0]["artists"]) == 2
         album = yt.get_album("MPREb_TPH4WqN5pUo")  # album with tracks completely removed/missing
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert album["tracks"][0]["trackNumber"] == 3
         assert album["tracks"][13]["trackNumber"] == 18
         album = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert album["tracks"][7]["trackNumber"] is None
 
     def test_get_album_errors(self, yt):

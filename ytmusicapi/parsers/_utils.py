@@ -67,7 +67,11 @@ def parse_duration(duration):
     # duration may be falsy or a single space: ' '
     if not duration or not duration.strip():
         return duration
-    mapped_increments = zip([1, 60, 3600], reversed(duration.split(":")))
+    duration_split = duration.strip().split(":")
+    for d in duration_split:
+        if not d.isdigit():  # For e.g: "2,343"
+            return None
+    mapped_increments = zip([1, 60, 3600], reversed(duration_split))
     seconds = sum(multiplier * int(time) for multiplier, time in mapped_increments)
     return seconds
 
