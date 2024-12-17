@@ -63,9 +63,16 @@ def parse_album_header_2024(response):
     # add to library/uploaded
     buttons = header["buttons"]
     album["audioPlaylistId"] = nav(
-        buttons, [1, "musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID], True
+        find_object_by_key(buttons, "musicPlayButtonRenderer"),
+        ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+        True,
     )
-    service = nav(buttons, [0, "toggleButtonRenderer", "defaultServiceEndpoint"], True)
+    service = nav(
+        find_object_by_key(buttons, "toggleButtonRenderer"),
+        ["toggleButtonRenderer", "defaultServiceEndpoint"],
+        True,
+    )
+    album["likeStatus"] = "INDIFFERENT"
     if service:
         album["likeStatus"] = parse_like_status(service)
 
