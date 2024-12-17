@@ -258,7 +258,9 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(self, query: str, detailed_runs=False) -> tuple[Union[list[str], list[dict]], dict[int, str]]:
+    def get_search_suggestions(
+        self, query: str, detailed_runs=False
+    ) -> tuple[Union[list[str], list[dict]], dict[int, str]]:
         """
         Get Search Suggestions
 
@@ -363,8 +365,10 @@ class SearchMixin(MixinProtocol):
                   print("Failed to remove suggestion")
         """
         if not feedback_tokens:
-            raise YTMusicUserError("No feedback tokens provided. Please run get_search_suggestions first to retrieve suggestions.")
-        
+            raise YTMusicUserError(
+                "No feedback tokens provided. Please run get_search_suggestions first to retrieve suggestions."
+            )
+
         feedback_token = feedback_tokens.get(index)
 
         if not feedback_token:

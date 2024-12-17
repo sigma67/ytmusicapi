@@ -117,7 +117,7 @@ class TestSearch:
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
 
     def test_remove_suggestion_valid(self, yt_auth):
-        first_pass = yt_auth.search("b") # Populate the suggestion history
+        first_pass = yt_auth.search("b")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
 
         results, feedback_tokens = yt_auth.get_search_suggestions("b", detailed_runs=True)
@@ -131,7 +131,7 @@ class TestSearch:
     def test_remove_suggestion_invalid_number(self, yt_auth):
         first_pass = yt_auth.search("a")
         assert len(first_pass) > 0, "Search returned no results"
-        
+
         results, feedback_tokens = yt_auth.get_search_suggestions("a", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"

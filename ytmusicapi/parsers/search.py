@@ -271,7 +271,7 @@ def parse_search_suggestions(results, detailed_runs, feedback_tokens):
             feedback_token = (
                 suggestion_content.get("serviceEndpoint", {}).get("feedbackEndpoint", {}).get("feedbackToken")
             )  # Extract feedbackToken if present
- 
+
             # Store the feedback token in the provided dictionary if it exists
             if feedback_token:
                 feedback_tokens[index] = feedback_token
