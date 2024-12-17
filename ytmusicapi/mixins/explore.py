@@ -93,7 +93,7 @@ class ExploreMixin(MixinProtocol):
         Get latest charts data from YouTube Music: Top songs, top videos, top artists and top trending videos.
         Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
 
-        :param country: ISO 3166-1 Alpha-2 country code. Default: ZZ = Global
+        :param country: ISO 3166-1 Alpha-2 country code. Default: ``ZZ`` = Global
         :return: Dictionary containing chart songs (only if authenticated with premium account),
             chart videos, chart artists and trending videos.
 

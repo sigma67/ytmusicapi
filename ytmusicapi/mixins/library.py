@@ -15,7 +15,7 @@ class LibraryMixin(MixinProtocol):
         """
         Retrieves the playlists in the user's library.
 
-        :param limit: Number of playlists to retrieve. `None` retrieves them all.
+        :param limit: Number of playlists to retrieve. ``None`` retrieves them all.
         :return: List of owned playlists.
 
         Each item is in the following format::
@@ -55,7 +55,7 @@ class LibraryMixin(MixinProtocol):
         :param limit: Number of songs to retrieve
         :param validate_responses: Flag indicating if responses from YTM should be validated and retried in case
             when some songs are missing. Default: False
-        :param order: Order of songs to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of songs to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of songs. Same format as :py:func:`get_playlist`
         """
         self._check_auth()
@@ -121,7 +121,7 @@ class LibraryMixin(MixinProtocol):
         Gets the albums in the user's library.
 
         :param limit: Number of albums to return
-        :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of albums to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of albums.
 
         Each item is in the following format::
@@ -156,7 +156,7 @@ class LibraryMixin(MixinProtocol):
         Gets the artists of the songs in the user's library.
 
         :param limit: Number of artists to return
-        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of artists to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of artists.
 
         Each item is in the following format::
@@ -186,7 +186,7 @@ class LibraryMixin(MixinProtocol):
         Gets the artists the user has subscribed to.
 
         :param limit: Number of artists to return
-        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of artists to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of artists. Same format as :py:func:`get_library_artists`
         """
         self._check_auth()
@@ -205,7 +205,7 @@ class LibraryMixin(MixinProtocol):
         Get podcasts the user has added to the library
 
         :param limit: Number of podcasts to return
-        :param order: Order of podcasts to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of podcasts to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of podcasts. New Episodes playlist is the first podcast returned, but only if subscribed to relevant podcasts.
 
         Example::
@@ -251,7 +251,7 @@ class LibraryMixin(MixinProtocol):
         Get channels the user has added to the library
 
         :param limit: Number of channels to return
-        :param order: Order of channels to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param order: Order of channels to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of channels.
 
         Example::
@@ -342,9 +342,9 @@ class LibraryMixin(MixinProtocol):
         Rates a song ("thumbs up"/"thumbs down" interactions on YouTube Music)
 
         :param videoId: Video id
-        :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
+        :param rating: One of ``LIKE``, ``DISLIKE``, ``INDIFFERENT``
 
-          | 'INDIFFERENT' removes the previous rating and assigns no rating
+          | ``INDIFFERENT`` removes the previous rating and assigns no rating
 
         :return: Full response
         """
@@ -375,9 +375,9 @@ class LibraryMixin(MixinProtocol):
         You can also dislike a playlist/album, which has an effect on your recommendations
 
         :param playlistId: Playlist id
-        :param rating: One of 'LIKE', 'DISLIKE', 'INDIFFERENT'
+        :param rating: One of ``LIKE``, ``DISLIKE``, ``INDIFFERENT``
 
-          | 'INDIFFERENT' removes the playlist/album from the library
+          | ``INDIFFERENT`` removes the playlist/album from the library
 
         :return: Full response
         """

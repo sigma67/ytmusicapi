@@ -99,10 +99,10 @@ class PodcastsMixin(MixinProtocol):
 
         .. note::
 
-            To add a podcast to your library, you need to call `rate_playlist` on it
+            To add a podcast to your library, you need to call ``rate_playlist`` on it
 
         :param playlistId: Playlist id
-        :param limit: How many songs to return. `None` retrieves them all. Default: 100
+        :param limit: How many songs to return. ``None`` retrieves them all. Default: 100
         :return: Dict with podcast information
 
         Example::
@@ -163,8 +163,8 @@ class PodcastsMixin(MixinProtocol):
 
         .. note::
 
-           To save an episode, you need to call `add_playlist_items` to add
-           it to the `SE` (saved episodes) playlist.
+           To save an episode, you need to call ``add_playlist_items`` to add
+           it to the ``SE`` (saved episodes) playlist.
 
         :param videoId: browseId (MPED..) or videoId for a single episode
         :return: Dict containing information about the episode

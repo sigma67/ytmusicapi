@@ -127,7 +127,7 @@ reached at least the ``limit`` parameter, and return all of these results.
 Which values can I use for languages?
 *************************************
 
-The `language` parameter determines the language of the returned results.
+The ``language`` parameter determines the language of the returned results.
 ``ytmusicapi`` only supports a subset of the languages supported by YouTube Music, as translations need to be done manually.
 Contributions are welcome, see `here for instructions <https://github.com/sigma67/ytmusicapi/tree/master/ytmusicapi/locales>`__.
 
