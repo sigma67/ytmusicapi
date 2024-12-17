@@ -6,8 +6,6 @@ from typing import Optional
 import requests
 
 from ytmusicapi.constants import (
-    OAUTH_CLIENT_ID,
-    OAUTH_CLIENT_SECRET,
     OAUTH_CODE_URL,
     OAUTH_SCOPE,
     OAUTH_TOKEN_URL,
@@ -47,8 +45,8 @@ class OAuthCredentials(Credentials):
 
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
+        client_id: str,
+        client_secret: str,
         session: Optional[requests.Session] = None,
         proxies: Optional[dict] = None,
     ):
@@ -66,8 +64,8 @@ class OAuthCredentials(Credentials):
             )
 
         # bind instance to OAuth client for auth flows
-        self.client_id = client_id if client_id else OAUTH_CLIENT_ID
-        self.client_secret = client_secret if client_secret else OAUTH_CLIENT_SECRET
+        self.client_id = client_id
+        self.client_secret = client_secret
 
         self._session = session if session else requests.Session()  # for auth requests
         if proxies:

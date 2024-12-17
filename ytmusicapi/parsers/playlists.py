@@ -213,8 +213,13 @@ def parse_playlist_item(
         song["feedbackTokens"] = feedback_tokens
 
     if menu_entries:
+        # sets the feedbackToken for get_history
+        menu_items = nav(data, MENU_ITEMS)
         for menu_entry in menu_entries:
-            song[menu_entry[-1]] = nav(data, MENU_ITEMS + menu_entry)
+            items = find_objects_by_key(menu_items, menu_entry[0])
+            song[menu_entry[-1]] = next(
+                filter(lambda x: x is not None, (nav(itm, menu_entry, True) for itm in items)), None
+            )
 
     return song
 
