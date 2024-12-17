@@ -844,10 +844,14 @@ class BrowsingMixin(MixinProtocol):
         """overload for mypy only"""
 
     @overload
-    def get_lyrics(self, browseId: str, timestamps: Literal[True] = True) -> Optional[Lyrics | TimedLyrics]:
+    def get_lyrics(
+        self, browseId: str, timestamps: Literal[True] = True
+    ) -> Optional[Union[Lyrics, TimedLyrics]]:
         """overload for mypy only"""
 
-    def get_lyrics(self, browseId: str, timestamps: Optional[bool] = False) -> Optional[Lyrics | TimedLyrics]:
+    def get_lyrics(
+        self, browseId: str, timestamps: Optional[bool] = False
+    ) -> Optional[Union[Lyrics, TimedLyrics]]:
         """
         Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
         timestamps, if available.
