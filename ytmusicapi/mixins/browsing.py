@@ -1,12 +1,13 @@
 import re
 import warnings
-from typing import Any, Optional
+from typing import Any, Optional, Union, cast, overload
 
 from ytmusicapi.continuations import (
     get_continuations,
     get_reloadable_continuation_params,
 )
 from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
+from ytmusicapi.models.lyrics import LyricLine, Lyrics, TimedLyrics
 from ytmusicapi.parsers.albums import parse_album_header_2024
 from ytmusicapi.parsers.browsing import (
     parse_album,
@@ -276,8 +277,10 @@ class BrowsingMixin(MixinProtocol):
         artist.update(self.parser.parse_channel_contents(results))
         return artist
 
+    ArtistOrderType = Literal["Recency", "Popularity", "Alphabetical order"]
+
     def get_artist_albums(
-        self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[str] = None
+        self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[ArtistOrderType] = None
     ) -> list[dict]:
         """
         Get the full list of an artist's albums, singles or shows
@@ -836,36 +839,100 @@ class BrowsingMixin(MixinProtocol):
         sections = nav(response, ["contents", *SECTION_LIST])
         return parse_mixed_content(sections)
 
-    def get_lyrics(self, browseId: str) -> dict:
+    @overload
+    def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Optional[Lyrics]:
+        """overload for mypy only"""
+
+    @overload
+    def get_lyrics(
+        self, browseId: str, timestamps: Literal[True] = True
+    ) -> Optional[Union[Lyrics, TimedLyrics]]:
+        """overload for mypy only"""
+
+    def get_lyrics(
+        self, browseId: str, timestamps: Optional[bool] = False
+    ) -> Optional[Union[Lyrics, TimedLyrics]]:
         """
-        Returns lyrics of a song or video.
+        Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
+        timestamps, if available.
 
-        :param browseId: Lyrics browse id obtained from ``get_watch_playlist``
-        :return: Dictionary with song lyrics.
+        :param browseId: Lyrics browseId obtained from :py:func:`get_watch_playlist` (startswith ``MPLYt...``).
+        :param timestamps: Optional. Whether to return bare lyrics or lyrics with timestamps, if available. (Default: `False`)
+        :return: Dictionary with song lyrics or ``None``, if no lyrics are found.
+            The ``hasTimestamps``-key determines the format of the data.
 
-        Example::
 
-            {
-                "lyrics": "Today is gonna be the day\\nThat they're gonna throw it back to you\\n",
-                "source": "Source: LyricFind"
-            }
+            Example when `timestamps=False`, or no timestamps are available::
+
+                {
+                    "lyrics": "Today is gonna be the day\\nThat they're gonna throw it back to you\\n",
+                    "source": "Source: LyricFind",
+                    "hasTimestamps": False
+                }
+
+            Example when `timestamps` is set to `True` and timestamps are available::
+
+                {
+                    "lyrics": [
+                        LyricLine(
+                            text="I was a liar",
+                            start_time=9200,
+                            end_time=10630,
+                            id=1
+                        ),
+                        LyricLine(
+                            text="I gave in to the fire",
+                            start_time=10680,
+                            end_time=12540,
+                            id=2
+                        ),
+                    ],
+                    "source": "Source: LyricFind",
+                    "hasTimestamps": True
+                }
 
         """
-        lyrics = {}
         if not browseId:
             raise YTMusicUserError("Invalid browseId provided. This song might not have lyrics.")
 
-        response = self._send_request("browse", {"browseId": browseId})
-        lyrics["lyrics"] = nav(
-            response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *DESCRIPTION], True
-        )
-        lyrics["source"] = nav(
-            response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "footer", *RUN_TEXT], True
-        )
+        if timestamps:
+            # changes and restores the client to get lyrics with timestamps (mobile only)
+            with self.as_mobile():
+                response = self._send_request("browse", {"browseId": browseId})
+        else:
+            response = self._send_request("browse", {"browseId": browseId})
 
-        return lyrics
+        # unpack the response
+        lyrics: Union[Lyrics, TimedLyrics]
+        if timestamps and (data := nav(response, TIMESTAMPED_LYRICS, True)) is not None:
+            # we got lyrics with timestamps
+            assert isinstance(data, dict)
 
-    def get_basejs_url(self):
+            if "timedLyricsData" not in data:  # pragma: no cover
+                return None
+
+            lyrics = TimedLyrics(
+                lyrics=list(map(LyricLine.from_raw, data["timedLyricsData"])),
+                source=data.get("sourceMessage"),
+                hasTimestamps=True,
+            )
+        else:
+            lyrics_str = nav(
+                response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *DESCRIPTION], True
+            )
+
+            if lyrics_str is None:  # pragma: no cover
+                return None
+
+            lyrics = Lyrics(
+                lyrics=lyrics_str,
+                source=nav(response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *RUN_TEXT], True),
+                hasTimestamps=False,
+            )
+
+        return cast(Union[Lyrics, TimedLyrics], lyrics)
+
+    def get_basejs_url(self) -> str:
         """
         Extract the URL for the `base.js` script from YouTube Music.
 

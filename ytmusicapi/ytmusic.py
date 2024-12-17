@@ -2,7 +2,8 @@ import gettext
 import json
 import locale
 import time
-from contextlib import suppress
+from collections.abc import Iterator
+from contextlib import contextmanager, suppress
 from functools import partial
 from pathlib import Path
 from typing import Optional, Union
@@ -89,8 +90,10 @@ class YTMusicBase:
             used for authentication flow.
         """
 
-        self._base_headers = None  #: for authless initializing requests during OAuth flow
-        self._headers = None  #: cache formed headers including auth
+        self._base_headers: Optional[CaseInsensitiveDict] = (
+            None  #: for authless initializing requests during OAuth flow
+        )
+        self._headers: Optional[CaseInsensitiveDict] = None  #: cache formed headers including auth
 
         self.auth = auth  #: raw auth
         self._input_dict: CaseInsensitiveDict = (
@@ -184,24 +187,26 @@ class YTMusicBase:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
     @property
-    def base_headers(self):
+    def base_headers(self) -> CaseInsensitiveDict:
         if not self._base_headers:
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
                 self._base_headers = self._input_dict
             else:
-                self._base_headers = {
-                    "user-agent": USER_AGENT,
-                    "accept": "*/*",
-                    "accept-encoding": "gzip, deflate",
-                    "content-type": "application/json",
-                    "content-encoding": "gzip",
-                    "origin": YTM_DOMAIN,
-                }
+                self._base_headers = CaseInsensitiveDict(
+                    {
+                        "user-agent": USER_AGENT,
+                        "accept": "*/*",
+                        "accept-encoding": "gzip, deflate",
+                        "content-type": "application/json",
+                        "content-encoding": "gzip",
+                        "origin": YTM_DOMAIN,
+                    }
+                )
 
         return self._base_headers
 
     @property
-    def headers(self):
+    def headers(self) -> CaseInsensitiveDict:
         # set on first use
         if not self._headers:
             self._headers = self.base_headers
@@ -217,6 +222,40 @@ class YTMusicBase:
             self._headers["X-Goog-Request-Time"] = str(int(time.time()))
 
         return self._headers
+
+    @contextmanager
+    def as_mobile(self) -> Iterator[None]:
+        """
+        Not thread-safe!
+        ----------------
+
+        Temporarily changes the `context` to enable different results
+        from the API, meant for the Android mobile-app.
+        All calls inside the `with`-statement with emulate mobile behavior.
+
+        This context-manager has no `enter_result`, as it operates in-place
+        and only temporarily alters the underlying `YTMusic`-object.
+
+
+        Example::
+
+            with yt.as_mobile():
+                yt._send_request(...)  # results as mobile-app
+
+            yt._send_request(...)  # back to normal, like web-app
+
+        """
+
+        # change the context to emulate a mobile-app (Android)
+        copied_context_client = self.context["context"]["client"].copy()
+        self.context["context"]["client"].update({"clientName": "ANDROID_MUSIC", "clientVersion": "7.21.50"})
+
+        # this will not catch errors
+        try:
+            yield None
+        finally:
+            # safely restore the old context
+            self.context["context"]["client"] = copied_context_client
 
     def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
         body.update(self.context)
