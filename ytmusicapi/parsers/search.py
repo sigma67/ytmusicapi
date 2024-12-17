@@ -1,3 +1,5 @@
+from typing import Union
+
 from ..helpers import to_int
 from ._utils import *
 from .songs import *
@@ -257,26 +259,38 @@ def _get_param2(filter):
     return filter_params[filter]
 
 
-def parse_search_suggestions(results, detailed_runs):
+def parse_search_suggestions(
+    results: dict[str, Any], detailed_runs: bool
+) -> Union[list[str], list[dict[str, Any]]]:
     if not results.get("contents", [{}])[0].get("searchSuggestionsSectionRenderer", {}).get("contents", []):
         return []
 
     raw_suggestions = results["contents"][0]["searchSuggestionsSectionRenderer"]["contents"]
     suggestions = []
 
-    for raw_suggestion in raw_suggestions:
+    for index, raw_suggestion in enumerate(raw_suggestions):
+        feedback_token = None
         if "historySuggestionRenderer" in raw_suggestion:
             suggestion_content = raw_suggestion["historySuggestionRenderer"]
-            from_history = True
+            # Extract feedbackToken if present
+            feedback_token = nav(
+                suggestion_content, ["serviceEndpoint", "feedbackEndpoint", "feedbackToken"], True
+            )
         else:
             suggestion_content = raw_suggestion["searchSuggestionRenderer"]
-            from_history = False
 
         text = suggestion_content["navigationEndpoint"]["searchEndpoint"]["query"]
         runs = suggestion_content["suggestion"]["runs"]
 
         if detailed_runs:
-            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history})
+            suggestions.append(
+                {
+                    "text": text,
+                    "runs": runs,
+                    "fromHistory": feedback_token is not None,
+                    "feedbackToken": feedback_token,
+                }
+            )
         else:
             suggestions.append(text)
 

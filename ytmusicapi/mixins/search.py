@@ -268,7 +268,8 @@ class SearchMixin(MixinProtocol):
             suggestion along with the complete text (like many search services
             usually bold the text typed by the user).
             Default: False, returns the list of search suggestions in plain text.
-        :return: List of search suggestion results depending on ``detailed_runs`` param.
+        :return: A list of search suggestions. If ``detailed_runs`` is False, it returns plain text suggestions.
+              If ``detailed_runs`` is True, it returns a list of dictionaries with detailed information.
 
           Example response when ``query`` is 'fade' and ``detailed_runs`` is set to ``False``::
 
@@ -295,7 +296,9 @@ class SearchMixin(MixinProtocol):
                     {
                       "text": "d"
                     }
-                  ]
+                  ],
+                  "fromHistory": true,
+                  "feedbackToken": "AEEJK..."
                 },
                 {
                   "text": "faded alan walker lyrics",
@@ -307,7 +310,9 @@ class SearchMixin(MixinProtocol):
                     {
                       "text": "d alan walker lyrics"
                     }
-                  ]
+                  ],
+                  "fromHistory": false,
+                  "feedbackToken": None
                 },
                 {
                   "text": "faded alan walker",
@@ -319,16 +324,64 @@ class SearchMixin(MixinProtocol):
                     {
                       "text": "d alan walker"
                     }
-                  ]
+                  ],
+                  "fromHistory": false,
+                  "feedbackToken": None
                 },
                 ...
               ]
         """
-
         body = {"input": query}
         endpoint = "music/get_search_suggestions"
 
         response = self._send_request(endpoint, body)
-        search_suggestions = parse_search_suggestions(response, detailed_runs)
 
-        return search_suggestions
+        return parse_search_suggestions(response, detailed_runs)
+
+    def remove_search_suggestions(
+        self, suggestions: list[dict[str, Any]], indices: Optional[list[int]] = None
+    ) -> bool:
+        """
+        Remove search suggestion from the user search history.
+
+        :param suggestions: The dictionary obtained from the :py:func:`get_search_suggestions`
+            (with detailed_runs=True)`
+        :param indices: Optional. The indices of the suggestions to be removed. Default: remove all suggestions.
+        :return: True if the operation was successful, False otherwise.
+
+          Example usage::
+
+              # Removing suggestion number 0
+              suggestions = ytmusic.get_search_suggestions(query="fade", detailed_runs=True)
+              success = ytmusic.remove_search_suggestions(suggestions=suggestions, indices=[0])
+              if success:
+                  print("Suggestion removed successfully")
+              else:
+                  print("Failed to remove suggestion")
+        """
+        if not any(run["fromHistory"] for run in suggestions):
+            raise YTMusicUserError(
+                "No search result from history provided. "
+                "Please run get_search_suggestions first to retrieve suggestions. "
+                "Ensure that you have searched a similar term before."
+            )
+
+        if indices is None:
+            indices = list(range(len(suggestions)))
+
+        if any(index >= len(suggestions) for index in indices):
+            raise YTMusicUserError("Index out of range. Index must be smaller than the length of suggestions")
+
+        feedback_tokens = [suggestions[index]["feedbackToken"] for index in indices]
+        if all(feedback_token is None for feedback_token in feedback_tokens):
+            return False
+
+        # filter None tokens
+        feedback_tokens = [token for token in feedback_tokens if token is not None]
+
+        body = {"feedbackTokens": feedback_tokens}
+        endpoint = "feedback"
+
+        response = self._send_request(endpoint, body)
+
+        return bool(nav(response, ["feedbackResponses", 0, "isProcessed"], none_if_absent=True))
