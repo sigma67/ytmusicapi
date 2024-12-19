@@ -2,7 +2,7 @@ import pytest
 
 from ytmusicapi import YTMusic
 from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.parsers.search import ALL_RESULT_TYPES
+from ytmusicapi.parsers.search import ALL_RESULT_TYPES, API_RESULT_TYPES
 
 
 class TestSearch:
@@ -22,7 +22,7 @@ class TestSearch:
         assert ["resultType" in r for r in results] == [True] * len(results)
         assert len(results) >= 5
         assert not any(
-            artist["name"].lower() in ALL_RESULT_TYPES
+            artist["name"].lower() in API_RESULT_TYPES
             for result in results
             if "artists" in result
             for artist in result["artists"]

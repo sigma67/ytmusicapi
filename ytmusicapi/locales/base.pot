@@ -18,65 +18,77 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: parsers/i18n.py:32
-msgid "artist"
+msgid "album"
 msgstr ""
 
 #: parsers/i18n.py:33
-msgid "playlist"
+msgid "artist"
 msgstr ""
 
 #: parsers/i18n.py:34
-msgid "song"
+msgid "playlist"
 msgstr ""
 
 #: parsers/i18n.py:35
-msgid "video"
+msgid "song"
 msgstr ""
 
 #: parsers/i18n.py:36
-msgid "station"
+msgid "video"
 msgstr ""
 
 #: parsers/i18n.py:37
-msgid "profile"
+msgid "station"
 msgstr ""
 
 #: parsers/i18n.py:38
-msgid "podcast"
+msgid "profile"
 msgstr ""
 
 #: parsers/i18n.py:39
+msgid "podcast"
+msgstr ""
+
+#: parsers/i18n.py:40
 msgid "episode"
 msgstr ""
 
 #: parsers/i18n.py:46
-msgid "albums"
+msgid "single"
 msgstr ""
 
 #: parsers/i18n.py:47
+msgid "ep"
+msgstr ""
+
+#: parsers/i18n.py:55
+msgid "albums"
+msgstr ""
+
+#: parsers/i18n.py:56
 msgid "singles"
 msgstr ""
 
-#: parsers/i18n.py:48
+#: parsers/i18n.py:57
 msgid "shows"
 msgstr ""
 
-#: parsers/i18n.py:49
+#: parsers/i18n.py:58
 msgid "videos"
 msgstr ""
 
-#: parsers/i18n.py:50
+#: parsers/i18n.py:59
 msgid "playlists"
 msgstr ""
 
-#: parsers/i18n.py:51
+#: parsers/i18n.py:60
 msgid "related"
 msgstr ""
 
-#: parsers/i18n.py:52
+#: parsers/i18n.py:61
 msgid "episodes"
 msgstr ""
 
-#: parsers/i18n.py:53
+#: parsers/i18n.py:62
 msgid "podcasts"
 msgstr ""
