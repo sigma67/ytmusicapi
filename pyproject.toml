@@ -43,7 +43,7 @@ include-package-data=false
 [tool.pytest.ini_options]
 python_functions = "test_*"
 testpaths = ["tests"]
-addopts = "--verbose --cov --retries 2 --retry-delay 5"
+addopts = "--verbose --cov --junitxml=junit.xml --retries 2 --retry-delay 5"
 
 [tool.coverage.run]
 source = ["ytmusicapi"]
