@@ -57,6 +57,7 @@ class YTMusicBase:
 
         :param auth: Optional. Provide a string, path to file, or oauth token dict.
           Authentication credentials are needed to manage your library.
+          Must set the arg ``oauth_credentials`` as well when using OAuth.
           See :py:func:`setup` for how to fill in the correct credentials.
           Default: A default header is used without authentication.
         :param user: Optional. Specify a user ID string to use in requests.
@@ -87,7 +88,7 @@ class YTMusicBase:
             No location will be set by default. This means it is determined by the server.
             Available languages can be checked in the FAQ.
         :param oauth_credentials: Optional. Used to specify a different oauth client to be
-            used for authentication flow.
+            used for authentication flow. Must be passed when using OAuth.
         """
 
         self._base_headers: Optional[CaseInsensitiveDict] = (
