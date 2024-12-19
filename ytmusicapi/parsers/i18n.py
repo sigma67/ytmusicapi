@@ -41,6 +41,14 @@ class Parser:
         ]
 
     @i18n
+    def get_api_result_types(self):
+        return [
+            _("single"),
+            _("ep"),
+            *self.get_search_result_types(),
+        ]
+
+    @i18n
     def parse_channel_contents(self, results: list) -> dict:
         # type: ignore[name-defined]
         categories = [
