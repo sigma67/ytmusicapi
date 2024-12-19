@@ -109,11 +109,15 @@ class PlaylistsMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
 
-        header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
+        header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM], True) or {}
         section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
         playlist: dict = {}
         playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
-        if not playlist["owned"]:
+
+        content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
+
+        header = None
+        if header_data and not playlist["owned"]:
             header = nav(header_data, RESPONSIVE_HEADER)
             playlist["id"] = nav(
                 header,
@@ -121,23 +125,29 @@ class PlaylistsMixin(MixinProtocol):
                 True,
             )
             playlist["privacy"] = "PUBLIC"
-        else:
+        elif header_data:
             playlist["id"] = nav(header_data, [*EDITABLE_PLAYLIST_DETAIL_HEADER, *PLAYLIST_ID])
             header = nav(header_data, [*EDITABLE_PLAYLIST_DETAIL_HEADER, *HEADER, *RESPONSIVE_HEADER])
             playlist["privacy"] = header_data[EDITABLE_PLAYLIST_DETAIL_HEADER[0]]["editHeader"][
                 "musicPlaylistEditHeaderRenderer"
             ]["privacy"]
 
-        description_shelf = nav(header, ["description", *DESCRIPTION_SHELF], True)
-        playlist["description"] = (
-            "".join([run["text"] for run in description_shelf["description"]["runs"]])
-            if description_shelf
-            else None
-        )
+        if header:
+            description_shelf = nav(header, ["description", *DESCRIPTION_SHELF], True)
+            playlist["description"] = (
+                "".join([run["text"] for run in description_shelf["description"]["runs"]])
+                if description_shelf
+                else None
+            )
 
-        playlist.update(parse_playlist_header_meta(header))
+            playlist.update(parse_playlist_header_meta(header))
 
-        playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
+            playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
+        else:
+            playlist["id"] = nav(
+                content_data, [*CONTENT, MRLIR, *PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PLAYLIST_ID]
+            )
+            playlist["trackCount"] = nav(content_data, ["collapsedItemCount"])
 
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
@@ -175,7 +185,6 @@ class PlaylistsMixin(MixinProtocol):
                     )
 
         playlist["tracks"] = []
-        content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
         if "contents" in content_data:
             playlist["tracks"] = parse_playlist_items(content_data["contents"])
 
@@ -186,6 +195,8 @@ class PlaylistsMixin(MixinProtocol):
                         content_data, "musicPlaylistShelfContinuation", limit, request_func, parse_func
                     )
                 )
+
+        playlist["title"] = playlist.get("title") or playlist["tracks"][0]["album"]["name"]
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist
