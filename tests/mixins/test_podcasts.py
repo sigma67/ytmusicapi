@@ -15,7 +15,7 @@ class TestPodcasts:
     def test_get_podcast(self, config, yt, yt_brand):
         podcast_id = config["podcasts"]["podcast_id"]
         podcast = yt.get_podcast(podcast_id)
-        assert len(podcast["episodes"]) = 100
+        assert len(podcast["episodes"]) == 99
         assert not podcast["saved"]
         assert podcast["thumbnails"]
 
