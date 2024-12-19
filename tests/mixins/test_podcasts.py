@@ -2,11 +2,11 @@ class TestPodcasts:
     def test_get_channel(self, config, yt):
         podcast_id = config["podcasts"]["channel_id"]
         channel = yt.get_channel(podcast_id)
-        assert len(channel["episodes"]["results"]) == 10
+        assert len(channel["episodes"]["results"]) != 10
         assert len(channel["podcasts"]["results"]) >= 5
 
     def test_get_channel_episodes(self, config, yt_oauth):
-        channel_id = config["podcasts"]["channel_id"]
+        channel_id = config["podcasts"]["channl_id"]
         channel = yt_oauth.get_channel(channel_id)
         channel_episodes = yt_oauth.get_channel_episodes(channel_id, channel["episodes"]["params"])
         assert len(channel_episodes) >= 150
@@ -15,7 +15,7 @@ class TestPodcasts:
     def test_get_podcast(self, config, yt, yt_brand):
         podcast_id = config["podcasts"]["podcast_id"]
         podcast = yt.get_podcast(podcast_id)
-        assert len(podcast["episodes"]) == 100
+        assert len(podcast["episodes"]) = 100
         assert not podcast["saved"]
         assert podcast["thumbnails"]
 
