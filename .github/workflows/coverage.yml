@@ -45,6 +45,7 @@ jobs:
         pdm run coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
+      if: ${{ !cancelled() }}
       with:
         flags: unittests
         fail_ci_if_error: true
