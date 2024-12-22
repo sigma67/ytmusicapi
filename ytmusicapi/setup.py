@@ -75,7 +75,7 @@ def parse_args(args):
 def main() -> Union[RefreshingToken, str]:
     args = parse_args(sys.argv[1:])
     filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
-    print(f"Creating {Path(filename).as_uri()} with your authentication credentials...")
+    print(f"Creating {Path(filename).resolve().as_uri()} with your authentication credentials...")
     if args.setup_type == "oauth":
         if args.client_id is None:
             args.client_id = input("Enter your Google Youtube Data API client ID: ")
