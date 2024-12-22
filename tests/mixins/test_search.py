@@ -2,7 +2,7 @@ import pytest
 
 from ytmusicapi import YTMusic
 from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.parsers.search import ALL_RESULT_TYPES
+from ytmusicapi.parsers.search import ALL_RESULT_TYPES, API_RESULT_TYPES
 
 
 class TestSearch:
@@ -22,11 +22,40 @@ class TestSearch:
         assert ["resultType" in r for r in results] == [True] * len(results)
         assert len(results) >= 5
         assert not any(
-            artist["name"].lower() in ALL_RESULT_TYPES
+            artist["name"].lower() in API_RESULT_TYPES
             for result in results
             if "artists" in result
             for artist in result["artists"]
         )
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            (
+                "Eminem Houdini",
+                {
+                    "title": "Houdini",
+                    "artists": [{"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}],
+                    "type": "Single",
+                    "resultType": "album",
+                },
+            ),
+            (
+                "Seven Martin Garrix",
+                {
+                    "title": "Seven",
+                    "artists": [{"name": "Martin Garrix", "id": "UCqJnSdHjKtfsrHi9aI-9d3g"}],
+                    "type": "EP",
+                    "resultType": "album",
+                },
+            ),
+        ],
+    )
+    def test_search_album_artists(self, yt, case: tuple[str, dict]):
+        (query, expected) = case
+        results = yt.search(query, filter="albums")
+
+        assert any(result == result | expected for result in results)
 
     def test_search_ignore_spelling(self, yt_auth):
         results = yt_auth.search("Martin Stig Andersen - Deteriation", ignore_spelling=True)

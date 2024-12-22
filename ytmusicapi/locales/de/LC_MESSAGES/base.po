@@ -18,65 +18,77 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: parsers/i18n.py:32
+msgid "album"
+msgstr "album"
+
+#: parsers/i18n.py:33
 msgid "artist"
 msgstr "künstler"
 
-#: parsers/i18n.py:33
+#: parsers/i18n.py:34
 msgid "playlist"
 msgstr "playlist"
 
-#: parsers/i18n.py:34
+#: parsers/i18n.py:35
 msgid "song"
 msgstr "titel"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:36
 msgid "video"
 msgstr "video"
 
-#: parsers/i18n.py:36
+#: parsers/i18n.py:37
 msgid "station"
 msgstr "sender"
 
-#: parsers/i18n.py:37
+#: parsers/i18n.py:38
 msgid "profile"
 msgstr "profil"
 
-#: parsers/i18n.py:38
+#: parsers/i18n.py:39
 msgid "podcast"
 msgstr ""
 
-#: parsers/i18n.py:39
+#: parsers/i18n.py:40
 msgid "episode"
 msgstr "Folge"
 
 #: parsers/i18n.py:46
+msgid "single"
+msgstr "single"
+
+#: parsers/i18n.py:47
+msgid "ep"
+msgstr "ep"
+
+#: parsers/i18n.py:55
 msgid "albums"
 msgstr "alben"
 
-#: parsers/i18n.py:47
+#: parsers/i18n.py:56
 msgid "singles"
 msgstr "singles"
 
-#: parsers/i18n.py:48
+#: parsers/i18n.py:57
 msgid "shows"
 msgstr "Hörbücher und Serien"
 
-#: parsers/i18n.py:49
+#: parsers/i18n.py:58
 msgid "videos"
 msgstr "videos"
 
-#: parsers/i18n.py:50
+#: parsers/i18n.py:59
 msgid "playlists"
 msgstr "playlists"
 
-#: parsers/i18n.py:51
+#: parsers/i18n.py:60
 msgid "related"
 msgstr "das könnte fans auch gefallen"
 
-#: parsers/i18n.py:52
+#: parsers/i18n.py:61
 msgid "episodes"
 msgstr "neueste folgen"
 
-#: parsers/i18n.py:53
+#: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "podcasts"
