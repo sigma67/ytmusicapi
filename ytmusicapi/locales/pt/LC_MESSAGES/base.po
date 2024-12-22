@@ -18,65 +18,77 @@ msgstr ""
 "X-Generator: Poedit 3.2.2\n"
 
 #: parsers/i18n.py:32
+msgid "album"
+msgstr "álbum"
+
+#: parsers/i18n.py:33
 msgid "artist"
 msgstr "artista"
 
-#: parsers/i18n.py:33
+#: parsers/i18n.py:34
 msgid "playlist"
 msgstr "lista de reprodução"
 
-#: parsers/i18n.py:34
+#: parsers/i18n.py:35
 msgid "song"
 msgstr "música"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:36
 msgid "video"
 msgstr "vídeo"
 
-#: parsers/i18n.py:36
+#: parsers/i18n.py:37
 msgid "station"
 msgstr "estação"
 
-#: parsers/i18n.py:37
+#: parsers/i18n.py:38
 msgid "profile"
 msgstr "perfil"
 
-#: parsers/i18n.py:38
+#: parsers/i18n.py:39
 msgid "podcast"
 msgstr ""
 
-#: parsers/i18n.py:39
+#: parsers/i18n.py:40
 msgid "episode"
 msgstr "Episódio"
 
 #: parsers/i18n.py:46
+msgid "single"
+msgstr "single"
+
+#: parsers/i18n.py:47
+msgid "ep"
+msgstr "ep"
+
+#: parsers/i18n.py:55
 msgid "albums"
 msgstr "álbuns"
 
-#: parsers/i18n.py:47
+#: parsers/i18n.py:56
 msgid "singles"
 msgstr "solteiros"
 
-#: parsers/i18n.py:48
+#: parsers/i18n.py:57
 msgid "shows"
 msgstr "Audiolivros e programas"
 
-#: parsers/i18n.py:49
+#: parsers/i18n.py:58
 msgid "videos"
 msgstr "vídeos"
 
-#: parsers/i18n.py:50
+#: parsers/i18n.py:59
 msgid "playlists"
 msgstr "listas de reprodução"
 
-#: parsers/i18n.py:51
+#: parsers/i18n.py:60
 msgid "related"
 msgstr "relacionado"
 
-#: parsers/i18n.py:52
+#: parsers/i18n.py:61
 msgid "episodes"
 msgstr "episódios novos"
 
-#: parsers/i18n.py:53
+#: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "podcasts"

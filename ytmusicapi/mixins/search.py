@@ -208,7 +208,6 @@ class SearchMixin(MixinProtocol):
 
         for res in section_list:
             result_type = category = None
-            search_result_types = self.parser.get_search_result_types()
 
             if "musicCardShelfRenderer" in res:
                 top_result = parse_top_result(
@@ -234,8 +233,10 @@ class SearchMixin(MixinProtocol):
             else:
                 continue
 
+            api_search_result_types = self.parser.get_api_result_types()
+
             search_results.extend(
-                parse_search_results(shelf_contents, search_result_types, result_type, category)
+                parse_search_results(shelf_contents, api_search_result_types, result_type, category)
             )
 
             if filter:  # if filter is set, there are continuations
@@ -244,7 +245,7 @@ class SearchMixin(MixinProtocol):
                     return self._send_request(endpoint, body, additionalParams)
 
                 def parse_func(contents):
-                    return parse_search_results(contents, search_result_types, result_type, category)
+                    return parse_search_results(contents, api_search_result_types, result_type, category)
 
                 search_results.extend(
                     get_continuations(
