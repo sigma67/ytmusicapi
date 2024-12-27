@@ -12,7 +12,7 @@ To achieve this, it emulates web requests that would occur if you performed the 
 
 To **get started**, read the :doc:`setup instructions <setup/index>`.
 
-For a **complete documentation** of available functions, see the :doc:`Reference <reference>`.
+For a **complete documentation** of available functions, see the :doc:`Reference <reference/index>`.
 
 Contents
 --------
@@ -26,5 +26,5 @@ Contents
 
    setup/index
    usage
-   reference
+   reference/index
    faq

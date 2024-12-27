@@ -312,11 +312,21 @@ class LibraryMixin(MixinProtocol):
     def add_history_item(self, song):
         """
         Add an item to the account's history using the playbackTracking URI
-        obtained from :py:func:`get_song`.
+        obtained from :py:func:`get_song`. A ``204`` return code indicates success.
+
+        Usage::
+
+            song = yt_auth.get_song(videoId)
+            response = yt_auth.add_history_item(song)
+
+        .. note::
+
+            You need to use the same YTMusic instance as you used for :py:func:`get_song`.
 
         :param song: Dictionary as returned by :py:func:`get_song`
         :return: Full response. response.status_code is 204 if successful
         """
+        self._check_auth()
         url = song["playbackTracking"]["videostatsPlaybackUrl"]["baseUrl"]
         CPNA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
         cpn = "".join(CPNA[randint(0, 256) & 63] for _ in range(0, 16))
