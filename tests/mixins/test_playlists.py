@@ -13,14 +13,15 @@ from ytmusicapi.exceptions import YTMusicUserError
 
 class TestPlaylists:
     @pytest.mark.parametrize(
-        "test_file",
+        "test_file, playlist_id",
         [
-            "2024_03_get_playlist.json",
-            "2024_03_get_playlist_public.json",
-            "2024_07_get_playlist_collaborative.json",
+            ("2024_03_get_playlist.json", "PLaZPMsuQNCsWn0iVMtGbaUXO6z-EdZaZm"),
+            ("2024_03_get_playlist_public.json", "RDCLAK5uy_lWy02cQBnTVTlwuRauaGKeUDH3L6PXNxI"),
+            ("2024_07_get_playlist_collaborative.json", "PLEUijtLfpCOgI8LNOwiwvq0EJ8HAGj7dT"),
+            ("2024_12_get_playlist_audio.json", "OLAK5uy_n0x1TMX8DL2eli2g_LysCSg-6Nq5YQa1g"),
         ],
     )
-    def test_get_playlist(self, yt, test_file):
+    def test_get_playlist(self, yt, test_file, playlist_id):
         data_dir = Path(__file__).parent.parent / "data"
         with open(data_dir / test_file, encoding="utf8") as f:
             mock_response = json.load(f)
@@ -28,7 +29,9 @@ class TestPlaylists:
             expected_output = json.load(f)
 
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
-            playlist = yt.get_playlist("MPREabc")
+            playlist = yt.get_playlist(playlist_id)
+            assert playlist_id == playlist["id"]
+
             assert playlist == playlist | expected_output
 
             for thumbnail in playlist.get("thumbnails", []):
@@ -62,6 +65,10 @@ class TestPlaylists:
         assert len(playlist["related"]) == related_len
         assert "suggestions" not in playlist
         assert playlist["owned"] is False
+
+    def test_get_large_audio_playlist(self, yt_oauth):
+        album = yt_oauth.get_playlist("OLAK5uy_noLNRtYnrcRVVO9rOyGMx64XyjVSCz1YU", limit=500)
+        assert len(album["tracks"]) == 456
 
     def test_get_playlist_empty(self, yt_empty):
         with pytest.raises(Exception):

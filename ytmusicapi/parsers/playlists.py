@@ -1,5 +1,8 @@
 from typing import Optional
 
+from ytmusicapi.continuations import *
+from ytmusicapi.helpers import sum_total_duration
+
 from ..helpers import to_int
 from .songs import *
 
@@ -59,6 +62,44 @@ def parse_playlist_header_meta(header: dict[str, Any]) -> dict[str, Any]:
         )
 
     return playlist_meta
+
+
+def parse_audio_playlist(response: dict, limit: Optional[int], request_func) -> dict[str, Any]:
+    playlist: dict = {
+        "owned": False,
+        "privacy": "PUBLIC",
+        "description": None,
+        "views": None,
+        "duration": None,
+        "tracks": [],
+        "thumbnails": [],
+        "related": [],
+    }
+
+    section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+    content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
+
+    playlist["id"] = nav(
+        content_data, [*CONTENT, MRLIR, *PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PLAYLIST_ID]
+    )
+    playlist["trackCount"] = nav(content_data, ["collapsedItemCount"])
+
+    playlist["tracks"] = []
+    if "contents" in content_data:
+        playlist["tracks"] = parse_playlist_items(content_data["contents"])
+
+        parse_func = lambda contents: parse_playlist_items(contents)
+        if "continuations" in content_data:
+            playlist["tracks"].extend(
+                get_continuations(
+                    content_data, "musicPlaylistShelfContinuation", limit, request_func, parse_func
+                )
+            )
+
+    playlist["title"] = playlist["tracks"][0]["album"]["name"]
+
+    playlist["duration_seconds"] = sum_total_duration(playlist)
+    return playlist
 
 
 def parse_playlist_items(results, menu_entries: Optional[list[list]] = None, is_album=False):

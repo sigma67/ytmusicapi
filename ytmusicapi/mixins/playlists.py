@@ -107,7 +107,11 @@ class PlaylistsMixin(MixinProtocol):
         browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
         body = {"browseId": browseId}
         endpoint = "browse"
-        response = self._send_request(endpoint, body)
+        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+        response = request_func("")
+
+        if playlistId.startswith("OLA") or playlistId.startswith("VLOLA"):
+            return parse_audio_playlist(response, limit, request_func)
 
         header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
         section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
@@ -138,8 +142,6 @@ class PlaylistsMixin(MixinProtocol):
         playlist.update(parse_playlist_header_meta(header))
 
         playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
-
-        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
 
         # suggestions and related are missing e.g. on liked songs
         playlist["related"] = []
