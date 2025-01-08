@@ -260,12 +260,8 @@ class BrowsingMixin(MixinProtocol):
             )
         subscription_button = header["subscriptionButton"]["subscribeButtonRenderer"]
         artist["channelId"] = subscription_button["channelId"]
-        artist["shuffleId"] = nav(
-            header, ["playButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True
-        )
-        artist["radioId"] = nav(
-            header, ["startRadioButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True
-        )
+        artist["shuffleId"] = nav(header, ["playButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True)
+        artist["radioId"] = nav(header, ["startRadioButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True)
         artist["subscribers"] = nav(subscription_button, ["subscriberCountText", "runs", 0, "text"], True)
         artist["subscribed"] = subscription_button["subscribed"]
         artist["thumbnails"] = nav(header, THUMBNAILS, True)
