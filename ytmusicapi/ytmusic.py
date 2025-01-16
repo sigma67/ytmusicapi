@@ -123,7 +123,7 @@ class YTMusicBase:
         if self.auth is not None:
             self.oauth_credentials = oauth_credentials
             auth_path: Optional[Path] = None
-            if isinstance(self.auth, str):
+            if not (auth_str.startswith("{") and (auth_path := Path(auth_str)).is_file():
                 auth_str: str = self.auth
                 if (auth_path := Path(auth_str)).is_file():
                     with open(auth_path) as json_file:
