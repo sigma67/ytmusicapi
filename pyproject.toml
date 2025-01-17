@@ -82,4 +82,5 @@ dev = [
     "pytest-cov>=4.1.0",
     "types-requests>=2.31.0.20240218",
     "pytest-retry>=1.6.3",
+    "sphinx-autodoc-typehints>=1.23.0",
 ]

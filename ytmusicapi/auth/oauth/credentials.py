@@ -43,6 +43,9 @@ class OAuthCredentials(Credentials):
     Class for handling OAuth credential retrieval and refreshing.
     """
 
+    client_id: str
+    client_secret: str
+
     def __init__(
         self,
         client_id: str,

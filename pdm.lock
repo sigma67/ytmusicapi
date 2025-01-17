@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:29af69738c3d9d88ee292103b66607d5e026df97aa8d73009be3549df8faeffb"
+content_hash = "sha256:c789497f83027a6f145d2ddb8cd18747f395b42f89330109b847bec1a417449c"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -657,6 +657,20 @@ dependencies = [
 files = [
     {file = "Sphinx-6.2.1.tar.gz", hash = "sha256:6d56a34697bb749ffa0152feafc4b19836c755d90a7c59b72bc7dfd371b9cc6b"},
     {file = "sphinx-6.2.1-py3-none-any.whl", hash = "sha256:97787ff1fa3256a3eef9eda523a63dbf299f7b47e053cfcf684a1c2a8380c912"},
+]
+
+[[package]]
+name = "sphinx-autodoc-typehints"
+version = "1.23.0"
+requires_python = ">=3.7"
+summary = "Type hints (PEP 484) support for the Sphinx autodoc extension"
+groups = ["dev"]
+dependencies = [
+    "sphinx>=5.3",
+]
+files = [
+    {file = "sphinx_autodoc_typehints-1.23.0-py3-none-any.whl", hash = "sha256:ac099057e66b09e51b698058ba7dd76e57e1fe696cd91b54e121d3dad188f91d"},
+    {file = "sphinx_autodoc_typehints-1.23.0.tar.gz", hash = "sha256:5d44e2996633cdada499b6d27a496ddf9dbc95dd1f0f09f7b37940249e61f6e9"},
 ]
 
 [[package]]
