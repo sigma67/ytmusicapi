@@ -3,6 +3,7 @@
 tests/*.json
 tests/setup/*.json
 docs/build
+docs/source/reference/api
 test.cfg
 **.mp3
 .coverage

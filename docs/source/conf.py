@@ -36,7 +36,10 @@ release = __version__
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc"]
+extensions = ["sphinx.ext.autodoc", "sphinx_autodoc_typehints"]
+
+typehints_use_signature = True
+typehints_use_signature_return = True
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -51,6 +54,9 @@ templates_path = ["_templates"]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_css_files = [
+    "css/custom.css",
+]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
