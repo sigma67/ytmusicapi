@@ -125,11 +125,13 @@ class YTMusicBase:
             auth_path: Optional[Path] = None
             if isinstance(self.auth, str):
                 auth_str: str = self.auth
-                if (auth_path := Path(auth_str)).is_file():
+                if self.auth.startswith("{"):
+                    input_json = json.loads(auth_str)
+                elif (auth_path := Path(auth_str)).is_file():
                     with open(auth_path) as json_file:
                         input_json = json.load(json_file)
                 else:
-                    input_json = json.loads(auth_str)
+                    raise YTMusicUserError("Invalid auth JSON string or file path provided.")
                 self._input_dict = CaseInsensitiveDict(input_json)
 
             else:
