@@ -53,6 +53,7 @@ precision = 2
 
 [tool.ruff]
 line-length = 110
+include = ["ytmusicapi/**/*.py", "tests/**/*.py"]
 
 [tool.ruff.lint]
 ignore = [ "F403", "F405", "F821", "E731", "PTH123" ]
@@ -61,6 +62,7 @@ extend-select = [
     "UP",  # pyupgrade
     "RUF", # ruff
     "PTH", # pathlib
+    "INP", # implicit namespace package
 ]
 
 [tool.mypy]
@@ -69,13 +71,13 @@ files = [
 ]
 mypy_path = "ytmusicapi"
 
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 dev = [
     "coverage>=7.4.0",
     'sphinx<7',
     'sphinx-rtd-theme',
-    "ruff>=0.8.3",
-    "mypy>=1.13.0",
+    "ruff>=0.9.0",
+    "mypy>=1.14.0",
     "pytest>=7.4.4",
     "pytest-cov>=4.1.0",
     "types-requests>=2.31.0.20240218",
