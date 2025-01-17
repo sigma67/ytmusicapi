@@ -6,7 +6,7 @@ build:
     python: "3.10"
   jobs:
     pre_build:
-      - sphinx-apidoc -o source/reference/api ../ytmusicapi
+      - sphinx-apidoc -o docs/source/reference/api ytmusicapi
 
 python:
   install:
