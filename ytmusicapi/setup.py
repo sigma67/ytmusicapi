@@ -1,4 +1,5 @@
 import argparse
+import importlib.metadata
 import sys
 from pathlib import Path
 from typing import Optional, Union
@@ -54,8 +55,15 @@ def setup_oauth(
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description="Setup ytmusicapi.")
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"ytmusicapi {importlib.metadata.version('ytmusicapi')}",
+        help="Installed version of ytmusicapi",
+    )
     # parser.add_argument("setup_type", type=str, choices=["oauth", "browser"], help="choose a setup type.")
-    subparsers = parser.add_subparsers(help="choose a setup type.", dest="setup_type")
+    subparsers = parser.add_subparsers(help="choose a setup type.", dest="setup_type", required=True)
     oauth_parser = subparsers.add_parser(
         "oauth",
         help="create an oauth token using your Google Youtube API credentials; type 'ytmusicapi oauth -h' for details.",
