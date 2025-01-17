@@ -53,6 +53,7 @@ precision = 2
 
 [tool.ruff]
 line-length = 110
+include = ["ytmusicapi/**/*.py", "tests/**/*.py"]
 
 [tool.ruff.lint]
 ignore = [ "F403", "F405", "F821", "E731", "PTH123" ]
