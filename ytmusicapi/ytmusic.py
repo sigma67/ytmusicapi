@@ -94,7 +94,6 @@ class YTMusicBase:
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
         self.cookies = {"SOCS": "CAI"}
 
-        #: raw auth as passed by user
         self._auth_headers: CaseInsensitiveDict = CaseInsensitiveDict()
         self.auth_type = AuthType.UNAUTHORIZED
         if auth is not None:
@@ -172,7 +171,7 @@ class YTMusicBase:
         headers = self.base_headers
 
         if "X-Goog-Visitor-Id" not in headers:
-            headers.update(get_visitor_id(self._send_get_request))
+            headers.update(get_visitor_id(partial(self._send_get_request, use_base_headers=True)))
 
         # keys updated each use, custom oauth implementations left untouched
         if self.auth_type == AuthType.BROWSER:
@@ -245,12 +244,14 @@ class YTMusicBase:
             raise YTMusicServerError(message + error)
         return response_text
 
-    def _send_get_request(self, url: str, params: Optional[dict] = None) -> Response:
+    def _send_get_request(
+        self, url: str, params: Optional[dict] = None, use_base_headers: bool = False
+    ) -> Response:
         response = self._session.get(
             url,
             params=params,
             # handle first-use x-goog-visitor-id fetching
-            headers=self.headers,
+            headers=self.base_headers if use_base_headers else self.headers,
             proxies=self.proxies,
             cookies=self.cookies,
         )
