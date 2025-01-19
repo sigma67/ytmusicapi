@@ -10,15 +10,8 @@ class AuthType(int, Enum):
 
     BROWSER = auto()
 
-    #: client auth via OAuth token refreshing
-    OAUTH_DEFAULT = auto()
-
     #: YTM instance is using a non-default OAuth client (id & secret)
     OAUTH_CUSTOM_CLIENT = auto()
 
     #: allows fully formed OAuth headers to ignore browser auth refresh flow
     OAUTH_CUSTOM_FULL = auto()
-
-    @classmethod
-    def oauth_types(cls) -> list["AuthType"]:
-        return [cls.OAUTH_DEFAULT, cls.OAUTH_CUSTOM_CLIENT, cls.OAUTH_CUSTOM_FULL]

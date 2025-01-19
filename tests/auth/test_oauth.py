@@ -10,6 +10,7 @@ from requests import Response
 
 from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.setup import main
 from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
 
@@ -114,9 +115,19 @@ class TestOAuth:
         assert yt_alt_oauth.auth_type != AuthType.OAUTH_CUSTOM_CLIENT
         with open(oauth_filepath) as f:
             token_dict = json.load(f)
+
         # oauth token dict entry and alt
         yt_alt_oauth = YTMusic(token_dict, oauth_credentials=alt_oauth_credentials)
         assert yt_alt_oauth.auth_type == AuthType.OAUTH_CUSTOM_CLIENT
+
+        # forgot to pass OAuth credentials - should raise
+        with pytest.raises(YTMusicUserError):
+            YTMusic(token_dict)
+
+        # oauth custom full
+        token_dict["authorization"] = "Bearer DKLEK23"
+        yt_alt_oauth = YTMusic(token_dict, oauth_credentials=alt_oauth_credentials)
+        assert yt_alt_oauth.auth_type == AuthType.OAUTH_CUSTOM_FULL
 
     def test_alt_oauth_request(self, yt_alt_oauth: YTMusic, sample_video):
         yt_alt_oauth.get_watch_playlist(sample_video)

@@ -24,7 +24,8 @@ After you have created the authentication JSON, you can instantiate the class:
 .. code-block:: python
 
     from ytmusicapi import YTMusic
-    ytmusic = YTMusic("oauth.json")
+    ytmusic = YTMusic("browser.json") # or, alternatively
+    ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret)
 
 
 With the :code:`ytmusic` instance you can now perform authenticated requests:
