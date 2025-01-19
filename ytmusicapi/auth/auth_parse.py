@@ -42,7 +42,7 @@ def determine_auth_type(auth_headers: CaseInsensitiveDict) -> AuthType:
     if OAuthToken.is_oauth(auth_headers):
         auth_type = AuthType.OAUTH_CUSTOM_CLIENT
 
-    elif authorization := auth_headers.get("authorization"):
+    if authorization := auth_headers.get("authorization"):
         if "SAPISIDHASH" in authorization:
             auth_type = AuthType.BROWSER
         elif authorization.startswith("Bearer"):

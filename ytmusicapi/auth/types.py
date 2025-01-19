@@ -15,7 +15,3 @@ class AuthType(int, Enum):
 
     #: allows fully formed OAuth headers to ignore browser auth refresh flow
     OAUTH_CUSTOM_FULL = auto()
-
-    @classmethod
-    def oauth_types(cls) -> list["AuthType"]:
-        return [cls.OAUTH_CUSTOM_CLIENT, cls.OAUTH_CUSTOM_FULL]

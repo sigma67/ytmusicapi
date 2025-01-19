@@ -222,7 +222,7 @@ class YTMusicBase:
     def _prepare_session(self, requests_session: Optional[requests.Session]) -> requests.Session:
         """Prepare requests session or use user-provided requests_session"""
         if isinstance(requests_session, requests.Session):
-            self._session = requests_session
+            return requests_session
         self._session = requests.Session()
         self._session.request = partial(self._session.request, timeout=30)  # type: ignore[method-assign]
         return self._session
