@@ -23,7 +23,7 @@ After you have created the authentication JSON, you can instantiate the class:
 
 .. code-block:: python
 
-    from ytmusicapi import YTMusic
+    from ytmusicapi import YTMusic, OAuthCredentials
     ytmusic = YTMusic("browser.json") # or, alternatively
     ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret)
 
