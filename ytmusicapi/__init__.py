@@ -1,5 +1,6 @@
 from importlib.metadata import PackageNotFoundError, version
 
+from ytmusicapi.auth.oauth.credentials import OAuthCredentials
 from ytmusicapi.setup import setup, setup_oauth
 from ytmusicapi.ytmusic import YTMusic
 
@@ -12,4 +13,4 @@ except PackageNotFoundError:
 __copyright__ = "Copyright 2024 sigma67"
 __license__ = "MIT"
 __title__ = "ytmusicapi"
-__all__ = ["YTMusic", "setup", "setup_oauth"]
+__all__ = ["OAuthCredentials", "YTMusic", "setup", "setup_oauth"]

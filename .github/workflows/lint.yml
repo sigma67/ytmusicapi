@@ -15,10 +15,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: chartboost/ruff-action@v1
         with:
-          version: 0.9.2
+          version: 0.9.4
       - uses: chartboost/ruff-action@v1
         with:
-          version: 0.9.2
+          version: 0.9.4
           args: format --check
   mypy:
     runs-on: ubuntu-latest
