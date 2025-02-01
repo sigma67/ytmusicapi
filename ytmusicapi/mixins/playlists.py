@@ -182,12 +182,8 @@ class PlaylistsMixin(MixinProtocol):
             playlist["tracks"] = parse_playlist_items(content_data["contents"])
 
             parse_func = lambda contents: parse_playlist_items(contents)
-            if "continuations" in content_data:
-                playlist["tracks"].extend(
-                    get_continuations(
-                        content_data, "musicPlaylistShelfContinuation", limit, request_func, parse_func
-                    )
-                )
+            request_func = lambda body: self._send_request(endpoint, body)
+            playlist["tracks"].extend(get_continuations_2025(content_data, limit, request_func, parse_func))
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist
