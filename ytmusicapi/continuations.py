@@ -1,4 +1,31 @@
+from typing import Any, Optional
+
 from ytmusicapi.navigation import nav
+
+CONTINUATION_TOKEN = ["continuationItemRenderer", "continuationEndpoint", "continuationCommand", "token"]
+CONTINUATION_ITEMS = ["onResponseReceivedActions", 0, "appendContinuationItemsAction", "continuationItems"]
+
+
+def get_continuation_token(results: list[dict[str, Any]]) -> Optional[str]:
+    return nav(results[-1], CONTINUATION_TOKEN, True)
+
+
+def get_continuations_2025(results, limit, request_func, parse_func):
+    items = []
+    continuation_token = get_continuation_token(results["contents"])
+    while continuation_token and (limit is None or len(items) < limit):
+        response = request_func({"continuation": continuation_token})
+        continuation_items = nav(response, CONTINUATION_ITEMS, True)
+        if not continuation_items:
+            break
+
+        contents = parse_func(continuation_items)
+        if len(contents) == 0:
+            break
+        items.extend(contents)
+        continuation_token = get_continuation_token(continuation_items)
+
+    return items
 
 
 def get_continuations(
