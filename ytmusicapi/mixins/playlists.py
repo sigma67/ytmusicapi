@@ -110,8 +110,9 @@ class PlaylistsMixin(MixinProtocol):
         request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
         response = request_func("")
 
+        request_func_continuations = lambda body: self._send_request(endpoint, body)
         if playlistId.startswith("OLA") or playlistId.startswith("VLOLA"):
-            return parse_audio_playlist(response, limit, request_func)
+            return parse_audio_playlist(response, limit, request_func_continuations)
 
         header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
         section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
@@ -182,8 +183,9 @@ class PlaylistsMixin(MixinProtocol):
             playlist["tracks"] = parse_playlist_items(content_data["contents"])
 
             parse_func = lambda contents: parse_playlist_items(contents)
-            request_func = lambda body: self._send_request(endpoint, body)
-            playlist["tracks"].extend(get_continuations_2025(content_data, limit, request_func, parse_func))
+            playlist["tracks"].extend(
+                get_continuations_2025(content_data, limit, request_func_continuations, parse_func)
+            )
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist

@@ -19,7 +19,7 @@ def get_continuations_2025(results, limit, request_func, parse_func):
         if not continuation_items:
             break
 
-        contents = get_continuation_contents(results, parse_func)
+        contents = parse_func(continuation_items)
         if len(contents) == 0:
             break
         items.extend(contents)

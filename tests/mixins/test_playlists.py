@@ -61,7 +61,8 @@ class TestPlaylists:
         playlist = yt_oauth.get_playlist(playlist_id, limit=None, related=True)
         assert len(playlist["duration"]) > 5
         assert playlist["trackCount"] > tracks_len
-        assert len(playlist["tracks"]) > tracks_len
+        # serialize each track to detect duplicates
+        assert len(set(json.dumps(track) for track in playlist["tracks"])) > tracks_len
         assert len(playlist["related"]) == related_len
         assert "suggestions" not in playlist
         assert playlist["owned"] is False
