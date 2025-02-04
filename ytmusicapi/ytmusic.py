@@ -4,7 +4,7 @@ import locale
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
-from functools import partial
+from functools import cached_property, partial
 from pathlib import Path
 from typing import Optional, Union
 
@@ -15,14 +15,13 @@ from requests.structures import CaseInsensitiveDict
 from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_LOCATIONS,
-    USER_AGENT,
     YTM_BASE_API,
-    YTM_DOMAIN,
     YTM_PARAMS,
     YTM_PARAMS_KEY,
     get_authorization,
     get_visitor_id,
     initialize_context,
+    initialize_headers,
     sapisid_from_cookie,
 )
 from ytmusicapi.mixins.browsing import BrowsingMixin
@@ -150,28 +149,22 @@ class YTMusicBase:
             except KeyError:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
-    @property
+    @cached_property
     def base_headers(self) -> CaseInsensitiveDict:
-        if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL:
-            return self._auth_headers
-
-        return CaseInsensitiveDict(
-            {
-                "user-agent": USER_AGENT,
-                "accept": "*/*",
-                "accept-encoding": "gzip, deflate",
-                "content-type": "application/json",
-                "content-encoding": "gzip",
-                "origin": YTM_DOMAIN,
-            }
+        headers = (
+            self._auth_headers
+            if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL
+            else initialize_headers()
         )
+
+        if "X-Goog-Visitor-Id" not in headers:
+            headers.update(get_visitor_id(partial(self._send_get_request, use_base_headers=True)))
+
+        return headers
 
     @property
     def headers(self) -> CaseInsensitiveDict:
         headers = self.base_headers
-
-        if "X-Goog-Visitor-Id" not in headers:
-            headers.update(get_visitor_id(partial(self._send_get_request, use_base_headers=True)))
 
         # keys updated each use, custom oauth implementations left untouched
         if self.auth_type == AuthType.BROWSER:
@@ -251,7 +244,7 @@ class YTMusicBase:
             url,
             params=params,
             # handle first-use x-goog-visitor-id fetching
-            headers=self.base_headers if use_base_headers else self.headers,
+            headers=initialize_headers() if use_base_headers else self.headers,
             proxies=self.proxies,
             cookies=self.cookies,
         )
