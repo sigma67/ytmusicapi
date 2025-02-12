@@ -64,7 +64,7 @@ def parse_album_header_2024(response):
     buttons = header["buttons"]
     album["audioPlaylistId"] = nav(
         find_object_by_key(buttons, "musicPlayButtonRenderer"),
-        ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+        ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PID],
         True,
     )
     service = nav(
