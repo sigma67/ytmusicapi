@@ -64,9 +64,16 @@ def parse_album_header_2024(response):
     buttons = header["buttons"]
     album["audioPlaylistId"] = nav(
         find_object_by_key(buttons, "musicPlayButtonRenderer"),
-        ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+        ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PID],
         True,
     )
+    # remove this once A/B testing is finished and it is no longer covered
+    if album["audioPlaylistId"] is None:
+        album["audioPlaylistId"] = nav(
+            find_object_by_key(buttons, "musicPlayButtonRenderer"),
+            ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+            True,
+        )
     service = nav(
         find_object_by_key(buttons, "toggleButtonRenderer"),
         ["toggleButtonRenderer", "defaultServiceEndpoint"],
