@@ -117,7 +117,9 @@ def parse_video(result):
     videoId = nav(result, NAVIGATION_VIDEO_ID, True)
     if not videoId:
         videoId = next(
-            id for entry in nav(result, MENU_ITEMS) if nav(entry, MENU_SERVICE + QUEUE_VIDEO_ID, True)
+            video_id
+            for entry in nav(result, MENU_ITEMS)
+            if (video_id := nav(entry, MENU_SERVICE + QUEUE_VIDEO_ID, True))
         )
     return {
         "title": nav(result, TITLE_TEXT),
