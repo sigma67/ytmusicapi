@@ -53,7 +53,7 @@ class Parser:
         # type: ignore[name-defined]
         categories = [
             ("albums", _("albums"), parse_album, MTRIR),
-            ("singles", _("singles"), parse_single, MTRIR),
+            ("singles", _("singles & eps"), parse_single, MTRIR),
             ("shows", _("shows"), parse_album, MTRIR),
             ("videos", _("videos"), parse_video, MTRIR),
             ("playlists", _("playlists"), parse_playlist, MTRIR),
