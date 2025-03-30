@@ -66,8 +66,8 @@ msgid "albums"
 msgstr "專輯"
 
 #: parsers/i18n.py:56
-msgid "singles"
-msgstr "單曲"
+msgid "singles & eps"
+msgstr "單曲與迷你專輯"
 
 #: parsers/i18n.py:57
 msgid "shows"
@@ -92,3 +92,6 @@ msgstr "最新集數"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "Podcast"
+
+#~ msgid "singles"
+#~ msgstr "單曲"

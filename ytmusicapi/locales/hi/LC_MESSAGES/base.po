@@ -66,8 +66,8 @@ msgid "albums"
 msgstr "एलबम"
 
 #: parsers/i18n.py:56
-msgid "singles"
-msgstr "एकल"
+msgid "singles & eps"
+msgstr "गाने और ईपी"
 
 #: parsers/i18n.py:57
 msgid "shows"
@@ -92,3 +92,6 @@ msgstr "सबसे नए एपिसोड"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "पॉडकास्ट"
+
+#~ msgid "singles"
+#~ msgstr "एकल"
