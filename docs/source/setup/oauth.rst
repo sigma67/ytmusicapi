@@ -26,7 +26,7 @@ You will also need to pass ``client_id`` and ``client_secret`` to :py:class:`YTM
 
     from ytmusicapi import YTMusic, OAuthCredentials
 
-    ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret)
+    ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))
 
 This OAuth flow uses the
 `Google API flow for TV devices <https://developers.google.com/youtube/v3/guides/auth/devices>`_.
