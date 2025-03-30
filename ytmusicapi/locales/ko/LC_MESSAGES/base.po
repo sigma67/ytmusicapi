@@ -66,8 +66,8 @@ msgid "albums"
 msgstr "앨범"
 
 #: parsers/i18n.py:56
-msgid "singles"
-msgstr "싱글"
+msgid "singles & eps"
+msgstr "싱글 및 ep"
 
 #: parsers/i18n.py:57
 msgid "shows"
@@ -92,3 +92,6 @@ msgstr "최신 에피소드"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "팟캐스트"
+
+#~ msgid "singles"
+#~ msgstr "싱글"
