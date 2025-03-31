@@ -65,8 +65,8 @@ msgid "albums"
 msgstr "专辑"
 
 #: parsers/i18n.py:56
-msgid "singles"
-msgstr "单曲"
+msgid "singles & eps"
+msgstr "单曲和迷你专辑"
 
 #: parsers/i18n.py:57
 msgid "shows"

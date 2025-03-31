@@ -66,8 +66,8 @@ msgid "albums"
 msgstr "البمز"
 
 #: parsers/i18n.py:56
-msgid "singles"
-msgstr "سنگلز"
+msgid "singles & eps"
+msgstr "سنگلز اور eps"
 
 #: parsers/i18n.py:57
 msgid "shows"
