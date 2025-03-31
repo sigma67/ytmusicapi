@@ -92,6 +92,3 @@ msgstr "новые выпуски"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "подкасты"
-
-#~ msgid "singles"
-#~ msgstr "синглы"

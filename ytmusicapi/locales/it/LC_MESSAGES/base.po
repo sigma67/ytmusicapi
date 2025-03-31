@@ -92,6 +92,3 @@ msgstr "puntate più recenti"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "podcast"
-
-#~ msgid "singles"
-#~ msgstr "singoli"

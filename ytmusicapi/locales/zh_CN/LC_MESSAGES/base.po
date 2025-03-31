@@ -91,6 +91,3 @@ msgstr "最新分集"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "播客"
-
-#~ msgid "singles"
-#~ msgstr "单曲"

@@ -92,6 +92,3 @@ msgstr "episódios novos"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "podcasts"
-
-#~ msgid "singles"
-#~ msgstr "solteiros"

@@ -92,6 +92,3 @@ msgstr "أحدث الحلقات"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "بودكاست"
-
-#~ msgid "singles"
-#~ msgstr "الفردي"

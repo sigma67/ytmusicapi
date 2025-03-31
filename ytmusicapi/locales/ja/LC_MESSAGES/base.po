@@ -92,6 +92,3 @@ msgstr "最新エピソード"
 #: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "ポッドキャスト"
-
-#~ msgid "singles"
-#~ msgstr "シングル"
