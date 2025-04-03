@@ -168,6 +168,8 @@ def parse_search_result(data, api_search_result_types, result_type, category):
         search_result["year"] = None
         flex_item = get_flex_column_item(data, 1)
         runs = flex_item["text"]["runs"]
+        if flex_item2 := get_flex_column_item(data, 2):
+            runs.extend([{"text": ""}, *flex_item2["text"]["runs"]])  # first item is a dummy separator
         # ignore the first run if it is a type specifier (like "Single" or "Album")
         runs_offset = (len(runs[0]) == 1 and runs[0]["text"].lower() in api_search_result_types) * 2
         song_info = parse_song_runs(runs[runs_offset:])

@@ -74,10 +74,12 @@ class TestSearch:
         query = "hip hop playlist"
         results = yt_auth.search(query, filter="songs")
         assert len(results) > 10
+        assert all(item["views"] != "" for item in results)
         assert all(len(item["artists"]) > 0 for item in results)
         assert all(item["resultType"] == "song" for item in results)
         results = yt_auth.search(query, filter="videos")
         assert len(results) > 10
+        assert all(item["views"] != "" for item in results)
         assert all(item["resultType"] == "video" for item in results)
         results = yt_auth.search(query, filter="albums", limit=40)
         assert len(results) > 20
