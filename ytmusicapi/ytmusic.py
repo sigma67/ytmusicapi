@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gettext
 import json
 import locale
@@ -6,7 +8,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from functools import cached_property, partial
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any
 
 import requests
 from requests import Response
@@ -39,18 +41,19 @@ from .auth.oauth import OAuthCredentials, RefreshingToken
 from .auth.oauth.token import Token
 from .auth.types import AuthType
 from .exceptions import YTMusicServerError, YTMusicUserError
+from .type_alias import JsonDict
 
 
 class YTMusicBase:
     def __init__(
         self,
-        auth: Optional[Union[str, dict]] = None,
-        user: Optional[str] = None,
-        requests_session: Optional[requests.Session] = None,
-        proxies: Optional[dict[str, str]] = None,
+        auth: str | JsonDict | None = None,
+        user: str | None = None,
+        requests_session: requests.Session | None = None,
+        proxies: dict[str, str] | None = None,
         language: str = "en",
         location: str = "",
-        oauth_credentials: Optional[OAuthCredentials] = None,
+        oauth_credentials: OAuthCredentials | None = None,
     ):
         """
         Create a new instance to interact with YouTube Music.
@@ -88,12 +91,12 @@ class YTMusicBase:
         """
         #: request session for connection pooling
         self._session = self._prepare_session(requests_session)
-        self.proxies: Optional[dict[str, str]] = proxies  #: params for session modification
+        self.proxies: dict[str, str] | None = proxies  #: params for session modification
         # see google cookie docs: https://policies.google.com/technologies/cookies
         # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
         self.cookies = {"SOCS": "CAI"}
 
-        self._auth_headers: CaseInsensitiveDict = CaseInsensitiveDict()
+        self._auth_headers: CaseInsensitiveDict[str] = CaseInsensitiveDict[str]()
         self.auth_type = AuthType.UNAUTHORIZED
         if auth is not None:
             self._auth_headers, auth_path = parse_auth_str(auth)
@@ -143,14 +146,14 @@ class YTMusicBase:
         if self.auth_type == AuthType.BROWSER:
             self.params += YTM_PARAMS_KEY
             try:
-                cookie = self.base_headers.get("cookie")
+                cookie = self.base_headers["cookie"]
                 self.sapisid = sapisid_from_cookie(cookie)
-                self.origin = self.base_headers.get("origin", self.base_headers.get("x-origin"))
+                self.origin: str = self.base_headers.get("origin", str(self.base_headers.get("x-origin")))
             except KeyError:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
     @cached_property
-    def base_headers(self) -> CaseInsensitiveDict:
+    def base_headers(self) -> CaseInsensitiveDict[str]:
         headers = (
             self._auth_headers
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL
@@ -163,7 +166,7 @@ class YTMusicBase:
         return headers
 
     @property
-    def headers(self) -> CaseInsensitiveDict:
+    def headers(self) -> CaseInsensitiveDict[str]:
         headers = self.base_headers
 
         # keys updated each use, custom oauth implementations left untouched
@@ -212,7 +215,7 @@ class YTMusicBase:
             # safely restore the old context
             self.context["context"]["client"] = copied_context_client
 
-    def _prepare_session(self, requests_session: Optional[requests.Session]) -> requests.Session:
+    def _prepare_session(self, requests_session: requests.Session | None) -> requests.Session:
         """Prepare requests session or use user-provided requests_session"""
         if isinstance(requests_session, requests.Session):
             return requests_session
@@ -220,7 +223,7 @@ class YTMusicBase:
         self._session.request = partial(self._session.request, timeout=30)  # type: ignore[method-assign]
         return self._session
 
-    def _send_request(self, endpoint: str, body: dict, additionalParams: str = "") -> dict:
+    def _send_request(self, endpoint: str, body: JsonDict, additionalParams: str = "") -> JsonDict:
         body.update(self.context)
 
         response = self._session.post(
@@ -230,7 +233,7 @@ class YTMusicBase:
             proxies=self.proxies,
             cookies=self.cookies,
         )
-        response_text = json.loads(response.text)
+        response_text: JsonDict = json.loads(response.text)
         if response.status_code >= 400:
             message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
             error = response_text.get("error", {}).get("message")
@@ -238,7 +241,7 @@ class YTMusicBase:
         return response_text
 
     def _send_get_request(
-        self, url: str, params: Optional[dict] = None, use_base_headers: bool = False
+        self, url: str, params: JsonDict | None = None, use_base_headers: bool = False
     ) -> Response:
         response = self._session.get(
             url,
@@ -250,14 +253,25 @@ class YTMusicBase:
         )
         return response
 
-    def _check_auth(self):
+    def _check_auth(self) -> None:
+        """
+        Checks if the user has provided authorization credentials
+
+        Raises:
+            YTMusicUserError: if the user is not authorized
+        """
         if self.auth_type == AuthType.UNAUTHORIZED:
             raise YTMusicUserError("Please provide authentication before using this function")
 
-    def __enter__(self):
+    def __enter__(self) -> YTMusicBase:
         return self
 
-    def __exit__(self, execType=None, execValue=None, trackback=None):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: Any | None,
+    ) -> bool | None:
         pass
 
 

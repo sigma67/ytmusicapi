@@ -1,6 +1,7 @@
 import re
 import warnings
-from typing import Any, Optional, Union, cast, overload
+from collections.abc import Callable
+from typing import Literal, cast, overload
 
 from ytmusicapi.continuations import (
     get_continuations,
@@ -18,6 +19,7 @@ from ytmusicapi.parsers.browsing import (
 )
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ..exceptions import YTMusicError, YTMusicUserError
 from ..navigation import *
@@ -26,13 +28,13 @@ from ._utils import get_datestamp
 
 
 class BrowsingMixin(MixinProtocol):
-    def get_home(self, limit=3) -> list[dict]:
+    def get_home(self, limit: int = 3) -> JsonList:
         """
         Get the home page.
         The home page is structured as titled rows, returning 3 rows of music suggestions at a time.
         Content varies and may contain artist, album, song or playlist suggestions, sometimes mixed within the same row
 
-        :param limit: Number of rows to return
+        :param limit: Number of rows on the home page to return
         :return: List of dictionaries keyed with 'title' text and 'contents' list
 
         Example list::
@@ -120,9 +122,11 @@ class BrowsingMixin(MixinProtocol):
 
         section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         if "continuations" in section_list:
-            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+            request_func: RequestFuncType = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams
+            )
 
-            parse_func = lambda contents: parse_mixed_content(contents)
+            parse_func: Callable[[JsonList], JsonList] = lambda contents: parse_mixed_content(contents)
 
             home.extend(
                 get_continuations(
@@ -132,7 +136,7 @@ class BrowsingMixin(MixinProtocol):
 
         return home
 
-    def get_artist(self, channelId: str) -> dict:
+    def get_artist(self, channelId: str) -> JsonDict:
         """
         Get information about an artist and their top releases (songs,
         albums, singles, videos, and related artists). The top lists
@@ -247,7 +251,7 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
-        artist: dict[str, Any] = {"description": None, "views": None}
+        artist: JsonDict = {"description": None, "views": None}
         header = response["header"]["musicImmersiveHeaderRenderer"]
         artist["name"] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
@@ -278,8 +282,8 @@ class BrowsingMixin(MixinProtocol):
     ArtistOrderType = Literal["Recency", "Popularity", "Alphabetical order"]
 
     def get_artist_albums(
-        self, channelId: str, params: str, limit: Optional[int] = 100, order: Optional[ArtistOrderType] = None
-    ) -> list[dict]:
+        self, channelId: str, params: str, limit: int | None = 100, order: ArtistOrderType | None = None
+    ) -> JsonList:
         """
         Get the full list of an artist's albums, singles or shows
 
@@ -295,8 +299,10 @@ class BrowsingMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
 
-        request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
-        parse_func = lambda contents: parse_albums(contents)
+        request_func: RequestFuncType = lambda additionalParams: self._send_request(
+            endpoint, body, additionalParams
+        )
+        parse_func: ParseFuncType = lambda contents: parse_albums(contents)
 
         if order:
             # pick the correct continuation from response depending on the order chosen
@@ -358,7 +364,7 @@ class BrowsingMixin(MixinProtocol):
 
         return albums
 
-    def get_user(self, channelId: str) -> dict:
+    def get_user(self, channelId: str) -> JsonDict:
         """
         Retrieve a user's page. A user may own videos or playlists.
 
@@ -423,7 +429,7 @@ class BrowsingMixin(MixinProtocol):
         user.update(self.parser.parse_channel_contents(results))
         return user
 
-    def get_user_playlists(self, channelId: str, params: str) -> list[dict]:
+    def get_user_playlists(self, channelId: str, params: str) -> JsonList:
         """
         Retrieve a list of playlists for a given user.
         Call this function again with the returned ``params`` to get the full list.
@@ -444,7 +450,7 @@ class BrowsingMixin(MixinProtocol):
 
         return user_playlists
 
-    def get_user_videos(self, channelId: str, params: str) -> list[dict]:
+    def get_user_videos(self, channelId: str, params: str) -> JsonList:
         """
         Retrieve a list of videos for a given user.
         Call this function again with the returned ``params`` to get the full list.
@@ -465,7 +471,7 @@ class BrowsingMixin(MixinProtocol):
 
         return user_videos
 
-    def get_album_browse_id(self, audioPlaylistId: str) -> Optional[str]:
+    def get_album_browse_id(self, audioPlaylistId: str) -> str | None:
         """
         Get an album's browseId based on its audioPlaylistId
 
@@ -486,7 +492,7 @@ class BrowsingMixin(MixinProtocol):
             browse_id = matches.group().strip('"')
         return browse_id
 
-    def get_album(self, browseId: str) -> dict:
+    def get_album(self, browseId: str) -> JsonDict:
         """
         Get information and tracks of an album
 
@@ -553,7 +559,7 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        album = parse_album_header_2024(response)
+        album: JsonDict = parse_album_header_2024(response)
 
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
@@ -570,7 +576,7 @@ class BrowsingMixin(MixinProtocol):
 
         return album
 
-    def get_song(self, videoId: str, signatureTimestamp: Optional[int] = None) -> dict:
+    def get_song(self, videoId: str, signatureTimestamp: int | None = None) -> JsonDict:
         """
         Returns metadata and streaming information about a song or video.
 
@@ -756,7 +762,7 @@ class BrowsingMixin(MixinProtocol):
                 del response[k]
         return response
 
-    def get_song_related(self, browseId: str):
+    def get_song_related(self, browseId: str) -> JsonList:
         """
         Gets related content for a song. Equivalent to the content
         shown in the "Related" tab of the watch panel.
@@ -838,18 +844,14 @@ class BrowsingMixin(MixinProtocol):
         return parse_mixed_content(sections)
 
     @overload
-    def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Optional[Lyrics]:
+    def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Lyrics | None:
         """overload for mypy only"""
 
     @overload
-    def get_lyrics(
-        self, browseId: str, timestamps: Literal[True] = True
-    ) -> Optional[Union[Lyrics, TimedLyrics]]:
+    def get_lyrics(self, browseId: str, timestamps: Literal[True] = True) -> Lyrics | TimedLyrics | None:
         """overload for mypy only"""
 
-    def get_lyrics(
-        self, browseId: str, timestamps: Optional[bool] = False
-    ) -> Optional[Union[Lyrics, TimedLyrics]]:
+    def get_lyrics(self, browseId: str, timestamps: bool | None = False) -> Lyrics | TimedLyrics | None:
         """
         Returns lyrics of a song or video. When `timestamps` is set, lyrics are returned with
         timestamps, if available.
@@ -901,7 +903,7 @@ class BrowsingMixin(MixinProtocol):
             response = self._send_request("browse", {"browseId": browseId})
 
         # unpack the response
-        lyrics: Union[Lyrics, TimedLyrics]
+        lyrics: Lyrics | TimedLyrics
         if timestamps and (data := nav(response, TIMESTAMPED_LYRICS, True)) is not None:
             # we got lyrics with timestamps
             assert isinstance(data, dict)
@@ -928,7 +930,7 @@ class BrowsingMixin(MixinProtocol):
                 hasTimestamps=False,
             )
 
-        return cast(Union[Lyrics, TimedLyrics], lyrics)
+        return cast(Lyrics | TimedLyrics, lyrics)
 
     def get_basejs_url(self) -> str:
         """
@@ -943,7 +945,7 @@ class BrowsingMixin(MixinProtocol):
 
         return YTM_DOMAIN + match.group(1)
 
-    def get_signatureTimestamp(self, url: Optional[str] = None) -> int:
+    def get_signatureTimestamp(self, url: str | None = None) -> int:
         """
         Fetch the `base.js` script from YouTube Music and parse out the
         ``signatureTimestamp`` for use with :py:func:`get_song`.
@@ -961,9 +963,9 @@ class BrowsingMixin(MixinProtocol):
 
         return int(match.group(1))
 
-    def get_tasteprofile(self) -> dict:
+    def get_tasteprofile(self) -> JsonDict:
         """
-        Fetches suggested artists from taste profile (music.youtube.com/tasteprofile).
+        Fetches suggested artists from taste profile (music.youtube.com/tasteprofile). Must be authenticated.
         Tasteprofile allows users to pick artists to update their recommendations.
         Only returns a list of suggested artists, not the actual list of selected entries
 
@@ -979,7 +981,7 @@ class BrowsingMixin(MixinProtocol):
             }
 
         """
-
+        self._check_auth()
         response = self._send_request("browse", {"browseId": "FEmusic_tastebuilder"})
         profiles = nav(response, TASTE_PROFILE_ITEMS)
 
@@ -993,7 +995,7 @@ class BrowsingMixin(MixinProtocol):
                 }
         return taste_profiles
 
-    def set_tasteprofile(self, artists: list[str], taste_profile: Optional[dict] = None) -> None:
+    def set_tasteprofile(self, artists: list[str], taste_profile: JsonDict | None = None) -> None:
         """
         Favorites artists to see more recommendations from the artist.
         Use :py:func:`get_tasteprofile` to see which artists are available to be recommended

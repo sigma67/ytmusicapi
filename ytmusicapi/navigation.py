@@ -1,6 +1,8 @@
 """commonly used navigation paths"""
 
-from typing import Any, Literal, Optional, overload
+from typing import Any, Literal, overload
+
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]
@@ -101,37 +103,42 @@ TIMESTAMPED_LYRICS = [
 
 
 @overload
-def nav(root: dict[str, Any], items: list[Any], none_if_absent: Literal[False] = False) -> Any:
+def nav(root: JsonDict | None, items: list[Any], none_if_absent: Literal[False] = False) -> Any:
     """overload for mypy only"""
 
 
 @overload
-def nav(root: dict, items: list[Any], none_if_absent: Literal[True] = True) -> Optional[Any]:
+def nav(root: JsonDict | None, items: list[Any], none_if_absent: Literal[True] = True) -> Any | None:
     """overload for mypy only"""
 
 
-def nav(root: dict, items: list[Any], none_if_absent: bool = False) -> Optional[Any]:
+def nav(root: JsonDict | None, items: list[Any], none_if_absent: bool = False) -> Any | None:
     """Access a nested object in root by item sequence."""
+    if root is None:
+        return None
     try:
         for k in items:
-            root = root[k]
-    except (KeyError, IndexError, TypeError) as e:
+            root = root[k]  # type: ignore[index]
+    except (KeyError, IndexError) as e:
         if none_if_absent:
             return None
         raise type(e)(f"Unable to find '{k}' using path {items!r} on {root!r}, exception: {e}")
     return root
 
 
-def find_object_by_key(object_list, key, nested=None, is_key=False):
+def find_object_by_key(
+    object_list: JsonList, key: str, nested: str | None = None, is_key: bool = False
+) -> JsonDict | None:
     for item in object_list:
         if nested:
             item = item[nested]
         if key in item:
             return item[key] if is_key else item
+
     return None
 
 
-def find_objects_by_key(object_list, key, nested=None):
+def find_objects_by_key(object_list: JsonList, key: str, nested: str | None = None) -> JsonList:
     objects = []
     for item in object_list:
         if nested:

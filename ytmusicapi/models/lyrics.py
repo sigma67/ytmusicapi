@@ -1,16 +1,17 @@
 from dataclasses import dataclass
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
+
+from ytmusicapi.type_alias import JsonDict
 
 
 @dataclass
 class LyricLine:
     """Represents a line of lyrics with timestamps (in milliseconds).
 
-    Args:
-        text (str): The Songtext.
-        start_time (int): Begin of the lyric in milliseconds.
-        end_time (int): End of the lyric in milliseconds.
-        id (int): A Metadata-Id that probably uniquely identifies each lyric line.
+    :param text (str): The Songtext.
+    :param start_time (int): Begin of the lyric in milliseconds.
+    :param end_time (int): End of the lyric in milliseconds.
+    :param id (int): A Metadata-Id that probably uniquely identifies each lyric line.
     """
 
     text: str
@@ -19,7 +20,7 @@ class LyricLine:
     id: int
 
     @classmethod
-    def from_raw(cls, raw_lyric: dict):
+    def from_raw(cls, raw_lyric: JsonDict) -> "LyricLine":
         """
         Converts lyrics in the format from the api to a more reasonable format
 
@@ -36,11 +37,11 @@ class LyricLine:
 
 class Lyrics(TypedDict):
     lyrics: str
-    source: Optional[str]
+    source: str | None
     hasTimestamps: Literal[False]
 
 
 class TimedLyrics(TypedDict):
     lyrics: list[LyricLine]
-    source: Optional[str]
+    source: str | None
     hasTimestamps: Literal[True]

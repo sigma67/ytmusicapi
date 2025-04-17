@@ -1,8 +1,10 @@
+from ytmusicapi.type_alias import JsonList
+
 from ._utils import *
 from .songs import parse_song_album, parse_song_artists
 
 
-def parse_uploaded_items(results):
+def parse_uploaded_items(results: JsonList) -> JsonList:
     songs = []
     for result in results:
         data = result[MRLIR]
@@ -32,7 +34,7 @@ def parse_uploaded_items(results):
         thumbnails = nav(data, THUMBNAILS) if "thumbnail" in data else None
         duration = None
         if "fixedColumns" in data:
-            duration = get_fixed_column_item(data, 0)["text"]["runs"][0]["text"]
+            duration = nav(get_fixed_column_item(data, 0), TEXT_RUN_TEXT)
         song = {
             "entityId": entityId,
             "videoId": videoId,

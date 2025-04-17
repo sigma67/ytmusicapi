@@ -1,21 +1,20 @@
-from typing import Optional, Union
-
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.playlists import validate_playlist_id
 from ytmusicapi.parsers.watch import *
+from ytmusicapi.type_alias import JsonList, ParseFuncType, RequestFuncType
 
 
 class WatchMixin(MixinProtocol):
     def get_watch_playlist(
         self,
-        videoId: Optional[str] = None,
-        playlistId: Optional[str] = None,
-        limit=25,
+        videoId: str | None = None,
+        playlistId: str | None = None,
+        limit: int = 25,
         radio: bool = False,
         shuffle: bool = False,
-    ) -> dict[str, Union[list[dict], str, None]]:
+    ) -> dict[str, JsonList | str | None]:
         """
         Get a watch list of tracks. This watch playlist appears when you press
         play on a track in YouTube Music.
@@ -169,8 +168,10 @@ class WatchMixin(MixinProtocol):
         tracks = parse_watch_playlist(results["contents"])
 
         if "continuations" in results:
-            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_watch_playlist(contents)
+            request_func: RequestFuncType = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams
+            )
+            parse_func: ParseFuncType = lambda contents: parse_watch_playlist(contents)
             tracks.extend(
                 get_continuations(
                     results,

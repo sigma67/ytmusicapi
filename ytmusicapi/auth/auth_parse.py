@@ -1,21 +1,21 @@
 import json
 from pathlib import Path
-from typing import Optional, Union
 
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
 from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.type_alias import JsonDict
 
 
-def parse_auth_str(auth: Union[str, dict]) -> tuple[CaseInsensitiveDict, Optional[Path]]:
+def parse_auth_str(auth: str | JsonDict) -> tuple[CaseInsensitiveDict[str], Path | None]:
     """
 
     :param auth: user-provided auth string or dict
     :return: parsed header dict based on auth, optionally path to file if it auth was a path to a file
     """
-    auth_path: Optional[Path] = None
+    auth_path: Path | None = None
     if isinstance(auth, str):
         auth_str: str = auth
         if auth.startswith("{"):
@@ -31,7 +31,7 @@ def parse_auth_str(auth: Union[str, dict]) -> tuple[CaseInsensitiveDict, Optiona
         return CaseInsensitiveDict(auth), auth_path
 
 
-def determine_auth_type(auth_headers: CaseInsensitiveDict) -> AuthType:
+def determine_auth_type(auth_headers: CaseInsensitiveDict[str]) -> AuthType:
     """
     Determine the type of auth based on auth headers.
 

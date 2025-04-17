@@ -1,9 +1,11 @@
-from typing import Any
+import typing
+
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 from .songs import *
 
 
-def parse_watch_playlist(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def parse_watch_playlist(results: JsonList) -> JsonList:
     tracks = []
     PPVWR = "playlistPanelVideoWrapperRenderer"
     PPVR = "playlistPanelVideoRenderer"
@@ -26,7 +28,7 @@ def parse_watch_playlist(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return tracks
 
 
-def parse_watch_track(data):
+def parse_watch_track(data: JsonDict) -> JsonDict:
     feedback_tokens = like_status = library_status = None
     for item in nav(data, MENU_ITEMS):
         if TOGGLE_MENU in item:
@@ -54,8 +56,10 @@ def parse_watch_track(data):
     return track
 
 
-def get_tab_browse_id(watchNextRenderer, tab_id):
+def get_tab_browse_id(watchNextRenderer: JsonDict, tab_id: int) -> str | None:
     if "unselectable" not in watchNextRenderer["tabs"][tab_id]["tabRenderer"]:
-        return watchNextRenderer["tabs"][tab_id]["tabRenderer"]["endpoint"]["browseEndpoint"]["browseId"]
+        return typing.cast(
+            str, watchNextRenderer["tabs"][tab_id]["tabRenderer"]["endpoint"]["browseEndpoint"]["browseId"]
+        )
     else:
         return None
