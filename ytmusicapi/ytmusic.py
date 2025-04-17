@@ -141,7 +141,7 @@ class YTMusicBase:
         if user:
             self.context["context"]["user"]["onBehalfOfUser"] = user
 
-        # sapsid, origin, and params all set once during init
+        # sapisid, origin, and params all set once during init
         self.params = YTM_PARAMS
         if self.auth_type == AuthType.BROWSER:
             self.params += YTM_PARAMS_KEY
