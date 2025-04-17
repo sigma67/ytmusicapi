@@ -81,8 +81,8 @@ def get_continuations(
     """
     items: JsonList = []
     while "continuations" in results and (limit is None or len(items) < limit):
-        additionalParams = additionalParams or get_continuation_params(results, ctoken_path)
-        response = request_func(additionalParams)
+        additional_params = additionalParams or get_continuation_params(results, ctoken_path)
+        response = request_func(additional_params)
         if "continuationContents" in response:
             results = response["continuationContents"][continuation_type]
         else:
