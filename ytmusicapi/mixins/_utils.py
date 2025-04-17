@@ -8,13 +8,13 @@ from ytmusicapi.models.content.enums import LikeStatus
 LibraryOrderType = Literal["a_to_z", "z_to_a", "recently_added"]
 
 
-def prepare_like_endpoint(rating: LikeStatus) -> str | None:
+def prepare_like_endpoint(rating: str | LikeStatus) -> str | None:
     match rating:
         case LikeStatus.LIKE:
             return "like/like"
         case LikeStatus.DISLIKE:
             return "like/dislike"
-        case rating.INDIFFERENT:
+        case LikeStatus.INDIFFERENT:
             return "like/removelike"
         case _:
             raise YTMusicUserError(

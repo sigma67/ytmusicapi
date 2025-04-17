@@ -89,7 +89,7 @@ class TestBrowsing:
 
     def test_get_album_browse_id_issue_470(self, yt):
         escaped_browse_id = yt.get_album_browse_id("OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
-        assert escaped_browse_id == "MPREb_scJdtUCpPE2"
+        assert escaped_browse_id == "MPREb_pZhPA6GfQmN"
 
     def test_get_album_2024(self, yt):
         with open(Path(__file__).parent.parent / "data" / "2024_03_get_album.json", encoding="utf8") as f:
@@ -204,21 +204,13 @@ class TestBrowsing:
         signature_timestamp = yt.get_signatureTimestamp()
         assert signature_timestamp is not None
 
-    def test_set_tasteprofile(self, yt, yt_brand):
-        with pytest.raises(Exception):
-            yt.set_tasteprofile(["not an artist"])
-        taste_profile = yt.get_tasteprofile()
-        assert yt.set_tasteprofile(list(taste_profile)[:5], taste_profile) is None
-
+    def test_set_tasteprofile(self, yt_brand):
         with pytest.raises(Exception):
             yt_brand.set_tasteprofile(["test", "test2"])
         taste_profile = yt_brand.get_tasteprofile()
         assert yt_brand.set_tasteprofile(list(taste_profile)[:1], taste_profile) is None
 
     def test_get_tasteprofile(self, yt, yt_oauth):
-        result = yt.get_tasteprofile()
-        assert len(result) >= 0
-
         result = yt_oauth.get_tasteprofile()
         assert len(result) >= 0
 

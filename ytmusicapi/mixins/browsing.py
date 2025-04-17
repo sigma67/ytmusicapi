@@ -965,7 +965,7 @@ class BrowsingMixin(MixinProtocol):
 
     def get_tasteprofile(self) -> JsonDict:
         """
-        Fetches suggested artists from taste profile (music.youtube.com/tasteprofile).
+        Fetches suggested artists from taste profile (music.youtube.com/tasteprofile). Must be authenticated.
         Tasteprofile allows users to pick artists to update their recommendations.
         Only returns a list of suggested artists, not the actual list of selected entries
 
@@ -981,7 +981,7 @@ class BrowsingMixin(MixinProtocol):
             }
 
         """
-
+        self._check_auth()
         response = self._send_request("browse", {"browseId": "FEmusic_tastebuilder"})
         profiles = nav(response, TASTE_PROFILE_ITEMS)
 

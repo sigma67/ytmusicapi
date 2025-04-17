@@ -2,6 +2,8 @@ from urllib.parse import urlparse
 
 import pytest
 
+from ytmusicapi.exceptions import YTMusicUserError
+
 
 class TestLibrary:
     def test_get_library_playlists(self, config, yt_oauth, yt_empty):
@@ -111,8 +113,8 @@ class TestLibrary:
         assert "actions" in response
         response = yt_auth.rate_song(sample_video, "INDIFFERENT")
         assert response
-        response = yt_auth.rate_song(sample_video, "notexist")
-        assert not response
+        with pytest.raises(YTMusicUserError):
+            yt_auth.rate_song(sample_video, "notexist")
 
     @pytest.mark.skip(reason="edit_song_library_status is currently broken due to server-side update")
     def test_edit_song_library_status(self, yt_brand, sample_album):

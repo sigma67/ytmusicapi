@@ -366,13 +366,11 @@ class LibraryMixin(MixinProtocol):
           | ``INDIFFERENT`` removes the previous rating and assigns no rating
 
         :return: Full response
+        :raises: YTMusicUserError if an invalid rating ir povided
         """
         self._check_auth()
         body = {"target": {"videoId": videoId}}
         endpoint = prepare_like_endpoint(rating)
-        if endpoint is None:
-            return None
-
         return self._send_request(endpoint, body)
 
     def edit_song_library_status(self, feedbackTokens: list[str] | None = None) -> JsonDict:
