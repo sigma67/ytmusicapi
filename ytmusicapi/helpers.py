@@ -3,13 +3,15 @@ import locale
 import re
 import time
 import unicodedata
+from collections.abc import Callable
 from hashlib import sha1
 from http.cookies import SimpleCookie
 
+from requests import Response
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.constants import *
-from ytmusicapi.type_alias import JsonDict, RequestFuncType
+from ytmusicapi.type_alias import JsonDict
 
 
 def initialize_headers() -> CaseInsensitiveDict[str]:
@@ -37,7 +39,7 @@ def initialize_context() -> JsonDict:
     }
 
 
-def get_visitor_id(request_func: RequestFuncType) -> dict[str, str]:
+def get_visitor_id(request_func: Callable[[str], Response]) -> dict[str, str]:
     response = request_func(YTM_DOMAIN)
     matches = re.findall(r"ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;", response.text)
     visitor_id = ""

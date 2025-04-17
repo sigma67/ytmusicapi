@@ -125,6 +125,7 @@ class TestSearch:
             )
         results = yt_oauth.search(config["queries"]["uploads_songs"], scope="uploads", limit=40)
         assert len(results) > 20
+        assert all(item["resultType"] == "upload" for item in results)
 
     def test_search_library(self, config, yt_oauth):
         results = yt_oauth.search(config["queries"]["library_any"], scope="library")

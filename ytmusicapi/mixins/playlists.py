@@ -4,7 +4,7 @@ from ytmusicapi.helpers import sum_total_duration
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
 
 from ._protocol import MixinProtocol
 from ._utils import *
@@ -112,7 +112,7 @@ class PlaylistsMixin(MixinProtocol):
         )
         response = request_func("")
 
-        request_func_continuations = lambda body: self._send_request(endpoint, body)
+        request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
         if playlistId.startswith("OLA") or playlistId.startswith("VLOLA"):
             return parse_audio_playlist(response, limit, request_func_continuations)
 
@@ -160,13 +160,12 @@ class PlaylistsMixin(MixinProtocol):
 
                 parse_func = lambda results: parse_playlist_items(results)
                 playlist["suggestions"].extend(
-                    get_continuations(
+                    get_reloadable_continuations(
                         suggestions_shelf,
                         "musicShelfContinuation",
                         suggestions_limit - len(playlist["suggestions"]),
                         request_func,
                         parse_func,
-                        reloadable=True,
                     )
                 )
 

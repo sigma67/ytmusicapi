@@ -3,7 +3,7 @@ from typing import Any
 
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.explore import *
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType, ParseFuncType
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
 
 
 class ExploreMixin(MixinProtocol):
@@ -235,7 +235,7 @@ class ExploreMixin(MixinProtocol):
         if has_trending:
             charts_categories.append("trending")
 
-        parse_chart: Callable[[int, ParseFuncType | ParseFuncDictType, str], list[dict[str, Any]]] = (
+        parse_chart: Callable[[int, ParseFuncDictType, str], list[dict[str, Any]]] = (
             lambda index, parse_func, key: parse_content_list(
                 nav(results[index + has_songs], CAROUSEL_CONTENTS), parse_func, key
             )

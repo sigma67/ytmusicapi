@@ -2,7 +2,7 @@ import re
 
 from ytmusicapi.continuations import *
 from ytmusicapi.helpers import sum_total_duration
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType
 
 from ..helpers import to_int
 from .songs import *
@@ -65,7 +65,9 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
     return playlist_meta
 
 
-def parse_audio_playlist(response: JsonDict, limit: int | None, request_func) -> JsonDict:
+def parse_audio_playlist(
+    response: JsonDict, limit: int | None, request_func: RequestFuncBodyType
+) -> JsonDict:
     playlist: JsonDict = {
         "owned": False,
         "privacy": "PUBLIC",
@@ -99,7 +101,7 @@ def parse_audio_playlist(response: JsonDict, limit: int | None, request_func) ->
 
 
 def parse_playlist_items(
-    results: JsonList, menu_entries: JsonList | None = None, is_album: bool = False
+    results: JsonList, menu_entries: list[list[str]] | None = None, is_album: bool = False
 ) -> JsonList:
     songs = []
     for result in results:
@@ -211,10 +213,10 @@ def parse_playlist_item(
 
     duration = None
     if "fixedColumns" in data:
-        if "simpleText" in get_fixed_column_item(data, 0)["text"]:
-            duration = get_fixed_column_item(data, 0)["text"]["simpleText"]
+        if "simpleText" in nav(get_fixed_column_item(data, 0), ["text"]):
+            duration = nav(get_fixed_column_item(data, 0), ["text", "simpleText"])
         else:
-            duration = get_fixed_column_item(data, 0)["text"]["runs"][0]["text"]
+            duration = nav(get_fixed_column_item(data, 0), TEXT_RUN_TEXT)
 
     thumbnails = nav(data, THUMBNAILS, True)
 

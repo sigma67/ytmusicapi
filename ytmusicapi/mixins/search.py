@@ -202,11 +202,13 @@ class SearchMixin(MixinProtocol):
         # set filter for parser
         if filter and "playlists" in filter:
             filter = "playlists"
-        elif scope == scopes[1]:
+            result_type = None
+        elif scope == scopes[1]:  # uploads
             filter = scopes[1]
+            result_type = scopes[1][:-1]
 
         for res in section_list:
-            result_type = category = None
+            category = None
 
             if "musicCardShelfRenderer" in res:
                 top_result = parse_top_result(

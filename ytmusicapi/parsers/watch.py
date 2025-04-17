@@ -1,3 +1,5 @@
+import typing
+
 from ytmusicapi.type_alias import JsonDict, JsonList
 
 from .songs import *
@@ -56,6 +58,8 @@ def parse_watch_track(data: JsonDict) -> JsonDict:
 
 def get_tab_browse_id(watchNextRenderer: JsonDict, tab_id: int) -> str | None:
     if "unselectable" not in watchNextRenderer["tabs"][tab_id]["tabRenderer"]:
-        return watchNextRenderer["tabs"][tab_id]["tabRenderer"]["endpoint"]["browseEndpoint"]["browseId"]
+        return typing.cast(
+            str, watchNextRenderer["tabs"][tab_id]["tabRenderer"]["endpoint"]["browseEndpoint"]["browseId"]
+        )
     else:
         return None

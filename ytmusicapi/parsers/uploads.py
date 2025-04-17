@@ -34,7 +34,7 @@ def parse_uploaded_items(results: JsonList) -> JsonList:
         thumbnails = nav(data, THUMBNAILS) if "thumbnail" in data else None
         duration = None
         if "fixedColumns" in data:
-            duration = get_fixed_column_item(data, 0)["text"]["runs"][0]["text"]
+            duration = nav(get_fixed_column_item(data, 0), TEXT_RUN_TEXT)
         song = {
             "entityId": entityId,
             "videoId": videoId,

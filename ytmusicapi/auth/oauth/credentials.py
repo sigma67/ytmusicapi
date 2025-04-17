@@ -1,3 +1,4 @@
+import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
@@ -77,7 +78,7 @@ class OAuthCredentials(Credentials):
     def get_code(self) -> AuthCodeDict:
         """Method for obtaining a new user auth code. First step of token creation."""
         code_response = self._send_request(OAUTH_CODE_URL, data={"scope": OAUTH_SCOPE})
-        return AuthCodeDict(**code_response.json())
+        return typing.cast(AuthCodeDict, code_response.json())
 
     def _send_request(self, url: str, data: JsonDict) -> Response:
         """Method for sending post requests with required client_id and User-Agent modifications"""
@@ -111,7 +112,7 @@ class OAuthCredentials(Credentials):
                 "code": device_code,
             },
         )
-        return RefreshableTokenDict(**response.json())
+        return typing.cast(RefreshableTokenDict, response.json())
 
     def refresh_token(self, refresh_token: str) -> BaseTokenDict:
         """
@@ -130,4 +131,4 @@ class OAuthCredentials(Credentials):
             },
         )
 
-        return BaseTokenDict(**response.json())
+        return typing.cast(BaseTokenDict, response.json())

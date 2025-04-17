@@ -146,7 +146,7 @@ class YTMusicBase:
         if self.auth_type == AuthType.BROWSER:
             self.params += YTM_PARAMS_KEY
             try:
-                cookie: str = self.base_headers.get("cookie")
+                cookie = self.base_headers["cookie"]
                 self.sapisid = sapisid_from_cookie(cookie)
                 self.origin: str = self.base_headers.get("origin", str(self.base_headers.get("x-origin")))
             except KeyError:

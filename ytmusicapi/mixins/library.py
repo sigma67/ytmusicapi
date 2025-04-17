@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from random import randint
-from typing import Any
 
 from requests import Response
 
@@ -40,6 +39,8 @@ class LibraryMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
 
         results = get_library_contents(response, GRID)
+        if results is None:
+            return []
         playlists = parse_content_list(results["items"][1:], parse_playlist)
 
         if "continuations" in results:
@@ -82,11 +83,11 @@ class LibraryMixin(MixinProtocol):
             raise YTMusicUserError("Validation is not supported without a limit parameter.")
 
         if validate_responses:
-            validate_func: Callable[[list[dict[str, Any]]], bool] = lambda parsed: validate_response(
+            validate_func: Callable[[JsonDict], bool] = lambda parsed: validate_response(
                 parsed, per_page, limit, 0
             )
             response = resend_request_until_parsed_response_is_valid(
-                request_func, None, parse_func, validate_func, 3
+                request_func, "", parse_func, validate_func, 3
             )
         else:
             response = parse_func(request_func(""))
@@ -397,11 +398,12 @@ class LibraryMixin(MixinProtocol):
           | ``INDIFFERENT`` removes the playlist/album from the library
 
         :return: Full response
+        :raises: YTMusicUserError if an invalid rating is provided
         """
         self._check_auth()
         body = {"target": {"playlistId": playlistId}}
         endpoint = prepare_like_endpoint(rating)
-        return endpoint if not endpoint else self._send_request(endpoint, body)
+        return self._send_request(endpoint, body)
 
     def subscribe_artists(self, channelIds: list[str]) -> JsonDict:
         """

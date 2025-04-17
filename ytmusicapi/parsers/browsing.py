@@ -1,6 +1,6 @@
 import re
 
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType, ParseFuncType
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
 
 from .podcasts import parse_episode, parse_podcast
 from .songs import *
@@ -50,9 +50,7 @@ def parse_mixed_content(rows: JsonList) -> JsonList:
     return items
 
 
-def parse_content_list(
-    results: JsonList, parse_func: ParseFuncType | ParseFuncDictType, key: str = MTRIR
-) -> JsonList:
+def parse_content_list(results: JsonList, parse_func: ParseFuncDictType, key: str = MTRIR) -> JsonList:
     contents = []
     for result in results:
         contents.append(parse_func(result[key]))

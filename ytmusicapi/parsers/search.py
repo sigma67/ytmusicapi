@@ -113,9 +113,11 @@ def parse_search_result(
         search_result["playlistId"] = parse_album_playlistid_if_exists(play_navigation)
 
     elif result_type == "playlist":
-        flex_item = get_flex_column_item(data, 1)["text"]["runs"]
+        flex_item = nav(get_flex_column_item(data, 1), TEXT_RUNS)
         has_author = len(flex_item) == default_offset + 3
-        search_result["itemCount"] = get_item_text(data, 1, default_offset + has_author * 2).split(" ")[0]
+        search_result["itemCount"] = (get_item_text(data, 1, default_offset + has_author * 2) or "").split(
+            " "
+        )[0]
         if search_result["itemCount"] and search_result["itemCount"].isnumeric():
             search_result["itemCount"] = to_int(search_result["itemCount"])
         search_result["author"] = None if not has_author else get_item_text(data, 1, default_offset)
@@ -152,7 +154,11 @@ def parse_search_result(
                 search_result["resultType"] = "artist"
             else:
                 flex_item2 = get_flex_column_item(data, 1)
-                runs = [run["text"] for i, run in enumerate(flex_item2["text"]["runs"]) if i % 2 == 0]
+                runs = (
+                    [run["text"] for i, run in enumerate(flex_item2["text"]["runs"]) if i % 2 == 0]
+                    if flex_item2
+                    else []
+                )
                 if len(runs) > 1:
                     search_result["artist"] = runs[1]
                 if len(runs) > 2:  # date may be missing
@@ -195,7 +201,7 @@ def parse_search_result(
     return search_result
 
 
-def parse_album_playlistid_if_exists(data: JsonDict) -> str | None:
+def parse_album_playlistid_if_exists(data: JsonDict | None) -> str | None:
     """the content of the data changes based on whether the user is authenticated or not"""
     return nav(data, WATCH_PID, True) or nav(data, WATCH_PLAYLIST_ID, True) if data else None
 
@@ -271,7 +277,7 @@ def get_search_params(filter: str | None, scope: str | None, ignore_spelling: bo
     return params if params else param1 + param2 + param3
 
 
-def _get_param2(filter):
+def _get_param2(filter: str) -> str:
     filter_params = {
         "songs": "II",
         "videos": "IQ",

@@ -114,11 +114,11 @@ def nav(root: JsonDict | None, items: list[Any], none_if_absent: Literal[True] =
 
 def nav(root: JsonDict | None, items: list[Any], none_if_absent: bool = False) -> Any | None:
     """Access a nested object in root by item sequence."""
-    if not root:
+    if root is None:
         return None
     try:
         for k in items:
-            root = root[k]
+            root = root[k]  # type: ignore[index]
     except (KeyError, IndexError) as e:
         if none_if_absent:
             return None

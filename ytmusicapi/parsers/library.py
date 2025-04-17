@@ -22,7 +22,7 @@ def parse_artists(results: JsonList, uploaded: bool = False) -> JsonList:
             artist["type"] = "artist"
         parse_menu_playlists(data, artist)
         if uploaded:
-            artist["songs"] = get_item_text(data, 1).split(" ")[0]
+            artist["songs"] = (get_item_text(data, 1) or "").split(" ")[0]
         else:
             subtitle = get_item_text(data, 1)
             if subtitle:
@@ -70,6 +70,8 @@ def parse_albums(results: JsonList) -> JsonList:
 
 def parse_library_podcasts(response: JsonDict, request_func: RequestFuncType, limit: int | None) -> JsonList:
     results = get_library_contents(response, GRID)
+    if results is None:
+        return []
     parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_podcast)
     podcasts = parse_func(results["items"][1:])  # skip first entry "Add podcast"
 
@@ -98,7 +100,7 @@ def parse_library_artists(response: JsonDict, request_func: RequestFuncType, lim
     return artists
 
 
-def pop_songs_random_mix(results: JsonDict) -> None:
+def pop_songs_random_mix(results: JsonDict | None) -> None:
     """remove the random mix that conditionally appears at the start of library songs"""
     if results:
         if len(results["contents"]) >= 2:
@@ -111,7 +113,7 @@ def parse_library_songs(response: JsonDict) -> JsonDict:
     return {"results": results, "parsed": parse_playlist_items(results["contents"]) if results else results}
 
 
-def get_library_contents(response: JsonDict, renderer: list[str]) -> JsonDict:
+def get_library_contents(response: JsonDict, renderer: list[str]) -> JsonDict | None:
     """
     Find library contents. This function is a bit messy now
     as it is supporting two different response types. Can be
@@ -121,7 +123,6 @@ def get_library_contents(response: JsonDict, renderer: list[str]) -> JsonDict:
     :return: library contents or None
     """
     section = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
-    contents = None
     if section is None:  # empty library or uploads
         # covers the case of non-premium subscribers - no downloads tab
         num_tabs = len(nav(response, [*SINGLE_COLUMN, "tabs"]))
