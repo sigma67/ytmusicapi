@@ -1,17 +1,18 @@
 import json
 import time
 import webbrowser
+from collections.abc import KeysView
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.auth.oauth.credentials import Credentials
+from ytmusicapi.auth.oauth.credentials import Credentials, OAuthCredentials
 from ytmusicapi.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Token:
     """Base class representation of the YouTubeMusicAPI OAuth token."""
 
@@ -24,7 +25,7 @@ class Token:
     expires_in: int = 0
 
     @staticmethod
-    def members():
+    def members() -> KeysView[str]:
         return Token.__annotations__.keys()
 
     def __repr__(self) -> str:
@@ -51,10 +52,10 @@ class OAuthToken(Token):
     """Wrapper for an OAuth token implementing expiration methods."""
 
     @staticmethod
-    def is_oauth(headers: CaseInsensitiveDict) -> bool:
+    def is_oauth(headers: CaseInsensitiveDict[str]) -> bool:
         return all(key in headers for key in Token.members())
 
-    def update(self, fresh_access: BaseTokenDict):
+    def update(self, fresh_access: BaseTokenDict) -> None:
         """
         Update access_token and expiration attributes with a BaseTokenDict inplace.
         expires_at attribute set using current epoch, avoid expiration desync
@@ -85,12 +86,12 @@ class RefreshingToken(OAuthToken):
     """
 
     #: credentials used for access_token refreshing
-    credentials: Optional[Credentials] = None
+    credentials: Credentials
 
     #: protected/property attribute enables auto writing token values to new file location via setter
-    _local_cache: Optional[Path] = None
+    _local_cache: Path | None = None
 
-    def __getattribute__(self, item):
+    def __getattribute__(self, item: str) -> Any:
         """access token setter to auto-refresh if it is expiring"""
         if item == "access_token" and self.is_expiring:
             fresh = self.credentials.refresh_token(self.refresh_token)
@@ -100,18 +101,18 @@ class RefreshingToken(OAuthToken):
         return super().__getattribute__(item)
 
     @property
-    def local_cache(self) -> Optional[Path]:
+    def local_cache(self) -> Path | None:
         return self._local_cache
 
     @local_cache.setter
-    def local_cache(self, path: Path):
+    def local_cache(self, path: Path) -> None:
         """Update attribute and dump token to new path."""
         self._local_cache = path
         self.store_token()
 
     @classmethod
     def prompt_for_token(
-        cls, credentials: Credentials, open_browser: bool = False, to_file: Optional[str] = None
+        cls, credentials: OAuthCredentials, open_browser: bool = False, to_file: str | None = None
     ) -> "RefreshingToken":
         """
         Method for CLI token creation via user inputs.
@@ -133,7 +134,7 @@ class RefreshingToken(OAuthToken):
             ref_token.local_cache = Path(to_file)
         return ref_token
 
-    def store_token(self, path: Optional[str] = None) -> None:
+    def store_token(self, path: str | None = None) -> None:
         """
         Write token values to json file at specified path, defaulting to self.local_cache.
         Operation does not update instance local_cache attribute.

@@ -1,14 +1,15 @@
-from typing import Optional
+import re
 
 from ytmusicapi.continuations import *
 from ytmusicapi.helpers import sum_total_duration
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType
 
 from ..helpers import to_int
 from .songs import *
 
 
-def parse_playlist_header(response: dict) -> dict[str, Any]:
-    playlist: dict[str, Any] = {}
+def parse_playlist_header(response: JsonDict) -> JsonDict:
+    playlist: JsonDict = {}
     editable_header = nav(response, [*HEADER, *EDITABLE_PLAYLIST_DETAIL_HEADER], True)
     playlist["owned"] = editable_header is not None
     playlist["privacy"] = "PUBLIC"
@@ -38,7 +39,7 @@ def parse_playlist_header(response: dict) -> dict[str, Any]:
     return playlist
 
 
-def parse_playlist_header_meta(header: dict[str, Any]) -> dict[str, Any]:
+def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
     playlist_meta = {
         "views": None,
         "duration": None,
@@ -64,8 +65,8 @@ def parse_playlist_header_meta(header: dict[str, Any]) -> dict[str, Any]:
     return playlist_meta
 
 
-def parse_audio_playlist(response: dict, limit: Optional[int], request_func) -> dict[str, Any]:
-    playlist: dict = {
+def parse_audio_playlist(response: JsonDict, limit: int | None, request_func) -> JsonDict:
+    playlist: JsonDict = {
         "owned": False,
         "privacy": "PUBLIC",
         "description": None,
@@ -88,7 +89,7 @@ def parse_audio_playlist(response: dict, limit: Optional[int], request_func) -> 
     if "contents" in content_data:
         playlist["tracks"] = parse_playlist_items(content_data["contents"])
 
-        parse_func = lambda contents: parse_playlist_items(contents)
+        parse_func: ParseFuncType = lambda contents: parse_playlist_items(contents)
         playlist["tracks"].extend(get_continuations_2025(content_data, limit, request_func, parse_func))
 
     playlist["title"] = playlist["tracks"][0]["album"]["name"]
@@ -97,7 +98,9 @@ def parse_audio_playlist(response: dict, limit: Optional[int], request_func) -> 
     return playlist
 
 
-def parse_playlist_items(results, menu_entries: Optional[list[list]] = None, is_album=False):
+def parse_playlist_items(
+    results: JsonList, menu_entries: JsonList | None = None, is_album: bool = False
+) -> JsonList:
     songs = []
     for result in results:
         if MRLIR not in result:
@@ -111,8 +114,8 @@ def parse_playlist_items(results, menu_entries: Optional[list[list]] = None, is_
 
 
 def parse_playlist_item(
-    data: dict, menu_entries: Optional[list[list]] = None, is_album=False
-) -> Optional[dict]:
+    data: JsonDict, menu_entries: list[list[str]] | None = None, is_album: bool = False
+) -> JsonDict | None:
     videoId = setVideoId = None
     like = None
     feedback_tokens = None

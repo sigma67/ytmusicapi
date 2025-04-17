@@ -1,11 +1,12 @@
 from ytmusicapi.helpers import to_int
+from ytmusicapi.type_alias import JsonDict
 
 from ._utils import *
 from .podcasts import parse_base_header
 from .songs import parse_like_status, parse_song_runs
 
 
-def parse_album_header(response):
+def parse_album_header(response: JsonDict) -> JsonDict:
     header = nav(response, HEADER_DETAIL)
     album = {
         "title": nav(header, TITLE_TEXT),
@@ -39,7 +40,7 @@ def parse_album_header(response):
     return album
 
 
-def parse_album_header_2024(response):
+def parse_album_header_2024(response: JsonDict) -> JsonDict:
     header = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
     album = {
         "title": nav(header, TITLE_TEXT),

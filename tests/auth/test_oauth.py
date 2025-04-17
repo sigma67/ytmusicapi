@@ -2,7 +2,6 @@ import json
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
 from unittest import mock
 
 import pytest
@@ -16,7 +15,7 @@ from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
 
 
 @pytest.fixture(name="blank_code")
-def fixture_blank_code() -> dict[str, Any]:
+def fixture_blank_code() -> JsonDict:
     return {
         "device_code": "",
         "user_code": "",

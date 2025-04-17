@@ -51,7 +51,7 @@ class TestSearch:
             ),
         ],
     )
-    def test_search_album_artists(self, yt, case: tuple[str, dict]):
+    def test_search_album_artists(self, yt, case: tuple[str, dict[str, Any]]):
         (query, expected) = case
         results = yt.search(query, filter="albums")
 

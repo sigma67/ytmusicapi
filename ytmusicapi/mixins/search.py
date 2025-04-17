@@ -1,20 +1,19 @@
-from typing import Any, Optional, Union
-
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.search import *
+from ytmusicapi.type_alias import JsonList, ParseFuncType, RequestFuncType
 
 
 class SearchMixin(MixinProtocol):
     def search(
         self,
         query: str,
-        filter: Optional[str] = None,
-        scope: Optional[str] = None,
+        filter: str | None = None,
+        scope: str | None = None,
         limit: int = 20,
         ignore_spelling: bool = False,
-    ) -> list[dict]:
+    ) -> JsonList:
         """
         Search YouTube music
         Returns results within the provided category.
@@ -137,7 +136,7 @@ class SearchMixin(MixinProtocol):
         """
         body = {"query": query}
         endpoint = "search"
-        search_results: list[dict[str, Any]] = []
+        search_results: JsonList = []
         filters = [
             "albums",
             "artists",
@@ -240,12 +239,12 @@ class SearchMixin(MixinProtocol):
             )
 
             if filter:  # if filter is set, there are continuations
-
-                def request_func(additionalParams):
-                    return self._send_request(endpoint, body, additionalParams)
-
-                def parse_func(contents):
-                    return parse_search_results(contents, api_search_result_types, result_type, category)
+                request_func: RequestFuncType = lambda additionalParams: self._send_request(
+                    endpoint, body, additionalParams
+                )
+                parse_func: ParseFuncType = lambda contents: parse_search_results(
+                    contents, api_search_result_types, result_type, category
+                )
 
                 search_results.extend(
                     get_continuations(
@@ -259,7 +258,7 @@ class SearchMixin(MixinProtocol):
 
         return search_results
 
-    def get_search_suggestions(self, query: str, detailed_runs=False) -> Union[list[str], list[dict]]:
+    def get_search_suggestions(self, query: str, detailed_runs: bool = False) -> list[str] | JsonList:
         """
         Get Search Suggestions
 
@@ -339,9 +338,7 @@ class SearchMixin(MixinProtocol):
 
         return parse_search_suggestions(response, detailed_runs)
 
-    def remove_search_suggestions(
-        self, suggestions: list[dict[str, Any]], indices: Optional[list[int]] = None
-    ) -> bool:
+    def remove_search_suggestions(self, suggestions: JsonList, indices: list[int] | None = None) -> bool:
         """
         Remove search suggestion from the user search history.
 

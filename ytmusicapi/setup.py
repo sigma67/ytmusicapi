@@ -2,7 +2,6 @@ import argparse
 import importlib.metadata
 import sys
 from pathlib import Path
-from typing import Optional, Union
 
 import requests
 
@@ -10,7 +9,7 @@ from ytmusicapi.auth.browser import setup_browser
 from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken
 
 
-def setup(filepath: Optional[str] = None, headers_raw: Optional[str] = None) -> str:
+def setup(filepath: str | None = None, headers_raw: str | None = None) -> str:
     """
     Requests browser headers from the user via command line
     and returns a string that can be passed to YTMusic()
@@ -26,9 +25,9 @@ def setup(filepath: Optional[str] = None, headers_raw: Optional[str] = None) -> 
 def setup_oauth(
     client_id: str,
     client_secret: str,
-    filepath: Optional[str] = None,
-    session: Optional[requests.Session] = None,
-    proxies: Optional[dict] = None,
+    filepath: str | None = None,
+    session: requests.Session | None = None,
+    proxies: dict[str, str] | None = None,
     open_browser: bool = False,
 ) -> RefreshingToken:
     """
@@ -53,7 +52,7 @@ def setup_oauth(
     return RefreshingToken.prompt_for_token(oauth_credentials, open_browser, filepath)
 
 
-def parse_args(args):
+def parse_args(args: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Setup ytmusicapi.")
     parser.add_argument(
         "-v",
@@ -80,7 +79,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def main() -> Union[RefreshingToken, str]:
+def main() -> RefreshingToken | str:
     args = parse_args(sys.argv[1:])
     filename = args.file.as_posix() if args.file else f"{args.setup_type}.json"
     print(f"Creating {Path(filename).resolve().as_uri()} with your authentication credentials...")

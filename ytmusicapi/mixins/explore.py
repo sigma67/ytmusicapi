@@ -1,11 +1,13 @@
+from collections.abc import Callable
 from typing import Any
 
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.explore import *
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType, ParseFuncType
 
 
 class ExploreMixin(MixinProtocol):
-    def get_mood_categories(self) -> dict:
+    def get_mood_categories(self) -> JsonDict:
         """
         Fetch "Moods & Genres" categories from YouTube Music.
 
@@ -50,7 +52,7 @@ class ExploreMixin(MixinProtocol):
             }
 
         """
-        sections: dict[str, Any] = {}
+        sections: JsonDict = {}
         response = self._send_request("browse", {"browseId": "FEmusic_moods_and_genres"})
         for section in nav(response, SINGLE_COLUMN_TAB + SECTION_LIST):
             title = nav(section, [*GRID, "header", "gridHeaderRenderer", *TITLE_TEXT])
@@ -62,7 +64,7 @@ class ExploreMixin(MixinProtocol):
 
         return sections
 
-    def get_mood_playlists(self, params: str) -> list[dict]:
+    def get_mood_playlists(self, params: str) -> JsonList:
         """
         Retrieve a list of playlists for a given "Moods & Genres" category.
 
@@ -88,7 +90,7 @@ class ExploreMixin(MixinProtocol):
 
         return playlists
 
-    def get_charts(self, country: str = "ZZ") -> dict:
+    def get_charts(self, country: str = "ZZ") -> JsonDict:
         """
         Get latest charts data from YouTube Music: Top songs, top videos, top artists and top trending videos.
         Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
@@ -188,13 +190,13 @@ class ExploreMixin(MixinProtocol):
             }
 
         """
-        body: dict[str, Any] = {"browseId": "FEmusic_charts"}
+        body: JsonDict = {"browseId": "FEmusic_charts"}
         if country:
             body["formData"] = {"selectedValues": [country]}
 
         response = self._send_request("browse", body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        charts: dict[str, Any] = {"countries": {}}
+        charts: JsonDict = {"countries": {}}
         menu = nav(
             results[0],
             [
@@ -233,8 +235,10 @@ class ExploreMixin(MixinProtocol):
         if has_trending:
             charts_categories.append("trending")
 
-        parse_chart = lambda i, parse_func, key: parse_content_list(
-            nav(results[i + has_songs], CAROUSEL_CONTENTS), parse_func, key
+        parse_chart: Callable[[int, ParseFuncType | ParseFuncDictType, str], list[dict[str, Any]]] = (
+            lambda index, parse_func, key: parse_content_list(
+                nav(results[index + has_songs], CAROUSEL_CONTENTS), parse_func, key
+            )
         )
         for i, c in enumerate(charts_categories):
             charts[c] = {

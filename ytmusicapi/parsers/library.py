@@ -1,4 +1,5 @@
 from ytmusicapi.continuations import get_continuations
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ._utils import *
 from .browsing import parse_content_list
@@ -7,7 +8,7 @@ from .podcasts import parse_podcast
 from .songs import parse_song_runs
 
 
-def parse_artists(results, uploaded=False):
+def parse_artists(results: JsonList, uploaded: bool = False) -> JsonList:
     artists = []
     for result in results:
         data = result[MRLIR]
@@ -32,14 +33,14 @@ def parse_artists(results, uploaded=False):
     return artists
 
 
-def parse_library_albums(response, request_func, limit):
+def parse_library_albums(response: JsonDict, request_func: RequestFuncType, limit: int | None) -> JsonList:
     results = get_library_contents(response, GRID)
     if results is None:
         return []
     albums = parse_albums(results["items"])
 
     if "continuations" in results:
-        parse_func = lambda contents: parse_albums(contents)
+        parse_func: ParseFuncType = lambda contents: parse_albums(contents)
         remaining_limit = None if limit is None else (limit - len(albums))
         albums.extend(
             get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
@@ -48,7 +49,7 @@ def parse_library_albums(response, request_func, limit):
     return albums
 
 
-def parse_albums(results):
+def parse_albums(results: JsonList) -> JsonList:
     albums = []
     for result in results:
         data = result[MTRIR]
@@ -67,9 +68,9 @@ def parse_albums(results):
     return albums
 
 
-def parse_library_podcasts(response, request_func, limit):
+def parse_library_podcasts(response: JsonDict, request_func: RequestFuncType, limit: int | None) -> JsonList:
     results = get_library_contents(response, GRID)
-    parse_func = lambda contents: parse_content_list(contents, parse_podcast)
+    parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_podcast)
     podcasts = parse_func(results["items"][1:])  # skip first entry "Add podcast"
 
     if "continuations" in results:
@@ -81,14 +82,14 @@ def parse_library_podcasts(response, request_func, limit):
     return podcasts
 
 
-def parse_library_artists(response, request_func, limit):
+def parse_library_artists(response: JsonDict, request_func: RequestFuncType, limit: int | None) -> JsonList:
     results = get_library_contents(response, MUSIC_SHELF)
     if results is None:
         return []
     artists = parse_artists(results["contents"])
 
     if "continuations" in results:
-        parse_func = lambda contents: parse_artists(contents)
+        parse_func: ParseFuncType = lambda contents: parse_artists(contents)
         remaining_limit = None if limit is None else (limit - len(artists))
         artists.extend(
             get_continuations(results, "musicShelfContinuation", remaining_limit, request_func, parse_func)
@@ -97,20 +98,20 @@ def parse_library_artists(response, request_func, limit):
     return artists
 
 
-def pop_songs_random_mix(results) -> None:
+def pop_songs_random_mix(results: JsonDict) -> None:
     """remove the random mix that conditionally appears at the start of library songs"""
     if results:
         if len(results["contents"]) >= 2:
             results["contents"].pop(0)
 
 
-def parse_library_songs(response):
+def parse_library_songs(response: JsonDict) -> JsonDict:
     results = get_library_contents(response, MUSIC_SHELF)
     pop_songs_random_mix(results)
     return {"results": results, "parsed": parse_playlist_items(results["contents"]) if results else results}
 
 
-def get_library_contents(response, renderer):
+def get_library_contents(response: JsonDict, renderer: list[str]) -> JsonDict:
     """
     Find library contents. This function is a bit messy now
     as it is supporting two different response types. Can be
