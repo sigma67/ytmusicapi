@@ -22,7 +22,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.9
+        python-version: 3.10
     - name: Setup PDM
       uses: pdm-project/setup-pdm@v4
     - name: create-json
@@ -41,12 +41,18 @@ jobs:
         curl -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/browser.json
         cat <<< "$TEST_CFG" > tests/test.cfg
-        pdm run pytest
+        pdm run pytest --junitxml=test-results.xml
         pdm run coverage xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
+      if: ${{ !cancelled() }}
       with:
-        file: coverage.xml
         flags: unittests
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: test-results.xml

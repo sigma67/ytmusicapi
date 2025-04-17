@@ -6,6 +6,7 @@ from unittest import mock
 import pytest
 
 from tests.test_helpers import is_ci
+from ytmusicapi.models.lyrics import LyricLine
 
 
 class TestBrowsing:
@@ -18,6 +19,8 @@ class TestBrowsing:
     def test_get_artist(self, yt):
         results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
         assert len(results) == 16
+        assert results["shuffleId"] is not None
+        assert results["radioId"] is not None
 
         # test correctness of related artists
         related = results["related"]["results"]
@@ -86,7 +89,7 @@ class TestBrowsing:
 
     def test_get_album_browse_id_issue_470(self, yt):
         escaped_browse_id = yt.get_album_browse_id("OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
-        assert escaped_browse_id == "MPREb_scJdtUCpPE2"
+        assert escaped_browse_id == "MPREb_pZhPA6GfQmN"
 
     def test_get_album_2024(self, yt):
         with open(Path(__file__).parent.parent / "data" / "2024_03_get_album.json", encoding="utf8") as f:
@@ -110,17 +113,26 @@ class TestBrowsing:
         assert album["tracks"][0]["isExplicit"]
         assert all(item["views"] is not None for item in album["tracks"])
         assert all(item["album"] is not None for item in album["tracks"])
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert album["tracks"][0]["trackNumber"] == 1
         assert "feedbackTokens" in album["tracks"][0]
         album = yt.get_album("MPREb_BQZvl3BFGay")
+        assert album["audioPlaylistId"] is not None
         assert len(album["tracks"]) == 7
         assert len(album["tracks"][0]["artists"]) == 1
         album = yt.get_album("MPREb_rqH94Zr3NN0")
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert len(album["tracks"][0]["artists"]) == 2
         album = yt.get_album("MPREb_TPH4WqN5pUo")  # album with tracks completely removed/missing
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert album["tracks"][0]["trackNumber"] == 3
         assert album["tracks"][13]["trackNumber"] == 18
         album = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
+        assert album["likeStatus"] is not None
+        assert album["audioPlaylistId"] is not None
         assert album["tracks"][7]["trackNumber"] is None
 
     def test_get_album_errors(self, yt):
@@ -164,9 +176,24 @@ class TestBrowsing:
 
     def test_get_lyrics(self, config, yt, sample_video):
         playlist = yt.get_watch_playlist(sample_video)
+        # test normal lyrics
         lyrics_song = yt.get_lyrics(playlist["lyrics"])
-        assert lyrics_song["lyrics"] is not None
-        assert lyrics_song["source"] is not None
+        assert lyrics_song is not None
+        assert isinstance(lyrics_song["lyrics"], str)
+        assert lyrics_song["hasTimestamps"] is False
+
+        # test lyrics with timestamps
+        lyrics_song = yt.get_lyrics(playlist["lyrics"], timestamps=True)
+        assert lyrics_song is not None
+        assert len(lyrics_song["lyrics"]) >= 1
+        assert lyrics_song["hasTimestamps"] is True
+
+        # check the LyricLine object
+        song = lyrics_song["lyrics"][0]
+        assert isinstance(song, LyricLine)
+        assert isinstance(song.text, str)
+        assert song.start_time <= song.end_time
+        assert isinstance(song.id, int)
 
         playlist = yt.get_watch_playlist(config["uploads"]["private_upload_id"])
         assert playlist["lyrics"] is None
@@ -177,21 +204,13 @@ class TestBrowsing:
         signature_timestamp = yt.get_signatureTimestamp()
         assert signature_timestamp is not None
 
-    def test_set_tasteprofile(self, yt, yt_brand):
-        with pytest.raises(Exception):
-            yt.set_tasteprofile(["not an artist"])
-        taste_profile = yt.get_tasteprofile()
-        assert yt.set_tasteprofile(list(taste_profile)[:5], taste_profile) is None
-
+    def test_set_tasteprofile(self, yt_brand):
         with pytest.raises(Exception):
             yt_brand.set_tasteprofile(["test", "test2"])
         taste_profile = yt_brand.get_tasteprofile()
         assert yt_brand.set_tasteprofile(list(taste_profile)[:1], taste_profile) is None
 
     def test_get_tasteprofile(self, yt, yt_oauth):
-        result = yt.get_tasteprofile()
-        assert len(result) >= 0
-
         result = yt_oauth.get_tasteprofile()
         assert len(result) >= 0
 

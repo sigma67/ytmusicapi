@@ -1,12 +1,12 @@
 """models for oauth authentication"""
 
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypedDict
 
-DefaultScope = Union[str, Literal["https://www.googleapis.com/auth/youtube"]]
-Bearer = Union[str, Literal["Bearer"]]
+DefaultScope = str | Literal["https://www.googleapis.com/auth/youtube"]
+Bearer = str | Literal["Bearer"]
 
 
-class BaseTokenDict(TypedDict):
+class BaseTokenDict(TypedDict, total=False):
     """Limited token. Does not provide a refresh token. Commonly obtained via a token refresh."""
 
     access_token: str  #: str to be used in Authorization header
@@ -15,14 +15,14 @@ class BaseTokenDict(TypedDict):
     token_type: Bearer  #: should be 'Bearer'
 
 
-class RefreshableTokenDict(BaseTokenDict):
+class RefreshableTokenDict(BaseTokenDict, total=False):
     """Entire token. Including refresh. Obtained through token setup."""
 
     expires_at: int  #: UNIX epoch timestamp in seconds
     refresh_token: str  #: str used to obtain new access token upon expiration
 
 
-class AuthCodeDict(TypedDict):
+class AuthCodeDict(TypedDict, total=False):
     """Keys for the json object obtained via code response during auth flow."""
 
     device_code: str  #: code obtained via user confirmation and oauth consent

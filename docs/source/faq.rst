@@ -12,7 +12,7 @@ My library results are empty even though I set up my cookie correctly.
 Please make sure that you don't have multiple Google accounts. ``ytmusicapi`` might be returning
 results from a different account which is currently empty. You can set your account using ``X-Goog-AuthUser``
 in your headers file (numeric index) or by providing the id of a brand account with ``ytmusic = YTMusic(headers, "1234..")``.
-For more details see the :doc:`reference`.
+For more details see the :doc:`reference/index`.
 
 Usage
 -----------------------
@@ -127,7 +127,7 @@ reached at least the ``limit`` parameter, and return all of these results.
 Which values can I use for languages?
 *************************************
 
-The `language` parameter determines the language of the returned results.
+The ``language`` parameter determines the language of the returned results.
 ``ytmusicapi`` only supports a subset of the languages supported by YouTube Music, as translations need to be done manually.
 Contributions are welcome, see `here for instructions <https://github.com/sigma67/ytmusicapi/tree/master/ytmusicapi/locales>`__.
 

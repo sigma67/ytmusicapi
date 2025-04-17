@@ -1,11 +1,12 @@
 from ytmusicapi.helpers import to_int
+from ytmusicapi.type_alias import JsonDict
 
 from ._utils import *
 from .podcasts import parse_base_header
 from .songs import parse_like_status, parse_song_runs
 
 
-def parse_album_header(response):
+def parse_album_header(response: JsonDict) -> JsonDict:
     header = nav(response, HEADER_DETAIL)
     album = {
         "title": nav(header, TITLE_TEXT),
@@ -39,7 +40,7 @@ def parse_album_header(response):
     return album
 
 
-def parse_album_header_2024(response):
+def parse_album_header_2024(response: JsonDict) -> JsonDict:
     header = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
     album = {
         "title": nav(header, TITLE_TEXT),
@@ -63,9 +64,23 @@ def parse_album_header_2024(response):
     # add to library/uploaded
     buttons = header["buttons"]
     album["audioPlaylistId"] = nav(
-        buttons, [1, "musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID], True
+        find_object_by_key(buttons, "musicPlayButtonRenderer"),
+        ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PID],
+        True,
     )
-    service = nav(buttons, [0, "toggleButtonRenderer", "defaultServiceEndpoint"], True)
+    # remove this once A/B testing is finished and it is no longer covered
+    if album["audioPlaylistId"] is None:
+        album["audioPlaylistId"] = nav(
+            find_object_by_key(buttons, "musicPlayButtonRenderer"),
+            ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+            True,
+        )
+    service = nav(
+        find_object_by_key(buttons, "toggleButtonRenderer"),
+        ["toggleButtonRenderer", "defaultServiceEndpoint"],
+        True,
+    )
+    album["likeStatus"] = "INDIFFERENT"
     if service:
         album["likeStatus"] = parse_like_status(service)
 

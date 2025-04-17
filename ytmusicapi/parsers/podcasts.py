@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from typing import Any
+
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 from .songs import *
 
@@ -26,7 +29,7 @@ class Timestamp(DescriptionElement):
 
 @dataclass
 class Description(list[DescriptionElement]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(args[0])
 
     @property
@@ -34,7 +37,7 @@ class Description(list[DescriptionElement]):
         return "".join(str(element) for element in self)
 
     @classmethod
-    def from_runs(cls, description_runs: list[dict]) -> "Description":
+    def from_runs(cls, description_runs: JsonList) -> "Description":
         """parse the description runs into a usable format
 
         :param description_runs: the original description runs
@@ -61,7 +64,7 @@ class Description(list[DescriptionElement]):
         return cls(elements)
 
 
-def parse_base_header(header: dict) -> dict:
+def parse_base_header(header: JsonDict) -> JsonDict:
     """parse common left hand side (header) items of an episode or podcast page"""
     strapline = nav(header, ["straplineTextOne"])
     return {
@@ -70,10 +73,11 @@ def parse_base_header(header: dict) -> dict:
             "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID], True),
         },
         "title": nav(header, TITLE_TEXT),
+        "thumbnails": nav(header, THUMBNAILS),
     }
 
 
-def parse_podcast_header(header: dict) -> dict:
+def parse_podcast_header(header: JsonDict) -> JsonDict:
     metadata = parse_base_header(header)
     metadata["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
     metadata["saved"] = nav(header, ["buttons", 1, *TOGGLED_BUTTON])
@@ -81,7 +85,7 @@ def parse_podcast_header(header: dict) -> dict:
     return metadata
 
 
-def parse_episode_header(header: dict) -> dict:
+def parse_episode_header(header: JsonDict) -> JsonDict:
     metadata = parse_base_header(header)
     metadata["date"] = nav(header, [*SUBTITLE])
     progress_renderer = nav(header, ["progress", *PROGRESS_RENDERER])
@@ -98,7 +102,7 @@ def parse_episode_header(header: dict) -> dict:
     return metadata
 
 
-def parse_episode(data):
+def parse_episode(data: JsonDict) -> JsonDict:
     """Parses a single episode under "Episodes" on a channel page or on a podcast page"""
     thumbnails = nav(data, THUMBNAILS)
     date = nav(data, SUBTITLE, True)
@@ -122,7 +126,7 @@ def parse_episode(data):
     }
 
 
-def parse_podcast(data):
+def parse_podcast(data: JsonDict) -> JsonDict:
     """Parses a single podcast under "Podcasts" on a channel page"""
     return {
         "title": nav(data, TITLE_TEXT),

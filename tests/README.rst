@@ -4,7 +4,7 @@ Tests use the ``unittest`` framework. Each function has a corresponding unittest
 Sometimes there is a single unittest for multiple functions to ensure there are no permanent changes in the user's
 YouTube account (i.e. subscribe and unsubscribe).
 
-Note that there must be a ``browser.json`` and ``oauth.json`` in the `tests` folder to run all authenticated tests.
+Note that there must be a ``browser.json`` and ``oauth.json`` in the ``tests`` folder to run all authenticated tests.
 These two files can be easily obtained as the default outputs of running the following commands respectively:
 
 .. code-block:: bash

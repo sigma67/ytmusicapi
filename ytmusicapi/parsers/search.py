@@ -1,12 +1,24 @@
+from ytmusicapi.type_alias import JsonDict, JsonList
+
 from ..helpers import to_int
 from ._utils import *
 from .songs import *
 
-UNIQUE_RESULT_TYPES = ["artist", "playlist", "song", "video", "station", "profile", "podcast", "episode"]
-ALL_RESULT_TYPES = ["album", *UNIQUE_RESULT_TYPES]
+ALL_RESULT_TYPES = [
+    "album",
+    "artist",
+    "playlist",
+    "song",
+    "video",
+    "station",
+    "profile",
+    "podcast",
+    "episode",
+]
+API_RESULT_TYPES = ["single", "ep", *ALL_RESULT_TYPES]
 
 
-def get_search_result_type(result_type_local, result_types_local):
+def get_search_result_type(result_type_local: str, result_types_local: list[str]) -> str | None:
     if not result_type_local:
         return None
     result_type_local = result_type_local.lower()
@@ -19,7 +31,7 @@ def get_search_result_type(result_type_local, result_types_local):
     return result_type
 
 
-def parse_top_result(data, search_result_types):
+def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict:
     result_type = get_search_result_type(nav(data, SUBTITLE), search_result_types)
     search_result = {"category": nav(data, CARD_SHELF_TITLE), "resultType": result_type}
     if result_type == "artist":
@@ -59,9 +71,11 @@ def parse_top_result(data, search_result_types):
     return search_result
 
 
-def parse_search_result(data, search_result_types, result_type, category):
+def parse_search_result(
+    data: JsonDict, api_search_result_types: list[str], result_type: str | None, category: str | None
+) -> JsonDict:
     default_offset = (not result_type or result_type == "album") * 2
-    search_result = {"category": category}
+    search_result: JsonDict = {"category": category}
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
 
     # determine result type based on browseId
@@ -99,9 +113,11 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result["playlistId"] = parse_album_playlistid_if_exists(play_navigation)
 
     elif result_type == "playlist":
-        flex_item = get_flex_column_item(data, 1)["text"]["runs"]
+        flex_item = nav(get_flex_column_item(data, 1), TEXT_RUNS)
         has_author = len(flex_item) == default_offset + 3
-        search_result["itemCount"] = get_item_text(data, 1, default_offset + has_author * 2).split(" ")[0]
+        search_result["itemCount"] = (get_item_text(data, 1, default_offset + has_author * 2) or "").split(
+            " "
+        )[0]
         if search_result["itemCount"] and search_result["itemCount"].isnumeric():
             search_result["itemCount"] = to_int(search_result["itemCount"])
         search_result["author"] = None if not has_author else get_item_text(data, 1, default_offset)
@@ -138,7 +154,11 @@ def parse_search_result(data, search_result_types, result_type, category):
                 search_result["resultType"] = "artist"
             else:
                 flex_item2 = get_flex_column_item(data, 1)
-                runs = [run["text"] for i, run in enumerate(flex_item2["text"]["runs"]) if i % 2 == 0]
+                runs = (
+                    [run["text"] for i, run in enumerate(flex_item2["text"]["runs"]) if i % 2 == 0]
+                    if flex_item2
+                    else []
+                )
                 if len(runs) > 1:
                     search_result["artist"] = runs[1]
                 if len(runs) > 2:  # date may be missing
@@ -156,8 +176,10 @@ def parse_search_result(data, search_result_types, result_type, category):
         search_result["year"] = None
         flex_item = get_flex_column_item(data, 1)
         runs = flex_item["text"]["runs"]
+        if flex_item2 := get_flex_column_item(data, 2):
+            runs.extend([{"text": ""}, *flex_item2["text"]["runs"]])  # first item is a dummy separator
         # ignore the first run if it is a type specifier (like "Single" or "Album")
-        runs_offset = (len(runs[0]) == 1 and runs[0]["text"].lower() in search_result_types) * 2
+        runs_offset = (len(runs[0]) == 1 and runs[0]["text"].lower() in api_search_result_types) * 2
         song_info = parse_song_runs(runs[runs_offset:])
         search_result.update(song_info)
 
@@ -181,18 +203,32 @@ def parse_search_result(data, search_result_types, result_type, category):
     return search_result
 
 
-def parse_album_playlistid_if_exists(data: dict[str, Any]) -> Optional[str]:
+def parse_album_playlistid_if_exists(data: JsonDict | None) -> str | None:
     """the content of the data changes based on whether the user is authenticated or not"""
     return nav(data, WATCH_PID, True) or nav(data, WATCH_PLAYLIST_ID, True) if data else None
 
 
-def parse_search_results(results, search_result_types, resultType=None, category=None):
+def parse_search_results(
+    results: JsonList,
+    api_search_result_types: list[str],
+    resultType: str | None = None,
+    category: str | None = None,
+) -> JsonList:
     return [
-        parse_search_result(result[MRLIR], search_result_types, resultType, category) for result in results
+        parse_search_result(result[MRLIR], api_search_result_types, resultType, category)
+        for result in results
     ]
 
 
-def get_search_params(filter, scope, ignore_spelling):
+def get_search_params(filter: str | None, scope: str | None, ignore_spelling: bool) -> str | None:
+    """
+    Get search params for search query string based on user input
+
+    :param filter: The search filter
+    :param scope: The search scope
+    :param ignore_spelling: If spelling shall be ignored
+    :return: search param string
+    """
     filtered_param1 = "EgWKAQ"
     params = None
     if filter is None and scope is None and not ignore_spelling:
@@ -243,7 +279,7 @@ def get_search_params(filter, scope, ignore_spelling):
     return params if params else param1 + param2 + param3
 
 
-def _get_param2(filter):
+def _get_param2(filter: str) -> str:
     filter_params = {
         "songs": "II",
         "videos": "IQ",
@@ -257,26 +293,36 @@ def _get_param2(filter):
     return filter_params[filter]
 
 
-def parse_search_suggestions(results, detailed_runs):
+def parse_search_suggestions(results: JsonDict, detailed_runs: bool) -> list[str] | JsonList:
     if not results.get("contents", [{}])[0].get("searchSuggestionsSectionRenderer", {}).get("contents", []):
         return []
 
     raw_suggestions = results["contents"][0]["searchSuggestionsSectionRenderer"]["contents"]
     suggestions = []
 
-    for raw_suggestion in raw_suggestions:
+    for index, raw_suggestion in enumerate(raw_suggestions):
+        feedback_token = None
         if "historySuggestionRenderer" in raw_suggestion:
             suggestion_content = raw_suggestion["historySuggestionRenderer"]
-            from_history = True
+            # Extract feedbackToken if present
+            feedback_token = nav(
+                suggestion_content, ["serviceEndpoint", "feedbackEndpoint", "feedbackToken"], True
+            )
         else:
             suggestion_content = raw_suggestion["searchSuggestionRenderer"]
-            from_history = False
 
         text = suggestion_content["navigationEndpoint"]["searchEndpoint"]["query"]
         runs = suggestion_content["suggestion"]["runs"]
 
         if detailed_runs:
-            suggestions.append({"text": text, "runs": runs, "fromHistory": from_history})
+            suggestions.append(
+                {
+                    "text": text,
+                    "runs": runs,
+                    "fromHistory": feedback_token is not None,
+                    "feedbackToken": feedback_token,
+                }
+            )
         else:
             suggestions.append(text)
 

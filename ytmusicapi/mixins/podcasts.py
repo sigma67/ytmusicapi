@@ -4,6 +4,7 @@ from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list
 from ytmusicapi.parsers.playlists import parse_playlist_header
 from ytmusicapi.parsers.podcasts import *
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ._utils import *
 
@@ -11,7 +12,7 @@ from ._utils import *
 class PodcastsMixin(MixinProtocol):
     """Podcasts Mixin"""
 
-    def get_channel(self, channelId: str) -> dict:
+    def get_channel(self, channelId: str) -> JsonDict:
         """
         Get information about a podcast channel (episodes, podcasts). For episodes, a
         maximum of 10 episodes are returned, the full list of episodes can be retrieved
@@ -78,7 +79,7 @@ class PodcastsMixin(MixinProtocol):
 
         return channel
 
-    def get_channel_episodes(self, channelId: str, params: str) -> list[dict]:
+    def get_channel_episodes(self, channelId: str, params: str) -> JsonList:
         """
         Get all channel episodes. This endpoint is currently unlimited
 
@@ -93,16 +94,16 @@ class PodcastsMixin(MixinProtocol):
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS)
         return parse_content_list(results, parse_episode, MMRIR)
 
-    def get_podcast(self, playlistId: str, limit: Optional[int] = 100) -> dict:
+    def get_podcast(self, playlistId: str, limit: int | None = 100) -> JsonDict:
         """
         Returns podcast metadata and episodes
 
         .. note::
 
-            To add a podcast to your library, you need to call `rate_playlist` on it
+            To add a podcast to your library, you need to call ``rate_playlist`` on it
 
         :param playlistId: Playlist id
-        :param limit: How many songs to return. `None` retrieves them all. Default: 100
+        :param limit: How many songs to return. ``None`` retrieves them all. Default: 100
         :return: Dict with podcast information
 
         Example::
@@ -138,14 +139,16 @@ class PodcastsMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         two_columns = nav(response, TWO_COLUMN_RENDERER)
         header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
-        podcast = parse_podcast_header(header)
+        podcast: JsonDict = parse_podcast_header(header)
 
         results = nav(two_columns, ["secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        parse_func = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
+        parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
         episodes = parse_func(results["contents"])
 
         if "continuations" in results:
-            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+            request_func: RequestFuncType = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams
+            )
             remaining_limit = None if limit is None else (limit - len(episodes))
             episodes.extend(
                 get_continuations(
@@ -157,14 +160,14 @@ class PodcastsMixin(MixinProtocol):
 
         return podcast
 
-    def get_episode(self, videoId: str) -> dict:
+    def get_episode(self, videoId: str) -> JsonDict:
         """
         Retrieve episode data for a single episode
 
         .. note::
 
-           To save an episode, you need to call `add_playlist_items` to add
-           it to the `SE` (saved episodes) playlist.
+           To save an episode, you need to call ``add_playlist_items`` to add
+           it to the ``SE`` (saved episodes) playlist.
 
         :param videoId: browseId (MPED..) or videoId for a single episode
         :return: Dict containing information about the episode
@@ -228,7 +231,7 @@ class PodcastsMixin(MixinProtocol):
 
         return episode
 
-    def get_episodes_playlist(self, playlist_id: str = "RDPN") -> dict:
+    def get_episodes_playlist(self, playlist_id: str = "RDPN") -> JsonDict:
         """
         Get all episodes in an episodes playlist. Currently the only known playlist is the
         "New Episodes" auto-generated playlist
@@ -243,7 +246,7 @@ class PodcastsMixin(MixinProtocol):
         playlist = parse_playlist_header(response)
 
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        parse_func = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
+        parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
         playlist["episodes"] = parse_func(results["contents"])
 
         return playlist

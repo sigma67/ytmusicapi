@@ -1,7 +1,7 @@
 [project]
 name = "ytmusicapi"
 description = "Unofficial API for YouTube Music"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors=[{name = "sigma67", email= "ytmusicapi@gmail.com"}]
 license={file="LICENSE"}
 classifiers = [
@@ -43,7 +43,7 @@ include-package-data=false
 [tool.pytest.ini_options]
 python_functions = "test_*"
 testpaths = ["tests"]
-addopts = "--verbose --cov --retries 2 --retry-delay 5"
+addopts = "--verbose --cov --junitxml=junit.xml --retries 2 --retry-delay 5"
 
 [tool.coverage.run]
 source = ["ytmusicapi"]
@@ -53,6 +53,7 @@ precision = 2
 
 [tool.ruff]
 line-length = 110
+include = ["ytmusicapi/**/*.py", "tests/**/*.py"]
 
 [tool.ruff.lint]
 ignore = [ "F403", "F405", "F821", "E731", "PTH123" ]
@@ -61,6 +62,7 @@ extend-select = [
     "UP",  # pyupgrade
     "RUF", # ruff
     "PTH", # pathlib
+    "INP", # implicit namespace package
 ]
 
 [tool.mypy]
@@ -68,15 +70,17 @@ files = [
     "ytmusicapi/"
 ]
 mypy_path = "ytmusicapi"
+strict = true
 
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 dev = [
     "coverage>=7.4.0",
     'sphinx<7',
     'sphinx-rtd-theme',
-    "ruff>=0.1.9",
-    "mypy>=1.8.0",
+    "ruff>=0.9.0",
+    "mypy>=1.15.0",
     "pytest>=7.4.4",
     "pytest-cov>=4.1.0",
     "pytest-retry>=1.6.3",
+    "sphinx-autodoc-typehints>=1.23.0",
 ]

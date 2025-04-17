@@ -25,6 +25,7 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
+sphinx-apidoc -o source/reference/api ../ytmusicapi
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 

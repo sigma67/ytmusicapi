@@ -18,65 +18,77 @@ msgstr ""
 "X-Generator: Poedit 3.2.2\n"
 
 #: parsers/i18n.py:32
+msgid "album"
+msgstr "एल्‍बम"
+
+#: parsers/i18n.py:33
 msgid "artist"
 msgstr "कलाकार"
 
-#: parsers/i18n.py:33
+#: parsers/i18n.py:34
 msgid "playlist"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:34
+#: parsers/i18n.py:35
 msgid "song"
 msgstr "गीत"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:36
 msgid "video"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:36
+#: parsers/i18n.py:37
 msgid "station"
 msgstr "स्टेशन"
 
-#: parsers/i18n.py:37
+#: parsers/i18n.py:38
 msgid "profile"
 msgstr "प्रोफ़ाइल"
 
-#: parsers/i18n.py:38
+#: parsers/i18n.py:39
 msgid "podcast"
 msgstr "पॉडकास्ट"
 
-#: parsers/i18n.py:39
+#: parsers/i18n.py:40
 msgid "episode"
 msgstr "एपिसोड"
 
 #: parsers/i18n.py:46
+msgid "single"
+msgstr "सिंगल"
+
+#: parsers/i18n.py:47
+msgid "ep"
+msgstr "ईपी"
+
+#: parsers/i18n.py:55
 msgid "albums"
 msgstr "एलबम"
 
-#: parsers/i18n.py:47
-msgid "singles"
-msgstr "एकल"
+#: parsers/i18n.py:56
+msgid "singles & eps"
+msgstr "गाने और ईपी"
 
-#: parsers/i18n.py:48
+#: parsers/i18n.py:57
 msgid "shows"
 msgstr "ऑडियो बुक और ऑडियो शो"
 
-#: parsers/i18n.py:49
+#: parsers/i18n.py:58
 msgid "videos"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:50
+#: parsers/i18n.py:59
 msgid "playlists"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:51
+#: parsers/i18n.py:60
 msgid "related"
 msgstr "सम्बंधित"
 
-#: parsers/i18n.py:52
+#: parsers/i18n.py:61
 msgid "episodes"
 msgstr "सबसे नए एपिसोड"
 
-#: parsers/i18n.py:53
+#: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "पॉडकास्ट"

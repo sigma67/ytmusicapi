@@ -23,7 +23,7 @@ on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 # -- Project information -----------------------------------------------------
 
 project = "ytmusicapi"
-copyright = "2022, sigma67"
+copyright = "2024, sigma67"
 author = "sigma67"
 
 # The full version, including alpha/beta/rc tags
@@ -36,7 +36,10 @@ release = __version__
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc"]
+extensions = ["sphinx.ext.autodoc", "sphinx_autodoc_typehints"]
+
+typehints_use_signature = True
+typehints_use_signature_return = True
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -46,6 +49,14 @@ master_doc = "index"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+# Add any paths that contain custom static files (such as style sheets) here,
+# relative to this directory. They are copied after the builtin static files,
+# so a file named "default.css" will overwrite the builtin "default.css".
+html_static_path = ["_static"]
+html_css_files = [
+    "css/custom.css",
+]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

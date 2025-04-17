@@ -1,26 +1,28 @@
 import re
 
+from ytmusicapi.type_alias import JsonDict, JsonList
+
 from ._utils import *
 
 
-def parse_song_artists(data, index):
+def parse_song_artists(data: JsonDict, index: int) -> JsonList:
     flex_item = get_flex_column_item(data, index)
     if not flex_item:
-        return None
+        return []
     else:
         runs = flex_item["text"]["runs"]
         return parse_song_artists_runs(runs)
 
 
-def parse_song_artists_runs(runs):
+def parse_song_artists_runs(runs: JsonList) -> JsonList:
     artists = []
     for j in range(int(len(runs) / 2) + 1):
         artists.append({"name": runs[j * 2]["text"], "id": nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)})
     return artists
 
 
-def parse_song_runs(runs):
-    parsed = {"artists": []}
+def parse_song_runs(runs: JsonList) -> JsonDict:
+    parsed: JsonDict = {"artists": []}
     for i, run in enumerate(runs):
         if i % 2:  # uneven items are always separators
             continue
@@ -51,20 +53,20 @@ def parse_song_runs(runs):
     return parsed
 
 
-def parse_song_album(data, index):
+def parse_song_album(data: JsonDict, index: int) -> JsonDict | None:
     flex_item = get_flex_column_item(data, index)
     browse_id = nav(flex_item, TEXT_RUN + NAVIGATION_BROWSE_ID, True)
     return None if not flex_item else {"name": get_item_text(data, index), "id": browse_id}
 
 
-def parse_song_library_status(item) -> bool:
+def parse_song_library_status(item: JsonDict) -> bool:
     """Returns True if song is in the library"""
     library_status = nav(item, [TOGGLE_MENU, "defaultIcon", "iconType"], True)
 
     return library_status == "LIBRARY_SAVED"
 
 
-def parse_song_menu_tokens(item):
+def parse_song_menu_tokens(item: JsonDict) -> dict[str, str | None]:
     toggle_menu = item[TOGGLE_MENU]
 
     library_add_token = nav(toggle_menu, ["defaultServiceEndpoint", *FEEDBACK_TOKEN], True)
@@ -77,6 +79,6 @@ def parse_song_menu_tokens(item):
     return {"add": library_add_token, "remove": library_remove_token}
 
 
-def parse_like_status(service):
+def parse_like_status(service: JsonDict) -> str:
     status = ["LIKE", "INDIFFERENT"]
     return status[status.index(service["likeEndpoint"]["status"]) - 1]

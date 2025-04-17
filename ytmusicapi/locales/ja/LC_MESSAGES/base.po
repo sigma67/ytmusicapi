@@ -18,65 +18,77 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: parsers/i18n.py:32
+msgid "album"
+msgstr "アルバム"
+
+#: parsers/i18n.py:33
 msgid "artist"
 msgstr "アーティスト"
 
-#: parsers/i18n.py:33
+#: parsers/i18n.py:34
 msgid "playlist"
 msgstr "プレイリスト"
 
-#: parsers/i18n.py:34
+#: parsers/i18n.py:35
 msgid "song"
 msgstr "曲"
 
-#: parsers/i18n.py:35
+#: parsers/i18n.py:36
 msgid "video"
 msgstr "動画"
 
-#: parsers/i18n.py:36
+#: parsers/i18n.py:37
 msgid "station"
 msgstr "ステーション"
 
-#: parsers/i18n.py:37
+#: parsers/i18n.py:38
 msgid "profile"
 msgstr "プロフィール"
 
-#: parsers/i18n.py:38
+#: parsers/i18n.py:39
 msgid "podcast"
 msgstr "ポッドキャスト"
 
-#: parsers/i18n.py:39
+#: parsers/i18n.py:40
 msgid "episode"
 msgstr "エピソード"
 
 #: parsers/i18n.py:46
+msgid "single"
+msgstr "シングル"
+
+#: parsers/i18n.py:47
+msgid "ep"
+msgstr "ep"
+
+#: parsers/i18n.py:55
 msgid "albums"
 msgstr "アルバム"
 
-#: parsers/i18n.py:47
-msgid "singles"
-msgstr "シングル"
+#: parsers/i18n.py:56
+msgid "singles & eps"
+msgstr "シングルと ep"
 
-#: parsers/i18n.py:48
+#: parsers/i18n.py:57
 msgid "shows"
 msgstr "オーディオブックと番組"
 
-#: parsers/i18n.py:49
+#: parsers/i18n.py:58
 msgid "videos"
 msgstr "動画"
 
-#: parsers/i18n.py:50
+#: parsers/i18n.py:59
 msgid "playlists"
 msgstr "プレイリスト"
 
-#: parsers/i18n.py:51
+#: parsers/i18n.py:60
 msgid "related"
 msgstr "おすすめのアーティスト"
 
-#: parsers/i18n.py:52
+#: parsers/i18n.py:61
 msgid "episodes"
 msgstr "最新エピソード"
 
-#: parsers/i18n.py:53
+#: parsers/i18n.py:62
 msgid "podcasts"
 msgstr "ポッドキャスト"

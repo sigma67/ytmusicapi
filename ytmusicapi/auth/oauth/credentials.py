@@ -1,13 +1,11 @@
+import typing
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Optional
 
 import niquests as requests
+from niquests import Response
 
 from ytmusicapi.constants import (
-    OAUTH_CLIENT_ID,
-    OAUTH_CLIENT_SECRET,
     OAUTH_CODE_URL,
     OAUTH_SCOPE,
     OAUTH_TOKEN_URL,
@@ -15,6 +13,7 @@ from ytmusicapi.constants import (
 )
 
 from ...exceptions import YTMusicServerError
+from ...type_alias import JsonDict
 from .exceptions import BadOAuthClient, UnauthorizedOAuthClient
 from .models import AuthCodeDict, BaseTokenDict, RefreshableTokenDict
 
@@ -27,7 +26,7 @@ class Credentials(ABC):
     client_secret: str
 
     @abstractmethod
-    def get_code(self) -> Mapping:
+    def get_code(self) -> AuthCodeDict:
         """Method for obtaining a new user auth code. First step of token creation."""
 
     @abstractmethod
@@ -45,17 +44,20 @@ class OAuthCredentials(Credentials):
     Class for handling OAuth credential retrieval and refreshing.
     """
 
+    client_id: str
+    client_secret: str
+
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        session: Optional[requests.Session] = None,
-        proxies: Optional[dict] = None,
+        client_id: str,
+        client_secret: str,
+        session: requests.Session | None = None,
+        proxies: dict[str, str] | None = None,
     ):
         """
-        :param client_id: Optional. Set the GoogleAPI client_id used for auth flows.
-            Requires client_secret also be provided if set.
-        :param client_secret: Optional. Corresponding secret for provided client_id.
+        :param client_id: Optional. Set the GoogleAPI ``client_id`` used for auth flows.
+            Requires ``client_secret`` also be provided if set.
+        :param client_secret: Optional. Corresponding secret for provided ``client_id``.
         :param session: Optional. Connection pooling with an active session.
         :param proxies: Optional. Modify the session with proxy parameters.
         """
@@ -66,8 +68,8 @@ class OAuthCredentials(Credentials):
             )
 
         # bind instance to OAuth client for auth flows
-        self.client_id = client_id if client_id else OAUTH_CLIENT_ID
-        self.client_secret = client_secret if client_secret else OAUTH_CLIENT_SECRET
+        self.client_id = client_id
+        self.client_secret = client_secret
 
         self._session = session if session else requests.Session()  # for auth requests
         if proxies:
@@ -76,9 +78,9 @@ class OAuthCredentials(Credentials):
     def get_code(self) -> AuthCodeDict:
         """Method for obtaining a new user auth code. First step of token creation."""
         code_response = self._send_request(OAUTH_CODE_URL, data={"scope": OAUTH_SCOPE})
-        return code_response.json()
+        return typing.cast(AuthCodeDict, code_response.json())
 
-    def _send_request(self, url, data):
+    def _send_request(self, url: str, data: JsonDict) -> Response:
         """Method for sending post requests with required client_id and User-Agent modifications"""
 
         data.update({"client_id": self.client_id})
@@ -110,14 +112,14 @@ class OAuthCredentials(Credentials):
                 "code": device_code,
             },
         )
-        return response.json()
+        return typing.cast(RefreshableTokenDict, response.json())
 
     def refresh_token(self, refresh_token: str) -> BaseTokenDict:
         """
-        Method for requesting a new access token for a given refresh_token.
+        Method for requesting a new access token for a given ``refresh_token``.
         Token must have been created by the same OAuth client.
 
-        :param refresh_token: Corresponding refresh_token for a matching access_token.
+        :param refresh_token: Corresponding ``refresh_token`` for a matching ``access_token``.
             Obtained via
         """
         response = self._send_request(
@@ -129,4 +131,4 @@ class OAuthCredentials(Credentials):
             },
         )
 
-        return response.json()
+        return typing.cast(BaseTokenDict, response.json())

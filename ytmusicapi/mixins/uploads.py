@@ -1,5 +1,5 @@
+import typing
 from pathlib import Path
-from typing import Optional, Union
 
 import niquests as requests
 
@@ -14,21 +14,24 @@ from ytmusicapi.parsers.library import (
     pop_songs_random_mix,
 )
 from ytmusicapi.parsers.uploads import parse_uploaded_items
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ..auth.types import AuthType
 from ..enums import ResponseStatus
 from ..exceptions import YTMusicUserError
 from ._protocol import MixinProtocol
-from ._utils import prepare_order_params, validate_order_parameter
+from ._utils import LibraryOrderType, prepare_order_params, validate_order_parameter
 
 
 class UploadsMixin(MixinProtocol):
-    def get_library_upload_songs(self, limit: Optional[int] = 25, order: Optional[str] = None) -> list[dict]:
+    def get_library_upload_songs(
+        self, limit: int | None = 25, order: LibraryOrderType | None = None
+    ) -> JsonList:
         """
         Returns a list of uploaded songs
 
-        :param limit: How many songs to return. `None` retrieves them all. Default: 25
-        :param order: Order of songs to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param limit: How many songs to return. ``None`` retrieves them all. Default: 25
+        :param order: Order of songs to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of uploaded songs.
 
         Each item is in the following format::
@@ -57,10 +60,12 @@ class UploadsMixin(MixinProtocol):
         if results is None:
             return []
         pop_songs_random_mix(results)
-        songs = parse_uploaded_items(results["contents"])
+        songs: JsonList = parse_uploaded_items(results["contents"])
 
         if "continuations" in results:
-            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
+            request_func: RequestFuncType = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams
+            )
             remaining_limit = None if limit is None else (limit - len(songs))
             songs.extend(
                 get_continuations(
@@ -70,12 +75,14 @@ class UploadsMixin(MixinProtocol):
 
         return songs
 
-    def get_library_upload_albums(self, limit: Optional[int] = 25, order: Optional[str] = None) -> list[dict]:
+    def get_library_upload_albums(
+        self, limit: int | None = 25, order: LibraryOrderType | None = None
+    ) -> JsonList:
         """
         Gets the albums of uploaded songs in the user's library.
 
-        :param limit: Number of albums to return. `None` retrives them all. Default: 25
-        :param order: Order of albums to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param limit: Number of albums to return. ``None`` retrives them all. Default: 25
+        :param order: Order of albums to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of albums as returned by :py:func:`get_library_albums`
         """
         self._check_auth()
@@ -90,13 +97,13 @@ class UploadsMixin(MixinProtocol):
         )
 
     def get_library_upload_artists(
-        self, limit: Optional[int] = 25, order: Optional[str] = None
-    ) -> list[dict]:
+        self, limit: int | None = 25, order: LibraryOrderType | None = None
+    ) -> JsonList:
         """
         Gets the artists of uploaded songs in the user's library.
 
-        :param limit: Number of artists to return. `None` retrieves them all. Default: 25
-        :param order: Order of artists to return. Allowed values: 'a_to_z', 'z_to_a', 'recently_added'. Default: Default order.
+        :param limit: Number of artists to return. ``None`` retrieves them all. Default: 25
+        :param order: Order of artists to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
         :return: List of artists as returned by :py:func:`get_library_artists`
         """
         self._check_auth()
@@ -110,7 +117,7 @@ class UploadsMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_upload_artist(self, browseId: str, limit: int = 25) -> list[dict]:
+    def get_library_upload_artist(self, browseId: str, limit: int = 25) -> JsonList:
         """
         Returns a list of uploaded tracks for the artist.
 
@@ -148,8 +155,10 @@ class UploadsMixin(MixinProtocol):
         items = parse_uploaded_items(results["contents"])
 
         if "continuations" in results:
-            request_func = lambda additionalParams: self._send_request(endpoint, body, additionalParams)
-            parse_func = lambda contents: parse_uploaded_items(contents)
+            request_func: RequestFuncType = lambda additionalParams: self._send_request(
+                endpoint, body, additionalParams
+            )
+            parse_func: ParseFuncType = lambda contents: parse_uploaded_items(contents)
             remaining_limit = None if limit is None else (limit - len(items))
             items.extend(
                 get_continuations(
@@ -159,7 +168,7 @@ class UploadsMixin(MixinProtocol):
 
         return items
 
-    def get_library_upload_album(self, browseId: str) -> dict:
+    def get_library_upload_album(self, browseId: str) -> JsonDict:
         """
         Get information and tracks of an album associated with uploaded tracks
 
@@ -201,7 +210,7 @@ class UploadsMixin(MixinProtocol):
         album["duration_seconds"] = sum_total_duration(album)
         return album
 
-    def upload_song(self, filepath: str) -> Union[ResponseStatus, requests.Response]:
+    def upload_song(self, filepath: str) -> ResponseStatus | requests.Response:
         """
         Uploads a song to YouTube Music
 
@@ -247,7 +256,7 @@ class UploadsMixin(MixinProtocol):
         else:
             return response
 
-    def delete_upload_entity(self, entityId: str) -> Union[str, dict]:  # pragma: no cover
+    def delete_upload_entity(self, entityId: str) -> str | JsonDict:  # pragma: no cover
         """
         Deletes a previously uploaded song or album
 
@@ -266,4 +275,4 @@ class UploadsMixin(MixinProtocol):
         if "error" not in response:
             return ResponseStatus.SUCCEEDED
         else:
-            return response["error"]
+            return typing.cast(str, response["error"])
