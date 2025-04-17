@@ -200,9 +200,9 @@ class SearchMixin(MixinProtocol):
             return search_results
 
         # set filter for parser
+        result_type = None
         if filter and "playlists" in filter:
             filter = "playlists"
-            result_type = None
         elif scope == scopes[1]:  # uploads
             filter = scopes[1]
             result_type = scopes[1][:-1]
