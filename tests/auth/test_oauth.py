@@ -11,6 +11,7 @@ from ytmusicapi.auth.oauth import OAuthToken
 from ytmusicapi.auth.types import AuthType
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.setup import main
+from ytmusicapi.type_alias import JsonDict
 from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
 
 
