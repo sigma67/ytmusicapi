@@ -85,7 +85,7 @@ feel free to create an `issue <https://github.com/sigma67/ytmusicapi/issues/new/
 Requirements
 ------------
 
-- Python 3.9 or higher - https://www.python.org
+- Python 3.10 or higher - https://www.python.org
 
 Setup
 -----
