@@ -7,12 +7,18 @@ assignees: ''
 
 ---
 
-# Hello and thanks for using ytmusicapi! Please fill out the issue template below. Issues not following this template will be closed without comment. If you have a question only, please use GitHub discussions or gitter (linked in README).
-~~~~~~~~~~~~~
+- [ ] I confirm that I have read the [FAQ](https://ytmusicapi.readthedocs.io/en/stable/faq.html#why-is-ytmusicapi-returning-more-results-than-requested-with-the-limit-parameter)
+
 **Describe the bug**
+
 A clear and concise description of what the bug is.
 
+**ytmusicapi version**
+
+x.x.x
+
 **To Reproduce**
+
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
@@ -20,4 +26,5 @@ Steps to reproduce the behavior:
 4. See error
 
 **Additional context**
+
 Add any other context about the problem here, such as a code sample.
