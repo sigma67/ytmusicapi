@@ -3,13 +3,13 @@ from random import randint
 
 from requests import Response
 
-from ytmusicapi.continuations import *
-from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.models.content.enums import LikeStatus
-from ytmusicapi.parsers.browsing import *
-from ytmusicapi.parsers.library import *
-from ytmusicapi.parsers.playlists import parse_playlist_items
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType, ParseFuncType, RequestFuncType
+from ytmusicapi2.continuations import *
+from ytmusicapi2.exceptions import YTMusicUserError
+from ytmusicapi2.models.content.enums import LikeStatus
+from ytmusicapi2.parsers.browsing import *
+from ytmusicapi2.parsers.library import *
+from ytmusicapi2.parsers.playlists import parse_playlist_items
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncDictType, ParseFuncType, RequestFuncType
 
 from ..exceptions import YTMusicServerError
 from ._protocol import MixinProtocol

@@ -1,4 +1,4 @@
-"""custom exception classes for ytmusicapi"""
+"""custom exception classes for ytmusicapi2"""
 
 
 class YTMusicError(Exception):
@@ -9,7 +9,7 @@ class YTMusicError(Exception):
 
 
 class YTMusicUserError(YTMusicError):
-    """error caused by invalid usage of ytmusicapi"""
+    """error caused by invalid usage of ytmusicapi2"""
 
 
 class YTMusicServerError(YTMusicError):

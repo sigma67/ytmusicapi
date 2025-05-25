@@ -3,10 +3,10 @@ from pathlib import Path
 
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.auth.oauth import OAuthToken
-from ytmusicapi.auth.types import AuthType
-from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.type_alias import JsonDict
+from ytmusicapi2.auth.oauth import OAuthToken
+from ytmusicapi2.auth.types import AuthType
+from ytmusicapi2.exceptions import YTMusicUserError
+from ytmusicapi2.type_alias import JsonDict
 
 
 def parse_auth_str(auth: str | JsonDict) -> tuple[CaseInsensitiveDict[str], Path | None]:

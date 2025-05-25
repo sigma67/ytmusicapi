@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, TypedDict
 
-from ytmusicapi.type_alias import JsonDict
+from ytmusicapi2.type_alias import JsonDict
 
 
 @dataclass

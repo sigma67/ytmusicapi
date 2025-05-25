@@ -1,9 +1,9 @@
 from collections.abc import Callable
 from typing import Any
 
-from ytmusicapi.mixins._protocol import MixinProtocol
-from ytmusicapi.parsers.explore import *
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
+from ytmusicapi2.mixins._protocol import MixinProtocol
+from ytmusicapi2.parsers.explore import *
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncDictType
 
 
 class ExploreMixin(MixinProtocol):

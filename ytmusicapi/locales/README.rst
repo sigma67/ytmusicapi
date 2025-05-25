@@ -1,6 +1,6 @@
 Translations
 ============================================
-Translations are required for ytmusicapi since it relies on parsing user interface text.
+Translations are required for ytmusicapi2 since it relies on parsing user interface text.
 In some places, for example the search() or get_artist() features, there is no other way to tell which content type is
 offered other than parsing display text, which depends on the user's language. Changing the API language is desirable,
 since artist and song titles are also language dependent.

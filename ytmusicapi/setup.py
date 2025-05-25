@@ -5,8 +5,8 @@ from pathlib import Path
 
 import requests
 
-from ytmusicapi.auth.browser import setup_browser
-from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken
+from ytmusicapi2.auth.browser import setup_browser
+from ytmusicapi2.auth.oauth import OAuthCredentials, RefreshingToken
 
 
 def setup(filepath: str | None = None, headers_raw: str | None = None) -> str:
@@ -53,26 +53,26 @@ def setup_oauth(
 
 
 def parse_args(args: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Setup ytmusicapi.")
+    parser = argparse.ArgumentParser(description="Setup ytmusicapi2.")
     parser.add_argument(
         "-v",
         "--version",
         action="version",
-        version=f"ytmusicapi {importlib.metadata.version('ytmusicapi')}",
-        help="Installed version of ytmusicapi",
+        version=f"ytmusicapi2 {importlib.metadata.version('ytmusicapi2')}",
+        help="Installed version of ytmusicapi2",
     )
     # parser.add_argument("setup_type", type=str, choices=["oauth", "browser"], help="choose a setup type.")
     subparsers = parser.add_subparsers(help="choose a setup type.", dest="setup_type", required=True)
     oauth_parser = subparsers.add_parser(
         "oauth",
-        help="create an oauth token using your Google Youtube API credentials; type 'ytmusicapi oauth -h' for details.",
+        help="create an oauth token using your Google Youtube API credentials; type 'ytmusicapi2 oauth -h' for details.",
     )
     oauth_parser.add_argument("--file", type=Path, help="optional path to output file")
     oauth_parser.add_argument("--client-id", type=str, help="use your Google Youtube API client ID.")
     oauth_parser.add_argument("--client-secret", type=str, help="use your Google Youtube API client secret.")
     browser_parser = subparsers.add_parser(
         "browser",
-        help="use cookies from request headers (deprecated); type 'ytmusicapi browser -h' for details.",
+        help="use cookies from request headers (deprecated); type 'ytmusicapi2 browser -h' for details.",
     )
     browser_parser.add_argument("--file", type=Path, help="optional path to output file.")
 

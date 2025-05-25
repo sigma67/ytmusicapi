@@ -7,9 +7,9 @@ from typing import Protocol
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.auth.types import AuthType
-from ytmusicapi.parsers.i18n import Parser
-from ytmusicapi.type_alias import JsonDict
+from ytmusicapi2.auth.types import AuthType
+from ytmusicapi2.parsers.i18n import Parser
+from ytmusicapi2.type_alias import JsonDict
 
 
 class MixinProtocol(Protocol):

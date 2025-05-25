@@ -1,7 +1,7 @@
 from gettext import GNUTranslations
 from gettext import gettext as _
 
-from ytmusicapi.navigation import (
+from ytmusicapi2.navigation import (
     CAROUSEL,
     CAROUSEL_TITLE,
     MMRIR,
@@ -10,8 +10,8 @@ from ytmusicapi.navigation import (
     NAVIGATION_BROWSE_ID,
     nav,
 )
-from ytmusicapi.parsers._utils import i18n
-from ytmusicapi.parsers.browsing import (
+from ytmusicapi2.parsers._utils import i18n
+from ytmusicapi2.parsers.browsing import (
     parse_album,
     parse_content_list,
     parse_playlist,
@@ -19,8 +19,8 @@ from ytmusicapi.parsers.browsing import (
     parse_single,
     parse_video,
 )
-from ytmusicapi.parsers.podcasts import parse_episode, parse_podcast
-from ytmusicapi.type_alias import JsonDict, JsonList
+from ytmusicapi2.parsers.podcasts import parse_episode, parse_podcast
+from ytmusicapi2.type_alias import JsonDict, JsonList
 
 
 class Parser:

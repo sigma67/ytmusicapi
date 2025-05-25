@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from typing import Any
 
-from ytmusicapi.navigation import nav
-from ytmusicapi.type_alias import (
+from ytmusicapi2.navigation import nav
+from ytmusicapi2.type_alias import (
     JsonDict,
     JsonList,
     ParseFuncDictType,

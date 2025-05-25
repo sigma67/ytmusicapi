@@ -1,5 +1,5 @@
-from ytmusicapi.continuations import get_continuations
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi2.continuations import get_continuations
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ._utils import *
 from .browsing import parse_content_list
@@ -118,7 +118,7 @@ def get_library_contents(response: JsonDict, renderer: list[str]) -> JsonDict | 
     Find library contents. This function is a bit messy now
     as it is supporting two different response types. Can be
     cleaned up once all users are migrated to the new responses.
-    :param response: ytmusicapi response
+    :param response: ytmusicapi2 response
     :param renderer: GRID or MUSIC_SHELF
     :return: library contents or None
     """

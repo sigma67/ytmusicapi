@@ -1,8 +1,8 @@
 import re
 
-from ytmusicapi.continuations import *
-from ytmusicapi.helpers import sum_total_duration
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType
+from ytmusicapi2.continuations import *
+from ytmusicapi2.helpers import sum_total_duration
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType
 
 from ..helpers import to_int
 from .songs import *

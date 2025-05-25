@@ -1,6 +1,6 @@
 import re
 
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncDictType
 
 from .podcasts import parse_episode, parse_podcast
 from .songs import *

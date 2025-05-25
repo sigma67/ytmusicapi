@@ -1,8 +1,8 @@
-from ytmusicapi.continuations import get_continuations
-from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.mixins._protocol import MixinProtocol
-from ytmusicapi.parsers.search import *
-from ytmusicapi.type_alias import JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi2.continuations import get_continuations
+from ytmusicapi2.exceptions import YTMusicUserError
+from ytmusicapi2.mixins._protocol import MixinProtocol
+from ytmusicapi2.parsers.search import *
+from ytmusicapi2.type_alias import JsonList, ParseFuncType, RequestFuncType
 
 
 class SearchMixin(MixinProtocol):

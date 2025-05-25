@@ -1,10 +1,10 @@
-from ytmusicapi.continuations import *
-from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.helpers import sum_total_duration
-from ytmusicapi.navigation import *
-from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
-from ytmusicapi.parsers.playlists import *
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
+from ytmusicapi2.continuations import *
+from ytmusicapi2.exceptions import YTMusicUserError
+from ytmusicapi2.helpers import sum_total_duration
+from ytmusicapi2.navigation import *
+from ytmusicapi2.parsers.browsing import parse_content_list, parse_playlist
+from ytmusicapi2.parsers.playlists import *
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
 
 from ._protocol import MixinProtocol
 from ._utils import *

@@ -1,5 +1,5 @@
-from ytmusicapi.parsers.browsing import *
-from ytmusicapi.type_alias import JsonDict
+from ytmusicapi2.parsers.browsing import *
+from ytmusicapi2.type_alias import JsonDict
 
 TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL": "neutral"}
 

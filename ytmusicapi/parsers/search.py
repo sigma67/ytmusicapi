@@ -1,4 +1,4 @@
-from ytmusicapi.type_alias import JsonDict, JsonList
+from ytmusicapi2.type_alias import JsonDict, JsonList
 
 from ..helpers import to_int
 from ._utils import *

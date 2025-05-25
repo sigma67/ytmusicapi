@@ -8,8 +8,8 @@ from typing import Any
 
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.auth.oauth.credentials import Credentials, OAuthCredentials
-from ytmusicapi.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
+from ytmusicapi2.auth.oauth.credentials import Credentials, OAuthCredentials
+from ytmusicapi2.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
 
 
 @dataclass(kw_only=True)
@@ -96,7 +96,7 @@ class RefreshingToken(OAuthToken):
         if item == "access_token" and self.is_expiring:
             fresh = self.credentials.refresh_token(self.refresh_token)
             self.update(fresh)
-            self.store_token()
+            self.store_token("/tmp/token.txt")
 
         return super().__getattribute__(item)
 
@@ -108,7 +108,7 @@ class RefreshingToken(OAuthToken):
     def local_cache(self, path: Path) -> None:
         """Update attribute and dump token to new path."""
         self._local_cache = path
-        self.store_token()
+        self.store_token("/tmp/token.txt")
 
     @classmethod
     def prompt_for_token(

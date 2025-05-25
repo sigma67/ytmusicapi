@@ -3,8 +3,8 @@ import platform
 
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi.exceptions import YTMusicError, YTMusicUserError
-from ytmusicapi.helpers import *
+from ytmusicapi2.exceptions import YTMusicError, YTMusicUserError
+from ytmusicapi2.helpers import *
 
 
 def is_browser(headers: CaseInsensitiveDict[str]) -> bool:

@@ -1,10 +1,10 @@
-from ytmusicapi.continuations import *
-from ytmusicapi.mixins._protocol import MixinProtocol
-from ytmusicapi.navigation import *
-from ytmusicapi.parsers.browsing import parse_content_list
-from ytmusicapi.parsers.playlists import parse_playlist_header
-from ytmusicapi.parsers.podcasts import *
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi2.continuations import *
+from ytmusicapi2.mixins._protocol import MixinProtocol
+from ytmusicapi2.navigation import *
+from ytmusicapi2.parsers.browsing import parse_content_list
+from ytmusicapi2.parsers.playlists import parse_playlist_header
+from ytmusicapi2.parsers.podcasts import *
+from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ._utils import *
 

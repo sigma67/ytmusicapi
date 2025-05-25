@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from ytmusicapi.type_alias import JsonDict, JsonList
+from ytmusicapi2.type_alias import JsonDict, JsonList
 
 from .songs import *
 
