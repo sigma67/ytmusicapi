@@ -3,18 +3,18 @@ from pathlib import Path
 
 import requests
 
-from ytmusicapi2.continuations import get_continuations
-from ytmusicapi2.helpers import *
-from ytmusicapi2.navigation import *
-from ytmusicapi2.parsers.albums import parse_album_header
-from ytmusicapi2.parsers.library import (
+from ytmusicapi.continuations import get_continuations
+from ytmusicapi.helpers import *
+from ytmusicapi.navigation import *
+from ytmusicapi.parsers.albums import parse_album_header
+from ytmusicapi.parsers.library import (
     get_library_contents,
     parse_library_albums,
     parse_library_artists,
     pop_songs_random_mix,
 )
-from ytmusicapi2.parsers.uploads import parse_uploaded_items
-from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi.parsers.uploads import parse_uploaded_items
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ..auth.types import AuthType
 from ..enums import ResponseStatus

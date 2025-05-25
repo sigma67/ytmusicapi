@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import requests
 from requests import Response
 
-from ytmusicapi2.constants import (
+from ytmusicapi.constants import (
     OAUTH_CODE_URL,
     OAUTH_SCOPE,
     OAUTH_TOKEN_URL,

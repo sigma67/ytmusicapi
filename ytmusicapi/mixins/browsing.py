@@ -3,23 +3,23 @@ import warnings
 from collections.abc import Callable
 from typing import Literal, cast, overload
 
-from ytmusicapi2.continuations import (
+from ytmusicapi.continuations import (
     get_continuations,
     get_reloadable_continuation_params,
 )
-from ytmusicapi2.helpers import YTM_DOMAIN, sum_total_duration
-from ytmusicapi2.models.lyrics import LyricLine, Lyrics, TimedLyrics
-from ytmusicapi2.parsers.albums import parse_album_header_2024
-from ytmusicapi2.parsers.browsing import (
+from ytmusicapi.helpers import YTM_DOMAIN, sum_total_duration
+from ytmusicapi.models.lyrics import LyricLine, Lyrics, TimedLyrics
+from ytmusicapi.parsers.albums import parse_album_header_2024
+from ytmusicapi.parsers.browsing import (
     parse_album,
     parse_content_list,
     parse_mixed_content,
     parse_playlist,
     parse_video,
 )
-from ytmusicapi2.parsers.library import parse_albums
-from ytmusicapi2.parsers.playlists import parse_playlist_items
-from ytmusicapi2.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi.parsers.library import parse_albums
+from ytmusicapi.parsers.playlists import parse_playlist_items
+from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ..exceptions import YTMusicError, YTMusicUserError
 from ..navigation import *

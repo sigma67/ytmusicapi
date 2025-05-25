@@ -8,8 +8,8 @@ from typing import Any
 
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi2.auth.oauth.credentials import Credentials, OAuthCredentials
-from ytmusicapi2.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
+from ytmusicapi.auth.oauth.credentials import Credentials, OAuthCredentials
+from ytmusicapi.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
 
 
 @dataclass(kw_only=True)

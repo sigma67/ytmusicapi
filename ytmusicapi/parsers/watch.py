@@ -1,6 +1,6 @@
 import typing
 
-from ytmusicapi2.type_alias import JsonDict, JsonList
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 from .songs import *
 

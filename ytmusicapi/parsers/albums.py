@@ -1,5 +1,5 @@
-from ytmusicapi2.helpers import to_int
-from ytmusicapi2.type_alias import JsonDict
+from ytmusicapi.helpers import to_int
+from ytmusicapi.type_alias import JsonDict
 
 from ._utils import *
 from .podcasts import parse_base_header

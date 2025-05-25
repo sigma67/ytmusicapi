@@ -14,7 +14,7 @@ import requests
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi2.helpers import (
+from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_LOCATIONS,
     YTM_BASE_API,
@@ -26,15 +26,15 @@ from ytmusicapi2.helpers import (
     initialize_headers,
     sapisid_from_cookie,
 )
-from ytmusicapi2.mixins.browsing import BrowsingMixin
-from ytmusicapi2.mixins.explore import ExploreMixin
-from ytmusicapi2.mixins.library import LibraryMixin
-from ytmusicapi2.mixins.playlists import PlaylistsMixin
-from ytmusicapi2.mixins.podcasts import PodcastsMixin
-from ytmusicapi2.mixins.search import SearchMixin
-from ytmusicapi2.mixins.uploads import UploadsMixin
-from ytmusicapi2.mixins.watch import WatchMixin
-from ytmusicapi2.parsers.i18n import Parser
+from ytmusicapi.mixins.browsing import BrowsingMixin
+from ytmusicapi.mixins.explore import ExploreMixin
+from ytmusicapi.mixins.library import LibraryMixin
+from ytmusicapi.mixins.playlists import PlaylistsMixin
+from ytmusicapi.mixins.podcasts import PodcastsMixin
+from ytmusicapi.mixins.search import SearchMixin
+from ytmusicapi.mixins.uploads import UploadsMixin
+from ytmusicapi.mixins.watch import WatchMixin
+from ytmusicapi.parsers.i18n import Parser
 
 from .auth.auth_parse import determine_auth_type, parse_auth_str
 from .auth.oauth import OAuthCredentials, RefreshingToken
@@ -82,7 +82,7 @@ class YTMusicBase:
 
         :param language: Optional. Can be used to change the language of returned data.
             English will be used by default. Available languages can be checked in
-            the ytmusicapi2/locales directory.
+            the ytmusicapi/locales directory.
         :param location: Optional. Can be used to change the location of the user.
             No location will be set by default. This means it is determined by the server.
             Available languages can be checked in the FAQ.

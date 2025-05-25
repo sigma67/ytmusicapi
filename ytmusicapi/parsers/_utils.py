@@ -4,8 +4,8 @@ from functools import wraps
 from gettext import GNUTranslations
 from typing import ParamSpec, TypeVar
 
-from ytmusicapi2.navigation import *
-from ytmusicapi2.type_alias import JsonDict, JsonList
+from ytmusicapi.navigation import *
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 P = ParamSpec("P")
 R = TypeVar("R")

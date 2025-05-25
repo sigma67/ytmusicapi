@@ -1,7 +1,7 @@
-# Translations for ytmusicapi2
+# Translations for ytmusicapi
 # Copyright (C) 2023 sigma67
-# This file is distributed under the same license as ytmusicapi2
-# sigma67 <ytmusicapi2@gmail.com>
+# This file is distributed under the same license as ytmusicapi
+# sigma67 <ytmusicapi@gmail.com>
 # 
 msgid ""
 msgstr ""

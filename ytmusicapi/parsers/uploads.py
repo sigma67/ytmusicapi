@@ -1,4 +1,4 @@
-from ytmusicapi2.type_alias import JsonList
+from ytmusicapi.type_alias import JsonList
 
 from ._utils import *
 from .songs import parse_song_album, parse_song_artists

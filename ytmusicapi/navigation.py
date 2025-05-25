@@ -2,7 +2,7 @@
 
 from typing import Any, Literal, overload
 
-from ytmusicapi2.type_alias import JsonDict, JsonList
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 CONTENT = ["contents", 0]
 RUN_TEXT = ["runs", 0, "text"]

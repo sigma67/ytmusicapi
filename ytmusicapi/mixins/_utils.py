@@ -2,8 +2,8 @@ import re
 from datetime import date
 from typing import Literal
 
-from ytmusicapi2.exceptions import YTMusicUserError
-from ytmusicapi2.models.content.enums import LikeStatus
+from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.models.content.enums import LikeStatus
 
 LibraryOrderType = Literal["a_to_z", "z_to_a", "recently_added"]
 

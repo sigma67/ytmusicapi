@@ -10,8 +10,8 @@ from http.cookies import SimpleCookie
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
-from ytmusicapi2.constants import *
-from ytmusicapi2.type_alias import JsonDict
+from ytmusicapi.constants import *
+from ytmusicapi.type_alias import JsonDict
 
 
 def initialize_headers() -> CaseInsensitiveDict[str]:
