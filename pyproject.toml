@@ -34,7 +34,7 @@ readme = {file = ["README.rst"]}
 include-package-data=false
 
 [tool.setuptools.package-data]
-"*" = ["**.rst", "**.py", "**.mo"]
+"ytmusicapi" = ["py.typed", "*.rst", "*.mo"]
 
 ###############
 # DEVELOPMENT #
