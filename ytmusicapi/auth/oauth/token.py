@@ -126,7 +126,7 @@ class RefreshingToken(OAuthToken):
         url = f"{code['verification_url']}?user_code={code['user_code']}"
         if open_browser:
             webbrowser.open(url)
-        input(f"Go to {url}, finish the login flow and press Enter when done, Ctrl-C to abort")
+        input(f"Go to {url} , finish the login flow and press Enter when done, Ctrl-C to abort")
         raw_token = credentials.token_from_code(code["device_code"])
         ref_token = cls(credentials=credentials, **raw_token)
         ref_token.update(ref_token.as_dict())
