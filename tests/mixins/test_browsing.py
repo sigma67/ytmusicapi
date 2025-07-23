@@ -139,6 +139,12 @@ class TestBrowsing:
         with pytest.raises(Exception, match="Invalid album browseId"):
             yt.get_album("asdf")
 
+    def test_get_album_without_artist(self, yt):
+        album = yt.get_album("MPREb_n1AxZ9F8rF7")  # soundtrack album with no artist info
+        assert album["artists"] is None
+        assert album["audioPlaylistId"] is not None
+        assert len(album["tracks"]) == 11
+
     def test_get_album_other_versions(self, yt):
         # Eminem - Curtain Call: The Hits (Explicit Variant)
         album = yt.get_album("MPREb_LQCAymzbaKJ")
