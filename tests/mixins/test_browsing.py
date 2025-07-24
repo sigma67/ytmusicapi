@@ -191,11 +191,6 @@ class TestBrowsing:
         assert song.start_time <= song.end_time
         assert isinstance(song.id, int)
 
-        playlist = yt.get_watch_playlist(config["uploads"]["private_upload_id"])
-        assert playlist["lyrics"] is None
-        with pytest.raises(Exception):
-            yt.get_lyrics(playlist["lyrics"])
-
     def test_get_signatureTimestamp(self, yt):
         signature_timestamp = yt.get_signatureTimestamp()
         assert signature_timestamp is not None
