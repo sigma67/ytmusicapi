@@ -81,7 +81,9 @@ class TestSearch:
         assert all(item["resultType"] == "song" for item in results)
         results = yt_auth.search(query, filter="videos")
         assert len(results) > 10
-        assert all(item["views"] != "" for item in results)
+        assert all(
+            item["views"] != "" for item in results if item["videoType"] != "MUSIC_VIDEO_TYPE_PODCAST_EPISODE"
+        )  # video results include podcast episodes, which can't track views
         assert all(item["resultType"] == "video" for item in results)
         results = yt_auth.search(query, filter="albums", limit=40)
         assert len(results) > 20

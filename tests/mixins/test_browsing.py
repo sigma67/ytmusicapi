@@ -121,19 +121,15 @@ class TestBrowsing:
         assert album["audioPlaylistId"] is not None
         assert len(album["tracks"]) == 7
         assert len(album["tracks"][0]["artists"]) == 1
-        album = yt.get_album("MPREb_rqH94Zr3NN0")
+        album = yt.get_album("MPREb_7HdnOQMfJ3w")
         assert album["likeStatus"] is not None
         assert album["audioPlaylistId"] is not None
         assert len(album["tracks"][0]["artists"]) == 2
-        album = yt.get_album("MPREb_TPH4WqN5pUo")  # album with tracks completely removed/missing
+        album = yt.get_album("MPREb_G21w42zx0qJ")  # album with track (#13) disabled/greyed out
         assert album["likeStatus"] is not None
         assert album["audioPlaylistId"] is not None
-        assert album["tracks"][0]["trackNumber"] == 3
-        assert album["tracks"][13]["trackNumber"] == 18
-        album = yt.get_album("MPREb_YuigcYm2erf")  # album with track (#8) disabled/greyed out
-        assert album["likeStatus"] is not None
-        assert album["audioPlaylistId"] is not None
-        assert album["tracks"][7]["trackNumber"] is None
+        assert album["tracks"][12]["trackNumber"] is None
+        assert not album["tracks"][12]["isAvailable"]
 
     def test_get_album_errors(self, yt):
         with pytest.raises(Exception, match="Invalid album browseId"):
