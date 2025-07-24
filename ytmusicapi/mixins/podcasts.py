@@ -224,10 +224,14 @@ class PodcastsMixin(MixinProtocol):
         header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
         episode = parse_episode_header(header)
 
+        episode["description"] = None
         description_runs = nav(
-            two_columns, ["secondaryContents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "description", "runs"]
+            two_columns,
+            ["secondaryContents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "description", "runs"],
+            True,
         )
-        episode["description"] = Description.from_runs(description_runs)
+        if description_runs:
+            episode["description"] = Description.from_runs(description_runs)
 
         return episode
 
