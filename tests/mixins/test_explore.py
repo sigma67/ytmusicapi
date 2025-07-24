@@ -1,3 +1,6 @@
+import pytest
+
+
 class TestExplore:
     def test_get_mood_playlists(self, yt):
         categories = yt.get_mood_categories()
@@ -7,6 +10,7 @@ class TestExplore:
         playlists = yt.get_mood_playlists(categories[cat][0]["params"])
         assert len(playlists) > 0
 
+    @pytest.mark.skip(reason="disabled for now due to #787")
     def test_get_charts(self, yt, yt_oauth):
         charts = yt_oauth.get_charts()
         # songs section appears to be removed currently (US)
