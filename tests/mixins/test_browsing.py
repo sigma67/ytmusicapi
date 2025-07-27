@@ -141,9 +141,9 @@ class TestBrowsing:
         assert album["audioPlaylistId"] is not None
         assert len(album["tracks"]) == 11
 
-    def test_get_album_other_versions(self, yt):
+    def test_get_album_other_versions(self, yt, yt_oauth):
         # Eminem - Curtain Call: The Hits (Explicit Variant)
-        album = yt.get_album("MPREb_LQCAymzbaKJ")
+        album = yt_oauth.get_album("MPREb_LQCAymzbaKJ")
         variants = album["other_versions"]
         assert len(variants) >= 1  # appears to be regional
         variant = variants[0]
@@ -163,6 +163,7 @@ class TestBrowsing:
         assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"
         assert variant["artists"][1]["name"] == "RAYE"
         assert variant["artists"][2] == {"id": "UCb7jnkQW94hzOoWkG14zs4w", "name": "D-Block Europe"}
+        assert variant["audioPlaylistId"] is not None
 
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload

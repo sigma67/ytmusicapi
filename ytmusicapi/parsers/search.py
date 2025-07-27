@@ -2,6 +2,7 @@ from ytmusicapi.type_alias import JsonDict, JsonList
 
 from ..helpers import to_int
 from ._utils import *
+from .albums import parse_album_playlistid_if_exists
 from .songs import *
 
 ALL_RESULT_TYPES = [
@@ -201,11 +202,6 @@ def parse_search_result(
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
 
     return search_result
-
-
-def parse_album_playlistid_if_exists(data: JsonDict | None) -> str | None:
-    """the content of the data changes based on whether the user is authenticated or not"""
-    return nav(data, WATCH_PID, True) or nav(data, WATCH_PLAYLIST_ID, True) if data else None
 
 
 def parse_search_results(

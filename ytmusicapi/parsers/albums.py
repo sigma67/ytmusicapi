@@ -85,3 +85,8 @@ def parse_album_header_2024(response: JsonDict) -> JsonDict:
         album["likeStatus"] = parse_like_status(service)
 
     return album
+
+
+def parse_album_playlistid_if_exists(data: JsonDict | None) -> str | None:
+    """the content of the data changes based on whether the user is authenticated or not"""
+    return nav(data, WATCH_PID, True) or nav(data, WATCH_PLAYLIST_ID, True) if data else None

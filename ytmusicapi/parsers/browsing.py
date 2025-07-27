@@ -2,6 +2,7 @@ import re
 
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
 
+from .albums import parse_album_playlistid_if_exists
 from .podcasts import parse_episode, parse_podcast
 from .songs import *
 
@@ -64,7 +65,7 @@ def parse_album(result: JsonDict) -> JsonDict:
         "type": nav(result, SUBTITLE),
         "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
-        "audioPlaylistId": nav(result, THUMBNAIL_OVERLAY, True),
+        "audioPlaylistId": parse_album_playlistid_if_exists(nav(result, THUMBNAIL_OVERLAY_NAVIGATION, True)),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
     }
