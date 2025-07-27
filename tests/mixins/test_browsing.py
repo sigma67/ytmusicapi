@@ -109,6 +109,7 @@ class TestBrowsing:
     def test_get_album(self, yt, yt_auth, sample_album):
         album = yt_auth.get_album(sample_album)
         assert len(album) >= 9
+        assert album["related_recommendations"]
         assert "isExplicit" in album
         assert album["tracks"][0]["isExplicit"]
         assert all(item["views"] is not None for item in album["tracks"])
@@ -148,6 +149,7 @@ class TestBrowsing:
         assert len(variants) >= 1  # appears to be regional
         variant = variants[0]
         assert variant["type"] == "Album"
+        assert variant["title"] == album["title"]
         assert len(variant["artists"]) == 1
         assert variant["artists"][0] == {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}
         assert variant["audioPlaylistId"] is not None
@@ -158,6 +160,7 @@ class TestBrowsing:
         assert not album["isExplicit"]
         variant = album["other_versions"][0]
         assert variant["type"] == "Single"
+        assert variant["title"] == "Prada"
         assert variant["isExplicit"]
         assert len(variant["artists"]) == 3
         assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"

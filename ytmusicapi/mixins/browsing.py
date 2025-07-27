@@ -564,11 +564,17 @@ class BrowsingMixin(MixinProtocol):
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
 
-        other_versions = nav(
-            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST, 1, *CAROUSEL], True
+        secondary_carousels = (
+            nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True) or []
         )
-        if other_versions is not None:
-            album["other_versions"] = parse_content_list(other_versions["contents"], parse_album)
+        for section in secondary_carousels[1:]:
+            carousel = nav(section, CAROUSEL)
+            key = {
+                "COLLECTION_STYLE_ITEM_SIZE_SMALL": "related_recommendations",
+                "COLLECTION_STYLE_ITEM_SIZE_MEDIUM": "other_versions",
+            }[carousel["itemSize"]]
+            album[key] = parse_content_list(carousel["contents"], parse_album)
+
         album["duration_seconds"] = sum_total_duration(album)
         for i, track in enumerate(album["tracks"]):
             album["tracks"][i]["album"] = album["title"]
