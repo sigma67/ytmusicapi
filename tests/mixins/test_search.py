@@ -112,12 +112,35 @@ class TestSearch:
         assert len(results) >= 3
         assert all(item["resultType"] == "episode" for item in results)
 
-    def test_search_top_result(self, yt):
+    def test_search_episode_category(self, yt):
+        """Test resultType detection for episodes by searching for a podcast without a filter."""
+        results = yt.search("Stanford Graduate School of Business")
+        episode = next(
+            item
+            for item in results
+            if item["category"] == "Episodes" and item["podcast"]["name"] == "Stanford GSB Podcasts"
+        )
+        assert episode["resultType"] == "episode"
+        assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
+
+    def test_search_top_result_playlist(self, yt):
         results = yt.search("fdsfsfsd")  # issue 524
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "playlist"
         assert results[0]["playlistId"].startswith("PL")
         assert len(results[0]["author"]) > 0
+
+    def test_search_top_result_episode(self, yt):
+        results = yt.search(
+            "Stanford GSB Podcasts 124. Making Meetings Meaningful, Pt. 1: How to Structure and Organize More Effective Gatherings"
+        )
+        assert results[0]["category"] == "Top result"
+        assert results[0]["resultType"] == "episode"
+        assert results[0]["videoId"] == "KNkyHCLOr1o"
+        assert results[0]["podcast"] == {
+            "id": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
+            "name": "Stanford GSB Podcasts",
+        }
 
     def test_search_uploads(self, config, yt, yt_oauth):
         with pytest.raises(Exception, match="No filter can be set when searching uploads"):
