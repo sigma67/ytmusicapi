@@ -67,6 +67,13 @@ def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict
         search_result["title"] = nav(data, TITLE_TEXT)
         search_result["author"] = parse_song_artists_runs(nav(data, ["subtitle", "runs"])[2:])
 
+    if result_type in ["episode"]:
+        search_result["videoId"] = nav(data, [*THUMBNAIL_OVERLAY_NAVIGATION, *WATCH_VIDEO_ID])
+        search_result["videoType"] = nav(data, [*THUMBNAIL_OVERLAY_NAVIGATION, *NAVIGATION_VIDEO_TYPE])
+        runs = nav(data, SUBTITLE_RUNS)[2:]
+        search_result["date"] = runs[0]["text"]
+        search_result["podcast"] = parse_id_name(runs[2])
+
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
     return search_result
 
@@ -96,7 +103,10 @@ def parse_search_result(
                 iter(type for prefix, type in mapping.items() if browse_id.startswith(prefix)), None
             )
         else:
-            result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
+            result_type = {
+                "MUSIC_VIDEO_TYPE_ATV": "song",
+                "MUSIC_VIDEO_TYPE_PODCAST_EPISODE": "episode",
+            }.get(video_type or "", "video")
 
     search_result["resultType"] = result_type
 
@@ -191,12 +201,13 @@ def parse_search_result(
 
     if result_type in ["episode"]:
         flex_item = get_flex_column_item(data, 1)
-        has_date = int(len(nav(flex_item, TEXT_RUNS)) > 1)
+        runs = nav(flex_item, TEXT_RUNS)[default_offset:]
+        has_date = int(len(runs) > 1)
         search_result["live"] = bool(nav(data, ["badges", 0, "liveBadgeRenderer"], True))
         if has_date:
-            search_result["date"] = nav(flex_item, TEXT_RUN_TEXT)
+            search_result["date"] = runs[0]["text"]
 
-        search_result["podcast"] = parse_id_name(nav(flex_item, ["text", "runs", has_date * 2]))
+        search_result["podcast"] = parse_id_name(runs[has_date * 2])
 
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
 
