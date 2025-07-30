@@ -27,6 +27,7 @@ from ytmusicapi.helpers import (
     sapisid_from_cookie,
 )
 from ytmusicapi.mixins.browsing import BrowsingMixin
+from ytmusicapi.mixins.charts import ChartsMixin
 from ytmusicapi.mixins.explore import ExploreMixin
 from ytmusicapi.mixins.library import LibraryMixin
 from ytmusicapi.mixins.playlists import PlaylistsMixin
@@ -280,6 +281,7 @@ class YTMusic(
     BrowsingMixin,
     SearchMixin,
     WatchMixin,
+    ChartsMixin,
     ExploreMixin,
     LibraryMixin,
     PlaylistsMixin,
