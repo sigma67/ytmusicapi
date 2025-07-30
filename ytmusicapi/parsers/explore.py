@@ -10,6 +10,14 @@ def parse_chart_song(data: JsonDict) -> JsonDict:
     return parsed
 
 
+def parse_chart_playlist(data: JsonDict) -> JsonDict:
+    return {
+        "title": nav(data, TITLE_TEXT),
+        "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
+        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+    }
+
+
 def parse_chart_artist(data: JsonDict) -> JsonDict:
     subscribers = get_flex_column_item(data, 1)
     if subscribers:
