@@ -1,9 +1,6 @@
-from collections.abc import Callable
-from typing import Any
-
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.explore import *
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 
 class ExploreMixin(MixinProtocol):
@@ -90,27 +87,33 @@ class ExploreMixin(MixinProtocol):
 
         return playlists
 
-    def get_charts(self, country: str = "ZZ") -> JsonDict:
+    def get_explore(self) -> JsonDict:
         """
-        Get latest charts data from YouTube Music: Top songs, top videos, top artists and top trending videos.
-        Global charts have no Trending section, US charts have an extra Genres section with some Genre charts.
+        Get latest explore data from YouTube Music.
+        The Top Songs chart is only returned when authenticated with a premium account.
 
-        :param country: ISO 3166-1 Alpha-2 country code. Default: ``ZZ`` = Global
-        :return: Dictionary containing chart songs (only if authenticated with premium account),
-            chart videos, chart artists and trending videos.
+        :return: Dictionary containing new album releases, top songs (if authenticated with a premium account), moods & genres, popular episodes, trending tracks, and new music videos.
 
         Example::
 
             {
-                "countries": {
-                    "selected": {
-                        "text": "United States"
-                    },
-                    "options": ["DE",
-                        "ZZ",
-                        "ZW"]
-                },
-                "songs": {
+                "new_releases": [
+                    {
+                        "title": "Hangang",
+                        "type": "Album",
+                        "artists": [
+                            {
+                              "id": "UCpo4SbqmPXpCVA5RFj-Gq5Q",
+                              "name": "Dept"
+                            }
+                        ],
+                        "browseId": "MPREb_rGl39ZNEl95",
+                        "audioPlaylistId": "OLAK5uy_mTZAp8a-agh1at-cVUGrwPhTJoM5GnKTk",
+                        "thumbnails": [...],
+                        "isExplicit": false
+                    }
+                ],
+                "top_songs": {
                     "playlist": "VLPL4fGSI1pDJn6O1LS0XSdF3RyO0Rq_LDeI",
                     "items": [
                         {
@@ -137,124 +140,104 @@ class ExploreMixin(MixinProtocol):
                         }
                     ]
                 },
-                "videos": {
-                    "playlist": "VLPL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc",
-                    "items": [
-                        {
-                            "title": "EVERY CHANCE I GET (Official Music Video) (feat. Lil Baby & Lil Durk)",
-                            "videoId": "BTivsHlVcGU",
-                            "playlistId": "PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc",
-                            "thumbnails": [],
-                            "views": "46M"
-                        }
-                    ]
-                },
-                "artists": {
-                    "playlist": null,
-                    "items": [
-                        {
-                            "title": "YoungBoy Never Broke Again",
-                            "browseId": "UCR28YDxjDE3ogQROaNdnRbQ",
-                            "subscribers": "9.62M",
-                            "thumbnails": [],
-                            "rank": "1",
-                            "trend": "neutral"
-                        }
-                    ]
-                },
-                "genres": [
+                "moods_and_genres": [
                     {
-                        "title": "Top 50 Pop Music Videos United States",
-                        "playlistId": "PL4fGSI1pDJn77aK7sAW2AT0oOzo5inWY8",
-                        "thumbnails": []
+                        "title": "Chill",
+                        "params": "ggMPOg1uXzVuc0dnZlhpV3Ba"
+                    }
+                ],
+                "top_episodes": [
+                    {
+                        "title": "132. Lean Into Failure: How to Make Mistakes That Work | Think Fast, Talk Smart: Communication...",
+                        "description": "...",
+                        "duration": "25 min",
+                        "videoId": "xAEGaW2my7E",
+                        "browseId": "MPEDxAEGaW2my7E",
+                        "videoType": "MUSIC_VIDEO_TYPE_PODCAST_EPISODE",
+                        "date": "Mar 5, 2024",
+                        "thumbnails": [...],
+                        "podcast": {
+                            "id": "UCGwuxdEeCf0TIA2RbPOj-8g",
+                            "name: "Stanford Graduate School of Business"
+                        }
                     }
                 ],
                 "trending": {
-                    "playlist": "VLPLrEnWoR732-DtKgaDdnPkezM_nDidBU9H",
+                    "playlist": "VLOLAK5uy_kNWGJvgWVqlt5LsFDL9Sdluly4M8TvGkM",
                     "items": [
                         {
                             "title": "Permission to Dance",
                             "videoId": "CuklIb9d3fI",
-                            "playlistId": "PLrEnWoR732-DtKgaDdnPkezM_nDidBU9H",
+                            "playlistId": "OLAK5uy_kNWGJvgWVqlt5LsFDL9Sdluly4M8TvGkM",
                             "artists": [
                                 {
                                     "name": "BTS",
                                     "id": "UC9vrvNSL3xcWGSkV86REBSg"
                                 }
                             ],
-                            "thumbnails": [],
+                            "thumbnails": [...],
+                            "isExplicit": false,
                             "views": "108M"
                         }
                     ]
-                }
+                },
+                "new_videos": [
+                    {
+                        "title": "EVERY CHANCE I GET (Official Music Video) (feat. Lil Baby & Lil Durk)",
+                        "videoId": "BTivsHlVcGU",
+                        "artists": [
+                            {
+                                "name": "DJ Khaled",
+                                "id": "UC0Kgvj5t_c9EMWpEDWJuR1Q"
+                            }
+                        ],
+                        "playlistId": null,
+                        "thumbnails": [...],
+                        "views": "46M"
+                    }
+                ]
             }
 
         """
-        body: JsonDict = {"browseId": "FEmusic_charts"}
-        if country:
-            body["formData"] = {"selectedValues": [country]}
+        body: JsonDict = {"browseId": "FEmusic_explore"}
 
         response = self._send_request("browse", body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        charts: JsonDict = {"countries": {}}
-        menu = nav(
-            results[0],
-            [
-                *MUSIC_SHELF,
-                "subheaders",
-                0,
-                "musicSideAlignedItemRenderer",
-                "startItems",
-                0,
-                "musicSortFilterButtonRenderer",
-            ],
-        )
-        charts["countries"]["selected"] = nav(menu, TITLE)
-        charts["countries"]["options"] = list(
-            filter(
-                None,
-                [
-                    nav(m, ["payload", "musicFormBooleanChoice", "opaqueToken"], True)
-                    for m in nav(response, FRAMEWORK_MUTATIONS)
-                ],
-            )
-        )
-        charts_categories = ["videos", "artists"]
 
-        has_genres = country == "US"
-        has_trending = country != "ZZ"
+        explore: JsonDict = {}
 
-        # use result length to determine if songs category is present
-        # could also be done via an is_premium attribute on YTMusic instance
-        has_songs = (len(results) - 1) > (len(charts_categories) + has_genres + has_trending)
+        for result in results:
+            browse_id = nav(result, CAROUSEL + CAROUSEL_TITLE + NAVIGATION_BROWSE_ID, True)
+            if browse_id is None:
+                continue
 
-        if has_songs:
-            charts_categories.insert(0, "songs")
-        if has_genres:
-            charts_categories.append("genres")
-        if has_trending:
-            charts_categories.append("trending")
+            contents = nav(result, CAROUSEL_CONTENTS)
+            match browse_id:
+                case "FEmusic_new_releases_albums":
+                    explore["new_releases"] = parse_content_list(contents, parse_album)
 
-        parse_chart: Callable[[int, ParseFuncDictType, str], list[dict[str, Any]]] = (
-            lambda index, parse_func, key: parse_content_list(
-                nav(results[index + has_songs], CAROUSEL_CONTENTS), parse_func, key
-            )
-        )
-        for i, c in enumerate(charts_categories):
-            charts[c] = {
-                "playlist": nav(results[1 + i], CAROUSEL + CAROUSEL_TITLE + NAVIGATION_BROWSE_ID, True)
-            }
+                case "FEmusic_moods_and_genres":
+                    explore["moods_and_genres"] = [
+                        {"title": nav(genre, CATEGORY_TITLE), "params": nav(genre, CATEGORY_PARAMS)}
+                        for genre in nav(result, CAROUSEL_CONTENTS)
+                    ]
 
-        if has_songs:
-            charts["songs"].update({"items": parse_chart(0, parse_chart_song, MRLIR)})
+                case "FEmusic_top_non_music_audio_episodes":
+                    explore["top_episodes"] = parse_content_list(contents, parse_chart_episode, MMRIR)
 
-        charts["videos"]["items"] = parse_chart(1, parse_video, MTRIR)
-        charts["artists"]["items"] = parse_chart(2, parse_chart_artist, MRLIR)
+                case "FEmusic_new_releases_videos":
+                    explore["new_videos"] = parse_content_list(contents, parse_video, MTRIR)
 
-        if has_genres:
-            charts["genres"] = parse_chart(3, parse_playlist, MTRIR)
+                case playlist_id if playlist_id.startswith("VLPL"):
+                    explore["top_songs"] = {
+                        "playlist": playlist_id,
+                        "items": parse_content_list(contents, parse_chart_song, MRLIR),
+                    }
 
-        if has_trending:
-            charts["trending"]["items"] = parse_chart(3 + has_genres, parse_chart_trending, MRLIR)
+                case playlist_id if playlist_id.startswith("VLOLA"):
+                    explore["trending"] = {
+                        "playlist": playlist_id,
+                        "items": parse_content_list(contents, parse_trending_song, MRLIR),
+                    }
 
-        return charts
+        return explore
