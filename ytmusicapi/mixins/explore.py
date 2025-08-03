@@ -237,7 +237,7 @@ class ExploreMixin(MixinProtocol):
                 case playlist_id if playlist_id.startswith("VLOLA"):
                     explore["trending"] = {
                         "playlist": playlist_id,
-                        "items": parse_content_list(contents, parse_trending_song, MRLIR),
+                        "items": parse_content_list(contents, parse_song_flat, MRLIR),
                     }
 
         return explore

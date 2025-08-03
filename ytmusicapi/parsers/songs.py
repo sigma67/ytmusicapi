@@ -21,7 +21,13 @@ def parse_song_artists_runs(runs: JsonList) -> JsonList:
     return artists
 
 
-def parse_song_runs(runs: JsonList) -> JsonDict:
+def parse_song_runs(runs: JsonList, api_result_types: list[str] = []) -> JsonDict:
+    """
+    :param api_result_types: use to skip type specifiers (like "Song", "Single", or "Album")
+    """
+    runs_offset = (len(runs) and len(runs[0]) == 1 and runs[0]["text"].lower() in api_result_types) * 2
+    runs = runs[runs_offset:]
+
     parsed: JsonDict = {"artists": []}
     for i, run in enumerate(runs):
         if i % 2:  # uneven items are always separators

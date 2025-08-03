@@ -16,7 +16,10 @@ class TestExplore:
         assert all(item["audioPlaylistId"].startswith("OLA") for item in explore["new_releases"])
 
         # check top_songs if present
-        assert all(item["videoId"] for item in explore.get("top_songs", {"items": []})["items"])
+        assert all(
+            item["videoId"] and (item.get("views") or item.get("album"))
+            for item in explore.get("top_songs", {"items": []})["items"]
+        )
 
         assert all(
             item["videoId"] and all(artist["id"] for artist in item["artists"])
