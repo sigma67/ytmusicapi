@@ -34,7 +34,9 @@ def get_search_result_type(result_type_local: str, result_types_local: list[str]
 
 def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict:
     result_type = get_search_result_type(nav(data, SUBTITLE), search_result_types)
-    search_result = {"category": nav(data, CARD_SHELF_TITLE), "resultType": result_type}
+    # header element is missing in some edge cases (#799)
+    category = nav(data, CARD_SHELF_TITLE, True) or "Top result"
+    search_result = {"category": category, "resultType": result_type}
     if result_type == "artist":
         subscribers = nav(data, SUBTITLE2, True)
         if subscribers:
