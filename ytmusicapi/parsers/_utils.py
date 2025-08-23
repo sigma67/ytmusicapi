@@ -7,6 +7,8 @@ from typing import ParamSpec, TypeVar
 from ytmusicapi.navigation import *
 from ytmusicapi.type_alias import JsonDict, JsonList
 
+from .constants import DOT_SEPARATOR_RUN
+
 P = ParamSpec("P")
 R = TypeVar("R")
 
@@ -69,7 +71,7 @@ def get_fixed_column_item(item: JsonDict, index: int) -> JsonDict | None:
 
 def get_dot_separator_index(runs: JsonList) -> int:
     try:
-        index = runs.index({"text": " • "})
+        index = runs.index(DOT_SEPARATOR_RUN)
     except ValueError:
         index = len(runs)
 

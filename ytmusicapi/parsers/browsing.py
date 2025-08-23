@@ -7,7 +7,9 @@ from .podcasts import parse_episode, parse_podcast
 from .songs import *
 
 
-def parse_mixed_content(rows: JsonList, api_result_types: list[str]) -> JsonList:
+def parse_mixed_content(
+    rows: JsonList,
+) -> JsonList:
     items = []
     for row in rows:
         if DESCRIPTION_SHELF[0] in row:
@@ -29,7 +31,7 @@ def parse_mixed_content(rows: JsonList, api_result_types: list[str]) -> JsonList
                         if nav(data, NAVIGATION_WATCH_PLAYLIST_ID, True) is not None:
                             content = parse_watch_playlist(data)
                         else:
-                            content = parse_song(data, api_result_types=api_result_types)
+                            content = parse_song(data)
                     elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
                         content = parse_album(data)
                     elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
@@ -39,7 +41,7 @@ def parse_mixed_content(rows: JsonList, api_result_types: list[str]) -> JsonList
                     elif page_type == "MUSIC_PAGE_TYPE_PODCAST_SHOW_DETAIL_PAGE":
                         content = parse_podcast(data)
                 elif data := nav(result, [MRLIR], True):
-                    content = parse_song_flat(data, api_result_types=api_result_types)
+                    content = parse_song_flat(data)
                 elif data := nav(result, [MMRIR], True):
                     content = parse_episode(data)
                 else:
@@ -85,18 +87,18 @@ def parse_single(result: JsonDict) -> JsonDict:
     }
 
 
-def parse_song(result: JsonDict, api_result_types: list[str] = []) -> JsonDict:
+def parse_song(result: JsonDict) -> JsonDict:
     song = {
         "title": nav(result, TITLE_TEXT),
         "videoId": nav(result, NAVIGATION_VIDEO_ID),
         "playlistId": nav(result, NAVIGATION_PLAYLIST_ID, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
     }
-    song.update(parse_song_runs(nav(result, SUBTITLE_RUNS), api_result_types=api_result_types))
+    song.update(parse_song_runs(nav(result, SUBTITLE_RUNS), skip_type_spec=True))
     return song
 
 
-def parse_song_flat(data: JsonDict, api_result_types: list[str] = []) -> JsonDict:
+def parse_song_flat(data: JsonDict) -> JsonDict:
     columns = [get_flex_column_item(data, i) for i in range(0, len(data["flexColumns"]))]
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
@@ -106,7 +108,7 @@ def parse_song_flat(data: JsonDict, api_result_types: list[str] = []) -> JsonDic
     }
 
     runs = nav(columns[1], TEXT_RUNS)
-    song.update(parse_song_runs(runs, api_result_types=api_result_types))
+    song.update(parse_song_runs(runs, skip_type_spec=True))
 
     if len(columns) > 2 and columns[2] is not None and "navigationEndpoint" in nav(columns[2], TEXT_RUN):
         song["album"] = {

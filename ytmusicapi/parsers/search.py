@@ -79,9 +79,7 @@ def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict
     return search_result
 
 
-def parse_search_result(
-    data: JsonDict, api_search_result_types: list[str], result_type: str | None, category: str | None
-) -> JsonDict:
+def parse_search_result(data: JsonDict, result_type: str | None, category: str | None) -> JsonDict:
     default_offset = (not result_type or result_type == "album") * 2
     search_result: JsonDict = {"category": category}
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
@@ -189,7 +187,7 @@ def parse_search_result(
         runs = flex_item["text"]["runs"]
         if flex_item2 := get_flex_column_item(data, 2):
             runs.extend([{"text": ""}, *flex_item2["text"]["runs"]])  # first item is a dummy separator
-        song_info = parse_song_runs(runs, api_result_types=api_search_result_types)
+        song_info = parse_song_runs(runs, skip_type_spec=True)
         search_result.update(song_info)
 
     if result_type in ["artist", "album", "playlist", "profile", "podcast"]:
@@ -215,14 +213,10 @@ def parse_search_result(
 
 def parse_search_results(
     results: JsonList,
-    api_search_result_types: list[str],
     resultType: str | None = None,
     category: str | None = None,
 ) -> JsonList:
-    return [
-        parse_search_result(result[MRLIR], api_search_result_types, resultType, category)
-        for result in results
-    ]
+    return [parse_search_result(result[MRLIR], resultType, category) for result in results]
 
 
 def get_search_params(filter: str | None, scope: str | None, ignore_spelling: bool) -> str | None:
