@@ -15,6 +15,16 @@ class TestBrowsing:
         assert len(result) >= 2
         result = yt_auth.get_home(limit=15)
         assert len(result) >= 15
+        assert all(
+            # ensure we aren't parsing specifiers like "Song" as artist names
+            [
+                item["artists"][0]["id"]
+                or item["artists"][0]["name"].lower() not in yt_auth.parser.get_api_result_types()
+                for section in result
+                for item in section["contents"]
+                if item and len(item.get("artists", [])) > 1
+            ]
+        )
 
     def test_get_artist(self, yt):
         results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
@@ -179,6 +189,15 @@ class TestBrowsing:
         song = yt_oauth.get_watch_playlist(sample_video)
         song = yt_oauth.get_song_related(song["related"])
         assert len(song) >= 5
+        assert all(
+            # ensure every video is associated with a view count or music album
+            [
+                item.get("views") or item.get("album")
+                for section in song
+                for item in section["contents"]
+                if "videoId" in item
+            ]
+        )
 
     def test_get_lyrics(self, config, yt, sample_video):
         playlist = yt.get_watch_playlist(sample_video)

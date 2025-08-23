@@ -142,6 +142,16 @@ class TestSearch:
             "name": "Stanford GSB Podcasts",
         }
 
+    def test_search_top_result_video(self, yt):
+        results = yt.search("Fuel Eminem")
+        assert results[0]["category"] == "Top result"
+        assert results[0]["resultType"] == "video"
+        assert results[0]["videoId"] == "t5H_CewqpKA"
+        assert results[0]["artists"] == [
+            {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"},
+            {"name": "JID", "id": "UCRlGNubLJBgW9VRCuiUnuYw"},
+        ]
+
     def test_search_uploads(self, config, yt, yt_oauth):
         with pytest.raises(Exception, match="No filter can be set when searching uploads"):
             yt.search(

@@ -7,7 +7,7 @@ TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL
 
 
 def parse_chart_song(data: JsonDict) -> JsonDict:
-    parsed = parse_trending_song(data)
+    parsed = parse_song_flat(data)
     parsed.update(parse_ranking(data))
     return parsed
 
@@ -41,18 +41,6 @@ def parse_chart_artist(data: JsonDict) -> JsonDict:
     }
     parsed.update(parse_ranking(data))
     return parsed
-
-
-def parse_trending_song(data: JsonDict) -> JsonDict:
-    flex_0 = get_flex_column_item(data, 0)
-    return {
-        "title": nav(flex_0, TEXT_RUN_TEXT),
-        "videoId": nav(flex_0, TEXT_RUN + NAVIGATION_VIDEO_ID, True),
-        **(parse_song_runs(nav(get_flex_column_item(data, 1), TEXT_RUNS))),
-        "playlistId": nav(flex_0, TEXT_RUN + NAVIGATION_PLAYLIST_ID, True),
-        "thumbnails": nav(data, THUMBNAILS),
-        "isExplicit": nav(data, BADGE_LABEL, True) is not None,
-    }
 
 
 def parse_ranking(data: JsonDict) -> JsonDict:

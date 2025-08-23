@@ -1,6 +1,5 @@
 import re
 import warnings
-from collections.abc import Callable
 from typing import Literal, cast, overload
 
 from ytmusicapi.continuations import (
@@ -117,8 +116,7 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": "FEmusic_home"}
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        home = []
-        home.extend(parse_mixed_content(results))
+        home = parse_mixed_content(results)
 
         section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         if "continuations" in section_list:
@@ -126,11 +124,13 @@ class BrowsingMixin(MixinProtocol):
                 endpoint, body, additionalParams
             )
 
-            parse_func: Callable[[JsonList], JsonList] = lambda contents: parse_mixed_content(contents)
-
             home.extend(
                 get_continuations(
-                    section_list, "sectionListContinuation", limit - len(home), request_func, parse_func
+                    section_list,
+                    "sectionListContinuation",
+                    limit - len(home),
+                    request_func,
+                    parse_mixed_content,
                 )
             )
 
@@ -847,7 +847,9 @@ class BrowsingMixin(MixinProtocol):
 
         response = self._send_request("browse", {"browseId": browseId})
         sections = nav(response, ["contents", *SECTION_LIST])
-        return parse_mixed_content(sections)
+        return parse_mixed_content(
+            sections,
+        )
 
     @overload
     def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Lyrics | None:

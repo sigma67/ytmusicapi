@@ -234,18 +234,14 @@ class SearchMixin(MixinProtocol):
             else:
                 continue
 
-            api_search_result_types = self.parser.get_api_result_types()
-
-            search_results.extend(
-                parse_search_results(shelf_contents, api_search_result_types, result_type, category)
-            )
+            search_results.extend(parse_search_results(shelf_contents, result_type, category))
 
             if filter:  # if filter is set, there are continuations
                 request_func: RequestFuncType = lambda additionalParams: self._send_request(
                     endpoint, body, additionalParams
                 )
                 parse_func: ParseFuncType = lambda contents: parse_search_results(
-                    contents, api_search_result_types, result_type, category
+                    contents, result_type, category
                 )
 
                 search_results.extend(
