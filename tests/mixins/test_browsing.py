@@ -13,7 +13,7 @@ class TestBrowsing:
     def test_get_home(self, yt, yt_auth):
         result = yt.get_home()
         assert len(result) >= 2
-        result = yt_auth.get_home(limit=15)
+        result = yt_auth.get_home(limit=20)
         assert len(result) >= 15
         assert all(
             # ensure we aren't parsing specifiers like "Song" as artist names
@@ -24,6 +24,10 @@ class TestBrowsing:
                 for item in section["contents"]
                 if item and len(item.get("artists", [])) > 1
             ]
+        )
+        assert all(
+            # ensure all links are supported by parse_mixed_content
+            [item is not None for section in result for item in section["contents"]]
         )
 
     def test_get_artist(self, yt):
