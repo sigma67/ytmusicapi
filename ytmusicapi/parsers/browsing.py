@@ -34,7 +34,7 @@ def parse_mixed_content(
                             content = parse_song(data)
                     elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
                         content = parse_album(data)
-                    elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
+                    elif page_type in ["MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL"]:
                         content = parse_related_artist(data)
                     elif page_type == "MUSIC_PAGE_TYPE_PLAYLIST":
                         content = parse_playlist(data)
