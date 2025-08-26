@@ -52,7 +52,7 @@ def parse_song_runs(runs: JsonList, skip_type_spec: bool = False) -> JsonDict:
     :param skip_type_spec: if true, skip the type specifier (like "Song", "Single", or "Album") that may appear before artists ("Song • Eminem"). Otherwise, that text item is parsed as an artist with no ID.
     """
 
-    parsed: JsonDict = {"artists": []}
+    parsed: JsonDict = {}
 
     # prevent type specifier from being parsed as an artist
     # it's the first run, separated from the actual artists by " • "
@@ -75,6 +75,7 @@ def parse_song_runs(runs: JsonList, skip_type_spec: bool = False) -> JsonDict:
             case "album":
                 parsed["album"] = data
             case "artist":
+                parsed["artists"] = parsed.get("artists", [])
                 parsed["artists"].append(data)
             case "views":
                 parsed["views"] = data
