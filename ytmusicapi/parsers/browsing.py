@@ -141,7 +141,11 @@ def parse_video(result: JsonDict) -> JsonDict:
 
 def parse_playlist(data: JsonDict) -> JsonDict:
     playlist = {
-        "title": nav(data, TITLE_TEXT),
+        "title": nav(
+            data,
+            TITLE_TEXT,
+            none_if_absent=True,  # rare but possible for playlist title to be missing
+        ),
         "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
     }
