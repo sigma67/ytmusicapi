@@ -34,7 +34,10 @@ class PlaylistsMixin(MixinProtocol):
               "title": "New EDM This Week 03/13/2020",
               "thumbnails": [...]
               "description": "Weekly r/EDM new release roundup. Created with github.com/sigma67/spotifyplaylist_to_gmusic",
-              "author": "sigmatics",
+              "author": {
+                  "name": "sigmatics",
+                  "id": "..."
+              },
               "year": "2020",
               "duration": "6+ hours",
               "duration_seconds": 52651,

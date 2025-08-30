@@ -80,6 +80,13 @@ class TestPlaylists:
         assert playlist["trackCount"] is None  # playlist has no trackCount
         assert len(playlist["tracks"]) >= 100
 
+    def test_get_playlist_author(self, yt):
+        playlist = yt.get_playlist("PL9tY0BWXOZFu4vlBOzIOmvT6wjYb2jNiV")
+        assert "artists" not in playlist  # shouldn't return the "artists" key from parse_song_runs
+        assert playlist["author"] == {"name": "Vevo", "id": "UC2pmfLm7iq6Ov1UwYrWYkZA"}
+        playlist = yt.get_playlist("RDCLAK5uy_l2pHac-aawJYLcesgTf67gaKU-B9ekk1o")
+        assert playlist["author"] == {"name": "YouTube Music", "id": None}
+
     @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
     def test_get_playlist_languages(self, language):
         yt = YTMusic(language=language)

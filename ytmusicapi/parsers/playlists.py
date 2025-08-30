@@ -26,15 +26,8 @@ def parse_playlist_header(response: JsonDict) -> JsonDict:
     playlist.update(parse_playlist_header_meta(header))
     if playlist["thumbnails"] is None:
         playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED, True)
-    playlist["description"] = nav(header, DESCRIPTION, True)
-    run_count = len(nav(header, SUBTITLE_RUNS))
-    if run_count > 1:
-        playlist["author"] = {
-            "name": nav(header, SUBTITLE2),
-            "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
-        }
-        if run_count == 5:
-            playlist["year"] = nav(header, SUBTITLE3)
+    playlist["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
+    playlist["year"] = nav(header, SUBTITLE2)
 
     return playlist
 
@@ -47,6 +40,24 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
         "title": "".join([run["text"] for run in header.get("title", {}).get("runs", [])]),
         "thumbnails": nav(header, THUMBNAILS),
     }
+    if "facepile" in header:
+        playlist_meta["author"] = {
+            "name": nav(header, ["facepile", "avatarStackViewModel", "text", "content"]),
+            "id": nav(
+                header,
+                [
+                    "facepile",
+                    "avatarStackViewModel",
+                    "rendererContext",
+                    "commandContext",
+                    "onTap",
+                    "innertubeCommand",
+                    "browseEndpoint",
+                    "browseId",
+                ],
+                True,
+            ),
+        }
     if "runs" in header["secondSubtitle"]:
         second_subtitle_runs = header["secondSubtitle"]["runs"]
         has_views = (len(second_subtitle_runs) > 3) * 2
