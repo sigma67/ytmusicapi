@@ -116,7 +116,39 @@ class YTMusicBase:
                 )
 
         # prepare context
-        self.context = initialize_context()
+        # Use OAuth-compatible client for OAuth authentication, otherwise use default
+        if hasattr(self, 'auth_type') and self.auth_type == AuthType.OAUTH_CUSTOM_CLIENT:
+            # Use IOS_MUSIC client which works with OAuth authentication as of Aug 2025
+            self.context = initialize_context(client_name="IOS_MUSIC")
+            # Store original client info for smart switching
+            self._oauth_client_name = "IOS_MUSIC"
+            self._fallback_contexts = {}
+            # Initialize smart client selection mapping for OAuth
+            self._FUNCTION_CLIENT_MAP = {
+                # Library functions that need WEB client
+                'get_library_songs': 'WEB',
+                'get_library_artists': 'WEB',
+                'get_library_albums': 'WEB',
+                'get_library_subscriptions': 'WEB',
+                'get_library_upload_songs': 'WEB',
+                'get_library_upload_artists': 'WEB',
+                'get_library_upload_albums': 'WEB',
+                
+                # Account functions that need ANDROID_MUSIC client
+                'get_account_info': 'ANDROID_MUSIC',
+                
+                # Functions that need TVHTML5_SIMPLY_EMBEDDED_PLAYER client
+                'get_liked_songs': 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+                
+                # All other OAuth functions use default IOS_MUSIC
+                # (playlist functions, search, browsing, etc.)
+            }
+        else:
+            # Use default WEB_REMIX for browser authentication and unauthenticated access
+            self.context = initialize_context()
+            self._oauth_client_name = None
+            self._fallback_contexts = {}
+            self._FUNCTION_CLIENT_MAP = {}
 
         if location:
             if location not in SUPPORTED_LOCATIONS:
@@ -290,6 +322,112 @@ class YTMusic(
 ):
     """
     Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
-    Permits both authenticated and non-authenticated requests.
-    Authentication header data must be provided on initialization.
+    Requires an auth header, see setup().
     """
+    
+    # Function-specific client mapping for optimal OAuth compatibility
+    _FUNCTION_CLIENT_MAP = {
+        # Functions that work well with IOS_MUSIC client
+        'get_library_playlists': 'IOS_MUSIC',
+        'get_library_albums': 'IOS_MUSIC',
+        'get_library_podcasts': 'IOS_MUSIC',
+        'get_history': 'IOS_MUSIC',
+        'create_playlist': 'IOS_MUSIC',
+        'edit_playlist': 'IOS_MUSIC',
+        'delete_playlist': 'IOS_MUSIC',
+        'add_playlist_items': 'IOS_MUSIC',
+        'remove_playlist_items': 'IOS_MUSIC',
+        'rate_playlist': 'IOS_MUSIC',
+        'subscribe_artists': 'IOS_MUSIC',
+        'unsubscribe_artists': 'IOS_MUSIC',
+        
+        # Functions that may work better with alternative clients
+        'get_liked_songs': 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+        'get_account_info': 'ANDROID_MUSIC',
+        'get_library_songs': 'WEB',
+        'get_library_artists': 'WEB',
+        'get_library_subscriptions': 'WEB',
+        'get_library_channels': 'WEB',
+        'rate_song': 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+        'edit_song_library_status': 'WEB',
+        'add_history_item': 'WEB',
+        'remove_history_items': 'WEB',
+    }
+    
+    def _get_optimal_client_for_function(self, func_name: str) -> str:
+        """Get the optimal client for a specific function."""
+        if self.auth_type != AuthType.OAUTH_CUSTOM_CLIENT:
+            # Only apply smart client selection for OAuth
+            return self._oauth_client_name or "WEB_REMIX"
+        
+        return self._FUNCTION_CLIENT_MAP.get(func_name, "IOS_MUSIC")
+    
+    def _switch_client_for_function(self, func_name: str):
+        """Temporarily switch client context for optimal function compatibility."""
+        if self.auth_type != AuthType.OAUTH_CUSTOM_CLIENT:
+            return  # Only apply for OAuth
+            
+        optimal_client = self._get_optimal_client_for_function(func_name)
+        current_client = self.context['context']['client']['clientName']
+        
+        if optimal_client != current_client:
+            # Cache current context
+            if current_client not in self._fallback_contexts:
+                self._fallback_contexts[current_client] = self.context.copy()
+            
+            # Create or retrieve optimal context
+            if optimal_client not in self._fallback_contexts:
+                self._fallback_contexts[optimal_client] = initialize_context(client_name=optimal_client)
+                
+                # Preserve important settings from original context
+                original_client_settings = self.context['context']['client']
+                new_client_settings = self._fallback_contexts[optimal_client]['context']['client']
+                
+                # Keep language, location, and user settings
+                for key in ['hl', 'gl']:
+                    if key in original_client_settings:
+                        new_client_settings[key] = original_client_settings[key]
+                
+                if 'user' in self.context['context']:
+                    self._fallback_contexts[optimal_client]['context']['user'] = self.context['context']['user']
+            
+            # Switch to optimal context
+            self.context = self._fallback_contexts[optimal_client]
+    
+    def _restore_original_client(self):
+        """Restore the original OAuth client context."""
+        if self.auth_type == AuthType.OAUTH_CUSTOM_CLIENT and self._oauth_client_name:
+            if self._oauth_client_name in self._fallback_contexts:
+                self.context = self._fallback_contexts[self._oauth_client_name]
+    
+    def __getattribute__(self, name):
+        """Intercept function calls to apply smart client selection."""
+        attr = super().__getattribute__(name)
+        
+        # Check if this is a function call that benefits from client switching
+        if (callable(attr) and 
+            hasattr(self, 'auth_type') and 
+            self.auth_type == AuthType.OAUTH_CUSTOM_CLIENT and 
+            name in self._FUNCTION_CLIENT_MAP):
+            
+            # Create a wrapper that switches client context
+            def wrapper(*args, **kwargs):
+                original_context = self.context.copy()
+                try:
+                    self._switch_client_for_function(name)
+                    return attr(*args, **kwargs)
+                except Exception as e:
+                    # If the optimal client fails, try with original client
+                    if self.context != original_context:
+                        print(f"🔄 Function {name} failed with {self.context['context']['client']['clientName']}, trying with original client...")
+                        self.context = original_context
+                        return attr(*args, **kwargs)
+                    else:
+                        raise e
+                finally:
+                    # Always restore original context
+                    self.context = original_context
+            
+            return wrapper
+        
+        return attr

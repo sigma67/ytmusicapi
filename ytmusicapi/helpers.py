@@ -27,12 +27,35 @@ def initialize_headers() -> CaseInsensitiveDict[str]:
     )
 
 
-def initialize_context() -> JsonDict:
+def initialize_context(client_name: str = "WEB_REMIX", client_version: str | None = None) -> JsonDict:
+    """Initialize context for YouTube Music API requests.
+    
+    :param client_name: Client name to use for API requests
+    :param client_version: Client version to use. If None, auto-generates based on client_name
+    :return: Context dictionary for API requests
+    """
+    
+    # Auto-generate client version based on client name
+    if client_version is None:
+        if client_name == "WEB_REMIX":
+            client_version = "1." + time.strftime("%Y%m%d", time.gmtime()) + ".01.00"
+        elif client_name == "WEB":
+            client_version = "2." + time.strftime("%Y%m%d", time.gmtime()) + ".01.00"
+        elif client_name == "IOS_MUSIC":
+            client_version = "6.42"  # Working version for OAuth
+        elif client_name == "TVHTML5_SIMPLY_EMBEDDED_PLAYER":
+            client_version = "2.0"   # Alternative working version for OAuth
+        elif client_name == "ANDROID_MUSIC":
+            client_version = "7.29.52"  # Android Music client
+        else:
+            # Default fallback for unknown clients
+            client_version = "1." + time.strftime("%Y%m%d", time.gmtime()) + ".01.00"
+    
     return {
         "context": {
             "client": {
-                "clientName": "WEB_REMIX",
-                "clientVersion": "1." + time.strftime("%Y%m%d", time.gmtime()) + ".01.00",
+                "clientName": client_name,
+                "clientVersion": client_version,
             },
             "user": {},
         }

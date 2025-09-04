@@ -16,3 +16,17 @@ dist
 .venv
 *.log
 *.xml
+
+# OAuth development and testing files
+oauth.json
+oauth_*.json
+*oauth*.json
+test_*.py
+debug_*.py
+*_test.py
+demo_*.py
+!demo_oauth_enhancement.py
+COMPLETE_*.md
+FINAL_*.md
+README_*.md
+!README.rst
