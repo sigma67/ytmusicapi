@@ -116,7 +116,13 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": "FEmusic_home"}
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        home = parse_mixed_content(results)
+        
+        # Check if we have iOS Music format (elementRenderer structure)
+        if results and len(results) > 0 and 'elementRenderer' in results[0]:
+            home = self._parse_ios_mixed_content(results)
+        else:
+            # Use traditional parsing for web format
+            home = parse_mixed_content(results)
 
         section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         if "continuations" in section_list:
@@ -124,13 +130,15 @@ class BrowsingMixin(MixinProtocol):
                 endpoint, body, additionalParams
             )
 
+            parse_func = self._parse_ios_mixed_content if (results and len(results) > 0 and 'elementRenderer' in results[0]) else parse_mixed_content
+
             home.extend(
                 get_continuations(
                     section_list,
                     "sectionListContinuation",
                     limit - len(home),
                     request_func,
-                    parse_mixed_content,
+                    parse_func,
                 )
             )
 
@@ -252,7 +260,17 @@ class BrowsingMixin(MixinProtocol):
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
 
         artist: JsonDict = {"description": None, "views": None}
-        header = response["header"]["musicImmersiveHeaderRenderer"]
+        
+        # Handle both traditional and iOS header formats
+        if "musicImmersiveHeaderRenderer" in response["header"]:
+            # Traditional format
+            header = response["header"]["musicImmersiveHeaderRenderer"]
+        elif "musicVisualHeaderRenderer" in response["header"]:
+            # iOS format
+            header = response["header"]["musicVisualHeaderRenderer"]
+        else:
+            raise Exception(f"Unknown header format. Available keys: {list(response['header'].keys())}")
+            
         artist["name"] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
         if descriptionShelf:
@@ -276,8 +294,227 @@ class BrowsingMixin(MixinProtocol):
                 artist["songs"]["browseId"] = nav(musicShelf, TITLE + NAVIGATION_BROWSE_ID)
             artist["songs"]["results"] = parse_playlist_items(musicShelf["contents"])
 
-        artist.update(self.parser.parse_channel_contents(results))
+        # Check if we have iOS format sections
+        has_ios_sections = any(
+            "itemSectionRenderer" in section and 
+            "contents" in section["itemSectionRenderer"] and
+            len(section["itemSectionRenderer"]["contents"]) > 0 and
+            "elementRenderer" in section["itemSectionRenderer"]["contents"][0]
+            for section in results
+        )
+        
+        if has_ios_sections:
+            # Parse iOS format sections
+            artist.update(self._parse_ios_artist_sections(results))
+        else:
+            # Parse traditional format sections
+            artist.update(self.parser.parse_channel_contents(results))
+        
         return artist
+
+    def _parse_ios_artist_sections(self, results):
+        """Parse artist sections in iOS format (elementRenderer with musicListItemCarouselModel/musicGridItemCarouselModel)"""
+        artist_sections = {}
+        
+        for section in results:
+            if "itemSectionRenderer" in section:
+                item_section = section["itemSectionRenderer"]
+                if "contents" in item_section and item_section["contents"]:
+                    content = item_section["contents"][0]
+                    
+                    if "elementRenderer" in content:
+                        element = content["elementRenderer"]
+                        if "newElement" in element and "type" in element["newElement"]:
+                            new_elem = element["newElement"]
+                            if "componentType" in new_elem["type"] and "model" in new_elem["type"]["componentType"]:
+                                model = new_elem["type"]["componentType"]["model"]
+                                
+                                # Parse songs (musicListItemCarouselModel)
+                                if "musicListItemCarouselModel" in model:
+                                    carousel = model["musicListItemCarouselModel"]
+                                    if "header" in carousel and "title" in carousel["header"]:
+                                        title = carousel["header"]["title"].lower()
+                                        if "song" in title or "top" in title:
+                                            songs_data = self._parse_ios_songs_section(carousel)
+                                            if songs_data:
+                                                artist_sections["songs"] = songs_data
+                                
+                                # Parse albums/singles/videos (musicGridItemCarouselModel)
+                                elif "musicGridItemCarouselModel" in model:
+                                    carousel = model["musicGridItemCarouselModel"]
+                                    # Check for header in shelf structure (iOS format)
+                                    header_title = None
+                                    if "shelf" in carousel and "header" in carousel["shelf"] and "title" in carousel["shelf"]["header"]:
+                                        header_title = carousel["shelf"]["header"]["title"].lower()
+                                    elif "header" in carousel and "title" in carousel["header"]:
+                                        header_title = carousel["header"]["title"].lower()
+                                    
+                                    if header_title:
+                                        section_data = self._parse_ios_grid_section(carousel)
+                                        if section_data:
+                                            if "album" in header_title:
+                                                artist_sections["albums"] = section_data
+                                            elif "single" in header_title or "ep" in header_title:
+                                                artist_sections["singles"] = section_data
+                                            elif "video" in header_title:
+                                                artist_sections["videos"] = section_data
+                                            elif "playlist" in header_title or "featured" in header_title:
+                                                artist_sections["playlists"] = section_data
+                                            elif "fan" in header_title or "might" in header_title or "like" in header_title:
+                                                artist_sections["related"] = section_data
+        
+        return artist_sections
+    
+    def _parse_ios_songs_section(self, carousel):
+        """Parse iOS songs section (musicListItemCarouselModel)"""
+        section_data = {"browseId": None, "results": []}
+        
+        # Get browseId from header if available
+        if "header" in carousel and "onTap" in carousel["header"]:
+            on_tap = carousel["header"]["onTap"]
+            if "innertubeCommand" in on_tap and "browseEndpoint" in on_tap["innertubeCommand"]:
+                browse_endpoint = on_tap["innertubeCommand"]["browseEndpoint"]
+                section_data["browseId"] = browse_endpoint.get("browseId")
+        
+        # Parse song items
+        if "items" in carousel:
+            for item in carousel["items"]:
+                song = {}
+                if "title" in item:
+                    song["title"] = item["title"]
+                if "subtitle" in item:
+                    # Parse artist and play count from subtitle
+                    subtitle = item["subtitle"]
+                    if " • " in subtitle:
+                        parts = subtitle.split(" • ")
+                        song["artist"] = parts[0]
+                        if len(parts) > 1:
+                            song["playCount"] = parts[1]
+                    else:
+                        song["artist"] = subtitle
+                        
+                if "onTap" in item and "innertubeCommand" in item["onTap"]:
+                    command = item["onTap"]["innertubeCommand"]
+                    if "watchEndpoint" in command:
+                        watch_endpoint = command["watchEndpoint"]
+                        song["videoId"] = watch_endpoint.get("videoId")
+                        song["playlistId"] = watch_endpoint.get("playlistId")
+                        
+                if "thumbnail" in item and "image" in item["thumbnail"]:
+                    song["thumbnails"] = item["thumbnail"]["image"].get("sources", [])
+                
+                section_data["results"].append(song)
+        
+        return section_data
+    
+    def _parse_ios_grid_section(self, carousel):
+        """Parse iOS grid section (musicGridItemCarouselModel)"""
+        section_data = {"browseId": None, "results": []}
+        
+        # Get browseId from header (can be in shelf.header or direct header)
+        if "shelf" in carousel and "header" in carousel["shelf"] and "onTap" in carousel["shelf"]["header"]:
+            on_tap = carousel["shelf"]["header"]["onTap"]
+            if "innertubeCommand" in on_tap and "browseEndpoint" in on_tap["innertubeCommand"]:
+                browse_endpoint = on_tap["innertubeCommand"]["browseEndpoint"]
+                section_data["browseId"] = browse_endpoint.get("browseId")
+                if "params" in browse_endpoint:
+                    section_data["params"] = browse_endpoint["params"]
+        elif "header" in carousel and "onTap" in carousel["header"]:
+            on_tap = carousel["header"]["onTap"]
+            if "innertubeCommand" in on_tap and "browseEndpoint" in on_tap["innertubeCommand"]:
+                browse_endpoint = on_tap["innertubeCommand"]["browseEndpoint"]
+                section_data["browseId"] = browse_endpoint.get("browseId")
+                if "params" in browse_endpoint:
+                    section_data["params"] = browse_endpoint["params"]
+        
+        # Parse grid items (albums, singles, videos, etc.)
+        # Items can be in 'items' or 'shelf.items'
+        items = []
+        if "items" in carousel:
+            items = carousel["items"]
+        elif "shelf" in carousel and "items" in carousel["shelf"]:
+            items = carousel["shelf"]["items"]
+            
+        for item in items:
+            grid_item = {}
+            if "title" in item:
+                grid_item["title"] = item["title"]
+            if "subtitle" in item:
+                grid_item["subtitle"] = item["subtitle"]
+                    
+            if "onTap" in item and "innertubeCommand" in item["onTap"]:
+                command = item["onTap"]["innertubeCommand"]
+                if "browseEndpoint" in command:
+                    browse_endpoint = command["browseEndpoint"]
+                    grid_item["browseId"] = browse_endpoint.get("browseId")
+                elif "watchEndpoint" in command:
+                    watch_endpoint = command["watchEndpoint"]
+                    grid_item["videoId"] = watch_endpoint.get("videoId")
+                    grid_item["playlistId"] = watch_endpoint.get("playlistId")
+                    
+            if "thumbnail" in item and "image" in item["thumbnail"]:
+                grid_item["thumbnails"] = item["thumbnail"]["image"].get("sources", [])
+            
+            section_data["results"].append(grid_item)
+        
+        return section_data
+
+    def _parse_ios_albums(self, contents):
+        """Parse iOS format albums from gridRenderer items"""
+        albums = []
+        for result in contents:
+            if "musicTwoRowItemRenderer" not in result:
+                continue
+                
+            data = result["musicTwoRowItemRenderer"]
+            album = {}
+            
+            # Get browseId from navigationEndpoint at root level (iOS format)
+            if "navigationEndpoint" in data and "browseEndpoint" in data["navigationEndpoint"]:
+                album["browseId"] = data["navigationEndpoint"]["browseEndpoint"]["browseId"]
+            
+            # Get playlistId from menu if available
+            album["playlistId"] = nav(data, MENU_PLAYLIST_ID, none_if_absent=True)
+            
+            # Get title from title.runs[0].text
+            album["title"] = nav(data, TITLE_TEXT)
+            
+            # Get thumbnails from thumbnailRenderer
+            album["thumbnails"] = nav(data, THUMBNAIL_RENDERER)
+            
+            # Parse subtitle for type and year information
+            if "subtitle" in data and "runs" in data["subtitle"]:
+                subtitle_runs = data["subtitle"]["runs"]
+                if subtitle_runs:
+                    # First run is usually the type (Album, Single, etc.)
+                    album["type"] = subtitle_runs[0]["text"]
+                    
+                    # Look for year in the subtitle runs
+                    for run in subtitle_runs:
+                        text = run["text"]
+                        if text.strip().isdigit() and len(text.strip()) == 4:
+                            album["year"] = text.strip()
+                            break
+                    
+                    # Try to get more metadata from runs (similar to parse_song_runs)
+                    if len(subtitle_runs) > 2:
+                        # Skip type and separator, parse remaining runs
+                        remaining_runs = [run for run in subtitle_runs[2:] if run["text"].strip() not in ["•", " • "]]
+                        if remaining_runs:
+                            for run in remaining_runs:
+                                text = run["text"].strip()
+                                if text.isdigit() and len(text) == 4:
+                                    album["year"] = text
+                                elif "song" in text.lower():
+                                    album["songCount"] = text
+            
+            # Set album type if not already set
+            if "type" not in album:
+                album["type"] = "Album"  # default
+            
+            albums.append(album)
+        
+        return albums
 
     ArtistOrderType = Literal["Recency", "Popularity", "Alphabetical order"]
 
@@ -353,7 +590,27 @@ class BrowsingMixin(MixinProtocol):
             results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
 
         contents = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
-        albums = parse_albums(contents)
+        
+        # Check if we have iOS format (different structure for albums)
+        if contents and len(contents) > 0 and "musicTwoRowItemRenderer" in contents[0]:
+            # Check if this is iOS format by examining the navigation structure
+            first_item = contents[0]["musicTwoRowItemRenderer"]
+            is_ios_format = (
+                "navigationEndpoint" in first_item and 
+                "title" in first_item and 
+                "runs" in first_item["title"] and
+                "navigationEndpoint" not in first_item["title"]["runs"][0]
+            )
+            
+            if is_ios_format:
+                albums = self._parse_ios_albums(contents)
+                # Apply limit for iOS format
+                if limit is not None and len(albums) > limit:
+                    albums = albums[:limit]
+            else:
+                albums = parse_albums(contents)
+        else:
+            albums = parse_albums(contents)
 
         results = nav(results, GRID, True)
         if "continuations" in results:
@@ -426,8 +683,274 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         user = {"name": nav(response, [*HEADER_MUSIC_VISUAL, *TITLE_TEXT])}
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        user.update(self.parser.parse_channel_contents(results))
+        # Check if this is iOS format with elementRenderer structures
+        if (results and len(results) > 0 
+            and "itemSectionRenderer" in results[0] 
+            and "contents" in results[0]["itemSectionRenderer"]
+            and len(results[0]["itemSectionRenderer"]["contents"]) > 0
+            and "elementRenderer" in results[0]["itemSectionRenderer"]["contents"][0]):
+            user.update(self._parse_ios_user_contents(results))
+        else:
+            user.update(self.parser.parse_channel_contents(results))
         return user
+
+    def _parse_ios_user_contents(self, results: JsonList) -> JsonDict:
+        """Parse user contents in iOS format with elementRenderer structures"""
+        from ytmusicapi.parsers.browsing import parse_album, parse_playlist, parse_video, parse_single, parse_related_artist
+        from ytmusicapi.parsers.podcasts import parse_episode, parse_podcast
+        from ytmusicapi.navigation import MTRIR, MMRIR
+        
+        categories = [
+            ("albums", "albums", parse_album, MTRIR),
+            ("singles", "singles & eps", parse_single, MTRIR),
+            ("shows", "shows", parse_album, MTRIR),
+            ("videos", "videos", parse_video, MTRIR),
+            ("playlists", "playlists", parse_playlist, MTRIR),
+            ("related", "fans might also like", parse_related_artist, MTRIR),
+            ("episodes", "episodes", parse_episode, MMRIR),
+            ("podcasts", "podcasts", parse_podcast, MTRIR),
+        ]
+        
+        user_contents = {}
+        
+        for section in results:
+            if "itemSectionRenderer" not in section:
+                continue
+                
+            item_section = section["itemSectionRenderer"]
+            if "contents" not in item_section:
+                continue
+                
+            for content_item in item_section["contents"]:
+                if "elementRenderer" not in content_item:
+                    continue
+                    
+                element = content_item["elementRenderer"]
+                
+                # Navigate to the nested content structure
+                if ("newElement" in element 
+                    and "type" in element["newElement"] 
+                    and "componentType" in element["newElement"]["type"]
+                    and "model" in element["newElement"]["type"]["componentType"]):
+                    
+                    model = element["newElement"]["type"]["componentType"]["model"]
+                    
+                    # Handle musicListItemCarouselModel (e.g., Top songs)
+                    if "musicListItemCarouselModel" in model:
+                        carousel = model["musicListItemCarouselModel"]
+                        
+                        # Get the title/category
+                        section_title = None
+                        if "header" in carousel and "title" in carousel["header"]:
+                            section_title = carousel["header"]["title"].lower()
+                        
+                        # Special handling for "Top songs" -> "videos"
+                        if section_title == "top songs":
+                            section_title = "videos"
+                        
+                        if section_title:
+                            items = self._parse_ios_list_items(carousel.get("items", []))
+                            
+                            # Find matching category
+                            for category, category_local, category_parser, category_key in categories:
+                                if category == section_title or category_local.lower() == section_title:
+                                    if items:
+                                        user_contents[category] = {
+                                            "browseId": None,
+                                            "results": items
+                                        }
+                                        
+                                        # Extract browseId if available
+                                        if ("header" in carousel 
+                                            and "onTap" in carousel["header"] 
+                                            and "innertubeCommand" in carousel["header"]["onTap"]
+                                            and "browseEndpoint" in carousel["header"]["onTap"]["innertubeCommand"]):
+                                            
+                                            browse_endpoint = carousel["header"]["onTap"]["innertubeCommand"]["browseEndpoint"]
+                                            if "browseId" in browse_endpoint:
+                                                user_contents[category]["browseId"] = browse_endpoint["browseId"]
+                                            if "params" in browse_endpoint:
+                                                user_contents[category]["params"] = browse_endpoint["params"]
+                                    break
+                    
+                    # Handle musicGridItemCarouselModel (e.g., Albums, Singles, Playlists)
+                    elif "musicGridItemCarouselModel" in model:
+                        carousel = model["musicGridItemCarouselModel"]
+                        
+                        if "shelf" in carousel:
+                            shelf = carousel["shelf"]
+                            
+                            # Get the title/category
+                            section_title = None
+                            if "header" in shelf and "title" in shelf["header"]:
+                                section_title = shelf["header"]["title"].lower()
+                            
+                            if section_title:
+                                items = self._parse_ios_grid_items(shelf.get("items", []))
+                                
+                                # Find matching category
+                                for category, category_local, category_parser, category_key in categories:
+                                    if category == section_title or category_local.lower() == section_title:
+                                        if items:
+                                            user_contents[category] = {
+                                                "browseId": None,
+                                                "results": items
+                                            }
+                                            
+                                            # Extract browseId if available
+                                            if ("header" in shelf 
+                                                and "onTap" in shelf["header"] 
+                                                and "innertubeCommand" in shelf["header"]["onTap"]
+                                                and "browseEndpoint" in shelf["header"]["onTap"]["innertubeCommand"]):
+                                                
+                                                browse_endpoint = shelf["header"]["onTap"]["innertubeCommand"]["browseEndpoint"]
+                                                if "browseId" in browse_endpoint:
+                                                    user_contents[category]["browseId"] = browse_endpoint["browseId"]
+                                                if "params" in browse_endpoint:
+                                                    user_contents[category]["params"] = browse_endpoint["params"]
+                                        break
+        
+        return user_contents
+    
+    def _parse_ios_list_items(self, items: JsonList) -> JsonList:
+        """Parse items from musicListItemCarouselModel"""
+        parsed_items = []
+        
+        for item in items:
+            try:
+                parsed_item = {}
+                
+                # Extract title
+                if "title" in item:
+                    if isinstance(item["title"], dict) and "text" in item["title"]:
+                        parsed_item["title"] = item["title"]["text"]
+                    elif isinstance(item["title"], str):
+                        parsed_item["title"] = item["title"]
+                
+                # Extract subtitle (artist info)
+                if "subtitle" in item:
+                    if isinstance(item["subtitle"], dict) and "runs" in item["subtitle"]:
+                        # Join all runs for subtitle
+                        subtitle_parts = [run["text"] for run in item["subtitle"]["runs"]]
+                        parsed_item["subtitle"] = "".join(subtitle_parts)
+                    elif isinstance(item["subtitle"], str):
+                        parsed_item["subtitle"] = item["subtitle"]
+                
+                # Extract navigation endpoints for IDs
+                if "onTap" in item and "innertubeCommand" in item["onTap"]:
+                    command = item["onTap"]["innertubeCommand"]
+                    
+                    if "browseEndpoint" in command:
+                        browse_endpoint = command["browseEndpoint"]
+                        if "browseId" in browse_endpoint:
+                            parsed_item["browseId"] = browse_endpoint["browseId"]
+                    
+                    elif "watchEndpoint" in command:
+                        watch_endpoint = command["watchEndpoint"]
+                        if "videoId" in watch_endpoint:
+                            parsed_item["videoId"] = watch_endpoint["videoId"]
+                        if "playlistId" in watch_endpoint:
+                            parsed_item["playlistId"] = watch_endpoint["playlistId"]
+                
+                # Extract thumbnails - handle both complex and simple thumbnail structures
+                if "thumbnail" in item:
+                    if "musicThumbnailRenderer" in item["thumbnail"]:
+                        # Complex structure
+                        thumbnail_renderer = item["thumbnail"]["musicThumbnailRenderer"]
+                        if "thumbnail" in thumbnail_renderer and "thumbnails" in thumbnail_renderer["thumbnail"]:
+                            parsed_item["thumbnails"] = thumbnail_renderer["thumbnail"]["thumbnails"]
+                    elif "image" in item["thumbnail"] and "sources" in item["thumbnail"]["image"]:
+                        # Simple structure - convert to expected format
+                        sources = item["thumbnail"]["image"]["sources"]
+                        thumbnails = []
+                        for source in sources:
+                            if "url" in source:
+                                thumbnail = {"url": source["url"]}
+                                if "width" in source:
+                                    thumbnail["width"] = source["width"]
+                                if "height" in source:
+                                    thumbnail["height"] = source["height"]
+                                thumbnails.append(thumbnail)
+                        if thumbnails:
+                            parsed_item["thumbnails"] = thumbnails
+                
+                if parsed_item:  # Only add if we extracted some data
+                    parsed_items.append(parsed_item)
+                    
+            except Exception:
+                continue  # Skip items we can't parse
+        
+        return parsed_items
+    
+    def _parse_ios_grid_items(self, items: JsonList) -> JsonList:
+        """Parse items from musicGridItemCarouselModel"""
+        parsed_items = []
+        
+        for item in items:
+            try:
+                parsed_item = {}
+                
+                # Extract title - it's directly in the item
+                if "title" in item:
+                    if isinstance(item["title"], str):
+                        parsed_item["title"] = item["title"]
+                    elif isinstance(item["title"], dict) and "text" in item["title"]:
+                        parsed_item["title"] = item["title"]["text"]
+                
+                # Extract subtitle - it's directly in the item
+                if "subtitle" in item:
+                    if isinstance(item["subtitle"], str):
+                        parsed_item["subtitle"] = item["subtitle"]
+                    elif isinstance(item["subtitle"], dict) and "runs" in item["subtitle"]:
+                        # Join all runs for subtitle
+                        subtitle_parts = [run["text"] for run in item["subtitle"]["runs"]]
+                        parsed_item["subtitle"] = "".join(subtitle_parts)
+                
+                # Extract navigation endpoints for IDs
+                if "onTap" in item and "innertubeCommand" in item["onTap"]:
+                    command = item["onTap"]["innertubeCommand"]
+                    
+                    if "browseEndpoint" in command:
+                        browse_endpoint = command["browseEndpoint"]
+                        if "browseId" in browse_endpoint:
+                            parsed_item["browseId"] = browse_endpoint["browseId"]
+                    
+                    elif "watchEndpoint" in command:
+                        watch_endpoint = command["watchEndpoint"]
+                        if "videoId" in watch_endpoint:
+                            parsed_item["videoId"] = watch_endpoint["videoId"]
+                        if "playlistId" in watch_endpoint:
+                            parsed_item["playlistId"] = watch_endpoint["playlistId"]
+                
+                # Extract thumbnails - handle both complex and simple thumbnail structures
+                if "thumbnail" in item:
+                    if "musicThumbnailRenderer" in item["thumbnail"]:
+                        # Complex structure
+                        thumbnail_renderer = item["thumbnail"]["musicThumbnailRenderer"]
+                        if "thumbnail" in thumbnail_renderer and "thumbnails" in thumbnail_renderer["thumbnail"]:
+                            parsed_item["thumbnails"] = thumbnail_renderer["thumbnail"]["thumbnails"]
+                    elif "image" in item["thumbnail"] and "sources" in item["thumbnail"]["image"]:
+                        # Simple structure - convert to expected format
+                        sources = item["thumbnail"]["image"]["sources"]
+                        thumbnails = []
+                        for source in sources:
+                            if "url" in source:
+                                thumbnail = {"url": source["url"]}
+                                if "width" in source:
+                                    thumbnail["width"] = source["width"]
+                                if "height" in source:
+                                    thumbnail["height"] = source["height"]
+                                thumbnails.append(thumbnail)
+                        if thumbnails:
+                            parsed_item["thumbnails"] = thumbnails
+                
+                if parsed_item:  # Only add if we extracted some data
+                    parsed_items.append(parsed_item)
+                    
+            except Exception:
+                continue  # Skip items we can't parse
+        
+        return parsed_items
 
     def get_user_playlists(self, channelId: str, params: str) -> JsonList:
         """
@@ -446,9 +969,87 @@ class BrowsingMixin(MixinProtocol):
         if not results:
             return []
 
-        user_playlists = parse_content_list(results, parse_playlist)
+        # Check if this is iOS format with musicTwoRowItemRenderer
+        if results and len(results) > 0 and 'musicTwoRowItemRenderer' in results[0]:
+            user_playlists = self._parse_ios_user_playlists(results)
+        else:
+            user_playlists = parse_content_list(results, parse_playlist)
 
         return user_playlists
+
+    def _parse_ios_user_playlists(self, results: JsonList) -> JsonList:
+        """Parse user playlists in iOS format with musicTwoRowItemRenderer"""
+        playlists = []
+        
+        for item in results:
+            try:
+                if 'musicTwoRowItemRenderer' not in item:
+                    continue
+                    
+                renderer = item['musicTwoRowItemRenderer']
+                playlist = {}
+                
+                # Extract title
+                if 'title' in renderer and 'runs' in renderer['title']:
+                    title_runs = renderer['title']['runs']
+                    if title_runs and len(title_runs) > 0:
+                        playlist['title'] = title_runs[0]['text']
+                
+                # Extract playlistId from navigationEndpoint (iOS format has it at top level)
+                if 'navigationEndpoint' in renderer and 'browseEndpoint' in renderer['navigationEndpoint']:
+                    browse_endpoint = renderer['navigationEndpoint']['browseEndpoint']
+                    if 'browseId' in browse_endpoint:
+                        browse_id = browse_endpoint['browseId']
+                        # Remove VL prefix to get playlist ID
+                        if browse_id.startswith('VL'):
+                            playlist['playlistId'] = browse_id[2:]
+                        else:
+                            playlist['playlistId'] = browse_id
+                
+                # Extract thumbnails
+                if 'thumbnailRenderer' in renderer and 'musicThumbnailRenderer' in renderer['thumbnailRenderer']:
+                    thumbnail_renderer = renderer['thumbnailRenderer']['musicThumbnailRenderer']
+                    if 'thumbnail' in thumbnail_renderer and 'thumbnails' in thumbnail_renderer['thumbnail']:
+                        playlist['thumbnails'] = thumbnail_renderer['thumbnail']['thumbnails']
+                
+                # Extract description and metadata from subtitle
+                if 'subtitle' in renderer and 'runs' in renderer['subtitle']:
+                    subtitle_runs = renderer['subtitle']['runs']
+                    description_parts = []
+                    
+                    for run in subtitle_runs:
+                        description_parts.append(run['text'])
+                    
+                    full_description = ''.join(description_parts)
+                    playlist['description'] = full_description
+                    
+                    # Try to extract count and author from subtitle
+                    # Format is usually: "Playlist • Author • X views" or "Playlist • Author • X songs"
+                    if len(subtitle_runs) >= 3:
+                        # Look for view count or song count
+                        for run in subtitle_runs:
+                            text = run['text']
+                            if ' views' in text or ' songs' in text or ' song' in text:
+                                # Extract number
+                                import re
+                                match = re.search(r'(\d+(?:\.\d+)?[KMB]?)\s+(?:views?|songs?)', text)
+                                if match:
+                                    playlist['count'] = match.group(1)
+                                break
+                        
+                        # Extract author (usually between "Playlist •" and "• X views/songs")
+                        if len(subtitle_runs) >= 5:  # Playlist • Author • X views
+                            author_run = subtitle_runs[2]
+                            if author_run['text'] != ' • ':
+                                playlist['author'] = [{'name': author_run['text'], 'id': None}]
+                
+                if playlist:  # Only add if we extracted some data
+                    playlists.append(playlist)
+                    
+            except Exception:
+                continue  # Skip items we can't parse
+        
+        return playlists
 
     def get_user_videos(self, channelId: str, params: str) -> JsonList:
         """
@@ -465,11 +1066,69 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + GRID_ITEMS, True)
         if not results:
+            # Try iOS format with musicPlaylistShelfRenderer
+            section_content = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM, True)
+            if section_content and 'musicPlaylistShelfRenderer' in section_content:
+                shelf_contents = section_content['musicPlaylistShelfRenderer'].get('contents', [])
+                if shelf_contents:
+                    return self._parse_ios_user_videos(shelf_contents)
             return []
 
         user_videos = parse_content_list(results, parse_video)
 
         return user_videos
+
+    def _parse_ios_user_videos(self, contents: JsonList) -> JsonList:
+        """
+        Parse user videos from iOS format musicPlaylistShelfRenderer contents.
+        
+        :param contents: List of video items from musicPlaylistShelfRenderer
+        :return: List of parsed video dictionaries
+        """
+        videos = []
+        for item in contents:
+            if 'musicTwoColumnItemRenderer' in item:
+                renderer = item['musicTwoColumnItemRenderer']
+                
+                try:
+                    video = {}
+                    
+                    # Extract title
+                    if 'title' in renderer and 'runs' in renderer['title']:
+                        video['title'] = renderer['title']['runs'][0]['text']
+                    
+                    # Extract videoId from navigationEndpoint
+                    if 'navigationEndpoint' in renderer and 'watchEndpoint' in renderer['navigationEndpoint']:
+                        watch_endpoint = renderer['navigationEndpoint']['watchEndpoint']
+                        video['videoId'] = watch_endpoint.get('videoId', '')
+                    
+                    # Extract thumbnails
+                    if 'thumbnail' in renderer and 'musicThumbnailRenderer' in renderer['thumbnail']:
+                        thumbnail_renderer = renderer['thumbnail']['musicThumbnailRenderer']
+                        if 'thumbnail' in thumbnail_renderer and 'thumbnails' in thumbnail_renderer['thumbnail']:
+                            video['thumbnails'] = thumbnail_renderer['thumbnail']['thumbnails']
+                    
+                    # Extract metadata from subtitle
+                    if 'subtitle' in renderer and 'runs' in renderer['subtitle']:
+                        subtitle_runs = renderer['subtitle']['runs']
+                        if len(subtitle_runs) >= 3:
+                            # Format is typically: "Artist • Duration" or similar
+                            video['artists'] = [{'name': subtitle_runs[0]['text']}]
+                            # Duration is usually the last run
+                            for run in subtitle_runs:
+                                if ':' in run['text']:  # Duration format like "3:45"
+                                    video['duration'] = run['text']
+                                    break
+                    
+                    # Only add if we have the essential fields
+                    if 'title' in video and 'videoId' in video:
+                        videos.append(video)
+                        
+                except Exception as e:
+                    # Skip malformed items
+                    continue
+        
+        return videos
 
     def get_album_browse_id(self, audioPlaylistId: str) -> str | None:
         """
@@ -559,6 +1218,12 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
+        
+        # Check for iOS format (singleColumnBrowseResultsRenderer)
+        if 'singleColumnBrowseResultsRenderer' in response['contents']:
+            return self._parse_ios_album(response)
+        
+        # Traditional format (twoColumnBrowseResultsRenderer)
         album: JsonDict = parse_album_header_2024(response)
 
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
@@ -581,6 +1246,203 @@ class BrowsingMixin(MixinProtocol):
             album["tracks"][i]["artists"] = album["tracks"][i]["artists"] or album["artists"]
 
         return album
+
+    def _parse_ios_album(self, response: JsonDict) -> JsonDict:
+        """Parse album response from iOS format (singleColumnBrowseResultsRenderer)"""
+        # Get header from musicElementHeaderRenderer
+        header = nav(response, ["header", "musicElementHeaderRenderer"])
+        
+        # Initialize album dict
+        album: JsonDict = {}
+        
+        # Extract data from nested elementRenderer structure
+        data = nav(header, ["elementRenderer", "elementRenderer", "newElement", "type", "componentType", "model", "musicBlurredBackgroundHeaderModel", "data"], True) or {}
+        
+        # Parse basic album info
+        album["title"] = data.get("title", "")
+        album["type"] = "Album"
+        
+        # Get thumbnails from primaryImage
+        album["thumbnails"] = nav(data, ["primaryImage", "sources"], True) or []
+        
+        # Parse artist and year from straplineData
+        album["artists"] = []
+        album["year"] = None
+        album["trackCount"] = None
+        album["tracks"] = []
+        album["duration"] = None
+        album["audioPlaylistId"] = None
+        album["likeStatus"] = "INDIFFERENT"
+        album["isExplicit"] = False
+        
+        # Artist from straplineData.textLine1
+        artist_name = nav(data, ["straplineData", "textLine1", "content"], True)
+        if artist_name:
+            # Try to get artist ID from menu (if available)
+            artist_id = None
+            menu_renderer = nav(header, ["elementRenderer", "elementRenderer", "newElement", "type", "componentType", "model", "musicBlurredBackgroundHeaderModel", "data", "actionButtons", 3, "button", "onTap", "innertubeCommand", "menuEndpoint", "menu", "menuRenderer"], True)
+            if menu_renderer:
+                # Look for "Go to artist" menu item
+                for item in menu_renderer.get("items", []):
+                    if "menuNavigationItemRenderer" in item:
+                        item_renderer = item["menuNavigationItemRenderer"]
+                        text = nav(item_renderer, ["text", "runs", 0, "text"], True)
+                        if text == "Go to artist":
+                            artist_id = nav(item_renderer, ["navigationEndpoint", "browseEndpoint", "browseId"], True)
+                            break
+            
+            album["artists"].append({
+                "name": artist_name,
+                "id": artist_id
+            })
+        
+        # Year from straplineData.textLine2 (e.g., "Album • 2024")
+        year_text = nav(data, ["straplineData", "textLine2", "content"], True) or ""
+        import re
+        year_match = re.search(r'(\d{4})', year_text)
+        if year_match:
+            album["year"] = year_match.group(1)
+        
+        # Get description
+        album["description"] = data.get("description")
+        
+        # Get track count from menu if available
+        menu_renderer = nav(header, ["elementRenderer", "elementRenderer", "newElement", "type", "componentType", "model", "musicBlurredBackgroundHeaderModel", "data", "actionButtons", 3, "button", "onTap", "innertubeCommand", "menuEndpoint", "menu", "menuRenderer"], True)
+        if menu_renderer:
+            secondary_text = nav(menu_renderer, ["title", "musicMenuTitleRenderer", "secondaryText", "runs"], True)
+            if secondary_text:
+                for run in secondary_text:
+                    text = run.get("text", "")
+                    if "song" in text.lower():
+                        # Extract track count from text like "12 songs"
+                        match = re.search(r'(\d+)', text)
+                        if match:
+                            album["trackCount"] = int(match.group(1))
+                        break
+        
+        # Get sections from singleColumnBrowseResultsRenderer
+        sections = []
+        if "contents" in response and "singleColumnBrowseResultsRenderer" in response["contents"]:
+            single_col = response["contents"]["singleColumnBrowseResultsRenderer"]
+            if "tabs" in single_col and single_col["tabs"]:
+                tab_content = single_col["tabs"][0].get("tabRenderer", {}).get("content", {})
+                if "sectionListRenderer" in tab_content:
+                    sections = tab_content["sectionListRenderer"].get("contents", [])
+        
+        # Parse each section
+        for section in sections:
+            if "musicPlaylistShelfRenderer" in section:
+                # This is the tracks section (traditional format)
+                shelf = section["musicPlaylistShelfRenderer"]
+                
+                # Get audioPlaylistId from playlistId
+                if "playlistId" in shelf:
+                    album["audioPlaylistId"] = shelf["playlistId"]
+                
+                # Parse tracks using existing function (need to import parse_playlist_items)
+                if "contents" in shelf:
+                    # For now, skip traditional parsing as we're focusing on iOS
+                    pass
+                
+            elif "itemSectionRenderer" in section:
+                # iOS format - individual track sections
+                item_section = section["itemSectionRenderer"]
+                contents = item_section.get("contents", [])
+                
+                if contents and "elementRenderer" in contents[0]:
+                    element = contents[0]["elementRenderer"]
+                    
+                    try:
+                        # Navigate to musicListItemWrapperModel
+                        new_element = element.get("newElement", {})
+                        type_info = new_element.get("type", {})
+                        component_type = type_info.get("componentType", {})
+                        model = component_type.get("model", {})
+                        
+                        if "musicListItemWrapperModel" in model:
+                            wrapper_model = model["musicListItemWrapperModel"]
+                            
+                            if "musicListItemData" in wrapper_model:
+                                item_data = wrapper_model["musicListItemData"]
+                                
+                                # Check if this is a track (has indexText)
+                                if "indexText" in item_data and "title" in item_data:
+                                    track = self._parse_ios_track(item_data, album)
+                                    if track:
+                                        album["tracks"].append(track)
+                                        
+                                        # Set audioPlaylistId from first track
+                                        if not album["audioPlaylistId"] and track.get("playlistId"):
+                                            album["audioPlaylistId"] = track["playlistId"]
+                        
+                    except (KeyError, TypeError):
+                        # Not a track section, continue
+                        pass
+                
+            # Skip carousel parsing for now
+        
+        # Calculate duration
+        album["duration_seconds"] = sum_total_duration(album)
+        
+        # Add album metadata to tracks
+        for i, track in enumerate(album["tracks"]):
+            album["tracks"][i]["album"] = album["title"]
+            album["tracks"][i]["artists"] = album["tracks"][i]["artists"] or album["artists"]
+        
+        return album
+    
+    def _parse_ios_track(self, item_data: JsonDict, album: JsonDict) -> JsonDict:
+        """Parse individual track from iOS musicListItemData"""
+        track = {
+            'videoId': None,
+            'title': item_data.get('title', ''),
+            'artists': [],
+            'album': album.get('title', ''),
+            'likeStatus': 'INDIFFERENT',
+            'thumbnails': album.get('thumbnails', []),
+            'isAvailable': True,
+            'isExplicit': False,
+            'videoType': 'MUSIC_VIDEO_TYPE_ATV',
+            'duration': None,
+            'duration_seconds': None,
+            'feedbackTokens': None,
+            'playlistId': None
+        }
+        
+        # Extract videoId and playlistId from onTap
+        if 'onTap' in item_data and 'innertubeCommand' in item_data['onTap']:
+            command = item_data['onTap']['innertubeCommand']
+            if 'watchEndpoint' in command:
+                watch = command['watchEndpoint']
+                track['videoId'] = watch.get('videoId')
+                track['playlistId'] = watch.get('playlistId')
+        
+        # Parse artist and duration from subtitle (format: "Artist • Duration • Plays")
+        subtitle = item_data.get('subtitle', '')
+        if subtitle:
+            parts = subtitle.split('•')
+            if len(parts) >= 2:
+                # Artist
+                artist_name = parts[0].strip()
+                if artist_name:
+                    track['artists'] = [{'name': artist_name, 'id': None}]
+                
+                # Duration
+                duration_part = parts[1].strip()
+                track['duration'] = duration_part
+                
+                # Convert to seconds
+                if ':' in duration_part:
+                    time_parts = duration_part.split(':')
+                    if len(time_parts) == 2:
+                        try:
+                            minutes = int(time_parts[0])
+                            seconds = int(time_parts[1])
+                            track['duration_seconds'] = minutes * 60 + seconds
+                        except ValueError:
+                            pass
+        
+        return track
 
     def get_song(self, videoId: str, signatureTimestamp: int | None = None) -> JsonDict:
         """
@@ -932,9 +1794,14 @@ class BrowsingMixin(MixinProtocol):
             if lyrics_str is None:  # pragma: no cover
                 return None
 
+            # Try to get source from footer first (iOS format), then fallback to RUN_TEXT path
+            source = nav(response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "footer", "runs", 0, "text"], True)
+            if source is None:
+                source = nav(response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *RUN_TEXT], True)
+
             lyrics = Lyrics(
                 lyrics=lyrics_str,
-                source=nav(response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *RUN_TEXT], True),
+                source=source,
                 hasTimestamps=False,
             )
 
@@ -1028,3 +1895,79 @@ class BrowsingMixin(MixinProtocol):
 
         body = {"browseId": "FEmusic_home", "formData": formData}
         self._send_request("browse", body)
+
+    def _parse_ios_mixed_content(self, results: JsonList) -> JsonList:
+        """
+        Parse iOS Music format mixed content.
+        Handles elementRenderer -> newElement -> musicListItemCarouselModel structure.
+        """
+        items = []
+        
+        for section in results:
+            if 'elementRenderer' not in section:
+                continue
+                
+            element = section['elementRenderer']
+            if 'newElement' not in element:
+                continue
+                
+            new_element = element['newElement']
+            if 'model' not in new_element.get('type', {}).get('componentType', {}):
+                continue
+                
+            model = new_element['type']['componentType']['model']
+            
+            # Handle musicListItemCarouselModel
+            if 'musicListItemCarouselModel' in model:
+                carousel_model = model['musicListItemCarouselModel']
+                
+                # Extract title
+                if 'header' in carousel_model and 'title' in carousel_model['header']:
+                    title = carousel_model['header']['title']
+                else:
+                    title = 'Quick picks'  # Default title for sections without header
+                
+                contents = []
+                if 'listItems' in carousel_model:
+                    for item in carousel_model['listItems']:
+                        # Extract song information from iOS format
+                        song_data = {
+                            'title': item.get('title', ''),
+                            'videoId': '',
+                            'thumbnails': [],
+                            'artists': []
+                        }
+                        
+                        # Extract subtitle for artist info
+                        if 'subtitle' in item:
+                            subtitle = item['subtitle']
+                            # Parse artist info from subtitle - usually in format "Artist • Plays"
+                            if ' • ' in subtitle:
+                                artist_part = subtitle.split(' • ')[0]
+                                song_data['artists'] = [{'name': artist_part.strip()}]
+                        
+                        # Extract thumbnail
+                        if 'thumbnail' in item and 'image' in item['thumbnail']:
+                            song_data['thumbnails'] = item['thumbnail']['image'].get('sources', [])
+                        
+                        # Extract video ID from onTap command
+                        if 'onTap' in item and 'innertubeCommand' in item['onTap']:
+                            command = item['onTap']['innertubeCommand']
+                            if 'watchEndpoint' in command:
+                                song_data['videoId'] = command['watchEndpoint'].get('videoId', '')
+                        
+                        contents.append(song_data)
+                
+                # Build section result
+                section_result = {
+                    'title': title,
+                    'contents': contents
+                }
+                items.append(section_result)
+            
+            # Handle statementBannerModel (promotional banners) if needed
+            elif 'statementBannerModel' in model:
+                # Skip banners for now
+                pass
+        
+        return items

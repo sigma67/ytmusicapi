@@ -31,8 +31,8 @@ def initialize_context() -> JsonDict:
     return {
         "context": {
             "client": {
-                "clientName": "WEB_REMIX",
-                "clientVersion": "1." + time.strftime("%Y%m%d", time.gmtime()) + ".01.00",
+                "clientName": "IOS_MUSIC",
+                "clientVersion": "6.42",
             },
             "user": {},
         }

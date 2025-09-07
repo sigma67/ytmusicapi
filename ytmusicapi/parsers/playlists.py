@@ -116,12 +116,18 @@ def parse_playlist_items(
 ) -> JsonList:
     songs = []
     for result in results:
-        if MRLIR not in result:
-            continue
-        data = result[MRLIR]
-        song = parse_playlist_item(data, menu_entries, is_album)
-        if song:
-            songs.append(song)
+        # Handle both standard and iOS formats
+        if MRLIR in result:
+            data = result[MRLIR]
+            song = parse_playlist_item(data, menu_entries, is_album)
+            if song:
+                songs.append(song)
+        elif "musicTwoColumnItemRenderer" in result:
+            # Handle iOS format
+            data = result["musicTwoColumnItemRenderer"]
+            song = parse_playlist_item_ios(data, menu_entries, is_album)
+            if song:
+                songs.append(song)
 
     return songs
 
@@ -265,6 +271,118 @@ def parse_playlist_item(
         song["feedbackTokens"] = feedback_tokens
 
     if menu_entries:
+        # sets the feedbackToken for get_history
+        menu_items = nav(data, MENU_ITEMS)
+        for menu_entry in menu_entries:
+            items = find_objects_by_key(menu_items, menu_entry[0])
+            song[menu_entry[-1]] = next(
+                filter(lambda x: x is not None, (nav(itm, menu_entry, True) for itm in items)), None
+            )
+
+    return song
+
+
+def parse_playlist_item_ios(
+    data: JsonDict, menu_entries: list[list[str]] | None = None, is_album: bool = False
+) -> JsonDict | None:
+    """Parse playlist item in iOS format (musicTwoColumnItemRenderer)"""
+    videoId = setVideoId = None
+    like = None
+    feedback_tokens = None
+    library_status = None
+
+    # Extract videoId from navigationEndpoint
+    if "navigationEndpoint" in data and "watchEndpoint" in data["navigationEndpoint"]:
+        videoId = data["navigationEndpoint"]["watchEndpoint"]["videoId"]
+        
+        # Extract playlistSetVideoId if available
+        if "playlistSetVideoId" in data["navigationEndpoint"]["watchEndpoint"]:
+            setVideoId = data["navigationEndpoint"]["watchEndpoint"]["playlistSetVideoId"]
+
+    # Extract menu information if available
+    if "menu" in data:
+        for item in nav(data, MENU_ITEMS):
+            if "menuServiceItemRenderer" in item:
+                menu_service = nav(item, MENU_SERVICE)
+                if "playlistEditEndpoint" in menu_service:
+                    setVideoId = nav(menu_service, ["playlistEditEndpoint", "actions", 0, "setVideoId"], True)
+                    if not videoId:  # fallback if not found above
+                        videoId = nav(
+                            menu_service, ["playlistEditEndpoint", "actions", 0, "removedVideoId"], True
+                        )
+
+            if TOGGLE_MENU in item:
+                feedback_tokens = parse_song_menu_tokens(item)
+                library_status = parse_song_library_status(item)
+
+        # Check for like status in menu
+        like = nav(data, MENU_LIKE_STATUS, True)
+
+    # Extract title
+    title = None
+    if "title" in data and "runs" in data["title"] and len(data["title"]["runs"]) > 0:
+        title = data["title"]["runs"][0]["text"]
+
+    if title == "Song deleted":
+        return None
+
+    # Extract artists and duration from subtitle
+    artists = None
+    duration = None
+    if "subtitle" in data and "runs" in data["subtitle"]:
+        subtitle_runs = data["subtitle"]["runs"]
+        if len(subtitle_runs) > 0:
+            # First run is typically the artist
+            artist_text = subtitle_runs[0]["text"]
+            artists = [{"name": artist_text, "id": None}]
+            
+            # Look for duration (typically the last run after " • ")
+            for run in subtitle_runs:
+                text = run["text"]
+                if ":" in text and (text.count(":") == 1 or text.count(":") == 2):
+                    duration = text
+                    break
+
+    # Extract thumbnails
+    thumbnails = None
+    if "thumbnail" in data:
+        thumbnails = nav(data, THUMBNAILS, True)
+
+    # Assume available for iOS format items
+    isAvailable = True
+    isExplicit = False  # Would need to check badges if implemented
+
+    # Default values for iOS format
+    album = None
+    views = None
+    videoType = None
+
+    song = {
+        "videoId": videoId,
+        "title": title,
+        "artists": artists,
+        "album": album,
+        "likeStatus": like,
+        "inLibrary": library_status,
+        "thumbnails": thumbnails,
+        "isAvailable": isAvailable,
+        "isExplicit": isExplicit,
+        "videoType": videoType,
+        "views": views,
+    }
+
+    if is_album:
+        song["trackNumber"] = None  # iOS format doesn't typically have track numbers
+
+    if duration:
+        song["duration"] = duration
+        song["duration_seconds"] = parse_duration(duration)
+    if setVideoId:
+        song["setVideoId"] = setVideoId
+    if feedback_tokens:
+        song["feedbackTokens"] = feedback_tokens
+
+    if menu_entries and "menu" in data:
         # sets the feedbackToken for get_history
         menu_items = nav(data, MENU_ITEMS)
         for menu_entry in menu_entries:
