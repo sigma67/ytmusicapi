@@ -108,9 +108,51 @@ class LibraryMixin(MixinProtocol):
             )
             parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_playlist)
             remaining_limit = None if limit is None else (limit - len(playlists))
-            playlists.extend(
-                get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
-            )
+            
+            # Check for iOS format continuation first
+            if results["continuations"] and "nextContinuationData" in results["continuations"][0]:
+                # iOS format uses nextContinuationData - implement custom handling
+                print("Note: iOS format continuation available for playlists")
+                
+                ios_continuation = results["continuations"][0]["nextContinuationData"]
+                continuation_token = ios_continuation.get("continuation")
+                
+                if continuation_token:
+                    try:
+                        # Create continuation request body
+                        continuation_body = dict(body)  # Copy original body
+                        continuation_body["continuation"] = continuation_token
+                        
+                        continuation_response = self._send_request(endpoint, continuation_body)
+                        
+                        # Parse continuation response - iOS format uses different structure
+                        if continuation_response and "continuationContents" in continuation_response:
+                            continuation_contents = continuation_response["continuationContents"]
+                            
+                            # iOS continuation uses sectionListContinuation
+                            if "sectionListContinuation" in continuation_contents:
+                                section_continuation = continuation_contents["sectionListContinuation"]
+                                
+                                if "contents" in section_continuation:
+                                    sections = section_continuation["contents"]
+                                    
+                                    for section in sections:
+                                        if "musicShelfRenderer" in section:
+                                            shelf = section["musicShelfRenderer"]
+                                            shelf_contents = shelf.get("contents", [])
+                                            
+                                            if shelf_contents:
+                                                # Parse continuation items
+                                                continuation_playlists = parse_func(shelf_contents)
+                                                playlists.extend(continuation_playlists)
+                                                print(f"✅ Added {len(continuation_playlists)} playlists from continuation")
+                    except Exception as e:
+                        print(f"⚠️ iOS continuation failed: {e}")
+            else:
+                # Desktop format uses gridContinuation
+                playlists.extend(
+                    get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
+                )
 
         return playlists
 

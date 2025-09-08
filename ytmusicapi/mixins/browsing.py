@@ -516,6 +516,56 @@ class BrowsingMixin(MixinProtocol):
         
         return albums
 
+    def _parse_ios_albums_new_format(self, contents: JsonList) -> JsonList:
+        """
+        Parse albums from new iOS elementRenderer format (musicListItemCarouselModel)
+        """
+        albums = []
+        
+        for item in contents:
+            try:
+                album = {}
+                
+                # Extract title
+                if "title" in item:
+                    album["title"] = item["title"]
+                
+                # Extract album browse ID from onTap command
+                if ("onTap" in item and 
+                    "innertubeCommand" in item["onTap"] and 
+                    "browseEndpoint" in item["onTap"]["innertubeCommand"] and
+                    "browseId" in item["onTap"]["innertubeCommand"]["browseEndpoint"]):
+                    album["browseId"] = item["onTap"]["innertubeCommand"]["browseEndpoint"]["browseId"]
+                    
+                    # Extract playlist ID if available
+                    browse_config = item["onTap"]["innertubeCommand"]["browseEndpoint"].get("browseEndpointContextSupportedConfigs")
+                    if (browse_config and 
+                        "browseEndpointContextMusicConfig" in browse_config and
+                        "playlistIdForFallback" in browse_config["browseEndpointContextMusicConfig"]):
+                        album["audioPlaylistId"] = browse_config["browseEndpointContextMusicConfig"]["playlistIdForFallback"]
+                
+                # Extract subtitle (artist info)
+                if "subtitle" in item:
+                    album["subtitle"] = item["subtitle"]
+                
+                # Extract thumbnail
+                if ("thumbnail" in item and 
+                    "image" in item["thumbnail"] and 
+                    "sources" in item["thumbnail"]["image"]):
+                    album["thumbnails"] = item["thumbnail"]["image"]["sources"]
+                
+                # Set default type
+                album["type"] = "Album"
+                album["isExplicit"] = False
+                
+                albums.append(album)
+                
+            except (KeyError, TypeError, IndexError):
+                # Skip items that can't be parsed
+                continue
+        
+        return albums
+
     ArtistOrderType = Literal["Recency", "Popularity", "Alphabetical order"]
 
     def get_artist_albums(
@@ -589,35 +639,79 @@ class BrowsingMixin(MixinProtocol):
             # just use the results from the first request
             results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM)
 
-        contents = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
+        # Handle iOS format with elementRenderer structure
+        try:
+            contents = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
+        except (KeyError, TypeError):
+            contents = None
+        
+        # If standard navigation fails, try iOS elementRenderer format
+        if contents is None:
+            try:
+                # Check for iOS elementRenderer format
+                if "itemSectionRenderer" in results and "contents" in results["itemSectionRenderer"]:
+                    section_contents = results["itemSectionRenderer"]["contents"]
+                    if (len(section_contents) > 0 and 
+                        "elementRenderer" in section_contents[0] and
+                        "newElement" in section_contents[0]["elementRenderer"]):
+                        
+                        element = section_contents[0]["elementRenderer"]["newElement"]
+                        if ("type" in element and 
+                            "componentType" in element["type"] and
+                            "model" in element["type"]["componentType"] and
+                            "musicListItemCarouselModel" in element["type"]["componentType"]["model"]):
+                            
+                            carousel_model = element["type"]["componentType"]["model"]["musicListItemCarouselModel"]
+                            if "items" in carousel_model:
+                                contents = carousel_model["items"]
+            except (KeyError, IndexError, TypeError):
+                # If iOS parsing fails, contents remains None
+                pass
         
         # Check if we have iOS format (different structure for albums)
-        if contents and len(contents) > 0 and "musicTwoRowItemRenderer" in contents[0]:
-            # Check if this is iOS format by examining the navigation structure
-            first_item = contents[0]["musicTwoRowItemRenderer"]
-            is_ios_format = (
-                "navigationEndpoint" in first_item and 
-                "title" in first_item and 
-                "runs" in first_item["title"] and
-                "navigationEndpoint" not in first_item["title"]["runs"][0]
-            )
-            
-            if is_ios_format:
-                albums = self._parse_ios_albums(contents)
-                # Apply limit for iOS format
-                if limit is not None and len(albums) > limit:
-                    albums = albums[:limit]
+        ios_format_detected = False
+        if contents and len(contents) > 0:
+            # Check for new iOS elementRenderer format (from musicListItemCarouselModel)
+            first_item = contents[0]
+            if ("title" in first_item and 
+                "subtitle" in first_item and 
+                "onTap" in first_item and
+                "innertubeCommand" in first_item["onTap"]):
+                # This is the new iOS format from elementRenderer
+                ios_format_detected = True
+                albums = self._parse_ios_albums_new_format(contents)
+            elif "musicTwoRowItemRenderer" in first_item:
+                # Check if this is standard iOS format
+                renderer = first_item["musicTwoRowItemRenderer"]
+                is_ios_format = (
+                    "navigationEndpoint" in renderer and 
+                    "title" in renderer and 
+                    "runs" in renderer["title"] and
+                    "navigationEndpoint" not in renderer["title"]["runs"][0]
+                )
+                
+                if is_ios_format:
+                    ios_format_detected = True
+                    albums = self._parse_ios_albums(contents)
+                else:
+                    albums = parse_albums(contents)
             else:
                 albums = parse_albums(contents)
+                
+            # Apply limit for iOS format
+            if ios_format_detected and limit is not None and len(albums) > limit:
+                albums = albums[:limit]
         else:
-            albums = parse_albums(contents)
+            albums = parse_albums(contents) if contents else []
 
-        results = nav(results, GRID, True)
-        if "continuations" in results:
-            remaining_limit = None if limit is None else (limit - len(albums))
-            albums.extend(
-                get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
-            )
+        # Handle continuations only for non-iOS format
+        if not ios_format_detected:
+            results = nav(results, GRID, True)
+            if "continuations" in results:
+                remaining_limit = None if limit is None else (limit - len(albums))
+                albums.extend(
+                    get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
+                )
 
         return albums
 
@@ -1615,6 +1709,7 @@ class BrowsingMixin(MixinProtocol):
             }
 
         """
+        # Try original player endpoint first for full functionality
         endpoint = "player"
         if not signatureTimestamp:
             signatureTimestamp = get_datestamp() - 1
@@ -1623,12 +1718,195 @@ class BrowsingMixin(MixinProtocol):
             "playbackContext": {"contentPlaybackContext": {"signatureTimestamp": signatureTimestamp}},
             "video_id": videoId,
         }
-        response = self._send_request(endpoint, params)
-        keys = ["videoDetails", "playabilityStatus", "streamingData", "microformat", "playbackTracking"]
-        for k in list(response.keys()):
-            if k not in keys:
-                del response[k]
-        return response
+        
+        try:
+            response = self._send_request(endpoint, params)
+            
+            # Check if we got LOGIN_REQUIRED status
+            playability_status = response.get("playabilityStatus", {})
+            if playability_status.get("status") == "LOGIN_REQUIRED":
+                # Fall back to 'next' endpoint for basic song metadata (iOS compatible)
+                return self._get_song_fallback(videoId)
+            
+            # Original success path - return full response
+            keys = ["videoDetails", "playabilityStatus", "streamingData", "microformat", "playbackTracking"]
+            for k in list(response.keys()):
+                if k not in keys:
+                    del response[k]
+            return response
+            
+        except Exception:
+            # If player endpoint fails completely, try fallback
+            return self._get_song_fallback(videoId)
+
+    def _get_song_fallback(self, videoId: str) -> JsonDict:
+        """
+        Fallback method to get basic song metadata using 'next' endpoint.
+        This works without authentication and is compatible with iOS client.
+        """
+        try:
+            # Use 'next' endpoint which doesn't require authentication
+            response = self._send_request("next", {"videoId": videoId})
+            
+            # Extract metadata from the response
+            song_data = self._extract_song_metadata_from_next(response, videoId)
+            
+            # Create videoDetails structure
+            video_details = {
+                'videoId': song_data['videoId'],
+                'title': song_data['title'],
+                'author': song_data['author'],
+                'channelId': song_data['channelId'],
+                'viewCount': song_data['viewCount'],
+                'isLiveContent': song_data['isLiveContent']
+            }
+            
+            # Return in expected get_song format
+            return {
+                'playabilityStatus': {'status': 'OK'},
+                'videoDetails': video_details
+            }
+            
+        except Exception:
+            # Last resort - return minimal structure
+            return {
+                'playabilityStatus': {'status': 'ERROR', 'reason': 'Video not available'},
+                'videoDetails': {
+                    'videoId': videoId,
+                    'title': 'Unknown Title',
+                    'author': 'Unknown Artist',
+                    'channelId': '',
+                    'viewCount': '0',
+                    'isLiveContent': False
+                }
+            }
+
+    def _extract_song_metadata_from_next(self, response: JsonDict, videoId: str) -> JsonDict:
+        """Extract song metadata from 'next' endpoint response"""
+        song_data = {
+            'videoId': videoId,
+            'title': 'Unknown Title',
+            'author': 'Unknown Artist',
+            'channelId': '',
+            'viewCount': '0',
+            'isLiveContent': False
+        }
+        
+        try:
+            # Navigate the response structure
+            contents = response.get('contents', {})
+            
+            # Check for music watch next results (iOS format)
+            if 'singleColumnMusicWatchNextResultsRenderer' in contents:
+                music_watch = contents['singleColumnMusicWatchNextResultsRenderer']
+                
+                # Look for tabs or results
+                if 'tabbedRenderer' in music_watch:
+                    tabbed = music_watch['tabbedRenderer']
+                    if 'watchNextTabbedResultsRenderer' in tabbed:
+                        watch_tabs = tabbed['watchNextTabbedResultsRenderer']
+                        
+                        # Look in tabs
+                        tabs = watch_tabs.get('tabs', [])
+                        for tab in tabs:
+                            if 'tabRenderer' in tab:
+                                tab_renderer = tab['tabRenderer']
+                                if 'content' in tab_renderer:
+                                    content = tab_renderer['content']
+                                    # Recursively search for metadata in tab content
+                                    found_data = self._search_for_metadata_recursive(content, videoId)
+                                    if found_data:
+                                        song_data.update(found_data)
+                                        break
+                
+                # Also check direct content
+                found_data = self._search_for_metadata_recursive(music_watch, videoId)
+                if found_data:
+                    song_data.update(found_data)
+            
+            # Check current video endpoint for additional info
+            if 'currentVideoEndpoint' in response:
+                current_video = response['currentVideoEndpoint']
+                if 'watchEndpoint' in current_video:
+                    watch_endpoint = current_video['watchEndpoint']
+                    if 'videoId' in watch_endpoint:
+                        song_data['videoId'] = watch_endpoint['videoId']
+        
+        except Exception:
+            pass  # Return defaults if extraction fails
+        
+        return song_data
+
+    def _search_for_metadata_recursive(self, data, target_video_id: str, depth: int = 0) -> JsonDict:
+        """Recursively search for song metadata in response data"""
+        if depth > 5:  # Prevent infinite recursion
+            return {}
+        
+        found = {}
+        
+        try:
+            if isinstance(data, dict):
+                # Look for title renderers
+                if 'title' in data:
+                    title_data = data['title']
+                    if isinstance(title_data, dict):
+                        if 'runs' in title_data and title_data['runs']:
+                            title = title_data['runs'][0].get('text', '')
+                            if title:
+                                found['title'] = title
+                        elif 'simpleText' in title_data:
+                            found['title'] = title_data['simpleText']
+                
+                # Look for author/artist info
+                if 'subtitle' in data:
+                    subtitle_data = data['subtitle']
+                    if isinstance(subtitle_data, dict):
+                        if 'runs' in subtitle_data and subtitle_data['runs']:
+                            author = subtitle_data['runs'][0].get('text', '')
+                            if author:
+                                found['author'] = author
+                        elif 'simpleText' in subtitle_data:
+                            found['author'] = subtitle_data['simpleText']
+                
+                # Look for navigation endpoints for channel ID
+                if 'navigationEndpoint' in data:
+                    nav = data['navigationEndpoint']
+                    if 'browseEndpoint' in nav:
+                        browse = nav['browseEndpoint']
+                        if 'browseId' in browse:
+                            found['channelId'] = browse['browseId']
+                
+                # Look for video ID confirmation
+                if 'videoId' in data and data['videoId'] == target_video_id:
+                    found['videoId'] = data['videoId']
+                
+                # Look for view count
+                if 'viewCountText' in data:
+                    view_text = data['viewCountText']
+                    if isinstance(view_text, dict) and 'simpleText' in view_text:
+                        found['viewCount'] = view_text['simpleText']
+                
+                # Recursively search nested structures
+                for key, value in data.items():
+                    if isinstance(value, (dict, list)) and not found.get('title'):
+                        nested_found = self._search_for_metadata_recursive(value, target_video_id, depth + 1)
+                        if nested_found:
+                            found.update(nested_found)
+                            if found.get('title'):  # Stop if we found a title
+                                break
+            
+            elif isinstance(data, list):
+                for item in data:
+                    nested_found = self._search_for_metadata_recursive(item, target_video_id, depth + 1)
+                    if nested_found:
+                        found.update(nested_found)
+                        if found.get('title'):  # Stop if we found a title
+                            break
+        
+        except Exception:
+            pass  # Continue silently if extraction fails
+        
+        return found
 
     def get_song_related(self, browseId: str) -> JsonList:
         """

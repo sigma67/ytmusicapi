@@ -323,6 +323,7 @@ class PlaylistsMixin(MixinProtocol):
         :param limit: How many items to return. Default: 100
         :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
         """
+        self._check_auth()
         return self.get_playlist("LM", limit)
 
     def get_saved_episodes(self, limit: int = 100) -> JsonDict:
