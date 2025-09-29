@@ -538,7 +538,11 @@ class BrowsingMixin(MixinProtocol):
                   "feedbackTokens": {
                     "add": "AB9zfpK...",
                     "remove": "AB9zfpK..."
-                  }
+                  },
+                  "listenAgainFeedbackTokens": {
+                    "pin": "AB9zfpJ...",
+                    "unpin": "AB9zfpL..."
+                  },
                 }
               ],
               "other_versions": [

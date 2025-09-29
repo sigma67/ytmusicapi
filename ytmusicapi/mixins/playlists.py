@@ -100,7 +100,12 @@ class PlaylistsMixin(MixinProtocol):
                   "feedbackTokens": {
                     "add": "AB9zfpJxtvrU...",
                     "remove": "AB9zfpKTyZ..."
-                }
+                  },
+                  "listenAgainFeedbackTokens": {
+                    "pin": "AB9zfpImL2k...",
+                    "unpin": "AB9zfpJt6pA..."
+                  },
+
               ]
             }
 
