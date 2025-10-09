@@ -128,14 +128,17 @@ def parse_audio_playlist(
 
 
 def parse_playlist_items(
-    results: JsonList, menu_entries: list[list[str]] | None = None, is_album: bool = False
+    results: JsonList,
+    menu_entries: list[list[str]] | None = None,
+    is_album: bool = False,
+    is_collaborative: bool = False,
 ) -> JsonList:
     songs = []
     for result in results:
         if MRLIR not in result:
             continue
         data = result[MRLIR]
-        song = parse_playlist_item(data, menu_entries, is_album)
+        song = parse_playlist_item(data, menu_entries, is_album, is_collaborative)
         if song:
             songs.append(song)
 
@@ -143,7 +146,10 @@ def parse_playlist_items(
 
 
 def parse_playlist_item(
-    data: JsonDict, menu_entries: list[list[str]] | None = None, is_album: bool = False
+    data: JsonDict,
+    menu_entries: list[list[str]] | None = None,
+    is_album: bool = False,
+    is_collaborative: bool = False,
 ) -> JsonDict | None:
     videoId = setVideoId = None
     like = None
@@ -183,7 +189,9 @@ def parse_playlist_item(
 
     title_index = 0 if use_preset_columns else None
     artist_index = 1 if use_preset_columns else None
-    album_index = 2 if use_preset_columns else None
+    duration_index = None
+    # collaborative playlists have duration in flexColumns (between artist and album)
+    album_index = 3 if is_collaborative else 2 if use_preset_columns else None
     user_channel_indexes = []
     unrecognized_index = None
 
@@ -192,8 +200,14 @@ def parse_playlist_item(
         navigation_endpoint = nav(flex_column_item, [*TEXT_RUN, "navigationEndpoint"], True)
 
         if not navigation_endpoint:
-            if nav(flex_column_item, TEXT_RUN_TEXT, True) is not None:
-                unrecognized_index = index if unrecognized_index is None else unrecognized_index
+            run = nav(flex_column_item, TEXT_RUN, True)
+            if run and "text" in run:
+                parsed = parse_song_run(run)
+                if parsed["type"] == "duration":
+                    duration_index = index
+                else:
+                    unrecognized_index = index if unrecognized_index is None else unrecognized_index
+
             continue
 
         if "watchEndpoint" in navigation_endpoint:
@@ -238,7 +252,7 @@ def parse_playlist_item(
 
     views = get_item_text(data, 2) if is_album else None
 
-    duration = None
+    duration = get_item_text(data, duration_index) if duration_index else None
     if "fixedColumns" in data:
         if "simpleText" in nav(get_fixed_column_item(data, 0), ["text"]):
             duration = nav(get_fixed_column_item(data, 0), ["text", "simpleText"])
