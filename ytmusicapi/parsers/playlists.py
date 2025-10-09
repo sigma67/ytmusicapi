@@ -41,23 +41,39 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
         "thumbnails": nav(header, THUMBNAILS),
     }
     if "facepile" in header:
-        playlist_meta["author"] = {
-            "name": nav(header, ["facepile", "avatarStackViewModel", "text", "content"]),
-            "id": nav(
-                header,
-                [
-                    "facepile",
-                    "avatarStackViewModel",
-                    "rendererContext",
-                    "commandContext",
-                    "onTap",
-                    "innertubeCommand",
-                    "browseEndpoint",
-                    "browseId",
-                ],
-                True,
-            ),
-        }
+        avatar_renderer = nav(header, ["facepile", "avatarStackViewModel", "rendererContext"])
+        avatar_command = nav(
+            avatar_renderer,
+            [
+                "commandContext",
+                "onTap",
+                "innertubeCommand",
+            ],
+            True,
+        )
+
+        if (
+            nav(avatar_command, ["showEngagementPanelEndpoint", "identifier", "tag"], True)
+            == "PAplaylist_collaborate"
+        ):
+            avatars = nav(header, ["facepile", "avatarStackViewModel", "avatars"])
+
+            playlist_meta["collaborators"] = {
+                "text": nav(avatar_renderer, ["accessibilityContext", "label"]),
+                "avatars": [avatar["avatarViewModel"]["image"]["sources"][0] for avatar in avatars],
+            }
+        else:
+            playlist_meta["author"] = {
+                "name": nav(header, ["facepile", "avatarStackViewModel", "text", "content"]),
+                "id": nav(
+                    avatar_command,
+                    [
+                        "browseEndpoint",
+                        "browseId",
+                    ],
+                    True,
+                ),
+            }
     if "runs" in header["secondSubtitle"]:
         second_subtitle_runs = header["secondSubtitle"]["runs"]
         has_views = (len(second_subtitle_runs) > 3) * 2

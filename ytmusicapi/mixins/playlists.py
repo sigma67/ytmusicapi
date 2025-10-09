@@ -106,6 +106,21 @@ class PlaylistsMixin(MixinProtocol):
 
         The setVideoId is the unique id of this playlist item and
         needed for moving/removing playlist items
+
+        Collaborative playlists replace ``author`` with limited data about ``collaborators``::
+            {
+                "collaborators": {
+                    "text": "by Sample Author and 1 other",
+                    "avatars": [
+                        {
+                            "url": "https://yt3.ggpht.com/sample-author-photo"
+                        },
+                        {
+                            "url": "https://yt3.ggpht.com/sample-collaborator-photo"
+                        }
+                    ]
+                }
+            }
         """
         browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
         body = {"browseId": browseId}
