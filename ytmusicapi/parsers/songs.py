@@ -12,14 +12,7 @@ def parse_song_artists(data: JsonDict, index: int) -> JsonList:
         return []
     else:
         runs = flex_item["text"]["runs"]
-        return parse_song_artists_runs(runs)
-
-
-def parse_song_artists_runs(runs: JsonList) -> JsonList:
-    artists = []
-    for j in range(int(len(runs) / 2) + 1):
-        artists.append({"name": runs[j * 2]["text"], "id": nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)})
-    return artists
+        return parse_artists_runs(runs)
 
 
 def parse_song_run(run: JsonDict) -> JsonDict:

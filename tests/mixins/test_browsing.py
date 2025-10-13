@@ -173,6 +173,10 @@ class TestBrowsing:
         # Cassö & RAYE - Prada
         album = yt.get_album("MPREb_of3qfisa0yU")
         assert not album["isExplicit"]
+        assert album["artists"] == [
+            {"name": "cassö", "id": "UCGWMNnI1Ky5bMcRlr73Cj2Q"},
+            {"name": "RAYE", "id": "UCvyjk7zKlaFyNIPZ-Pyvkng"},
+        ]
         variant = album["other_versions"][0]
         assert variant["type"] == "Single"
         assert variant["title"] == "Prada"

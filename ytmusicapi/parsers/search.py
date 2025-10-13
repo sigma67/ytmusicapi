@@ -68,7 +68,7 @@ def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
         search_result["title"] = nav(data, TITLE_TEXT)
-        search_result["author"] = parse_song_artists_runs(nav(data, ["subtitle", "runs"])[2:])
+        search_result["author"] = parse_artists_runs(nav(data, ["subtitle", "runs"])[2:])
 
     if result_type in ["episode"]:
         search_result["videoId"] = nav(data, [*THUMBNAIL_OVERLAY_NAVIGATION, *WATCH_VIDEO_ID])
