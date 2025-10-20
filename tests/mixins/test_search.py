@@ -1,3 +1,4 @@
+import time
 from typing import Any
 
 import pytest
@@ -120,7 +121,9 @@ class TestSearch:
         episode = next(
             item
             for item in results
-            if item["category"] == "Top result" and item["podcast"]["name"] == "Stanford GSB Podcasts"
+            if item["category"] == "Top result"
+            and "podcast" in item
+            and item["podcast"]["name"] == "Stanford GSB Podcasts"
         )
         assert episode["resultType"] == "episode"
         assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
@@ -191,7 +194,7 @@ class TestSearch:
     def test_remove_search_suggestions_valid(self, yt_auth):
         first_pass = yt_auth.search("b")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
-
+        time.sleep(10)
         results = yt_auth.get_search_suggestions("b", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
