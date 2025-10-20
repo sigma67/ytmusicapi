@@ -57,6 +57,7 @@ def fixture_yt_auth(browser_filepath) -> YTMusic:
 
 @pytest.fixture(name="yt_oauth")
 def fixture_yt_oauth(browser_filepath, config) -> YTMusic:
+    # replaced with browser fixture for now due to oauth not working, see #813
     return YTMusic(browser_filepath)
     # credentials = OAuthCredentials(
     #     client_id=config["auth"]["client_id"], client_secret=config["auth"]["client_secret"]
