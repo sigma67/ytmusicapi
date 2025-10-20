@@ -33,12 +33,12 @@ class TestSearch:
     @pytest.mark.parametrize(
         "case",
         [
-            (
-                "Eminem Houdini",
+            (  # this test should be a single, but YTM currently doesn't find singles with album search 🤡
+                "eminem relapse",
                 {
-                    "title": "Houdini",
+                    "title": "Relapse",
                     "artists": [{"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}],
-                    "type": "Single",
+                    "type": "Album",
                     "resultType": "album",
                 },
             ),
