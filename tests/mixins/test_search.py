@@ -113,12 +113,14 @@ class TestSearch:
         assert all(item["resultType"] == "episode" for item in results)
 
     def test_search_episode_category(self, yt):
-        """Test resultType detection for episodes by searching for a podcast without a filter."""
+        """Test resultType detection for episodes by searching for a podcast without a filter.
+        Note 2025/10/20: categories are currently gone from default search, therefore category changed to "Top result"
+        """
         results = yt.search("Stanford Graduate School of Business")
         episode = next(
             item
             for item in results
-            if item["category"] == "Episodes" and item["podcast"]["name"] == "Stanford GSB Podcasts"
+            if item["category"] == "Top result" and item["podcast"]["name"] == "Stanford GSB Podcasts"
         )
         assert episode["resultType"] == "episode"
         assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
