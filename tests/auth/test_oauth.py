@@ -75,6 +75,7 @@ class TestOAuth:
         oauth_file.close()
         Path(oauth_file.name).unlink()
 
+    @pytest.mark.skip(reason="oauth is currently not working, see #813")
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
         # ensure instance initialized token
         assert yt_oauth._token is not None
