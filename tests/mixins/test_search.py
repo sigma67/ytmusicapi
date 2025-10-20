@@ -112,11 +112,11 @@ class TestSearch:
         assert len(results) >= 3
         assert all(item["resultType"] == "episode" for item in results)
 
-    def test_search_episode_category(self, yt):
+    def test_search_episode_category(self, yt_auth):
         """Test resultType detection for episodes by searching for a podcast without a filter.
         Note 2025/10/20: categories are currently gone from default search, therefore category changed to "Top result"
         """
-        results = yt.search("Stanford Graduate School of Business")
+        results = yt_auth.search("Stanford Graduate School of Business")
         episode = next(
             item
             for item in results
@@ -132,10 +132,8 @@ class TestSearch:
         assert results[0]["playlistId"].startswith("PL")
         assert len(results[0]["author"]) > 0
 
-    def test_search_top_result_episode(self, yt):
-        results = yt.search(
-            "Stanford GSB Podcasts 124. Making Meetings Meaningful, Pt. 1: How to Structure and Organize More Effective Gatherings"
-        )
+    def test_search_top_result_episode(self, yt_auth):
+        results = yt_auth.search("124. making meetings meaningful pt. 1 stanford")
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "episode"
         assert results[0]["videoId"] == "KNkyHCLOr1o"
