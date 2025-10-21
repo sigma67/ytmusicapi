@@ -3,6 +3,7 @@ import re
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
 
 from .albums import parse_album_playlistid_if_exists
+from .artists import parse_artists_runs
 from .podcasts import parse_episode, parse_podcast
 from .songs import *
 
@@ -132,7 +133,7 @@ def parse_video(result: JsonDict) -> JsonDict:
     return {
         "title": nav(result, TITLE_TEXT),
         "videoId": videoId,
-        "artists": parse_song_artists_runs(runs[:artists_len]),
+        "artists": parse_artists_runs(runs[:artists_len]),
         "playlistId": nav(result, NAVIGATION_PLAYLIST_ID, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
         "views": runs[-1]["text"].split(" ")[0],
@@ -154,7 +155,7 @@ def parse_playlist(data: JsonDict) -> JsonDict:
         playlist["description"] = "".join([run["text"] for run in subtitle["runs"]])
         if len(subtitle["runs"]) == 3 and re.search(r"\d+ ", nav(data, SUBTITLE2)):
             playlist["count"] = nav(data, SUBTITLE2).split(" ")[0]
-            playlist["author"] = parse_song_artists_runs(subtitle["runs"][:1])
+            playlist["author"] = parse_artists_runs(subtitle["runs"][:1])
 
     return playlist
 

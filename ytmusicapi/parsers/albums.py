@@ -2,7 +2,7 @@ from ytmusicapi.helpers import to_int
 from ytmusicapi.type_alias import JsonDict
 
 from ._utils import *
-from .podcasts import parse_base_header
+from .artists import parse_artists_runs
 from .songs import parse_like_status, parse_song_runs
 
 
@@ -52,7 +52,8 @@ def parse_album_header_2024(response: JsonDict) -> JsonDict:
     album["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
 
     album_info = parse_song_runs(header["subtitle"]["runs"][2:])
-    album_info["artists"] = [author] if (author := parse_base_header(header)["author"]) else None
+    strapline_runs = nav(header, ["straplineTextOne", "runs"], True)
+    album_info["artists"] = parse_artists_runs(strapline_runs) if strapline_runs else None
     album.update(album_info)
 
     if len(header["secondSubtitle"]["runs"]) > 1:

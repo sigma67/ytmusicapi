@@ -3,6 +3,7 @@ from ytmusicapi.type_alias import JsonDict, JsonList
 from ..helpers import to_int
 from ._utils import *
 from .albums import parse_album_playlistid_if_exists
+from .artists import parse_artists_runs
 from .songs import *
 
 ALL_RESULT_TYPES = [
@@ -68,7 +69,7 @@ def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
         search_result["title"] = nav(data, TITLE_TEXT)
-        search_result["author"] = parse_song_artists_runs(nav(data, ["subtitle", "runs"])[2:])
+        search_result["author"] = parse_artists_runs(nav(data, ["subtitle", "runs"])[2:])
 
     if result_type in ["episode"]:
         search_result["title"] = nav(data, TITLE_TEXT)
