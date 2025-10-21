@@ -2,6 +2,7 @@ from ytmusicapi.helpers import to_int
 from ytmusicapi.type_alias import JsonDict
 
 from ._utils import *
+from .artists import parse_artists_runs
 from .songs import parse_like_status, parse_song_runs
 
 

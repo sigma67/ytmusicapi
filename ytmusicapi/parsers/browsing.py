@@ -2,8 +2,8 @@ import re
 
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
 
-from ._utils import parse_artists_runs
 from .albums import parse_album_playlistid_if_exists
+from .artists import parse_artists_runs
 from .podcasts import parse_episode, parse_podcast
 from .songs import *
 

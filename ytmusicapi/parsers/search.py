@@ -3,6 +3,7 @@ from ytmusicapi.type_alias import JsonDict, JsonList
 from ..helpers import to_int
 from ._utils import *
 from .albums import parse_album_playlistid_if_exists
+from .artists import parse_artists_runs
 from .songs import *
 
 ALL_RESULT_TYPES = [

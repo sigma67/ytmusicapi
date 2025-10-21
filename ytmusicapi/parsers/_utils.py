@@ -38,13 +38,6 @@ def parse_menu_playlists(data: JsonDict, result: JsonDict) -> None:
             result[watch_key] = watch_id
 
 
-def parse_artists_runs(runs: JsonList) -> JsonList:
-    artists = []
-    for j in range(int(len(runs) / 2) + 1):
-        artists.append({"name": runs[j * 2]["text"], "id": nav(runs[j * 2], NAVIGATION_BROWSE_ID, True)})
-    return artists
-
-
 def get_item_text(item: JsonDict, index: int, run_index: int = 0, none_if_absent: bool = False) -> str | None:
     column = get_flex_column_item(item, index)
     if not column:

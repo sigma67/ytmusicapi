@@ -3,6 +3,7 @@ import re
 from ytmusicapi.type_alias import JsonDict, JsonList
 
 from ._utils import *
+from .artists import parse_artists_runs
 from .constants import DOT_SEPARATOR_RUN
 
 
