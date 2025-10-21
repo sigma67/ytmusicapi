@@ -115,13 +115,13 @@ class TestSearch:
 
     def test_search_episode_category(self, yt_auth):
         """Test resultType detection for episodes by searching for a podcast without a filter.
-        Note 2025/10/20: categories are currently gone from default search, therefore category changed to "Top result"
+        Note 2025/10/20: categories are currently gone from default search, therefore category changed to None
         """
         results = yt_auth.search("Stanford Graduate School of Business")
         episode = next(
             item
             for item in results
-            if item["category"] == "Top result"
+            if item["category"] is None
             and "podcast" in item
             and item["podcast"]["name"] == "Stanford GSB Podcasts"
         )
