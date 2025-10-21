@@ -205,9 +205,9 @@ class YTMusicBase:
 
         """
 
-        # change the context to emulate a mobile-app (Android)
+        # change the context to emulate a mobile-app (iOS Music)
         copied_context_client = self.context["context"]["client"].copy()
-        self.context["context"]["client"].update({"clientName": "ANDROID_MUSIC", "clientVersion": "7.21.50"})
+        self.context["context"]["client"].update({"clientName": "IOS_MUSIC", "clientVersion": "6.42"})
 
         # this will not catch errors
         try:

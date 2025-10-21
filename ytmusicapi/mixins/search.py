@@ -230,6 +230,75 @@ class SearchMixin(MixinProtocol):
                 #  so we take care to not set the result type for that scope
                 if filter and not scope == scopes[1]:
                     result_type = filter[:-1].lower()
+                
+                # Check if contents use new format instead of traditional MRLIR
+                if shelf_contents and "musicResponsiveListItemRenderer" not in shelf_contents[0]:
+                    for item in shelf_contents:
+                        if "musicTwoColumnItemRenderer" in item:
+                            # Try to extract search result from musicTwoColumnItemRenderer
+                            search_result = self._parse_two_column_item(item["musicTwoColumnItemRenderer"], result_type, category)
+                            if search_result:
+                                search_results.append(search_result)
+                    continue
+
+            elif "elementRenderer" in res:
+                # iOS format: Check for musicListItemShelfModel in elementRenderer
+                element = res["elementRenderer"]
+                if ("newElement" in element and 
+                    "type" in element["newElement"] and
+                    "componentType" in element["newElement"]["type"] and
+                    "model" in element["newElement"]["type"]["componentType"] and
+                    "musicListItemShelfModel" in element["newElement"]["type"]["componentType"]["model"]):
+                    
+                    # Extract items from iOS musicListItemShelfModel
+                    shelf_model = element["newElement"]["type"]["componentType"]["model"]["musicListItemShelfModel"]
+                    if "data" in shelf_model and "items" in shelf_model["data"]:
+                        data = shelf_model["data"]
+                        
+                        # Get category from header if available
+                        if "header" in data and "title" in data["header"]:
+                            category = data["header"]["title"]
+                        
+                        # Parse iOS format items directly - they don't need MRLIR wrapper
+                        ios_items = data["items"]
+                        for item in ios_items:
+                            # Convert iOS item format to standard search result format
+                            search_result = self._parse_ios_search_item(item, result_type, category)
+                            if search_result:
+                                search_results.append(search_result)
+                        continue
+
+            elif "itemSectionRenderer" in res:
+                # New format: itemSectionRenderer with elementRenderer contents
+                item_section = res["itemSectionRenderer"]
+                if "contents" in item_section and len(item_section["contents"]) > 0:
+                    first_content = item_section["contents"][0]
+                    if "elementRenderer" in first_content:
+                        element = first_content["elementRenderer"]
+                        if ("newElement" in element and 
+                            "type" in element["newElement"] and
+                            "componentType" in element["newElement"]["type"] and
+                            "model" in element["newElement"]["type"]["componentType"] and
+                            "musicListItemShelfModel" in element["newElement"]["type"]["componentType"]["model"]):
+                            
+                            # Extract items from musicListItemShelfModel
+                            shelf_model = element["newElement"]["type"]["componentType"]["model"]["musicListItemShelfModel"]
+                            if "data" in shelf_model and "items" in shelf_model["data"]:
+                                data = shelf_model["data"]
+                                
+                                # Get category from header if available
+                                if "header" in data and "title" in data["header"]:
+                                    category = data["header"]["title"]
+                                
+                                # Parse format items directly - they don't need MRLIR wrapper
+                                items = data["items"]
+                                for item in items:
+                                    # Convert item format to standard search result format
+                                    search_result = self._parse_ios_search_item(item, result_type, category)
+                                    if search_result:
+                                        search_results.append(search_result)
+                # Always continue for itemSectionRenderer - don't fall through to parse_search_results
+                continue
 
             else:
                 continue
@@ -381,3 +450,126 @@ class SearchMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
 
         return bool(nav(response, ["feedbackResponses", 0, "isProcessed"], none_if_absent=True))
+
+    def _parse_ios_search_item(self, item, result_type=None, category=None):
+        """
+        Parse an iOS format search item from musicListItemShelfModel
+        """
+        try:
+            search_result = {"category": category}
+            
+            # Extract basic information
+            if "title" in item:
+                search_result["title"] = item["title"]
+            
+            if "subtitle" in item:
+                # Parse subtitle to extract artist, duration, etc.
+                subtitle = item["subtitle"]
+                # For songs, subtitle is usually "Artist • Duration • Views"
+                if " • " in subtitle:
+                    parts = subtitle.split(" • ")
+                    if len(parts) >= 1:
+                        search_result["artist"] = parts[0]
+                    if len(parts) >= 2:
+                        search_result["duration"] = parts[1]
+                    if len(parts) >= 3:
+                        search_result["plays"] = parts[2]
+                else:
+                    search_result["subtitle"] = subtitle
+            
+            # Extract video/song information
+            if "onTap" in item and "innertubeCommand" in item["onTap"]:
+                command = item["onTap"]["innertubeCommand"]
+                if "watchEndpoint" in command:
+                    watch_endpoint = command["watchEndpoint"]
+                    if "videoId" in watch_endpoint:
+                        search_result["videoId"] = watch_endpoint["videoId"]
+                    # Determine result type based on available data
+                    if not result_type:
+                        search_result["resultType"] = "song"
+                    else:
+                        search_result["resultType"] = result_type
+                elif "browseEndpoint" in command:
+                    browse_endpoint = command["browseEndpoint"]
+                    if "browseId" in browse_endpoint:
+                        search_result["browseId"] = browse_endpoint["browseId"]
+                        # Determine result type from browseId prefix
+                        browse_id = browse_endpoint["browseId"]
+                        if browse_id.startswith("VL") or browse_id.startswith("PL"):
+                            search_result["resultType"] = "playlist"
+                        elif browse_id.startswith("UC"):
+                            search_result["resultType"] = "artist"
+                        elif browse_id.startswith("MPREb_"):
+                            search_result["resultType"] = "album"
+                        else:
+                            search_result["resultType"] = result_type or "unknown"
+            
+            # Extract thumbnail
+            if "thumbnail" in item and "image" in item["thumbnail"] and "sources" in item["thumbnail"]["image"]:
+                search_result["thumbnails"] = item["thumbnail"]["image"]["sources"]
+            
+            # Set default result type if not determined
+            if "resultType" not in search_result:
+                search_result["resultType"] = result_type or "song"
+            
+            return search_result
+            
+        except Exception:
+            # If parsing fails, return None to skip this item
+            return None
+
+    def _parse_two_column_item(self, item, result_type=None, category=None):
+        """
+        Parse a musicTwoColumnItemRenderer search item
+        """
+        try:
+            search_result = {"category": category}
+            
+            # Extract title
+            if "title" in item and "runs" in item["title"] and len(item["title"]["runs"]) > 0:
+                search_result["title"] = item["title"]["runs"][0]["text"]
+            
+            # Extract video ID from navigation endpoint
+            if "navigationEndpoint" in item and "watchEndpoint" in item["navigationEndpoint"]:
+                watch_endpoint = item["navigationEndpoint"]["watchEndpoint"]
+                if "videoId" in watch_endpoint:
+                    search_result["videoId"] = watch_endpoint["videoId"]
+                    search_result["resultType"] = result_type or "song"
+            
+            # Extract artists and other info from subtitle
+            if "subtitle" in item and "runs" in item["subtitle"]:
+                subtitle_runs = item["subtitle"]["runs"]
+                if len(subtitle_runs) > 0:
+                    # First run is usually the artist
+                    search_result["artists"] = [{"name": subtitle_runs[0]["text"]}]
+                    
+                    # Look for duration (format like "21:58")
+                    for run in subtitle_runs:
+                        text = run["text"]
+                        if ":" in text and text.replace(":", "").isdigit():
+                            search_result["duration"] = text
+                            # Convert to seconds for compatibility
+                            try:
+                                parts = text.split(":")
+                                if len(parts) == 2:
+                                    minutes, seconds = int(parts[0]), int(parts[1])
+                                    search_result["duration_seconds"] = minutes * 60 + seconds
+                            except ValueError:
+                                pass
+            
+            # Extract thumbnails
+            if ("thumbnail" in item and 
+                "musicThumbnailRenderer" in item["thumbnail"] and
+                "thumbnail" in item["thumbnail"]["musicThumbnailRenderer"] and
+                "thumbnails" in item["thumbnail"]["musicThumbnailRenderer"]["thumbnail"]):
+                search_result["thumbnails"] = item["thumbnail"]["musicThumbnailRenderer"]["thumbnail"]["thumbnails"]
+            
+            # Set default result type if not determined
+            if "resultType" not in search_result:
+                search_result["resultType"] = result_type or "song"
+            
+            return search_result
+            
+        except Exception:
+            # If parsing fails, return None to skip this item
+            return None

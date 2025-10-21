@@ -119,8 +119,130 @@ class PlaylistsMixin(MixinProtocol):
         if playlistId.startswith("OLA") or playlistId.startswith("VLOLA"):
             return parse_audio_playlist(response, limit, request_func_continuations)
 
-        header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
-        section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+        # Handle both desktop (two-column) and mobile iOS (single-column) formats
+        is_single_column = "singleColumnBrowseResultsRenderer" in response.get("contents", {})
+        
+        if is_single_column:
+            # iOS single-column format - parse properly with header data
+            playlist: JsonDict = {}
+            
+            # Try to get header information from the single-column structure
+            try:
+                # Look for header in the single-column tab structure
+                header_section = None
+                sections = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer", "contents"], True)
+                
+                if sections:
+                    # Find the header section (usually the first section with a header)
+                    for section in sections:
+                        if "musicDetailHeaderRenderer" in section:
+                            header_section = section["musicDetailHeaderRenderer"]
+                            break
+                        elif "musicResponsiveHeaderRenderer" in section:
+                            header_section = section["musicResponsiveHeaderRenderer"]
+                            break
+                
+                # Parse basic playlist info
+                playlist["id"] = playlistId
+                playlist["owned"] = False  # Default for iOS format
+                playlist["privacy"] = "PUBLIC"  # Default for iOS format
+                
+                if header_section:
+                    # Extract metadata from header
+                    playlist.update(parse_playlist_header_meta(header_section))
+                    
+                    # Get description if available
+                    description_shelf = nav(header_section, ["description", *DESCRIPTION_SHELF], True)
+                    playlist["description"] = (
+                        "".join([run["text"] for run in description_shelf["description"]["runs"]])
+                        if description_shelf
+                        else None
+                    )
+                else:
+                    # Fallback for special playlists or when header is missing
+                    if playlistId == "SE":
+                        playlist["title"] = "Episodes for later"
+                        playlist["description"] = "Your saved episodes"
+                    elif playlistId == "LM":
+                        playlist["title"] = "Liked Music"
+                        playlist["description"] = "Your liked songs"
+                    elif playlistId == "RDPN":
+                        playlist["title"] = "New Episodes"
+                        playlist["description"] = "Latest episodes from your subscriptions"
+                    else:
+                        # Try to extract title from shelf header
+                        try:
+                            shelf_data = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer", "contents", 0, "musicPlaylistShelfRenderer"])
+                            if "header" in shelf_data and "musicPlaylistShelfHeaderRenderer" in shelf_data["header"]:
+                                shelf_header = shelf_data["header"]["musicPlaylistShelfHeaderRenderer"]
+                                playlist["title"] = nav(shelf_header, ["title", "runs", 0, "text"], True) or "Unknown Playlist"
+                            else:
+                                playlist["title"] = "Unknown Playlist"
+                        except:
+                            playlist["title"] = "Unknown Playlist"
+                    
+                    # Set default values for missing header data
+                    playlist["description"] = None
+                    playlist["thumbnails"] = []
+                    playlist["author"] = {"name": "", "id": None}
+                    playlist["year"] = None
+                    playlist["duration"] = None
+                    playlist["trackCount"] = None
+                    playlist["views"] = None
+                
+                # Initialize collections
+                playlist["related"] = []
+                playlist["suggestions"] = []
+                playlist["tracks"] = []
+                
+                # Parse tracks from the shelf contents
+                try:
+                    shelf_data = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer", "contents", 0, "musicPlaylistShelfRenderer"])
+                    if "contents" in shelf_data:
+                        playlist["tracks"] = parse_playlist_items(shelf_data["contents"])
+                except:
+                    # Try alternative shelf location for different iOS layouts
+                    try:
+                        sections = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer", "contents"], True)
+                        if sections:
+                            for section in sections:
+                                if "musicPlaylistShelfRenderer" in section:
+                                    shelf_data = section["musicPlaylistShelfRenderer"]
+                                    if "contents" in shelf_data:
+                                        playlist["tracks"] = parse_playlist_items(shelf_data["contents"])
+                                        break
+                    except:
+                        playlist["tracks"] = []
+                
+                # Calculate duration from tracks
+                playlist["duration_seconds"] = sum_total_duration(playlist)
+                
+                return playlist
+                
+            except Exception as e:
+                # If iOS parsing fails completely, fall back to basic structure
+                playlist = {
+                    "id": playlistId,
+                    "owned": False,
+                    "privacy": "PUBLIC",
+                    "title": "Saved Episodes" if playlistId == "SE" else ("Liked Songs" if playlistId == "LM" else "Unknown Playlist"),
+                    "description": None,
+                    "thumbnails": [],
+                    "author": {"name": "", "id": None},
+                    "year": None,
+                    "duration": None,
+                    "duration_seconds": 0,
+                    "trackCount": None,
+                    "views": None,
+                    "related": [],
+                    "suggestions": [],
+                    "tracks": []
+                }
+                return playlist
+        else:
+            # Desktop two-column format
+            header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
+            section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
         playlist: JsonDict = {}
         playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
         if not playlist["owned"]:
@@ -201,6 +323,7 @@ class PlaylistsMixin(MixinProtocol):
         :param limit: How many items to return. Default: 100
         :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
         """
+        self._check_auth()
         return self.get_playlist("LM", limit)
 
     def get_saved_episodes(self, limit: int = 100) -> JsonDict:

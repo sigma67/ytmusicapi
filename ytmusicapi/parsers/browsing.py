@@ -20,13 +20,18 @@ def parse_mixed_content(
             results = next(iter(row.values()))
             if "contents" not in results:
                 continue
-            title = nav(results, [*CAROUSEL_TITLE, "text"])
+            title = nav(results, [*CAROUSEL_TITLE, "text"], True) or "Related content"
             contents = []
             for result in results["contents"]:
                 data = nav(result, [MTRIR], True)
                 content = None
                 if data:
                     page_type = nav(data, TITLE + NAVIGATION_BROWSE + PAGE_TYPE, True)
+                    
+                    # iOS format: try direct navigation endpoint if title approach fails
+                    if page_type is None:
+                        page_type = nav(data, NAVIGATION_BROWSE + PAGE_TYPE, True)
+                    
                     if page_type is None:  # song or watch_playlist
                         if nav(data, NAVIGATION_WATCH_PLAYLIST_ID, True) is not None:
                             content = parse_watch_playlist(data)
@@ -66,7 +71,7 @@ def parse_album(result: JsonDict) -> JsonDict:
         "title": nav(result, TITLE_TEXT),
         "type": nav(result, SUBTITLE),
         "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
-        "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
+        "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID, True) or nav(result, NAVIGATION_BROWSE_ID),
         "audioPlaylistId": parse_album_playlistid_if_exists(nav(result, THUMBNAIL_OVERLAY_NAVIGATION, True)),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
@@ -82,7 +87,7 @@ def parse_single(result: JsonDict) -> JsonDict:
     return {
         "title": nav(result, TITLE_TEXT),
         "year": nav(result, SUBTITLE, True),
-        "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
+        "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID, True) or nav(result, NAVIGATION_BROWSE_ID),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
     }
 
@@ -146,7 +151,7 @@ def parse_playlist(data: JsonDict) -> JsonDict:
             TITLE_TEXT,
             none_if_absent=True,  # rare but possible for playlist title to be missing
         ),
-        "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
+        "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID, True) or nav(data, NAVIGATION_BROWSE_ID)[2:],
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
     }
     subtitle = data["subtitle"]
@@ -165,7 +170,7 @@ def parse_related_artist(data: JsonDict) -> JsonDict:
         subscribers = subscribers.split(" ")[0]
     return {
         "title": nav(data, TITLE_TEXT),
-        "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
+        "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID, True) or nav(data, NAVIGATION_BROWSE_ID),
         "subscribers": subscribers,
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
     }

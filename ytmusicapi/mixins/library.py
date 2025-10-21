@@ -1,4 +1,5 @@
 from collections.abc import Callable
+import json
 from random import randint
 
 from requests import Response
@@ -6,6 +7,7 @@ from requests import Response
 from ytmusicapi.continuations import *
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.models.content.enums import LikeStatus
+from ytmusicapi.navigation import MUSIC_SHELF
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import *
 from ytmusicapi.parsers.playlists import parse_playlist_items
@@ -38,10 +40,67 @@ class LibraryMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
 
+        # Custom iOS-compatible navigation for library playlists
+        results = None
+        
+        # Try standard paths first
         results = get_library_contents(response, GRID)
         if results is None:
+            results = get_library_contents(response, MUSIC_SHELF)
+        
+        # If standard paths fail, try direct iOS path
+        if results is None:
+            try:
+                # iOS format: contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].musicShelfRenderer
+                contents = response.get("contents", {})
+                scbr = contents.get("singleColumnBrowseResultsRenderer", {})
+                tabs = scbr.get("tabs", [])
+                if tabs:
+                    tab_renderer = tabs[0].get("tabRenderer", {})
+                    content = tab_renderer.get("content", {})
+                    slr = content.get("sectionListRenderer", {})
+                    sections = slr.get("contents", [])
+                    
+                    # Look for musicShelfRenderer in the first section
+                    if sections and "musicShelfRenderer" in sections[0]:
+                        results = sections[0]["musicShelfRenderer"]
+            except (KeyError, IndexError):
+                pass
+        
+        if results is None:
             return []
-        playlists = parse_content_list(results["items"][1:], parse_playlist)
+        
+        # Handle different item structures between formats
+        items = results.get("items", []) if isinstance(results, dict) else []
+        
+        # iOS format uses "contents" instead of "items"
+        if not items and isinstance(results, dict):
+            items = results.get("contents", [])
+        if not items:
+            return []
+            
+        if "musicTwoColumnItemRenderer" in str(items[0]):
+            # iOS format uses musicTwoColumnItemRenderer, convert to regular format
+            converted_items = []
+            for item in items:
+                if "musicTwoColumnItemRenderer" in item:
+                    ios_item = item["musicTwoColumnItemRenderer"]
+                    # Wrap in the expected musicTwoRowItemRenderer structure
+                    converted_item = {
+                        "musicTwoRowItemRenderer": {
+                            "title": ios_item.get("title", {}),
+                            "subtitle": ios_item.get("subtitle", {}),
+                            "navigationEndpoint": ios_item.get("navigationEndpoint", {}),
+                            "thumbnailRenderer": ios_item.get("thumbnail", {})
+                        }
+                    }
+                    converted_items.append(converted_item)
+                else:
+                    converted_items.append(item)
+            playlists = parse_content_list(converted_items, parse_playlist)
+        else:
+            # Traditional format, skip first item which is usually a header
+            playlists = parse_content_list(items[1:], parse_playlist)
 
         if "continuations" in results:
             request_func: RequestFuncType = lambda additionalParams: self._send_request(
@@ -49,9 +108,51 @@ class LibraryMixin(MixinProtocol):
             )
             parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_playlist)
             remaining_limit = None if limit is None else (limit - len(playlists))
-            playlists.extend(
-                get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
-            )
+            
+            # Check for iOS format continuation first
+            if results["continuations"] and "nextContinuationData" in results["continuations"][0]:
+                # iOS format uses nextContinuationData - implement custom handling
+                print("Note: iOS format continuation available for playlists")
+                
+                ios_continuation = results["continuations"][0]["nextContinuationData"]
+                continuation_token = ios_continuation.get("continuation")
+                
+                if continuation_token:
+                    try:
+                        # Create continuation request body
+                        continuation_body = dict(body)  # Copy original body
+                        continuation_body["continuation"] = continuation_token
+                        
+                        continuation_response = self._send_request(endpoint, continuation_body)
+                        
+                        # Parse continuation response - iOS format uses different structure
+                        if continuation_response and "continuationContents" in continuation_response:
+                            continuation_contents = continuation_response["continuationContents"]
+                            
+                            # iOS continuation uses sectionListContinuation
+                            if "sectionListContinuation" in continuation_contents:
+                                section_continuation = continuation_contents["sectionListContinuation"]
+                                
+                                if "contents" in section_continuation:
+                                    sections = section_continuation["contents"]
+                                    
+                                    for section in sections:
+                                        if "musicShelfRenderer" in section:
+                                            shelf = section["musicShelfRenderer"]
+                                            shelf_contents = shelf.get("contents", [])
+                                            
+                                            if shelf_contents:
+                                                # Parse continuation items
+                                                continuation_playlists = parse_func(shelf_contents)
+                                                playlists.extend(continuation_playlists)
+                                                print(f"✅ Added {len(continuation_playlists)} playlists from continuation")
+                    except Exception as e:
+                        print(f"⚠️ iOS continuation failed: {e}")
+            else:
+                # Desktop format uses gridContinuation
+                playlists.extend(
+                    get_continuations(results, "gridContinuation", remaining_limit, request_func, parse_func)
+                )
 
         return playlists
 
@@ -77,7 +178,200 @@ class LibraryMixin(MixinProtocol):
         per_page = 25
 
         request_func: RequestFuncType = lambda additionalParams: self._send_request(endpoint, body)
-        parse_func: ParseFuncDictType = lambda raw_response: parse_library_songs(raw_response)
+        
+        # Custom iOS-compatible parser function
+        def parse_func_ios_compatible(raw_response: JsonDict) -> JsonDict:
+            response = raw_response
+            
+            # First check if this is iOS format by looking for musicTwoColumnItemRenderer
+            response_str = json.dumps(response)
+            is_ios_format = "musicTwoColumnItemRenderer" in response_str and "musicResponsiveListItemRenderer" not in response_str
+            
+            if is_ios_format:
+                # Handle iOS format directly
+                try:
+                    contents = response.get("contents", {})
+                    scbr = contents.get("singleColumnBrowseResultsRenderer", {})
+                    tabs = scbr.get("tabs", [])
+                    if tabs:
+                        tab_renderer = tabs[0].get("tabRenderer", {})
+                        content = tab_renderer.get("content", {})
+                        slr = content.get("sectionListRenderer", {})
+                        sections = slr.get("contents", [])
+                        
+                        if sections and "musicShelfRenderer" in sections[0]:
+                            results = sections[0]["musicShelfRenderer"]
+                            
+                            # Remove unwanted items (if any)
+                            pop_songs_random_mix(results)
+                            
+                            # Handle iOS format conversion
+                            items = results.get("contents", [])
+                            if items and "musicTwoColumnItemRenderer" in items[0]:
+                                # Convert iOS format to regular format
+                                converted_items = []
+                                for item in items:
+                                    if "musicTwoColumnItemRenderer" in item:
+                                        ios_item = item["musicTwoColumnItemRenderer"]
+                                        
+                                        navigation_endpoint = ios_item.get("navigationEndpoint", {})
+                                        
+                                        # Extract title from iOS format
+                                        title_text = None
+                                        if "title" in ios_item and "runs" in ios_item["title"]:
+                                            title_text = ios_item["title"]["runs"][0]["text"]
+                                        
+                                        # Extract artist and duration from subtitle (first run is artist, last part after • is duration)
+                                        artist_text = None
+                                        album_browse_id = None
+                                        artist_browse_id = None
+                                        
+                                        if "subtitle" in ios_item and "runs" in ios_item["subtitle"]:
+                                            # Parse subtitle - format is usually "Artist • Duration" or "Artist"
+                                            subtitle_runs = ios_item["subtitle"]["runs"]
+                                            if subtitle_runs:
+                                                # First run is usually the artist
+                                                artist_text = subtitle_runs[0]["text"]
+                                                
+                                                # Look for navigation endpoint to artist in subtitle runs
+                                                for run in subtitle_runs:
+                                                    if "navigationEndpoint" in run and "browseEndpoint" in run["navigationEndpoint"]:
+                                                        browse_id = run["navigationEndpoint"]["browseEndpoint"].get("browseId", "")
+                                                        if browse_id.startswith("UC"):  # Artist channel ID starts with UC
+                                                            artist_browse_id = browse_id
+                                        
+                                        # Extract videoId from navigation endpoint
+                                        video_id = None
+                                        if "watchEndpoint" in navigation_endpoint:
+                                            video_id = navigation_endpoint["watchEndpoint"].get("videoId")
+                                        
+                                        # Extract album and artist IDs from menu items
+                                        if "menu" in ios_item and "menuRenderer" in ios_item["menu"]:
+                                            menu_items = ios_item["menu"]["menuRenderer"].get("items", [])
+                                            for menu_item in menu_items:
+                                                if "menuNavigationItemRenderer" in menu_item:
+                                                    nav_item = menu_item["menuNavigationItemRenderer"]
+                                                    if "navigationEndpoint" in nav_item and "browseEndpoint" in nav_item["navigationEndpoint"]:
+                                                        browse_endpoint = nav_item["navigationEndpoint"]["browseEndpoint"]
+                                                        browse_id = browse_endpoint.get("browseId", "")
+                                                        
+                                                        # Check for album page type
+                                                        if "browseEndpointContextSupportedConfigs" in browse_endpoint:
+                                                            config = browse_endpoint["browseEndpointContextSupportedConfigs"]
+                                                            if "browseEndpointContextMusicConfig" in config:
+                                                                page_type = config["browseEndpointContextMusicConfig"].get("pageType")
+                                                                if page_type == "MUSIC_PAGE_TYPE_ALBUM":
+                                                                    album_browse_id = browse_id
+                                                                elif page_type == "MUSIC_PAGE_TYPE_ARTIST" and not artist_browse_id:
+                                                                    artist_browse_id = browse_id
+                                        
+                                        # Create flexColumns structure similar to regular format
+                                        flex_columns = []
+                                        
+                                        # First column: title with navigation endpoint for videoId
+                                        if title_text:
+                                            title_column = {
+                                                "musicResponsiveListItemFlexColumnRenderer": {
+                                                    "text": {
+                                                        "runs": [{"text": title_text}]
+                                                    },
+                                                    "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_FLEX_COLUMN_DISPLAY_PRIORITY_HIGH"
+                                                }
+                                            }
+                                            # Add navigation endpoint to title for videoId extraction
+                                            if navigation_endpoint:
+                                                title_column["musicResponsiveListItemFlexColumnRenderer"]["text"]["runs"][0]["navigationEndpoint"] = navigation_endpoint
+                                            
+                                            flex_columns.append(title_column)
+                                        
+                                        # Second column: artist with potential navigation endpoint and album
+                                        if artist_text:
+                                            artist_runs = [{"text": artist_text}]
+                                            
+                                            # Add artist navigation endpoint if available
+                                            if artist_browse_id:
+                                                artist_runs[0]["navigationEndpoint"] = {
+                                                    "browseEndpoint": {
+                                                        "browseId": artist_browse_id,
+                                                        "browseEndpointContextSupportedConfigs": {
+                                                            "browseEndpointContextMusicConfig": {
+                                                                "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            
+                                            # Add album information if available
+                                            if album_browse_id:
+                                                # Add separator and album as additional runs
+                                                artist_runs.extend([
+                                                    {"text": " • "},
+                                                    {
+                                                        "text": "Album",  # We could extract actual album name from menu text if needed
+                                                        "navigationEndpoint": {
+                                                            "browseEndpoint": {
+                                                                "browseId": album_browse_id,
+                                                                "browseEndpointContextSupportedConfigs": {
+                                                                    "browseEndpointContextMusicConfig": {
+                                                                        "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ])
+                                            
+                                            artist_column = {
+                                                "musicResponsiveListItemFlexColumnRenderer": {
+                                                    "text": {
+                                                        "runs": artist_runs
+                                                    },
+                                                    "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_FLEX_COLUMN_DISPLAY_PRIORITY_HIGH"
+                                                }
+                                            }
+                                            flex_columns.append(artist_column)
+                                        
+                                        converted_item = {
+                                            "musicResponsiveListItemRenderer": {
+                                                "flexColumns": flex_columns,
+                                                "thumbnail": ios_item.get("thumbnail", {}),
+                                                "menu": ios_item.get("menu", {}),
+                                                "playNavigationEndpoint": navigation_endpoint,
+                                                "navigationEndpoint": navigation_endpoint,
+                                                # Add overlay structure for videoId extraction
+                                                "overlay": {
+                                                    "musicItemThumbnailOverlayRenderer": {
+                                                        "content": {
+                                                            "musicPlayButtonRenderer": {
+                                                                "playNavigationEndpoint": navigation_endpoint
+                                                            }
+                                                        }
+                                                    }
+                                                } if navigation_endpoint else {}
+                                            }
+                                        }
+                                        converted_items.append(converted_item)
+                                    else:
+                                        converted_items.append(item)
+                                
+                                # Update results with converted items
+                                results = dict(results)  # Make a copy
+                                results["contents"] = converted_items
+                            
+                            # Parse items
+                            parsed_songs = parse_playlist_items(results["contents"]) if results else []
+                            
+                            return {"results": results, "parsed": parsed_songs}
+                except (KeyError, IndexError) as e:
+                    print(f"iOS parsing error: {e}")
+                    return {"results": None, "parsed": None}
+            
+            # Try standard parsing for non-iOS format
+            try:
+                return parse_library_songs(raw_response)
+            except Exception as e:
+                print(f"Standard parsing error: {e}")
+                return {"results": None, "parsed": None}
 
         if validate_responses and limit is None:
             raise YTMusicUserError("Validation is not supported without a limit parameter.")
@@ -87,10 +381,10 @@ class LibraryMixin(MixinProtocol):
                 parsed, per_page, limit, 0
             )
             response = resend_request_until_parsed_response_is_valid(
-                request_func, "", parse_func, validate_func, 3
+                request_func, "", parse_func_ios_compatible, validate_func, 3
             )
         else:
-            response = parse_func(request_func(""))
+            response = parse_func_ios_compatible(request_func(""))
 
         results = response["results"]
         songs: JsonList | None = response["parsed"]
@@ -103,28 +397,102 @@ class LibraryMixin(MixinProtocol):
             )
             parse_continuations_func = lambda contents: parse_playlist_items(contents)
 
-            if validate_responses:
-                songs.extend(
-                    get_validated_continuations(
-                        results,
-                        "musicShelfContinuation",
-                        limit - len(songs),
-                        per_page,
-                        request_continuations_func,
-                        parse_continuations_func,
-                    )
-                )
+            # Determine continuation type based on what's available
+            if results["continuations"] and "nextContinuationData" in results["continuations"][0]:
+                # iOS format uses nextContinuationData
+                print("Note: iOS format continuation available - implementing basic support")
+                
+                # Basic iOS continuation handling
+                ios_continuation = results["continuations"][0]["nextContinuationData"]
+                continuation_token = ios_continuation.get("continuation")
+                
+                if continuation_token and not validate_responses:
+                    # Make continuation request with proper format
+                    try:
+                        # Create continuation request body
+                        continuation_body = dict(body)  # Copy original body
+                        continuation_body["continuation"] = continuation_token
+                        
+                        continuation_response = self._send_request(endpoint, continuation_body)
+                        
+                        # Parse continuation response - iOS format uses different structure
+                        if continuation_response and "continuationContents" in continuation_response:
+                            continuation_contents = continuation_response["continuationContents"]
+                            
+                            # iOS continuation uses sectionListContinuation
+                            if "sectionListContinuation" in continuation_contents:
+                                section_continuation = continuation_contents["sectionListContinuation"]
+                                
+                                if "contents" in section_continuation:
+                                    sections = section_continuation["contents"]
+                                    
+                                    for section in sections:
+                                        if "musicShelfRenderer" in section:
+                                            shelf = section["musicShelfRenderer"]
+                                            shelf_contents = shelf.get("contents", [])
+                                            
+                                            # Parse continuation items using the same iOS conversion logic
+                                            if shelf_contents and "musicTwoColumnItemRenderer" in shelf_contents[0]:
+                                                # Create a fake response structure for our parser
+                                                fake_response = {
+                                                    "contents": {
+                                                        "singleColumnBrowseResultsRenderer": {
+                                                            "tabs": [{
+                                                                "tabRenderer": {
+                                                                    "content": {
+                                                                        "sectionListRenderer": {
+                                                                            "contents": [{
+                                                                                "musicShelfRenderer": {
+                                                                                    "contents": shelf_contents
+                                                                                }
+                                                                            }]
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }]
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                # Apply same iOS conversion logic
+                                                continuation_parsed = parse_func_ios_compatible(fake_response)
+                                                if continuation_parsed and continuation_parsed["parsed"]:
+                                                    continuation_songs = continuation_parsed["parsed"]
+                                                    songs.extend(continuation_songs)
+                                                    print(f"✅ Added {len(continuation_songs)} songs from continuation")
+                                                    
+                                                    # Check for more continuations in this batch
+                                                    if "continuations" in shelf:
+                                                        print(f"📄 More continuations available ({len(shelf['continuations'])} batches)")
+                                            break
+                    except Exception as e:
+                        print(f"iOS continuation error: {e}")
+                        import traceback
+                        traceback.print_exc()
             else:
-                remaining_limit = None if limit is None else (limit - len(songs))
-                songs.extend(
-                    get_continuations(
-                        results,
-                        "musicShelfContinuation",
-                        remaining_limit,
-                        request_continuations_func,
-                        parse_continuations_func,
+                # Standard continuation handling
+                if validate_responses:
+                    songs.extend(
+                        get_validated_continuations(
+                            results,
+                            "musicShelfContinuation",
+                            limit - len(songs),
+                            per_page,
+                            request_continuations_func,
+                            parse_continuations_func,
+                        )
                     )
-                )
+                else:
+                    remaining_limit = None if limit is None else (limit - len(songs))
+                    songs.extend(
+                        get_continuations(
+                            results,
+                            "musicShelfContinuation",
+                            remaining_limit,
+                            request_continuations_func,
+                            parse_continuations_func,
+                        )
+                    )
 
         return songs
 
@@ -432,6 +800,7 @@ class LibraryMixin(MixinProtocol):
     def get_account_info(self) -> JsonDict:
         """
         Gets information about the currently authenticated user's account.
+        Compatible with both desktop and iOS mobile single-column formats.
 
         :return: Dictionary with user's account name, channel handle, and URL of their account photo.
 
@@ -447,26 +816,75 @@ class LibraryMixin(MixinProtocol):
         endpoint = "account/account_menu"
         response = self._send_request(endpoint, {})
 
-        ACCOUNT_INFO = [
-            "actions",
-            0,
-            "openPopupAction",
-            "popup",
-            "multiPageMenuRenderer",
-            "header",
-            "activeAccountHeaderRenderer",
-        ]
-        ACCOUNT_RUNS_TEXT = ["runs", 0, "text"]
-        ACCOUNT_NAME = [*ACCOUNT_INFO, "accountName", *ACCOUNT_RUNS_TEXT]
-        ACCOUNT_CHANNEL_HANDLE = [*ACCOUNT_INFO, "channelHandle", *ACCOUNT_RUNS_TEXT]
-        ACCOUNT_PHOTO_URL = [*ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
+        # Try desktop navigation paths first (backward compatibility)
+        try:
+            ACCOUNT_INFO = [
+                "actions",
+                0,
+                "openPopupAction",
+                "popup",
+                "multiPageMenuRenderer",
+                "header",
+                "activeAccountHeaderRenderer",
+            ]
+            ACCOUNT_RUNS_TEXT = ["runs", 0, "text"]
+            ACCOUNT_NAME = [*ACCOUNT_INFO, "accountName", *ACCOUNT_RUNS_TEXT]
+            ACCOUNT_CHANNEL_HANDLE = [*ACCOUNT_INFO, "channelHandle", *ACCOUNT_RUNS_TEXT]
+            ACCOUNT_PHOTO_URL = [*ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
 
-        account_name = nav(response, ACCOUNT_NAME)
-        channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE, none_if_absent=True)
-        account_photo_url = nav(response, ACCOUNT_PHOTO_URL)
+            account_name = nav(response, ACCOUNT_NAME)
+            channel_handle = nav(response, ACCOUNT_CHANNEL_HANDLE, none_if_absent=True)
+            account_photo_url = nav(response, ACCOUNT_PHOTO_URL)
 
-        return {
-            "accountName": account_name,
-            "channelHandle": channel_handle,
-            "accountPhotoUrl": account_photo_url,
-        }
+            return {
+                "accountName": account_name,
+                "channelHandle": channel_handle,
+                "accountPhotoUrl": account_photo_url,
+            }
+        except:
+            # Fall back to iOS mobile navigation paths
+            try:
+                # iOS format typically omits 'openPopupAction' level
+                IOS_ACCOUNT_INFO = [
+                    "actions",
+                    0,
+                    "popup",
+                    "multiPageMenuRenderer",
+                    "header",
+                    "activeAccountHeaderRenderer",
+                ]
+                ACCOUNT_RUNS_TEXT = ["runs", 0, "text"]
+                IOS_ACCOUNT_NAME = [*IOS_ACCOUNT_INFO, "accountName", *ACCOUNT_RUNS_TEXT]
+                IOS_ACCOUNT_CHANNEL_HANDLE = [*IOS_ACCOUNT_INFO, "channelHandle", *ACCOUNT_RUNS_TEXT]
+                IOS_ACCOUNT_PHOTO_URL = [*IOS_ACCOUNT_INFO, "accountPhoto", "thumbnails", 0, "url"]
+
+                account_name = nav(response, IOS_ACCOUNT_NAME)
+                channel_handle = nav(response, IOS_ACCOUNT_CHANNEL_HANDLE, none_if_absent=True)
+                account_photo_url = nav(response, IOS_ACCOUNT_PHOTO_URL)
+
+                return {
+                    "accountName": account_name,
+                    "channelHandle": channel_handle,
+                    "accountPhotoUrl": account_photo_url,
+                }
+            except:
+                # Final fallback for alternative iOS structures
+                try:
+                    # Some iOS variants might have different action structure
+                    ALT_IOS_HEADER = ["popup", "multiPageMenuRenderer", "header", "activeAccountHeaderRenderer"]
+                    ALT_ACCOUNT_NAME = [*ALT_IOS_HEADER, "accountName", "runs", 0, "text"]
+                    ALT_ACCOUNT_CHANNEL_HANDLE = [*ALT_IOS_HEADER, "channelHandle", "runs", 0, "text"]
+                    ALT_ACCOUNT_PHOTO_URL = [*ALT_IOS_HEADER, "accountPhoto", "thumbnails", 0, "url"]
+
+                    account_name = nav(response, ALT_ACCOUNT_NAME)
+                    channel_handle = nav(response, ALT_ACCOUNT_CHANNEL_HANDLE, none_if_absent=True)
+                    account_photo_url = nav(response, ALT_ACCOUNT_PHOTO_URL)
+
+                    return {
+                        "accountName": account_name,
+                        "channelHandle": channel_handle,
+                        "accountPhotoUrl": account_photo_url,
+                    }
+                except Exception as e:
+                    # If all navigation attempts fail, raise informative error
+                    raise Exception(f"Unable to parse account info from response. The response structure may have changed or be unsupported in this format. Original error: {e}")

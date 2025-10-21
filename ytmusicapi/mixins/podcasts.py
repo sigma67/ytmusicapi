@@ -137,11 +137,63 @@ class PodcastsMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        two_columns = nav(response, TWO_COLUMN_RENDERER)
-        header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
-        podcast: JsonDict = parse_podcast_header(header)
-
-        results = nav(two_columns, ["secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
+        
+        # iOS Compatibility: Handle both desktop and mobile formats
+        try:
+            # Try desktop format first (original implementation)
+            two_columns = nav(response, TWO_COLUMN_RENDERER)
+            header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
+            podcast: JsonDict = parse_podcast_header(header)
+            results = nav(two_columns, ["secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
+        except (KeyError, TypeError):
+            # Fall back to mobile format (iOS single-column)
+            try:
+                single_column = nav(response, SINGLE_COLUMN_TAB)
+                sections = nav(single_column, SECTION_LIST)
+                
+                # Find header section (usually first section with header info)
+                header = None
+                results = None
+                
+                for section in sections:
+                    if "musicResponsiveHeaderRenderer" in section:
+                        header = section["musicResponsiveHeaderRenderer"]
+                        podcast: JsonDict = parse_podcast_header(header)
+                    elif "musicShelfRenderer" in section:
+                        # Found episodes section
+                        results = section["musicShelfRenderer"]
+                        break
+                    elif "musicCarouselShelfRenderer" in section:
+                        # Alternative episodes section format
+                        carousel = section["musicCarouselShelfRenderer"]
+                        if "contents" in carousel:
+                            # Convert carousel format to shelf format for compatibility
+                            results = {"contents": carousel["contents"]}
+                            if "continuations" in carousel:
+                                results["continuations"] = carousel["continuations"]
+                            break
+                
+                if header is None:
+                    # If no responsive header found, try alternative mobile header locations
+                    for section in sections:
+                        if "musicDetailHeaderRenderer" in section:
+                            header = section["musicDetailHeaderRenderer"]
+                            podcast: JsonDict = parse_podcast_header(header)
+                            break
+                
+                if header is None:
+                    raise KeyError("Could not find podcast header in mobile format")
+                
+                if results is None:
+                    raise KeyError("Could not find podcast episodes in mobile format")
+                
+            except (KeyError, TypeError) as mobile_error:
+                # If both desktop and mobile parsing fail, raise informative error
+                raise KeyError(
+                    f"Unable to parse podcast data. Desktop parsing failed, mobile parsing also failed: {mobile_error}. "
+                    f"Response structure may have changed or podcast may not be accessible."
+                ) from mobile_error
+        
         parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
         episodes = parse_func(results["contents"])
 
@@ -220,18 +272,117 @@ class PodcastsMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
 
-        two_columns = nav(response, TWO_COLUMN_RENDERER)
-        header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
-        episode = parse_episode_header(header)
+        # iOS Compatibility: Handle both desktop and mobile formats
+        try:
+            # Try desktop format first (original implementation)
+            two_columns = nav(response, TWO_COLUMN_RENDERER)
+            header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
+            episode = parse_episode_header(header)
 
-        episode["description"] = None
-        description_runs = nav(
-            two_columns,
-            ["secondaryContents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "description", "runs"],
-            True,
-        )
-        if description_runs:
-            episode["description"] = Description.from_runs(description_runs)
+            episode["description"] = None
+            description_runs = nav(
+                two_columns,
+                ["secondaryContents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, "description", "runs"],
+                True,
+            )
+            if description_runs:
+                episode["description"] = Description.from_runs(description_runs)
+        except (KeyError, TypeError):
+            # Fall back to mobile format (iOS single-column)
+            try:
+                single_column = nav(response, SINGLE_COLUMN_TAB)
+                sections = nav(single_column, SECTION_LIST)
+                
+                # Find header section and description section
+                header = None
+                description_runs = None
+                
+                for section in sections:
+                    if "musicResponsiveHeaderRenderer" in section:
+                        header = section["musicResponsiveHeaderRenderer"]
+                        episode = parse_episode_header(header)
+                    elif "itemSectionRenderer" in section:
+                        # Look for description in item section
+                        items = section["itemSectionRenderer"].get("contents", [])
+                        for item in items:
+                            if "elementRenderer" in item:
+                                element = item["elementRenderer"]
+                                if ("newElement" in element and 
+                                    "model" in element["newElement"] and
+                                    "musicTextModel" in element["newElement"]["model"]):
+                                    # Found description in mobile format
+                                    text_model = element["newElement"]["model"]["musicTextModel"]
+                                    if "data" in text_model and "formattedTexts" in text_model["data"]:
+                                        formatted_texts = text_model["data"]["formattedTexts"]
+                                        if len(formatted_texts) > 0:
+                                            # Convert mobile format to runs format
+                                            formatted_text = formatted_texts[0]
+                                            if "commandRuns" in formatted_text:
+                                                description_runs = []
+                                                content = formatted_text.get("content", "")
+                                                command_runs = formatted_text["commandRuns"]
+                                                
+                                                # Build runs from command runs
+                                                last_end = 0
+                                                for cmd_run in command_runs:
+                                                    start = cmd_run["startIndex"]
+                                                    length = cmd_run["length"]
+                                                    end = start + length
+                                                    
+                                                    # Add text before command
+                                                    if start > last_end:
+                                                        description_runs.append({
+                                                            "text": content[last_end:start]
+                                                        })
+                                                    
+                                                    # Add command text with URL if available
+                                                    cmd_text = content[start:end]
+                                                    run_data = {"text": cmd_text}
+                                                    
+                                                    if ("onTap" in cmd_run and 
+                                                        "innertubeCommand" in cmd_run["onTap"] and
+                                                        "urlEndpoint" in cmd_run["onTap"]["innertubeCommand"]):
+                                                        run_data["url"] = cmd_run["onTap"]["innertubeCommand"]["urlEndpoint"]["url"]
+                                                    elif ("onTap" in cmd_run and 
+                                                          "innertubeCommand" in cmd_run["onTap"] and
+                                                          "watchEndpoint" in cmd_run["onTap"]["innertubeCommand"]):
+                                                        # Handle timestamp links
+                                                        watch_endpoint = cmd_run["onTap"]["innertubeCommand"]["watchEndpoint"]
+                                                        if "startTimeSeconds" in watch_endpoint:
+                                                            run_data["seconds"] = watch_endpoint["startTimeSeconds"]
+                                                    
+                                                    description_runs.append(run_data)
+                                                    last_end = end
+                                                
+                                                # Add remaining text
+                                                if last_end < len(content):
+                                                    description_runs.append({
+                                                        "text": content[last_end:]
+                                                    })
+                                                break
+                
+                if header is None:
+                    # Try alternative mobile header locations
+                    for section in sections:
+                        if "musicDetailHeaderRenderer" in section:
+                            header = section["musicDetailHeaderRenderer"]
+                            episode = parse_episode_header(header)
+                            break
+                
+                if header is None:
+                    raise KeyError("Could not find episode header in mobile format")
+                
+                # Set description from mobile format
+                episode["description"] = None
+                if description_runs:
+                    episode["description"] = Description.from_runs(description_runs)
+                
+            except (KeyError, TypeError) as mobile_error:
+                # If both desktop and mobile parsing fail, raise informative error
+                raise KeyError(
+                    f"Unable to parse episode data. Desktop parsing failed, mobile parsing also failed: {mobile_error}. "
+                    f"Response structure may have changed or episode may not be accessible."
+                ) from mobile_error
 
         return episode
 
@@ -249,8 +400,21 @@ class PodcastsMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         playlist = parse_playlist_header(response)
 
-        results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
-        playlist["episodes"] = parse_func(results["contents"])
+        # Try desktop format first (TWO_COLUMN_RENDERER)
+        results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF], True)
+        
+        # If desktop format not found, try iOS mobile format (SINGLE_COLUMN_TAB)
+        if results is None:
+            results = nav(response, [*SINGLE_COLUMN_TAB, *SECTION_LIST_ITEM, *MUSIC_SHELF], True)
+        
+        # Final fallback for mobile format without SINGLE_COLUMN_TAB
+        if results is None:
+            results = nav(response, [*SECTION_LIST_ITEM, *MUSIC_SHELF], True)
+        
+        if results is None:
+            playlist["episodes"] = []
+        else:
+            parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
+            playlist["episodes"] = parse_func(results["contents"])
 
         return playlist
