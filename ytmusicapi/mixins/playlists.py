@@ -106,6 +106,21 @@ class PlaylistsMixin(MixinProtocol):
 
         The setVideoId is the unique id of this playlist item and
         needed for moving/removing playlist items
+
+        Collaborative playlists replace ``author`` with limited data about ``collaborators``::
+            {
+                "collaborators": {
+                    "text": "by Sample Author and 1 other",
+                    "avatars": [
+                        {
+                            "url": "https://yt3.ggpht.com/sample-author-photo"
+                        },
+                        {
+                            "url": "https://yt3.ggpht.com/sample-collaborator-photo"
+                        }
+                    ]
+                }
+            }
         """
         browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
         body = {"browseId": browseId}
@@ -146,6 +161,7 @@ class PlaylistsMixin(MixinProtocol):
         )
 
         playlist.update(parse_playlist_header_meta(header))
+        is_collaborative = "collaborators" in playlist
 
         playlist.update(parse_song_runs(nav(header, SUBTITLE_RUNS)[2 + playlist["owned"] * 2 :]))
 
@@ -184,9 +200,11 @@ class PlaylistsMixin(MixinProtocol):
         playlist["tracks"] = []
         content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
         if "contents" in content_data:
-            playlist["tracks"] = parse_playlist_items(content_data["contents"])
+            playlist["tracks"] = parse_playlist_items(
+                content_data["contents"], is_collaborative=is_collaborative
+            )
 
-            parse_func = lambda contents: parse_playlist_items(contents)
+            parse_func = lambda contents: parse_playlist_items(contents, is_collaborative=is_collaborative)
             playlist["tracks"].extend(
                 get_continuations_2025(content_data, limit, request_func_continuations, parse_func)
             )
