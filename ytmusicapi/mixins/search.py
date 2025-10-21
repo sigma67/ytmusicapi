@@ -78,6 +78,10 @@ class SearchMixin(MixinProtocol):
                 "feedbackTokens": {
                   "add": null,
                   "remove": null
+                },
+                "listenAgainFeedbackTokens": {
+                  "pin": null,
+                  "unpin": null
                 }
               },
               {

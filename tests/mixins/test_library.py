@@ -1,3 +1,4 @@
+import time
 from urllib.parse import urlparse
 
 import pytest
@@ -96,6 +97,7 @@ class TestLibrary:
         songs = yt_oauth.get_history()
         assert len(songs) > 0
         assert all(song["feedbackToken"] is not None for song in songs)
+        assert all(song["listenAgainFeedbackTokens"] is not None for song in songs)
 
     def test_manipulate_history_items(self, yt_auth, sample_video):
         song = yt_auth.get_song(sample_video)
@@ -116,10 +118,9 @@ class TestLibrary:
         with pytest.raises(YTMusicUserError):
             yt_auth.rate_song(sample_video, "notexist")
 
-    @pytest.mark.skip(reason="edit_song_library_status is currently broken due to server-side update")
     def test_edit_song_library_status(self, yt_brand, sample_album):
         album = yt_brand.get_album(sample_album)
-        response = yt_brand.rate_playlist(album["tracks"][0]["feedbackTokens"]["add"])
+        response = yt_brand.edit_song_library_status(album["tracks"][0]["feedbackTokens"]["add"])
         album = yt_brand.get_album(sample_album)
         assert album["tracks"][0]["inLibrary"]
         assert response["feedbackResponses"][0]["isProcessed"]
@@ -127,6 +128,28 @@ class TestLibrary:
         album = yt_brand.get_album(sample_album)
         assert not album["tracks"][0]["inLibrary"]
         assert response["feedbackResponses"][0]["isProcessed"]
+
+    def test_listen_again_feedback_tokens(self, yt_brand):
+        sample_album = "MPREb_4pL8gzRtw1p"
+        track_index = 1  # test with an audio track for the sake of free accounts (music video pin state isn't reflected in the corresponding song menu)
+
+        def test_pin_token(token_key: str, expected_status: bool):
+            album = yt_brand.get_album(sample_album)
+            token = album["tracks"][track_index]["listenAgainFeedbackTokens"][token_key]
+
+            response = yt_brand.edit_song_library_status(token)
+            assert response["feedbackResponses"][0]["isProcessed"]
+
+            for attempt in range(5):
+                time.sleep(1.5)  # wait for the pin state to change
+                album = yt_brand.get_album(sample_album)
+                if album["tracks"][track_index]["pinnedToListenAgain"] == expected_status:
+                    return
+
+            raise AssertionError(f"pinnedToListenAgain didn't change to {expected_status}")
+
+        test_pin_token("pin", True)
+        test_pin_token("unpin", False)
 
     def test_rate_playlist(self, yt_auth):
         response = yt_auth.rate_playlist("OLAK5uy_l3g4WcHZsEx_QuEDZzWEiyFzZl6pL0xZ4", "LIKE")

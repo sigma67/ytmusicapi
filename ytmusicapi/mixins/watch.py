@@ -52,6 +52,10 @@ class WatchMixin(MixinProtocol):
                         "add": "AB9zfpIGg9XN4u2iJ...",
                         "remove": "AB9zfpJdzWLcdZtC..."
                       },
+                      "listenAgainFeedbackTokens": {
+                        "pin": "AB9zfpK8kP5mQ7rT...",
+                        "unpin": "AB9zfpLy3L9vB2xN..."
+                      },
                       "likeStatus": "INDIFFERENT",
                       "videoType": "MUSIC_VIDEO_TYPE_ATV",
                       "artists": [
