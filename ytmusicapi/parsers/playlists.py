@@ -41,23 +41,39 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
         "thumbnails": nav(header, THUMBNAILS),
     }
     if "facepile" in header:
-        playlist_meta["author"] = {
-            "name": nav(header, ["facepile", "avatarStackViewModel", "text", "content"]),
-            "id": nav(
-                header,
-                [
-                    "facepile",
-                    "avatarStackViewModel",
-                    "rendererContext",
-                    "commandContext",
-                    "onTap",
-                    "innertubeCommand",
-                    "browseEndpoint",
-                    "browseId",
-                ],
-                True,
-            ),
-        }
+        avatar_renderer = nav(header, ["facepile", "avatarStackViewModel", "rendererContext"])
+        avatar_command = nav(
+            avatar_renderer,
+            [
+                "commandContext",
+                "onTap",
+                "innertubeCommand",
+            ],
+            True,
+        )
+
+        if (
+            nav(avatar_command, ["showEngagementPanelEndpoint", "identifier", "tag"], True)
+            == "PAplaylist_collaborate"
+        ):
+            avatars = nav(header, ["facepile", "avatarStackViewModel", "avatars"])
+
+            playlist_meta["collaborators"] = {
+                "text": nav(avatar_renderer, ["accessibilityContext", "label"]),
+                "avatars": [avatar["avatarViewModel"]["image"]["sources"][0] for avatar in avatars],
+            }
+        else:
+            playlist_meta["author"] = {
+                "name": nav(header, ["facepile", "avatarStackViewModel", "text", "content"]),
+                "id": nav(
+                    avatar_command,
+                    [
+                        "browseEndpoint",
+                        "browseId",
+                    ],
+                    True,
+                ),
+            }
     if "runs" in header["secondSubtitle"]:
         second_subtitle_runs = header["secondSubtitle"]["runs"]
         has_views = (len(second_subtitle_runs) > 3) * 2
@@ -111,20 +127,28 @@ def parse_audio_playlist(
     return playlist
 
 
-def parse_playlist_items(results: JsonList, is_album: bool = False) -> JsonList:
+def parse_playlist_items(
+    results: JsonList,
+    is_album: bool = False,
+    is_collaborative: bool = False,
+) -> JsonList:
     songs = []
     for result in results:
         if MRLIR not in result:
             continue
         data = result[MRLIR]
-        song = parse_playlist_item(data, is_album)
+        song = parse_playlist_item(data, is_album, is_collaborative)
         if song:
             songs.append(song)
 
     return songs
 
 
-def parse_playlist_item(data: JsonDict, is_album: bool = False) -> JsonDict | None:
+def parse_playlist_item(
+    data: JsonDict,
+    is_album: bool = False,
+    is_collaborative: bool = False,
+) -> JsonDict | None:
     videoId = setVideoId = None
     like = None
 
@@ -159,7 +183,9 @@ def parse_playlist_item(data: JsonDict, is_album: bool = False) -> JsonDict | No
 
     title_index = 0 if use_preset_columns else None
     artist_index = 1 if use_preset_columns else None
-    album_index = 2 if use_preset_columns else None
+    duration_index = None
+    # collaborative playlists have duration in flexColumns (between artist and album)
+    album_index = 3 if is_collaborative else 2 if use_preset_columns else None
     user_channel_indexes = []
     unrecognized_index = None
 
@@ -168,8 +194,14 @@ def parse_playlist_item(data: JsonDict, is_album: bool = False) -> JsonDict | No
         navigation_endpoint = nav(flex_column_item, [*TEXT_RUN, "navigationEndpoint"], True)
 
         if not navigation_endpoint:
-            if nav(flex_column_item, TEXT_RUN_TEXT, True) is not None:
-                unrecognized_index = index if unrecognized_index is None else unrecognized_index
+            run = nav(flex_column_item, TEXT_RUN, True)
+            if run and "text" in run:
+                parsed = parse_song_run(run)
+                if parsed["type"] == "duration":
+                    duration_index = index
+                else:
+                    unrecognized_index = index if unrecognized_index is None else unrecognized_index
+
             continue
 
         if "watchEndpoint" in navigation_endpoint:
@@ -214,7 +246,7 @@ def parse_playlist_item(data: JsonDict, is_album: bool = False) -> JsonDict | No
 
     views = get_item_text(data, 2) if is_album else None
 
-    duration = None
+    duration = get_item_text(data, duration_index) if duration_index else None
     if "fixedColumns" in data:
         if "simpleText" in nav(get_fixed_column_item(data, 0), ["text"]):
             duration = nav(get_fixed_column_item(data, 0), ["text", "simpleText"])
