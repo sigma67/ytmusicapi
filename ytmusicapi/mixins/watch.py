@@ -48,10 +48,12 @@ class WatchMixin(MixinProtocol):
                           "height": 60
                         }...
                       ],
+                      "inLibrary": false,
                       "feedbackTokens": {
                         "add": "AB9zfpIGg9XN4u2iJ...",
                         "remove": "AB9zfpJdzWLcdZtC..."
                       },
+                      "pinnedToListenAgain": true,
                       "listenAgainFeedbackTokens": {
                         "pin": "AB9zfpK8kP5mQ7rT...",
                         "unpin": "AB9zfpLy3L9vB2xN..."

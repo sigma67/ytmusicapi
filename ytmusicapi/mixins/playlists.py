@@ -97,10 +97,12 @@ class PlaylistsMixin(MixinProtocol):
                   "isAvailable": True,
                   "isExplicit": False,
                   "videoType": "MUSIC_VIDEO_TYPE_OMV",
+                  "inLibrary": False,
                   "feedbackTokens": {
                     "add": "AB9zfpJxtvrU...",
                     "remove": "AB9zfpKTyZ..."
                   },
+                  "pinnedToListenAgain": False,
                   "listenAgainFeedbackTokens": {
                     "pin": "AB9zfpImL2k...",
                     "unpin": "AB9zfpJt6pA..."

@@ -75,10 +75,12 @@ class SearchMixin(MixinProtocol):
                 "duration": "4:19",
                 "duration_seconds": 259
                 "isExplicit": false,
+                "inLibrary": false,
                 "feedbackTokens": {
                   "add": null,
                   "remove": null
                 },
+                "pinnedToListenAgain": false,
                 "listenAgainFeedbackTokens": {
                   "pin": null,
                   "unpin": null
