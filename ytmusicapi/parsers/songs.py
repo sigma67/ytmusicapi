@@ -146,12 +146,12 @@ def parse_song_menu_data(data: JsonDict) -> JsonDict:
                     "pin": feedback_token("toggledServiceEndpoint"),
                     "unpin": feedback_token("defaultServiceEndpoint"),
                 }
-            case "LIBRARY_ADD":
+            case "BOOKMARK_BORDER":
                 song_data["feedbackTokens"] = {
                     "add": feedback_token("defaultServiceEndpoint"),
                     "remove": feedback_token("toggledServiceEndpoint"),
                 }
-            case "LIBRARY_SAVED":
+            case "BOOKMARK":
                 song_data["inLibrary"] = True
                 song_data["feedbackTokens"] = {
                     "add": feedback_token("toggledServiceEndpoint"),
