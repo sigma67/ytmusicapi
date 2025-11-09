@@ -135,23 +135,23 @@ def parse_song_menu_data(data: JsonDict) -> JsonDict:
         )
 
         match current_icon_type:
-            case "KEEP": # pin to listen again
+            case "KEEP":  # pin to listen again
                 song_data["listenAgainFeedbackTokens"] = {
                     "pin": feedback_token("defaultServiceEndpoint"),
                     "unpin": feedback_token("toggledServiceEndpoint"),
                 }
-            case "KEEP_OFF": # unpin from listen again
+            case "KEEP_OFF":  # unpin from listen again
                 song_data["pinnedToListenAgain"] = True
                 song_data["listenAgainFeedbackTokens"] = {
                     "pin": feedback_token("toggledServiceEndpoint"),
                     "unpin": feedback_token("defaultServiceEndpoint"),
                 }
-            case "BOOKMARK_BORDER": # add to library
+            case "BOOKMARK_BORDER":  # add to library
                 song_data["feedbackTokens"] = {
                     "add": feedback_token("defaultServiceEndpoint"),
                     "remove": feedback_token("toggledServiceEndpoint"),
                 }
-            case "BOOKMARK": # remove from library
+            case "BOOKMARK":  # remove from library
                 song_data["inLibrary"] = True
                 song_data["feedbackTokens"] = {
                     "add": feedback_token("toggledServiceEndpoint"),
