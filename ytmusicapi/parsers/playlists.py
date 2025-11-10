@@ -129,7 +129,6 @@ def parse_audio_playlist(
 
 def parse_playlist_items(
     results: JsonList,
-    menu_entries: list[list[str]] | None = None,
     is_album: bool = False,
     is_collaborative: bool = False,
 ) -> JsonList:
@@ -138,7 +137,7 @@ def parse_playlist_items(
         if MRLIR not in result:
             continue
         data = result[MRLIR]
-        song = parse_playlist_item(data, menu_entries, is_album, is_collaborative)
+        song = parse_playlist_item(data, is_album, is_collaborative)
         if song:
             songs.append(song)
 
@@ -147,14 +146,11 @@ def parse_playlist_items(
 
 def parse_playlist_item(
     data: JsonDict,
-    menu_entries: list[list[str]] | None = None,
     is_album: bool = False,
     is_collaborative: bool = False,
 ) -> JsonDict | None:
     videoId = setVideoId = None
     like = None
-    feedback_tokens = None
-    library_status = None
 
     # if the item has a menu, find its setVideoId
     if "menu" in data:
@@ -167,9 +163,7 @@ def parse_playlist_item(
                         menu_service, ["playlistEditEndpoint", "actions", 0, "removedVideoId"], True
                     )
 
-            if TOGGLE_MENU in item:
-                feedback_tokens = parse_song_menu_tokens(item)
-                library_status = parse_song_library_status(item)
+    song_menu_data = {"inLibrary": None, "pinnedToListenAgain": None} | parse_song_menu_data(data)
 
     # if item is not playable, the videoId was retrieved above
     if nav(data, PLAY_BUTTON, none_if_absent=True) is not None:
@@ -275,7 +269,7 @@ def parse_playlist_item(
         "artists": artists,
         "album": album,
         "likeStatus": like,
-        "inLibrary": library_status,
+        **(song_menu_data),
         "thumbnails": thumbnails,
         "isAvailable": isAvailable,
         "isExplicit": isExplicit,
@@ -291,17 +285,6 @@ def parse_playlist_item(
         song["duration_seconds"] = parse_duration(duration)
     if setVideoId:
         song["setVideoId"] = setVideoId
-    if feedback_tokens:
-        song["feedbackTokens"] = feedback_tokens
-
-    if menu_entries:
-        # sets the feedbackToken for get_history
-        menu_items = nav(data, MENU_ITEMS)
-        for menu_entry in menu_entries:
-            items = find_objects_by_key(menu_items, menu_entry[0])
-            song[menu_entry[-1]] = next(
-                filter(lambda x: x is not None, (nav(itm, menu_entry, True) for itm in items)), None
-            )
 
     return song
 

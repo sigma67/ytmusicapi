@@ -1,4 +1,5 @@
 import re
+from collections.abc import Callable
 
 from ytmusicapi.type_alias import JsonDict, JsonList
 
@@ -88,24 +89,72 @@ def parse_song_album(data: JsonDict, index: int) -> JsonDict | None:
     return None if not flex_item else {"name": get_item_text(data, index), "id": browse_id}
 
 
-def parse_song_library_status(item: JsonDict) -> bool:
-    """Returns True if song is in the library"""
-    library_status = nav(item, [TOGGLE_MENU, "defaultIcon", "iconType"], True)
+def parse_song_menu_data(data: JsonDict) -> JsonDict:
+    """
+    :return: Dictionary with data from the provided song's context menu.
 
-    return library_status == "LIBRARY_SAVED"
+    Example::
 
+        {
+            "inLibrary": true,
+            "feedbackTokens": {
+                "add": "...",
+                "remove": "..."
+            },
+            "pinnedToListenAgain": true,
+            "listenAgainFeedbackTokens": {
+                "pin": "...",
+                "unpin": "..."
+            }
+        }
+    """
 
-def parse_song_menu_tokens(item: JsonDict) -> dict[str, str | None]:
-    toggle_menu = item[TOGGLE_MENU]
+    if "menu" not in data:
+        return {}
 
-    library_add_token = nav(toggle_menu, ["defaultServiceEndpoint", *FEEDBACK_TOKEN], True)
-    library_remove_token = nav(toggle_menu, ["toggledServiceEndpoint", *FEEDBACK_TOKEN], True)
+    song_data: JsonDict = {}
+    for item in nav(data, MENU_ITEMS):
+        menu_item = nav(item, [TOGGLE_MENU], True) or nav(item, ["menuServiceItemRenderer"], True)
+        if menu_item is None:
+            continue
 
-    in_library = parse_song_library_status(item)
-    if in_library:
-        library_add_token, library_remove_token = library_remove_token, library_add_token
+        song_data["inLibrary"] = song_data.get("inLibrary", False)
+        song_data["pinnedToListenAgain"] = song_data.get("pinnedToListenAgain", False)
 
-    return {"add": library_add_token, "remove": library_remove_token}
+        current_icon_type = nav(menu_item, ["defaultIcon", "iconType"], True) or nav(
+            menu_item, ["icon", "iconType"], True
+        )
+        feedback_token: Callable[[str], str | None] = lambda endpoint_type: nav(
+            menu_item, [endpoint_type, *FEEDBACK_TOKEN], True
+        )
+
+        match current_icon_type:
+            case "KEEP":  # pin to listen again
+                song_data["listenAgainFeedbackTokens"] = {
+                    "pin": feedback_token("defaultServiceEndpoint"),
+                    "unpin": feedback_token("toggledServiceEndpoint"),
+                }
+            case "KEEP_OFF":  # unpin from listen again
+                song_data["pinnedToListenAgain"] = True
+                song_data["listenAgainFeedbackTokens"] = {
+                    "pin": feedback_token("toggledServiceEndpoint"),
+                    "unpin": feedback_token("defaultServiceEndpoint"),
+                }
+            case "BOOKMARK_BORDER":  # add to library
+                song_data["feedbackTokens"] = {
+                    "add": feedback_token("defaultServiceEndpoint"),
+                    "remove": feedback_token("toggledServiceEndpoint"),
+                }
+            case "BOOKMARK":  # remove from library
+                song_data["inLibrary"] = True
+                song_data["feedbackTokens"] = {
+                    "add": feedback_token("toggledServiceEndpoint"),
+                    "remove": feedback_token("defaultServiceEndpoint"),
+                }
+            case "REMOVE_FROM_HISTORY":
+                song_data["feedbackToken"] = feedback_token("serviceEndpoint")
+
+    return song_data
 
 
 def parse_like_status(service: JsonDict) -> str:
