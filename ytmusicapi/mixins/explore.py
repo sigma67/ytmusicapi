@@ -157,7 +157,7 @@ class ExploreMixin(MixinProtocol):
                         "date": "Mar 5, 2024",
                         "thumbnails": [...],
                         "podcast": {
-                            "id": "UCGwuxdEeCf0TIA2RbPOj-8g",
+                            "id": "PLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
                             "name: "Stanford Graduate School of Business"
                         }
                     }
@@ -168,6 +168,7 @@ class ExploreMixin(MixinProtocol):
                         {
                             "title": "Permission to Dance",
                             "videoId": "CuklIb9d3fI",
+                            "videoType": "MUSIC_VIDEO_TYPE_OMV",
                             "playlistId": "OLAK5uy_kNWGJvgWVqlt5LsFDL9Sdluly4M8TvGkM",
                             "artists": [
                                 {
@@ -178,6 +179,19 @@ class ExploreMixin(MixinProtocol):
                             "thumbnails": [...],
                             "isExplicit": false,
                             "views": "108M"
+                        },
+                        {
+                            "title": "Stanford GSB Podcasts",
+                            "podcast": {
+                                "name": "Stanford GSB Podcasts",
+                                "id": "PLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
+                            },
+                            "browseId": "MPEDxAEGaW2my7E",
+                            "videoId": "xAEGaW2my7E",
+                            "videoType": "MUSIC_VIDEO_TYPE_PODCAST_EPISODE",
+                            "playlistId": "OLAK5uy_kNWGJvgWVqlt5LsFDL9Sdluly4M8TvGkM",
+                            "date": "Mar 5, 2024",
+                            "thumbnails": [...]
                         }
                     ]
                 },
@@ -237,7 +251,7 @@ class ExploreMixin(MixinProtocol):
                 case playlist_id if playlist_id.startswith("VLOLA"):
                     explore["trending"] = {
                         "playlist": playlist_id,
-                        "items": parse_content_list(contents, parse_song_flat, MRLIR),
+                        "items": parse_content_list(contents, parse_trending_item, MRLIR),
                     }
 
         return explore

@@ -12,6 +12,14 @@ def parse_chart_song(data: JsonDict) -> JsonDict:
     return parsed
 
 
+def parse_trending_item(data: JsonDict) -> JsonDict:
+    video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE])
+    if video_type == "MUSIC_VIDEO_TYPE_PODCAST_EPISODE":
+        return parse_episode_flat(data)
+
+    return parse_song_flat(data)
+
+
 def parse_chart_playlist(data: JsonDict) -> JsonDict:
     return {
         "title": nav(data, TITLE_TEXT),

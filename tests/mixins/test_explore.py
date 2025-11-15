@@ -22,13 +22,16 @@ class TestExplore:
         )
 
         assert all(
-            item["videoId"] and all(artist["id"] for artist in item["artists"])
+            item["videoId"]
+            and (
+                podcast["id"] and podcast["name"]
+                if (podcast := item.get("podcast", None))
+                else all(artist["id"] for artist in item["artists"])
+            )
             for item in explore["trending"]["items"]
         )
 
-        assert all(item["videoId"] for item in explore["trending"]["items"])
-
         assert all(
-            item["duration"] and item["podcast"]["id"] and item["podcast"]["name"]
+            item["videoId"] and item["duration"] and item["podcast"]["id"] and item["podcast"]["name"]
             for item in explore["top_episodes"]
         )
