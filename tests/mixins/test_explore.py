@@ -17,12 +17,13 @@ class TestExplore:
 
         # check top_songs if present
         assert all(
-            item["videoId"] and (item.get("views") or item.get("album"))
+            item["videoId"] and item["videoType"] and (item.get("views") or item.get("album"))
             for item in explore.get("top_songs", {"items": []})["items"]
         )
 
         assert all(
             item["videoId"]
+            and item["videoType"]
             and (
                 podcast["id"] and podcast["name"]
                 if (podcast := item.get("podcast", None))
@@ -32,6 +33,10 @@ class TestExplore:
         )
 
         assert all(
-            item["videoId"] and item["duration"] and item["podcast"]["id"] and item["podcast"]["name"]
+            item["videoId"]
+            and item["videoType"]
+            and item["duration"]
+            and item["podcast"]["id"]
+            and item["podcast"]["name"]
             for item in explore["top_episodes"]
         )

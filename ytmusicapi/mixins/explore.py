@@ -119,6 +119,8 @@ class ExploreMixin(MixinProtocol):
                         {
                             "title": "Outside (Better Days)",
                             "videoId": "oT79YlRtXDg",
+                            "playlistId": "VLPL4fGSI1pDJn6O1LS0XSdF3RyO0Rq_LDeI",
+                            "videoType": "MUSIC_VIDEO_TYPE_ATV",
                             "artists": [
                                 {
                                     "name": "MO3",

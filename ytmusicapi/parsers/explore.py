@@ -7,7 +7,7 @@ TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL
 
 
 def parse_chart_song(data: JsonDict) -> JsonDict:
-    parsed = parse_song_flat(data)
+    parsed = parse_song_flat(data, with_playlist_id=True)
     parsed.update(parse_ranking(data))
     return parsed
 
@@ -17,7 +17,7 @@ def parse_trending_item(data: JsonDict) -> JsonDict:
     if video_type == "MUSIC_VIDEO_TYPE_PODCAST_EPISODE":
         return parse_episode_flat(data)
 
-    return parse_song_flat(data)
+    return parse_song_flat(data, with_playlist_id=True)
 
 
 def parse_chart_playlist(data: JsonDict) -> JsonDict:
