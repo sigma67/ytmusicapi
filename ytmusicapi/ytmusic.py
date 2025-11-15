@@ -234,7 +234,11 @@ class YTMusicBase:
             proxies=self.proxies,
             cookies=self.cookies,
         )
-        response_text: JsonDict = json.loads(response.text)
+        try:
+            response_text: JsonDict = json.loads(response.text)
+        except json.JSONDecodeError:
+            print("JSON parsing failed for song \"" + body["query"] + "\". Probably a 403 or other garbage response. Retrying.")
+            return self._send_request(endpoint, body, additionalParams)
         if response.status_code >= 400:
             message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
             error = response_text.get("error", {}).get("message")
