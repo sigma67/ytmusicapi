@@ -535,10 +535,16 @@ class BrowsingMixin(MixinProtocol):
                   "duration": "5:03",
                   "duration_seconds": 303,
                   "trackNumber": 0,
+                  "inLibrary": false,
                   "feedbackTokens": {
                     "add": "AB9zfpK...",
                     "remove": "AB9zfpK..."
-                  }
+                  },
+                  "pinnedToListenAgain": false,
+                  "listenAgainFeedbackTokens": {
+                    "pin": "AB9zfpJ...",
+                    "unpin": "AB9zfpL..."
+                  },
                 }
               ],
               "other_versions": [

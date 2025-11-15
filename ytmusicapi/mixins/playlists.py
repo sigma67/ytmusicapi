@@ -97,10 +97,17 @@ class PlaylistsMixin(MixinProtocol):
                   "isAvailable": True,
                   "isExplicit": False,
                   "videoType": "MUSIC_VIDEO_TYPE_OMV",
+                  "inLibrary": False,
                   "feedbackTokens": {
                     "add": "AB9zfpJxtvrU...",
                     "remove": "AB9zfpKTyZ..."
-                }
+                  },
+                  "pinnedToListenAgain": False,
+                  "listenAgainFeedbackTokens": {
+                    "pin": "AB9zfpImL2k...",
+                    "unpin": "AB9zfpJt6pA..."
+                  },
+
               ]
             }
 
@@ -219,6 +226,7 @@ class PlaylistsMixin(MixinProtocol):
         :param limit: How many items to return. Default: 100
         :return: List of playlistItem dictionaries. See :py:func:`get_playlist`
         """
+        self._check_auth()
         return self.get_playlist("LM", limit)
 
     def get_saved_episodes(self, limit: int = 100) -> JsonDict:

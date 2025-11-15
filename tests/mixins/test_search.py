@@ -136,7 +136,7 @@ class TestSearch:
         assert len(results[0]["author"]) > 0
 
     def test_search_top_result_episode(self, yt_auth):
-        results = yt_auth.search("124. making meetings meaningful pt. 1 stanford")
+        results = yt_auth.search('"124. Making Meetings Meaningful, Pt. 1" Stanford')
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "episode"
         assert results[0]["videoId"] == "KNkyHCLOr1o"

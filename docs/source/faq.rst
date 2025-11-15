@@ -29,7 +29,17 @@ How do I add content to my library?
 - **podcasts**: `rate_playlist <reference.html#ytmusicapi.YTMusic.rate_playlist>`__
 - **episodes**: `add_playlist_items("SE", episode_id) <reference.html#ytmusicapi.YTMusic.add_playlist_items>`__
 
+What are the different feedback tokens?
+*******************************************************
 
+Pass these attributes to `edit_song_library_status <reference/library.html#ytmusicapi.YTMusic.edit_song_library_status>`__ to
+perform library management:
+
+- ``feedbackTokens``: ``add``/``remove`` from library (refer to ``inLibrary`` for the current status)
+- ``listenAgainFeedbackTokens``: ``pin``/``unpin`` from the "Listen Again" carousel (refer to ``pinnedToListenAgain`` for the current status)
+
+`get_history <reference/library.html#ytmusicapi.YTMusic.get_history>`__ items include ``feedbackToken``, which can be passed to
+`remove_history_items <reference/library.html#ytmusicapi.YTMusic.remove_history_items>`__.
 
 How can I get the radio playlist for a song, video, playlist or album?
 ***********************************************************************
