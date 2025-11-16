@@ -12,9 +12,9 @@ To run authenticated requests, set it up by first copying your request headers f
 To do so, follow these steps:
 
 - Open a new tab
-- Open the developer tools (Ctrl-Shift-I) and select the "Network" tab
+- Open the developer tools (Ctrl-Shift-I) and select the "Network" tab (Command-Option-I on MacOS)
 - Go to https://music.youtube.com and ensure you are logged in
-- Find an authenticated POST request. The simplest way is to filter by ``/browse`` using the search bar of the developer tools.
+- Find an authenticated POST request with cookies (enable the Cookies column by right-clicking and selecting it in Header Options). The simplest way is to filter by ``/browse`` (or ``/get_setting_values``) using the search bar of the developer tools.
   If you don't see the request, try scrolling down a bit or clicking on the library button in the top bar.
 
 .. raw:: html
@@ -40,6 +40,18 @@ To do so, follow these steps:
 
     - Verify that the request looks like this: **Status** 200, **Name** ``browse?...``
     - Click on the Name of any matching request. In the "Headers" tab, scroll to the section "Request headers" and copy everything starting from "accept: \*/\*" to the end of the section
+      - On new versions of Chrome "Copy as fetch (Node.js)" can be used to get the headers in a more convenient format. In this case, copy everything between the curly braces after "headers: {" and before the closing curly brace.
+      - It should look like this:
+.. code-block:: json
+
+    {
+      "accept": "*/*",
+      "accept-encoding": "gzip, deflate, br",
+      "accept-language": "en-US,en;q=0.9",
+      ...
+      "x-youtube-client-name": "67",
+      "x-youtube-client-version": "2.20211021.00.00"
+    }
 
 .. raw:: html
 
