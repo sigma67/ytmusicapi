@@ -40,7 +40,7 @@ To do so, follow these steps:
 
     - Verify that the request looks like this: **Status** 200, **Name** ``browse?...``
     - Click on the Name of any matching request. In the "Headers" tab, scroll to the section "Request headers" and copy everything starting from "accept: \*/\*" to the end of the section
-      - On new versions of Chrome "Copy as fetch (Node.js)" can be used to get the headers in a more convenient format. In this case, copy everything between the curly braces after "headers: {" and before the closing curly brace.
+      - On new versions of Chrome, you can use "method\:POST has-request-header\:X-Goog-AuthUser" as a filter to narrow it down.  Then "Copy as fetch (Node.js)" can be used to get the headers in a more convenient format. In this case, copy everything between the curly braces after "headers: {" and before the closing curly brace.
       - It should look like this:
 .. code-block:: json
 
