@@ -129,6 +129,19 @@ def parse_episode(data: JsonDict) -> JsonDict:
     }
 
 
+def parse_episode_flat(data: JsonDict) -> JsonDict:
+    return {
+        "title": nav(get_flex_column_item(data, 0), TEXT_RUN_TEXT),
+        "podcast": parse_id_name(nav(get_flex_column_item(data, 1), TEXT_RUN)),
+        "videoId": nav(data, ["playlistItemData", "videoId"]),
+        "browseId": nav(get_flex_column_item(data, 0), [*TEXT_RUN, *NAVIGATION_BROWSE_ID]),
+        "playlistId": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PLAYLIST_ID]),
+        "videoType": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE]),
+        "date": nav(get_flex_column_item(data, 2), TEXT_RUN_TEXT),
+        "thumbnails": nav(data, THUMBNAILS),
+    }
+
+
 def parse_podcast(data: JsonDict) -> JsonDict:
     """Parses a single podcast under "Podcasts" on a channel page"""
     return {
