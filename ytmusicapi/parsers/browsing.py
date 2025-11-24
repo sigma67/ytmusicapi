@@ -2,11 +2,15 @@ import re
 
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType
 
+from .albums import parse_album_playlistid_if_exists
+from .artists import parse_artists_runs
 from .podcasts import parse_episode, parse_podcast
 from .songs import *
 
 
-def parse_mixed_content(rows: JsonList) -> JsonList:
+def parse_mixed_content(
+    rows: JsonList,
+) -> JsonList:
     items = []
     for row in rows:
         if DESCRIPTION_SHELF[0] in row:
@@ -31,7 +35,7 @@ def parse_mixed_content(rows: JsonList) -> JsonList:
                             content = parse_song(data)
                     elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
                         content = parse_album(data)
-                    elif page_type == "MUSIC_PAGE_TYPE_ARTIST":
+                    elif page_type in ["MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL"]:
                         content = parse_related_artist(data)
                     elif page_type == "MUSIC_PAGE_TYPE_PLAYLIST":
                         content = parse_playlist(data)
@@ -64,7 +68,7 @@ def parse_album(result: JsonDict) -> JsonDict:
         "type": nav(result, SUBTITLE),
         "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
-        "audioPlaylistId": nav(result, THUMBNAIL_OVERLAY, True),
+        "audioPlaylistId": parse_album_playlistid_if_exists(nav(result, THUMBNAIL_OVERLAY_NAVIGATION, True)),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
     }
@@ -91,7 +95,7 @@ def parse_song(result: JsonDict) -> JsonDict:
         "playlistId": nav(result, NAVIGATION_PLAYLIST_ID, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
     }
-    song.update(parse_song_runs(nav(result, SUBTITLE_RUNS)))
+    song.update(parse_song_runs(nav(result, SUBTITLE_RUNS), skip_type_spec=True))
     return song
 
 
@@ -100,17 +104,18 @@ def parse_song_flat(data: JsonDict) -> JsonDict:
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
         "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
-        "artists": parse_song_artists(data, 1),
         "thumbnails": nav(data, THUMBNAILS),
         "isExplicit": nav(data, BADGE_LABEL, True) is not None,
     }
+
+    runs = nav(columns[1], TEXT_RUNS)
+    song.update(parse_song_runs(runs, skip_type_spec=True))
+
     if len(columns) > 2 and columns[2] is not None and "navigationEndpoint" in nav(columns[2], TEXT_RUN):
         song["album"] = {
             "name": nav(columns[2], TEXT_RUN_TEXT),
             "id": nav(columns[2], TEXT_RUN + NAVIGATION_BROWSE_ID),
         }
-    else:
-        song["views"] = nav(columns[1], ["text", "runs", -1, "text"]).split(" ")[0]
 
     return song
 
@@ -128,7 +133,7 @@ def parse_video(result: JsonDict) -> JsonDict:
     return {
         "title": nav(result, TITLE_TEXT),
         "videoId": videoId,
-        "artists": parse_song_artists_runs(runs[:artists_len]),
+        "artists": parse_artists_runs(runs[:artists_len]),
         "playlistId": nav(result, NAVIGATION_PLAYLIST_ID, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
         "views": runs[-1]["text"].split(" ")[0],
@@ -137,7 +142,11 @@ def parse_video(result: JsonDict) -> JsonDict:
 
 def parse_playlist(data: JsonDict) -> JsonDict:
     playlist = {
-        "title": nav(data, TITLE_TEXT),
+        "title": nav(
+            data,
+            TITLE_TEXT,
+            none_if_absent=True,  # rare but possible for playlist title to be missing
+        ),
         "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
         "thumbnails": nav(data, THUMBNAIL_RENDERER),
     }
@@ -146,7 +155,7 @@ def parse_playlist(data: JsonDict) -> JsonDict:
         playlist["description"] = "".join([run["text"] for run in subtitle["runs"]])
         if len(subtitle["runs"]) == 3 and re.search(r"\d+ ", nav(data, SUBTITLE2)):
             playlist["count"] = nav(data, SUBTITLE2).split(" ")[0]
-            playlist["author"] = parse_song_artists_runs(subtitle["runs"][:1])
+            playlist["author"] = parse_artists_runs(subtitle["runs"][:1])
 
     return playlist
 

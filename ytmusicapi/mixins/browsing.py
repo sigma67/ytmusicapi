@@ -1,6 +1,5 @@
 import re
 import warnings
-from collections.abc import Callable
 from typing import Literal, cast, overload
 
 from ytmusicapi.continuations import (
@@ -117,8 +116,7 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": "FEmusic_home"}
         response = self._send_request(endpoint, body)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
-        home = []
-        home.extend(parse_mixed_content(results))
+        home = parse_mixed_content(results)
 
         section_list = nav(response, [*SINGLE_COLUMN_TAB, "sectionListRenderer"])
         if "continuations" in section_list:
@@ -126,11 +124,13 @@ class BrowsingMixin(MixinProtocol):
                 endpoint, body, additionalParams
             )
 
-            parse_func: Callable[[JsonList], JsonList] = lambda contents: parse_mixed_content(contents)
-
             home.extend(
                 get_continuations(
-                    section_list, "sectionListContinuation", limit - len(home), request_func, parse_func
+                    section_list,
+                    "sectionListContinuation",
+                    limit - len(home),
+                    request_func,
+                    parse_mixed_content,
                 )
             )
 
@@ -535,10 +535,16 @@ class BrowsingMixin(MixinProtocol):
                   "duration": "5:03",
                   "duration_seconds": 303,
                   "trackNumber": 0,
+                  "inLibrary": false,
                   "feedbackTokens": {
                     "add": "AB9zfpK...",
                     "remove": "AB9zfpK..."
-                  }
+                  },
+                  "pinnedToListenAgain": false,
+                  "listenAgainFeedbackTokens": {
+                    "pin": "AB9zfpJ...",
+                    "unpin": "AB9zfpL..."
+                  },
                 }
               ],
               "other_versions": [
@@ -564,11 +570,17 @@ class BrowsingMixin(MixinProtocol):
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
 
-        other_versions = nav(
-            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST, 1, *CAROUSEL], True
+        secondary_carousels = (
+            nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True) or []
         )
-        if other_versions is not None:
-            album["other_versions"] = parse_content_list(other_versions["contents"], parse_album)
+        for section in secondary_carousels[1:]:
+            carousel = nav(section, CAROUSEL)
+            key = {
+                "COLLECTION_STYLE_ITEM_SIZE_SMALL": "related_recommendations",
+                "COLLECTION_STYLE_ITEM_SIZE_MEDIUM": "other_versions",
+            }[carousel["itemSize"]]
+            album[key] = parse_content_list(carousel["contents"], parse_album)
+
         album["duration_seconds"] = sum_total_duration(album)
         for i, track in enumerate(album["tracks"]):
             album["tracks"][i]["album"] = album["title"]
@@ -841,7 +853,9 @@ class BrowsingMixin(MixinProtocol):
 
         response = self._send_request("browse", {"browseId": browseId})
         sections = nav(response, ["contents", *SECTION_LIST])
-        return parse_mixed_content(sections)
+        return parse_mixed_content(
+            sections,
+        )
 
     @overload
     def get_lyrics(self, browseId: str, timestamps: Literal[False] = False) -> Lyrics | None:

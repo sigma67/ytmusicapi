@@ -17,8 +17,8 @@ class TestPlaylists:
         [
             ("2024_03_get_playlist.json", "PLaZPMsuQNCsWn0iVMtGbaUXO6z-EdZaZm"),
             ("2024_03_get_playlist_public.json", "RDCLAK5uy_lWy02cQBnTVTlwuRauaGKeUDH3L6PXNxI"),
-            ("2024_07_get_playlist_collaborative.json", "PLEUijtLfpCOgI8LNOwiwvq0EJ8HAGj7dT"),
             ("2024_12_get_playlist_audio.json", "OLAK5uy_n0x1TMX8DL2eli2g_LysCSg-6Nq5YQa1g"),
+            ("2025_10_get_playlist_collaborative.json", "PLxyTaDz8f5PBc-8kE36gvB-eflhODG2dw"),
         ],
     )
     def test_get_playlist(self, yt, test_file, playlist_id):
@@ -79,6 +79,13 @@ class TestPlaylists:
         playlist = yt_oauth.get_playlist("RDATgXd-")
         assert playlist["trackCount"] is None  # playlist has no trackCount
         assert len(playlist["tracks"]) >= 100
+
+    def test_get_playlist_author(self, yt):
+        playlist = yt.get_playlist("PL9tY0BWXOZFu4vlBOzIOmvT6wjYb2jNiV")
+        assert "artists" not in playlist  # shouldn't return the "artists" key from parse_song_runs
+        assert playlist["author"] == {"name": "Vevo", "id": "UC2pmfLm7iq6Ov1UwYrWYkZA"}
+        playlist = yt.get_playlist("RDCLAK5uy_l2pHac-aawJYLcesgTf67gaKU-B9ekk1o")
+        assert playlist["author"] == {"name": "YouTube Music", "id": None}
 
     @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
     def test_get_playlist_languages(self, language):

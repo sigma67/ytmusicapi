@@ -48,8 +48,9 @@ class TestUploads:
             pytest.raises(Exception, match="The provided file type is not supported"),
         ):
             yt_auth.upload_song(temp.name)
-        with pytest.raises(Exception, match="Please provide browser authentication"):
-            yt_oauth.upload_song(config["uploads"]["file"])
+        # commented due to #813
+        # with pytest.raises(Exception, match="Please provide browser authentication"):
+        #     yt_oauth.upload_song(config["uploads"]["file"])
 
     def test_upload_song(self, config, yt_auth):
         response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))

@@ -1,3 +1,4 @@
+import time
 from typing import Any
 
 import pytest
@@ -33,12 +34,12 @@ class TestSearch:
     @pytest.mark.parametrize(
         "case",
         [
-            (
-                "Eminem Houdini",
+            (  # this test should be a single, but YTM currently doesn't find singles with album search 🤡
+                "eminem relapse",
                 {
-                    "title": "Houdini",
+                    "title": "Relapse",
                     "artists": [{"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}],
-                    "type": "Single",
+                    "type": "Album",
                     "resultType": "album",
                 },
             ),
@@ -112,12 +113,47 @@ class TestSearch:
         assert len(results) >= 3
         assert all(item["resultType"] == "episode" for item in results)
 
-    def test_search_top_result(self, yt):
+    def test_search_episode_category(self, yt_auth):
+        """Test resultType detection for episodes by searching for a podcast without a filter.
+        Note 2025/10/20: categories are currently gone from default search, therefore category changed to None
+        """
+        results = yt_auth.search("Stanford Graduate School of Business")
+        episode = next(
+            item
+            for item in results
+            if item["category"] is None
+            and "podcast" in item
+            and item["podcast"]["name"] == "Stanford GSB Podcasts"
+        )
+        assert episode["resultType"] == "episode"
+        assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
+
+    def test_search_top_result_playlist(self, yt):
         results = yt.search("fdsfsfsd")  # issue 524
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "playlist"
         assert results[0]["playlistId"].startswith("PL")
         assert len(results[0]["author"]) > 0
+
+    def test_search_top_result_episode(self, yt_auth):
+        results = yt_auth.search('"124. Making Meetings Meaningful, Pt. 1" Stanford')
+        assert results[0]["category"] == "Top result"
+        assert results[0]["resultType"] == "episode"
+        assert results[0]["videoId"] == "KNkyHCLOr1o"
+        assert results[0]["podcast"] == {
+            "id": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
+            "name": "Stanford GSB Podcasts",
+        }
+
+    def test_search_top_result_video(self, yt):
+        results = yt.search("Fuel Eminem")
+        assert results[0]["category"] == "Top result"
+        assert results[0]["resultType"] == "video"
+        assert results[0]["videoId"] == "t5H_CewqpKA"
+        assert results[0]["artists"] == [
+            {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"},
+            {"name": "JID", "id": "UCRlGNubLJBgW9VRCuiUnuYw"},
+        ]
 
     def test_search_uploads(self, config, yt, yt_oauth):
         with pytest.raises(Exception, match="No filter can be set when searching uploads"):
@@ -158,7 +194,7 @@ class TestSearch:
     def test_remove_search_suggestions_valid(self, yt_auth):
         first_pass = yt_auth.search("b")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
-
+        time.sleep(10)
         results = yt_auth.get_search_suggestions("b", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"

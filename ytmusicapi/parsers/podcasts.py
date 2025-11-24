@@ -67,11 +67,14 @@ class Description(list[DescriptionElement]):
 def parse_base_header(header: JsonDict) -> JsonDict:
     """parse common left hand side (header) items of an episode or podcast page"""
     strapline = nav(header, ["straplineTextOne"])
+
+    author = {
+        "name": nav(strapline, [*RUN_TEXT], True),
+        "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID], True),
+    }
+
     return {
-        "author": {
-            "name": nav(strapline, [*RUN_TEXT]),
-            "id": nav(strapline, ["runs", 0, *NAVIGATION_BROWSE_ID], True),
-        },
+        "author": author if author["name"] else None,
         "title": nav(header, TITLE_TEXT),
         "thumbnails": nav(header, THUMBNAILS),
     }

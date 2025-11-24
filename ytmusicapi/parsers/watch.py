@@ -29,13 +29,10 @@ def parse_watch_playlist(results: JsonList) -> JsonList:
 
 
 def parse_watch_track(data: JsonDict) -> JsonDict:
-    feedback_tokens = like_status = library_status = None
+    like_status = None
     for item in nav(data, MENU_ITEMS):
         if TOGGLE_MENU in item:
-            library_status = parse_song_library_status(item)
             service = item[TOGGLE_MENU]["defaultServiceEndpoint"]
-            if "feedbackEndpoint" in service:
-                feedback_tokens = parse_song_menu_tokens(item)
             if "likeEndpoint" in service:
                 like_status = parse_like_status(service)
 
@@ -44,11 +41,20 @@ def parse_watch_track(data: JsonDict) -> JsonDict:
         "title": nav(data, TITLE_TEXT),
         "length": nav(data, ["lengthText", "runs", 0, "text"], True),
         "thumbnail": nav(data, THUMBNAIL),
-        "feedbackTokens": feedback_tokens,
         "likeStatus": like_status,
-        "inLibrary": library_status,
         "videoType": nav(data, ["navigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
     }
+
+    track.update(
+        {
+            "inLibrary": None,
+            "feedbackTokens": None,
+            "pinnedToListenAgain": None,
+            "listenAgainFeedbackTokens": None,
+        }
+        | parse_song_menu_data(data)
+    )
+
     if longBylineText := nav(data, ["longBylineText"]):
         song_info = parse_song_runs(longBylineText["runs"])
         track.update(song_info)

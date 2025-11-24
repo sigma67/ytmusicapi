@@ -26,15 +26,8 @@ def parse_playlist_header(response: JsonDict) -> JsonDict:
     playlist.update(parse_playlist_header_meta(header))
     if playlist["thumbnails"] is None:
         playlist["thumbnails"] = nav(header, THUMBNAIL_CROPPED, True)
-    playlist["description"] = nav(header, DESCRIPTION, True)
-    run_count = len(nav(header, SUBTITLE_RUNS))
-    if run_count > 1:
-        playlist["author"] = {
-            "name": nav(header, SUBTITLE2),
-            "id": nav(header, [*SUBTITLE_RUNS, 2, *NAVIGATION_BROWSE_ID], True),
-        }
-        if run_count == 5:
-            playlist["year"] = nav(header, SUBTITLE3)
+    playlist["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
+    playlist["year"] = nav(header, SUBTITLE2)
 
     return playlist
 
@@ -47,6 +40,40 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
         "title": "".join([run["text"] for run in header.get("title", {}).get("runs", [])]),
         "thumbnails": nav(header, THUMBNAILS),
     }
+    if "facepile" in header:
+        avatar_renderer = nav(header, ["facepile", "avatarStackViewModel", "rendererContext"])
+        avatar_command = nav(
+            avatar_renderer,
+            [
+                "commandContext",
+                "onTap",
+                "innertubeCommand",
+            ],
+            True,
+        )
+
+        if (
+            nav(avatar_command, ["showEngagementPanelEndpoint", "identifier", "tag"], True)
+            == "PAplaylist_collaborate"
+        ):
+            avatars = nav(header, ["facepile", "avatarStackViewModel", "avatars"])
+
+            playlist_meta["collaborators"] = {
+                "text": nav(avatar_renderer, ["accessibilityContext", "label"]),
+                "avatars": [avatar["avatarViewModel"]["image"]["sources"][0] for avatar in avatars],
+            }
+        else:
+            playlist_meta["author"] = {
+                "name": nav(header, ["facepile", "avatarStackViewModel", "text", "content"]),
+                "id": nav(
+                    avatar_command,
+                    [
+                        "browseEndpoint",
+                        "browseId",
+                    ],
+                    True,
+                ),
+            }
     if "runs" in header["secondSubtitle"]:
         second_subtitle_runs = header["secondSubtitle"]["runs"]
         has_views = (len(second_subtitle_runs) > 3) * 2
@@ -101,14 +128,16 @@ def parse_audio_playlist(
 
 
 def parse_playlist_items(
-    results: JsonList, menu_entries: list[list[str]] | None = None, is_album: bool = False
+    results: JsonList,
+    is_album: bool = False,
+    is_collaborative: bool = False,
 ) -> JsonList:
     songs = []
     for result in results:
         if MRLIR not in result:
             continue
         data = result[MRLIR]
-        song = parse_playlist_item(data, menu_entries, is_album)
+        song = parse_playlist_item(data, is_album, is_collaborative)
         if song:
             songs.append(song)
 
@@ -116,12 +145,12 @@ def parse_playlist_items(
 
 
 def parse_playlist_item(
-    data: JsonDict, menu_entries: list[list[str]] | None = None, is_album: bool = False
+    data: JsonDict,
+    is_album: bool = False,
+    is_collaborative: bool = False,
 ) -> JsonDict | None:
     videoId = setVideoId = None
     like = None
-    feedback_tokens = None
-    library_status = None
 
     # if the item has a menu, find its setVideoId
     if "menu" in data:
@@ -134,9 +163,7 @@ def parse_playlist_item(
                         menu_service, ["playlistEditEndpoint", "actions", 0, "removedVideoId"], True
                     )
 
-            if TOGGLE_MENU in item:
-                feedback_tokens = parse_song_menu_tokens(item)
-                library_status = parse_song_library_status(item)
+    song_menu_data = {"inLibrary": None, "pinnedToListenAgain": None} | parse_song_menu_data(data)
 
     # if item is not playable, the videoId was retrieved above
     if nav(data, PLAY_BUTTON, none_if_absent=True) is not None:
@@ -156,7 +183,9 @@ def parse_playlist_item(
 
     title_index = 0 if use_preset_columns else None
     artist_index = 1 if use_preset_columns else None
-    album_index = 2 if use_preset_columns else None
+    duration_index = None
+    # collaborative playlists have duration in flexColumns (between artist and album)
+    album_index = 3 if is_collaborative else 2 if use_preset_columns else None
     user_channel_indexes = []
     unrecognized_index = None
 
@@ -165,8 +194,14 @@ def parse_playlist_item(
         navigation_endpoint = nav(flex_column_item, [*TEXT_RUN, "navigationEndpoint"], True)
 
         if not navigation_endpoint:
-            if nav(flex_column_item, TEXT_RUN_TEXT, True) is not None:
-                unrecognized_index = index if unrecognized_index is None else unrecognized_index
+            run = nav(flex_column_item, TEXT_RUN, True)
+            if run and "text" in run:
+                parsed = parse_song_run(run)
+                if parsed["type"] == "duration":
+                    duration_index = index
+                else:
+                    unrecognized_index = index if unrecognized_index is None else unrecognized_index
+
             continue
 
         if "watchEndpoint" in navigation_endpoint:
@@ -211,7 +246,7 @@ def parse_playlist_item(
 
     views = get_item_text(data, 2) if is_album else None
 
-    duration = None
+    duration = get_item_text(data, duration_index) if duration_index else None
     if "fixedColumns" in data:
         if "simpleText" in nav(get_fixed_column_item(data, 0), ["text"]):
             duration = nav(get_fixed_column_item(data, 0), ["text", "simpleText"])
@@ -234,7 +269,7 @@ def parse_playlist_item(
         "artists": artists,
         "album": album,
         "likeStatus": like,
-        "inLibrary": library_status,
+        **(song_menu_data),
         "thumbnails": thumbnails,
         "isAvailable": isAvailable,
         "isExplicit": isExplicit,
@@ -250,17 +285,6 @@ def parse_playlist_item(
         song["duration_seconds"] = parse_duration(duration)
     if setVideoId:
         song["setVideoId"] = setVideoId
-    if feedback_tokens:
-        song["feedbackTokens"] = feedback_tokens
-
-    if menu_entries:
-        # sets the feedbackToken for get_history
-        menu_items = nav(data, MENU_ITEMS)
-        for menu_entry in menu_entries:
-            items = find_objects_by_key(menu_items, menu_entry[0])
-            song[menu_entry[-1]] = next(
-                filter(lambda x: x is not None, (nav(itm, menu_entry, True) for itm in items)), None
-            )
 
     return song
 

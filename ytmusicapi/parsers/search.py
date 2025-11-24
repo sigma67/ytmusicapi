@@ -2,6 +2,8 @@ from ytmusicapi.type_alias import JsonDict, JsonList
 
 from ..helpers import to_int
 from ._utils import *
+from .albums import parse_album_playlistid_if_exists
+from .artists import parse_artists_runs
 from .songs import *
 
 ALL_RESULT_TYPES = [
@@ -33,7 +35,9 @@ def get_search_result_type(result_type_local: str, result_types_local: list[str]
 
 def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict:
     result_type = get_search_result_type(nav(data, SUBTITLE), search_result_types)
-    search_result = {"category": nav(data, CARD_SHELF_TITLE), "resultType": result_type}
+    # header element is missing in some edge cases (#799)
+    category = nav(data, CARD_SHELF_TITLE, True) or "Top result"
+    search_result = {"category": category, "resultType": result_type}
     if result_type == "artist":
         subscribers = nav(data, SUBTITLE2, True)
         if subscribers:
@@ -65,15 +69,21 @@ def parse_top_result(data: JsonDict, search_result_types: list[str]) -> JsonDict
     if result_type in ["playlist"]:
         search_result["playlistId"] = nav(data, MENU_PLAYLIST_ID)
         search_result["title"] = nav(data, TITLE_TEXT)
-        search_result["author"] = parse_song_artists_runs(nav(data, ["subtitle", "runs"])[2:])
+        search_result["author"] = parse_artists_runs(nav(data, ["subtitle", "runs"])[2:])
+
+    if result_type in ["episode"]:
+        search_result["title"] = nav(data, TITLE_TEXT)
+        search_result["videoId"] = nav(data, [*THUMBNAIL_OVERLAY_NAVIGATION, *WATCH_VIDEO_ID])
+        search_result["videoType"] = nav(data, [*THUMBNAIL_OVERLAY_NAVIGATION, *NAVIGATION_VIDEO_TYPE])
+        runs = nav(data, SUBTITLE_RUNS)[2:]
+        search_result["date"] = runs[0]["text"]
+        search_result["podcast"] = parse_id_name(runs[2])
 
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
     return search_result
 
 
-def parse_search_result(
-    data: JsonDict, api_search_result_types: list[str], result_type: str | None, category: str | None
-) -> JsonDict:
+def parse_search_result(data: JsonDict, result_type: str | None, category: str | None) -> JsonDict:
     default_offset = (not result_type or result_type == "album") * 2
     search_result: JsonDict = {"category": category}
     video_type = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True)
@@ -96,7 +106,10 @@ def parse_search_result(
                 iter(type for prefix, type in mapping.items() if browse_id.startswith(prefix)), None
             )
         else:
-            result_type = "song" if video_type == "MUSIC_VIDEO_TYPE_ATV" else "video"
+            result_type = {
+                "MUSIC_VIDEO_TYPE_ATV": "song",
+                "MUSIC_VIDEO_TYPE_PODCAST_EPISODE": "episode",
+            }.get(video_type or "", "video")
 
     search_result["resultType"] = result_type
 
@@ -131,11 +144,7 @@ def parse_search_result(
 
     elif result_type == "song":
         search_result["album"] = None
-        if "menu" in data:
-            toggle_menu = find_object_by_key(nav(data, MENU_ITEMS), TOGGLE_MENU)
-            if toggle_menu:
-                search_result["inLibrary"] = parse_song_library_status(toggle_menu)
-                search_result["feedbackTokens"] = parse_song_menu_tokens(toggle_menu)
+        search_result.update(parse_song_menu_data(data))
 
     elif result_type == "upload":
         browse_id = nav(data, NAVIGATION_BROWSE_ID, True)
@@ -178,9 +187,7 @@ def parse_search_result(
         runs = flex_item["text"]["runs"]
         if flex_item2 := get_flex_column_item(data, 2):
             runs.extend([{"text": ""}, *flex_item2["text"]["runs"]])  # first item is a dummy separator
-        # ignore the first run if it is a type specifier (like "Single" or "Album")
-        runs_offset = (len(runs[0]) == 1 and runs[0]["text"].lower() in api_search_result_types) * 2
-        song_info = parse_song_runs(runs[runs_offset:])
+        song_info = parse_song_runs(runs, skip_type_spec=True)
         search_result.update(song_info)
 
     if result_type in ["artist", "album", "playlist", "profile", "podcast"]:
@@ -191,33 +198,25 @@ def parse_search_result(
 
     if result_type in ["episode"]:
         flex_item = get_flex_column_item(data, 1)
-        has_date = int(len(nav(flex_item, TEXT_RUNS)) > 1)
+        runs = nav(flex_item, TEXT_RUNS)[default_offset:]
+        has_date = int(len(runs) > 1)
         search_result["live"] = bool(nav(data, ["badges", 0, "liveBadgeRenderer"], True))
         if has_date:
-            search_result["date"] = nav(flex_item, TEXT_RUN_TEXT)
+            search_result["date"] = runs[0]["text"]
 
-        search_result["podcast"] = parse_id_name(nav(flex_item, ["text", "runs", has_date * 2]))
+        search_result["podcast"] = parse_id_name(runs[has_date * 2])
 
     search_result["thumbnails"] = nav(data, THUMBNAILS, True)
 
     return search_result
 
 
-def parse_album_playlistid_if_exists(data: JsonDict | None) -> str | None:
-    """the content of the data changes based on whether the user is authenticated or not"""
-    return nav(data, WATCH_PID, True) or nav(data, WATCH_PLAYLIST_ID, True) if data else None
-
-
 def parse_search_results(
     results: JsonList,
-    api_search_result_types: list[str],
     resultType: str | None = None,
     category: str | None = None,
 ) -> JsonList:
-    return [
-        parse_search_result(result[MRLIR], api_search_result_types, resultType, category)
-        for result in results
-    ]
+    return [parse_search_result(result[MRLIR], resultType, category) for result in results]
 
 
 def get_search_params(filter: str | None, scope: str | None, ignore_spelling: bool) -> str | None:

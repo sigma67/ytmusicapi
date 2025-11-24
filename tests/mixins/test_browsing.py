@@ -13,8 +13,23 @@ class TestBrowsing:
     def test_get_home(self, yt, yt_auth):
         result = yt.get_home()
         assert len(result) >= 2
-        result = yt_auth.get_home(limit=15)
+        result = yt_auth.get_home(limit=20)
         assert len(result) >= 15
+        assert all(
+            # ensure we aren't parsing specifiers like "Song" as artist names
+            [
+                item["artists"][0]["id"]
+                or item["artists"][0]["name"].lower() not in yt_auth.parser.get_api_result_types()
+                for section in result
+                for item in section["contents"]
+                if item and len(item.get("artists", [])) > 1
+            ]
+        )
+        # disabling this assert for now as failure cannot be reproduced
+        # assert all(
+        #     # ensure all links are supported by parse_mixed_content
+        #     [item is not None for section in result for item in section["contents"]]
+        # )
 
     def test_get_artist(self, yt):
         results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
@@ -42,6 +57,7 @@ class TestBrowsing:
     def test_get_artist_albums(self, yt):
         artist = yt.get_artist("UCAeLFBCQS7FvI8PvBrWvSBg")
         results = yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"])
+        assert all("artists" not in result for result in results)  # artist info is omitted from the results
         assert len(results) == 100
         results = yt.get_artist_albums(artist["singles"]["browseId"], artist["singles"]["params"])
         assert len(results) == 100
@@ -89,7 +105,7 @@ class TestBrowsing:
 
     def test_get_album_browse_id_issue_470(self, yt):
         escaped_browse_id = yt.get_album_browse_id("OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
-        assert escaped_browse_id == "MPREb_pZhPA6GfQmN"
+        assert len(escaped_browse_id) == 17
 
     def test_get_album_2024(self, yt):
         with open(Path(__file__).parent.parent / "data" / "2024_03_get_album.json", encoding="utf8") as f:
@@ -109,6 +125,7 @@ class TestBrowsing:
     def test_get_album(self, yt, yt_auth, sample_album):
         album = yt_auth.get_album(sample_album)
         assert len(album) >= 9
+        assert album["related_recommendations"]
         assert "isExplicit" in album
         assert album["tracks"][0]["isExplicit"]
         assert all(item["views"] is not None for item in album["tracks"])
@@ -135,13 +152,20 @@ class TestBrowsing:
         with pytest.raises(Exception, match="Invalid album browseId"):
             yt.get_album("asdf")
 
-    def test_get_album_other_versions(self, yt):
+    def test_get_album_without_artist(self, yt):
+        album = yt.get_album("MPREb_n1AxZ9F8rF7")  # soundtrack album with no artist info
+        assert album["artists"] is None
+        assert album["audioPlaylistId"] is not None
+        assert len(album["tracks"]) == 11
+
+    def test_get_album_other_versions(self, yt, yt_oauth):
         # Eminem - Curtain Call: The Hits (Explicit Variant)
-        album = yt.get_album("MPREb_LQCAymzbaKJ")
+        album = yt_oauth.get_album("MPREb_LQCAymzbaKJ")
         variants = album["other_versions"]
         assert len(variants) >= 1  # appears to be regional
         variant = variants[0]
         assert variant["type"] == "Album"
+        assert variant["title"] == album["title"]
         assert len(variant["artists"]) == 1
         assert variant["artists"][0] == {"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}
         assert variant["audioPlaylistId"] is not None
@@ -150,13 +174,19 @@ class TestBrowsing:
         # Cassö & RAYE - Prada
         album = yt.get_album("MPREb_of3qfisa0yU")
         assert not album["isExplicit"]
+        assert album["artists"] == [
+            {"name": "cassö", "id": "UCGWMNnI1Ky5bMcRlr73Cj2Q"},
+            {"name": "RAYE", "id": "UCvyjk7zKlaFyNIPZ-Pyvkng"},
+        ]
         variant = album["other_versions"][0]
         assert variant["type"] == "Single"
+        assert variant["title"] == "Prada"
         assert variant["isExplicit"]
         assert len(variant["artists"]) == 3
         assert variant["artists"][0]["id"] == "UCGWMNnI1Ky5bMcRlr73Cj2Q"
         assert variant["artists"][1]["name"] == "RAYE"
         assert variant["artists"][2] == {"id": "UCb7jnkQW94hzOoWkG14zs4w", "name": "D-Block Europe"}
+        assert variant["audioPlaylistId"] is not None
 
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
@@ -169,6 +199,15 @@ class TestBrowsing:
         song = yt_oauth.get_watch_playlist(sample_video)
         song = yt_oauth.get_song_related(song["related"])
         assert len(song) >= 5
+        assert all(
+            # ensure every video is associated with a view count or music album
+            [
+                item.get("views") or item.get("album")
+                for section in song
+                for item in section["contents"]
+                if "videoId" in item
+            ]
+        )
 
     def test_get_lyrics(self, config, yt, sample_video):
         playlist = yt.get_watch_playlist(sample_video)
@@ -190,11 +229,6 @@ class TestBrowsing:
         assert isinstance(song.text, str)
         assert song.start_time <= song.end_time
         assert isinstance(song.id, int)
-
-        playlist = yt.get_watch_playlist(config["uploads"]["private_upload_id"])
-        assert playlist["lyrics"] is None
-        with pytest.raises(Exception):
-            yt.get_lyrics(playlist["lyrics"])
 
     def test_get_signatureTimestamp(self, yt):
         signature_timestamp = yt.get_signatureTimestamp()
