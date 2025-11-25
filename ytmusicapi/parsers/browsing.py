@@ -33,7 +33,7 @@ def parse_mixed_content(
                             content = parse_watch_playlist(data)
                         else:
                             content = parse_song(data)
-                    elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
+                    elif page_type in ["MUSIC_PAGE_TYPE_ALBUM", "MUSIC_PAGE_TYPE_AUDIOBOOK"]:
                         content = parse_album(data)
                     elif page_type in ["MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL"]:
                         content = parse_related_artist(data)
