@@ -220,7 +220,7 @@ def parse_playlist_item(
             # MUSIC_PAGE_TYPE_ARTIST for regular songs, MUSIC_PAGE_TYPE_UNKNOWN for uploads
             if page_type == "MUSIC_PAGE_TYPE_ARTIST" or page_type == "MUSIC_PAGE_TYPE_UNKNOWN":
                 artist_index = index
-            elif page_type == "MUSIC_PAGE_TYPE_ALBUM":
+            elif page_type in ["MUSIC_PAGE_TYPE_ALBUM", "MUSIC_PAGE_TYPE_AUDIOBOOK"]:
                 album_index = index
             elif page_type == "MUSIC_PAGE_TYPE_USER_CHANNEL":
                 user_channel_indexes.append(index)

@@ -71,6 +71,22 @@ class TestPlaylists:
         album = yt_oauth.get_playlist("OLAK5uy_noLNRtYnrcRVVO9rOyGMx64XyjVSCz1YU", limit=500)
         assert len(album["tracks"]) == 456
 
+    @pytest.mark.parametrize(
+        "playlist_id",
+        [
+            "OLAK5uy_nT1mL8aZvxqfIRFN9L8FgIzfvk6HUkd0I",  # Show
+            "OLAK5uy_ksLYkcnrOSKYl62uxB3ga2zfBZfCuvnJ4",  # Audiobook
+        ],
+    )
+    def test_get_playlist_audiobook(self, yt, playlist_id):
+        playlist = yt.get_playlist(playlist_id)
+        assert all(
+            [
+                track["album"]["id"] and track["album"]["name"] == playlist["title"]
+                for track in playlist["tracks"]
+            ]
+        )
+
     def test_get_playlist_empty(self, yt_empty):
         with pytest.raises(Exception):
             yt_empty.get_playlist("PLABC")

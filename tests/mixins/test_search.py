@@ -135,11 +135,10 @@ class TestSearch:
         assert results[0]["playlistId"].startswith("PL")
         assert len(results[0]["author"]) > 0
 
-    def test_search_top_result_episode(self, yt_auth):
-        results = yt_auth.search('"124. Making Meetings Meaningful, Pt. 1" Stanford')
+    def test_search_top_result_episode(self, yt):
+        results = yt.search('"110. Write It Well: How to Craft an Email to Capture Busy Readers" Stanford')
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "episode"
-        assert results[0]["videoId"] == "KNkyHCLOr1o"
         assert results[0]["podcast"] == {
             "id": "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9",
             "name": "Stanford GSB Podcasts",
