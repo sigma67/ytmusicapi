@@ -17,8 +17,8 @@ class TestPlaylists:
         [
             ("2024_03_get_playlist.json", "PLaZPMsuQNCsWn0iVMtGbaUXO6z-EdZaZm"),
             ("2024_03_get_playlist_public.json", "RDCLAK5uy_lWy02cQBnTVTlwuRauaGKeUDH3L6PXNxI"),
-            ("2024_12_get_playlist_audio.json", "OLAK5uy_n0x1TMX8DL2eli2g_LysCSg-6Nq5YQa1g"),
             ("2025_10_get_playlist_collaborative.json", "PLxyTaDz8f5PBc-8kE36gvB-eflhODG2dw"),
+            ("2025_12_get_playlist_audio.json", "OLAK5uy_n0x1TMX8DL2eli2g_LysCSg-6Nq5YQa1g"),
         ],
     )
     def test_get_playlist(self, yt, test_file, playlist_id):
@@ -79,6 +79,13 @@ class TestPlaylists:
         playlist = yt_oauth.get_playlist("RDATgXd-")
         assert playlist["trackCount"] is None  # playlist has no trackCount
         assert len(playlist["tracks"]) >= 100
+
+    def test_get_playlist_unavailable(self, yt):
+        playlist_id = "OLAK5uy_mnDXXKVcY1Z_HKY00a_ZBrnE679EzsM50"
+        playlist = yt.get_playlist(playlist_id)
+        # in case this show is unavailable in the current region, we should get the ID without playNavigationEndpoint
+        assert playlist["id"] == playlist_id
+        assert len(playlist["tracks"]) == 35
 
     def test_get_playlist_author(self, yt):
         playlist = yt.get_playlist("PL9tY0BWXOZFu4vlBOzIOmvT6wjYb2jNiV")
