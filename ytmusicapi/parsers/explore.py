@@ -8,7 +8,7 @@ TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL
 
 def parse_chart_song(data: JsonDict) -> JsonDict:
     parsed = parse_song_flat(data)
-    parsed.update(parse_ranking(data))
+    parsed.update(parse_ranking(data, none_if_absent=False))
     return parsed
 
 
@@ -39,12 +39,13 @@ def parse_chart_artist(data: JsonDict) -> JsonDict:
         "subscribers": subscribers,
         "thumbnails": nav(data, THUMBNAILS),
     }
-    parsed.update(parse_ranking(data))
+    parsed.update(parse_ranking(data, none_if_absent=True))
     return parsed
 
 
-def parse_ranking(data: JsonDict) -> JsonDict:
+def parse_ranking(data: JsonDict, none_if_absent: bool) -> JsonDict:
+    trend_icon_type = nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *ICON_TYPE], none_if_absent)
     return {
-        "rank": nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *TEXT_RUN_TEXT]),
-        "trend": TRENDS[nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *ICON_TYPE])],
+        "rank": nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *TEXT_RUN_TEXT], none_if_absent),
+        "trend": TRENDS[trend_icon_type] if trend_icon_type is not None else None,
     }

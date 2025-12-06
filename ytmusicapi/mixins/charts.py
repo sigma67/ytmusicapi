@@ -7,6 +7,7 @@ class ChartsMixin(MixinProtocol):
     def get_charts(self, country: str = "ZZ") -> JsonDict:
         """
         Get latest charts data from YouTube Music: Artists and playlists of top videos.
+        Unauthenticated requests return unranked Artists with "rank" and "trend" set to None.
         US charts have an extra Genres section with some Genre charts.
 
         :param country: ISO 3166-1 Alpha-2 country code. Default: ``ZZ`` = Global
