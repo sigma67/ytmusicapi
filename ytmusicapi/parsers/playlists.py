@@ -109,9 +109,7 @@ def parse_audio_playlist(
     section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
     content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
 
-    playlist["id"] = nav(
-        content_data, [*CONTENT, MRLIR, *PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PLAYLIST_ID]
-    )
+    playlist["id"] = nav(content_data, ["targetId"])
     playlist["trackCount"] = nav(content_data, ["collapsedItemCount"])
 
     playlist["tracks"] = []
