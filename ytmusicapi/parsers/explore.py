@@ -1,8 +1,9 @@
+from typing import Literal
+
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.podcasts import *
 from ytmusicapi.parsers.songs import *
 from ytmusicapi.type_alias import JsonDict
-from typing import Literal
 
 TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL": "neutral"}
 
