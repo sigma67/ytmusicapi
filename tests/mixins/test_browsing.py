@@ -145,6 +145,8 @@ class TestBrowsing:
         album = yt.get_album("MPREb_G21w42zx0qJ")  # album with track (#13) disabled/greyed out
         assert album["likeStatus"] is not None
         assert album["audioPlaylistId"] is not None
+        assert album["tracks"][12]["trackNumber"] is None
+        assert not album["tracks"][12]["isAvailable"]
 
     def test_get_album_errors(self, yt):
         with pytest.raises(Exception, match="Invalid album browseId"):
