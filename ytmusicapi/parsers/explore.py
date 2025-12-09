@@ -2,6 +2,7 @@ from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.podcasts import *
 from ytmusicapi.parsers.songs import *
 from ytmusicapi.type_alias import JsonDict
+from typing import Literal
 
 TRENDS = {"ARROW_DROP_UP": "up", "ARROW_DROP_DOWN": "down", "ARROW_CHART_NEUTRAL": "neutral"}
 
@@ -43,9 +44,13 @@ def parse_chart_artist(data: JsonDict) -> JsonDict:
     return parsed
 
 
-def parse_ranking(data: JsonDict, none_if_absent: bool) -> JsonDict:
-    trend_icon_type = nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *ICON_TYPE], none_if_absent)
+def parse_ranking(data: JsonDict, none_if_absent: Literal[True, False]) -> JsonDict:
+    trend_icon_type = nav(
+        data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *ICON_TYPE], none_if_absent
+    )
     return {
-        "rank": nav(data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *TEXT_RUN_TEXT], none_if_absent),
+        "rank": nav(
+            data, ["customIndexColumn", "musicCustomIndexColumnRenderer", *TEXT_RUN_TEXT], none_if_absent
+        ),
         "trend": TRENDS[trend_icon_type] if trend_icon_type is not None else None,
     }
