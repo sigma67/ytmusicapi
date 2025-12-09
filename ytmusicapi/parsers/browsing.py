@@ -99,14 +99,18 @@ def parse_song(result: JsonDict) -> JsonDict:
     return song
 
 
-def parse_song_flat(data: JsonDict) -> JsonDict:
+def parse_song_flat(data: JsonDict, with_playlist_id: bool = False) -> JsonDict:
     columns = [get_flex_column_item(data, i) for i in range(0, len(data["flexColumns"]))]
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
         "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
+        "videoType": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
         "thumbnails": nav(data, THUMBNAILS),
         "isExplicit": nav(data, BADGE_LABEL, True) is not None,
     }
+
+    if with_playlist_id:
+        song["playlistId"] = nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PLAYLIST_ID])
 
     runs = nav(columns[1], TEXT_RUNS)
     song.update(parse_song_runs(runs, skip_type_spec=True))
