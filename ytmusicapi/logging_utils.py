@@ -5,10 +5,9 @@ Provides structured logging with configurable levels and optional debug output.
 
 import logging
 import os
-from typing import Optional
 
 DEFAULT_LOG_LEVEL = logging.WARNING
-_logger: Optional[logging.Logger] = None
+_logger: logging.Logger | None = None
 
 
 def get_logger(name: str = "ytmusicapi") -> logging.Logger:

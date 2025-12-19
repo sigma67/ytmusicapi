@@ -3,10 +3,10 @@
 Provides defensive validation for common input patterns to prevent errors early.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 
-def require_non_empty(value: Optional[str], name: str) -> str:
+def require_non_empty(value: str | None, name: str) -> str:
     """Validate that a string value is not None or empty.
 
     Args:
