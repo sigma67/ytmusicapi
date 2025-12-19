@@ -19,7 +19,7 @@ def require_non_empty(value: str | None, name: str) -> str:
     Raises:
         ValueError: If value is None or empty
     """
-    if not value:
+    if value is None or value == "":
         raise ValueError(f"{name} cannot be None or empty")
     return value
 
