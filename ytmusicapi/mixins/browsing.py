@@ -1,6 +1,6 @@
 import re
 import warnings
-from typing import Literal, cast, overload
+from typing import Any, Literal, overload
 
 from ytmusicapi.continuations import (
     get_continuations,
@@ -344,7 +344,7 @@ class BrowsingMixin(MixinProtocol):
                     {"continuations": [continuation["continuation"]]}
                 )
                 response = request_func(additionalParams)
-                results = nav(response, SECTION_LIST_CONTINUATION + CONTENT)
+                results: dict[str, Any] = nav(response, SECTION_LIST_CONTINUATION + CONTENT)
             else:
                 raise ValueError(f"Invalid order parameter {order}")
 
@@ -355,7 +355,7 @@ class BrowsingMixin(MixinProtocol):
         contents = nav(results, GRID_ITEMS, True) or nav(results, CAROUSEL_CONTENTS)
         albums = parse_albums(contents)
 
-        results = nav(results, GRID, True)
+        results = nav(results, GRID, True)  # type: ignore[assignment]
         if "continuations" in results:
             remaining_limit = None if limit is None else (limit - len(albums))
             albums.extend(
@@ -944,7 +944,7 @@ class BrowsingMixin(MixinProtocol):
                 hasTimestamps=False,
             )
 
-        return cast(Lyrics | TimedLyrics, lyrics)
+        return lyrics
 
     def get_basejs_url(self) -> str:
         """

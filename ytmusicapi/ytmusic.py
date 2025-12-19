@@ -112,7 +112,9 @@ class YTMusicBase:
                     )
                 #: OAuth credential handler
                 self._token = RefreshingToken(
-                    credentials=oauth_credentials, _local_cache=auth_path, **self._auth_headers
+                    credentials=oauth_credentials,
+                    _local_cache=auth_path,
+                    **self._auth_headers,  # type: ignore[arg-type]
                 )
 
         # prepare context

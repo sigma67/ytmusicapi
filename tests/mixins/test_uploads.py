@@ -41,7 +41,7 @@ class TestUploads:
         assert len(results) == 0
 
     def test_upload_song_exceptions(self, config, yt_auth, yt_oauth):
-        with pytest.raises(Exception, match="The provided file does not exist."):
+        with pytest.raises(Exception, match="The provided file does not exist"):
             yt_auth.upload_song("song.wav")
         with (
             tempfile.NamedTemporaryFile(suffix="wav") as temp,
