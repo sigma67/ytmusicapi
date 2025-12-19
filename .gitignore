@@ -1,18 +1,49 @@
+# IDEs
 .idea
 .vscode
+
+# Test files
 tests/*.json
 tests/setup/*.json
-docs/build
-docs/source/reference/api
 test.cfg
 **.mp3
+
+# Documentation
+docs/build
+docs/source/reference/api
+
+# Coverage and test results
 .coverage
+htmlcov/
+*.xml
+junit.xml
+
+# Python
 **/__pycache__/
-venv*/
+*.pyc
+*.pyo
+*.pyd
+.Python
 *.egg-info/
+*.egg
+
+# Virtual environments
+venv*/
+.venv
+.pdm-python
+
+# Build artifacts
 build
 dist
-.pdm-python
-.venv
+
+# Logs
 *.log
-*.xml
+
+# Cache directories
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
