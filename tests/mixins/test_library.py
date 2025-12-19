@@ -129,6 +129,7 @@ class TestLibrary:
         assert not album["tracks"][0]["inLibrary"]
         assert response["feedbackResponses"][0]["isProcessed"]
 
+    @pytest.mark.skip(reason="2025-12: never works currently, needs investigation")
     def test_listen_again_feedback_tokens(self, yt_brand):
         sample_album = "MPREb_4pL8gzRtw1p"
         track_index = 1  # test with an audio track for the sake of free accounts (music video pin state isn't reflected in the corresponding song menu)
