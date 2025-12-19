@@ -119,7 +119,7 @@ def nav(root: JsonDict | None, items: list[Any], none_if_absent: bool = False) -
         return None
     try:
         for k in items:
-            root = root[k]  # type: ignore[index]
+            root = root[k]
     except (KeyError, IndexError) as e:
         if none_if_absent:
             return None

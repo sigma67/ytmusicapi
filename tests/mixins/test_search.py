@@ -210,10 +210,10 @@ class TestSearch:
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
 
         suggestion_to_remove = [99]
-        with pytest.raises(YTMusicUserError, match="Index out of range."):
+        with pytest.raises(YTMusicUserError, match="Index out of range"):
             yt_auth.remove_search_suggestions(results, suggestion_to_remove)
 
         suggestion_to_remove = [0]
-        with pytest.raises(YTMusicUserError, match="No search result from history provided."):
+        with pytest.raises(YTMusicUserError, match="No search result from history provided"):
             results = yt.get_search_suggestions("a", detailed_runs=True)
             yt.remove_search_suggestions(results, suggestion_to_remove)

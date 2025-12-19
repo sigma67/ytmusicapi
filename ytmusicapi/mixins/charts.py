@@ -95,7 +95,8 @@ class ChartsMixin(MixinProtocol):
             charts_categories = [
                 ("daily", parse_chart_playlist, MTRIR),
                 ("weekly", parse_chart_playlist, MTRIR),
-            ] + charts_categories[1:]
+                *charts_categories[1:],
+            ]
 
         for i, (name, parse_func, key) in enumerate(charts_categories):
             charts[name] = parse_content_list(nav(results[1 + i], CAROUSEL_CONTENTS), parse_func, key)
