@@ -195,6 +195,16 @@ class TestBrowsing:
         if not is_ci():  # skip assert on GitHub CI because it doesn't work for some reason
             assert len(song["streamingData"]["adaptiveFormats"]) >= 10
 
+    def test_get_song_album_id(self, yt):
+        # Test with a song that has an album
+        album_id = yt.get_song_album_id("ZrOKjDZOtkA")  # Oasis - Wonderwall
+        assert album_id is not None
+        assert album_id.startswith("MPREb_")
+
+        # Test with a song that doesn't have an album
+        album_id = yt.get_song_album_id("lpPih3tTuM0")
+        assert album_id is None
+
     def test_get_song_related_content(self, yt_oauth, sample_video):
         song = yt_oauth.get_watch_playlist(sample_video)
         song = yt_oauth.get_song_related(song["related"])

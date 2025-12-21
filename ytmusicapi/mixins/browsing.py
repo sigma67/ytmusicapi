@@ -774,6 +774,44 @@ class BrowsingMixin(MixinProtocol):
                 del response[k]
         return response
 
+    def get_song_album_id(self, videoId: str) -> str | None:
+        """
+        Get the album's browseId a song belongs to, if any.
+
+        :param videoId: Video id
+        :return: Album browseId (starting with ``MPREb_``) or ``None`` if no album was found.
+        """
+        response = self._send_request(
+            "next", {"videoId": videoId, "index": 0, "watchNextType": "WATCH_NEXT_TYPE_SKIP_VIDEO"}
+        )
+        # since there's only a few menu items, let's loop through them and find the one with the album icon instead of relying on a fixed index
+        # old fixed index below:
+        # album_browse_id = nav(response, [*SINGLE_COLUMN_WATCH_NEXT_TAB, *AUTOPLAY_ITEM_LIST, 0, "playlistPanelVideoRenderer", *MENU_ITEMS, 6, *MENU_BROWSE_ID], True)
+
+        menu_items = (
+            nav(
+                response,
+                [
+                    *SINGLE_COLUMN_WATCH_NEXT_TAB,
+                    *AUTOPLAY_ITEM_LIST,
+                    0,
+                    "playlistPanelVideoRenderer",
+                    *MENU_ITEMS,
+                ],
+                True,
+            )
+            or []
+        )
+        if not menu_items:
+            return None
+        album_browse_id = None
+        for item in menu_items:
+            if nav(item, [MNIR, *ICON_TYPE], True) == "ALBUM":
+                album_browse_id = nav(item, MENU_BROWSE_ID, True)
+                break
+
+        return album_browse_id
+
     def get_song_related(self, browseId: str) -> JsonList:
         """
         Gets related content for a song. Equivalent to the content

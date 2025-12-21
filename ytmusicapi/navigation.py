@@ -11,7 +11,14 @@ TAB_1_CONTENT = ["tabs", 1, "tabRenderer", "content"]
 TAB_2_CONTENT = ["tabs", 2, "tabRenderer", "content"]
 TWO_COLUMN_RENDERER = ["contents", "twoColumnBrowseResultsRenderer"]
 SINGLE_COLUMN = ["contents", "singleColumnBrowseResultsRenderer"]
+SINGLE_COLUMN_WATCH_NEXT = ["contents", "singleColumnMusicWatchNextResultsRenderer"]
 SINGLE_COLUMN_TAB = SINGLE_COLUMN + TAB_CONTENT
+SINGLE_COLUMN_WATCH_NEXT_TAB = [
+    *SINGLE_COLUMN_WATCH_NEXT,
+    "tabbedRenderer",
+    "watchNextTabbedResultsRenderer",
+    *TAB_CONTENT,
+]
 SECTION = ["sectionListRenderer"]
 SECTION_LIST = [*SECTION, "contents"]
 SECTION_LIST_ITEM = SECTION + CONTENT
@@ -70,6 +77,7 @@ CATEGORY_TITLE = ["musicNavigationButtonRenderer", "buttonText", *RUN_TEXT]
 CATEGORY_PARAMS = ["musicNavigationButtonRenderer", "clickCommand", "browseEndpoint", "params"]
 MMRIR = "musicMultiRowListItemRenderer"
 MRLIR = "musicResponsiveListItemRenderer"
+MRLIFCR = "musicResponsiveListItemFlexColumnRenderer"
 MTRIR = "musicTwoRowItemRenderer"
 MNIR = "menuNavigationItemRenderer"
 TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
@@ -101,6 +109,9 @@ TIMESTAMPED_LYRICS = [
     "timedLyricsModel",
     "lyricsData",
 ]
+AUTOPLAY_ITEM_LIST = ["musicQueueRenderer", "content", "playlistPanelRenderer", "contents"]
+MENU_BROWSE_ENDPOINT = [MNIR, *NAVIGATION_BROWSE]
+MENU_BROWSE_ID = [*MENU_BROWSE_ENDPOINT, "browseId"]
 
 
 @overload
