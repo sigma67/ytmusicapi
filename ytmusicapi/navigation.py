@@ -77,7 +77,6 @@ CATEGORY_TITLE = ["musicNavigationButtonRenderer", "buttonText", *RUN_TEXT]
 CATEGORY_PARAMS = ["musicNavigationButtonRenderer", "clickCommand", "browseEndpoint", "params"]
 MMRIR = "musicMultiRowListItemRenderer"
 MRLIR = "musicResponsiveListItemRenderer"
-MRLIFCR = "musicResponsiveListItemFlexColumnRenderer"
 MTRIR = "musicTwoRowItemRenderer"
 MNIR = "menuNavigationItemRenderer"
 TASTE_PROFILE_ITEMS = ["contents", "tastebuilderRenderer", "contents"]
