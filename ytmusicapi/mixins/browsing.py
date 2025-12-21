@@ -802,8 +802,6 @@ class BrowsingMixin(MixinProtocol):
             )
             or []
         )
-        if not menu_items:
-            return None
         album_browse_id = None
         for item in menu_items:
             if nav(item, [MNIR, *ICON_TYPE], True) == "ALBUM":
