@@ -578,9 +578,9 @@ class BrowsingMixin(MixinProtocol):
         if not clean_songs:
             album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
         else:
-            urlCannonical: str | None = nav(response, ["microformat", "microformatDataRenderer", "urlCanonical"], True)
-            if urlCannonical:
-                playlistid = urlCannonical.split("list=")[-1]
+            urlCanonical: str | None = nav(response, ["microformat", "microformatDataRenderer", "urlCanonical"], True)
+            if urlCanonical:
+                playlistid = urlCanonical.split("list=")[-1]
                 playlist = self._send_request("browse", {"browseId": "VL" + playlistid})
                 album["tracks"] = parse_playlist_items(nav(playlist, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, "musicPlaylistShelfRenderer", "contents"], True) or [])
             else:
