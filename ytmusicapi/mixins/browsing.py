@@ -584,7 +584,12 @@ class BrowsingMixin(MixinProtocol):
                 playlist = self._send_request("browse", {"browseId": "VL" + playlistid})
                 album["tracks"] = parse_playlist_items(nav(playlist, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, "musicPlaylistShelfRenderer", "contents"], True) or [])
             else:
-                raise YTMusicError("Could not retrieve audio playlist for album.")
+                raise YTMusicError(
+                    "Could not retrieve audio playlist for album because the canonical URL "
+                    "metadata is missing. This can happen for some albums when requesting "
+                    "clean tracks (clean_songs=True). Try calling get_album again with "
+                    "clean_songs=False to fall back to the standard track listing."
+                )
             
         secondary_carousels = (
             nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True) or []
