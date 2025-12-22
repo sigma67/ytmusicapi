@@ -492,12 +492,18 @@ class BrowsingMixin(MixinProtocol):
             browse_id = matches.group().strip('"')
         return browse_id
 
-    def get_album(self, browseId: str) -> JsonDict:
+    def get_album(self, browseId: str, clean_songs: bool = False) -> JsonDict:
         """
         Get information and tracks of an album
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
+        :param clean_songs: Whether or not to only return actual youtube music songs,
+            not youtube videos (like music videos, lyric videos, etc.). Note that getting
+            the clean songs requires an additional request to be made to YouTube Music,
+            and is thus slower.
+            Default: False
+            
         :return: Dictionary with album and track metadata.
 
         The result is in the following format::
@@ -568,8 +574,18 @@ class BrowsingMixin(MixinProtocol):
         album: JsonDict = parse_album_header_2024(response)
 
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
-
+        
+        if not clean_songs:
+            album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
+        else:
+            urlCannonical: str | None = nav(response, ["microformat", "microformatDataRenderer", "urlCanonical"], True)
+            if urlCannonical:
+                playlistid = urlCannonical.split("list=")[-1]
+                playlist = self._send_request("browse", {"browseId": "VL" + playlistid})
+                album["tracks"] = parse_playlist_items(nav(playlist, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, "musicPlaylistShelfRenderer", "contents"], True) or [])
+            else:
+                raise YTMusicError("Could not retrieve audio playlist for album.")
+            
         secondary_carousels = (
             nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True) or []
         )
