@@ -498,12 +498,12 @@ class BrowsingMixin(MixinProtocol):
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
-        :param clean_songs: Whether or not to only return actual youtube music songs,
-            not youtube videos (like music videos, lyric videos, etc.). Note that getting
-            the clean songs requires an additional request to be made to YouTube Music,
-            and is thus slower.
+        :param clean_songs: Whether to return only YouTube Music audio tracks
+            (with album-style metadata and artwork) and exclude alternative video
+            versions such as music videos, lyric videos, or extended cuts that may
+            differ in title or content. Enabling this option requires an additional
+            request to be made to YouTube Music and is therefore slower.
             Default: False
-            
         :return: Dictionary with album and track metadata.
 
         The result is in the following format::
