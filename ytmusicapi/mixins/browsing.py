@@ -177,6 +177,7 @@ class BrowsingMixin(MixinProtocol):
                 "shuffleId": "RDAOkjHYJjL1a3xspEyVkhHAsg",
                 "radioId": "RDEMkjHYJjL1a3xspEyVkhHAsg",
                 "subscribers": "3.86M",
+                "monthlyListeners": "29.1M",
                 "subscribed": false,
                 "thumbnails": [...],
                 "songs": {
@@ -267,6 +268,12 @@ class BrowsingMixin(MixinProtocol):
         artist["shuffleId"] = nav(header, ["playButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True)
         artist["radioId"] = nav(header, ["startRadioButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True)
         artist["subscribers"] = nav(subscription_button, ["subscriberCountText", "runs", 0, "text"], True)
+        artist["monthlyListeners"] = nav(header, ["monthlyListenerCount", "runs", 0, "text"], True)
+        artist["monthlyListeners"] = (
+            artist["monthlyListeners"].replace(" monthly audience", "")
+            if artist["monthlyListeners"]
+            else None
+        )
         artist["subscribed"] = subscription_button["subscribed"]
         artist["thumbnails"] = nav(header, THUMBNAILS, True)
         artist["songs"] = {"browseId": None}
