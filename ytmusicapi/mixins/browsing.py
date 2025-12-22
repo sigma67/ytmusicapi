@@ -782,12 +782,9 @@ class BrowsingMixin(MixinProtocol):
         :return: Album browseId (starting with ``MPREb_``) or ``None`` if no album was found.
         """
         response = self._send_request(
-            "next", {"videoId": videoId, "index": 0, "watchNextType": "WATCH_NEXT_TYPE_SKIP_VIDEO"}
+            "next", {"videoId": videoId}
         )
-        # since there's only a few menu items, let's loop through them and find the one with the album icon instead of relying on a fixed index
-        # old fixed index below:
-        # album_browse_id = nav(response, [*SINGLE_COLUMN_WATCH_NEXT_TAB, *AUTOPLAY_ITEM_LIST, 0, "playlistPanelVideoRenderer", *MENU_ITEMS, 6, *MENU_BROWSE_ID], True)
-
+        
         menu_items = (
             nav(
                 response,
