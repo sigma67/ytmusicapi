@@ -33,7 +33,7 @@ class TestBrowsing:
 
     def test_get_artist(self, yt):
         results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
-        assert len(results) == 16
+        assert len(results) == 17
         assert results["shuffleId"] is not None
         assert results["radioId"] is not None
 
