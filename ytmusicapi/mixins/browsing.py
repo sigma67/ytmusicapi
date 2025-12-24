@@ -781,6 +781,39 @@ class BrowsingMixin(MixinProtocol):
                 del response[k]
         return response
 
+    def get_song_album_id(self, videoId: str) -> str | None:
+        """
+        Get the album's browseId a song belongs to, if any.
+
+        :param videoId: Video id
+        :return: Album browseId (starting with ``MPREb_``) or ``None`` if no album was found.
+        """
+        response = self._send_request(
+            "next", {"videoId": videoId}
+        )
+        
+        menu_items = (
+            nav(
+                response,
+                [
+                    *SINGLE_COLUMN_WATCH_NEXT_TAB,
+                    *AUTOPLAY_ITEM_LIST,
+                    0,
+                    "playlistPanelVideoRenderer",
+                    *MENU_ITEMS,
+                ],
+                True,
+            )
+            or []
+        )
+        album_browse_id = None
+        for item in menu_items:
+            if nav(item, [MNIR, *ICON_TYPE], True) == "ALBUM":
+                album_browse_id = nav(item, MENU_BROWSE_ID, True)
+                break
+
+        return album_browse_id
+
     def get_song_related(self, browseId: str) -> JsonList:
         """
         Gets related content for a song. Equivalent to the content
