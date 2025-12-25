@@ -492,13 +492,13 @@ class BrowsingMixin(MixinProtocol):
             browse_id = matches.group().strip('"')
         return browse_id
 
-    def get_album(self, browseId: str, clean_songs: bool = False) -> JsonDict:
+    def get_album(self, browseId: str, audio_tracks_only: bool = False) -> JsonDict:
         """
         Get information and tracks of an album
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
-        :param clean_songs: Whether to return only YouTube Music audio tracks
+        :param audio_tracks_only: Whether to return only YouTube Music audio tracks
             (with album-style metadata and artwork) and exclude alternative video
             versions such as music videos, lyric videos, or extended cuts that may
             differ in title or content. Enabling this option requires an additional
@@ -575,7 +575,7 @@ class BrowsingMixin(MixinProtocol):
 
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         
-        if not clean_songs:
+        if not audio_tracks_only:
             album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
         else:
             urlCanonical: str | None = nav(response, ["microformat", "microformatDataRenderer", "urlCanonical"], True)
