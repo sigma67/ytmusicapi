@@ -499,12 +499,18 @@ class BrowsingMixin(MixinProtocol):
             browse_id = matches.group().strip('"')
         return browse_id
 
-    def get_album(self, browseId: str) -> JsonDict:
+    def get_album(self, browseId: str, audio_tracks_only: bool = False) -> JsonDict:
         """
         Get information and tracks of an album
 
         :param browseId: browseId of the album, for example
             returned by :py:func:`search`
+        :param audio_tracks_only: Whether to return only YouTube Music audio tracks
+            (with album-style metadata and artwork) and exclude alternative video
+            versions such as music videos, lyric videos, or extended cuts that may
+            differ in title or content. Enabling this option requires an additional
+            request to be made to YouTube Music and is therefore slower.
+            Default: False
         :return: Dictionary with album and track metadata.
 
         The result is in the following format::
@@ -575,8 +581,21 @@ class BrowsingMixin(MixinProtocol):
         album: JsonDict = parse_album_header_2024(response)
 
         results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
-        album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
-
+        
+        if not audio_tracks_only:
+            album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
+        else:
+            if album.get("audioPlaylistId"):
+                playlist = self._send_request("browse", {"browseId": "VL" + album["audioPlaylistId"]})
+                album["tracks"] = parse_playlist_items(nav(playlist, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, "musicPlaylistShelfRenderer", "contents"], True) or [])
+            else:
+                raise YTMusicError(
+                    "Could not retrieve audio playlist for album because the canonical URL "
+                    "metadata is missing. This can happen for some albums when requesting "
+                    "clean tracks (clean_songs=True). Try calling get_album again with "
+                    "clean_songs=False to fall back to the standard track listing."
+                )
+            
         secondary_carousels = (
             nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True) or []
         )
