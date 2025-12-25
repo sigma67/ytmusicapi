@@ -188,6 +188,11 @@ class TestBrowsing:
         assert variant["artists"][2] == {"id": "UCb7jnkQW94hzOoWkG14zs4w", "name": "D-Block Europe"}
         assert variant["audioPlaylistId"] is not None
 
+    def test_get_album_audio_tracks_only(self, yt):
+        album = yt.get_album("MPREb_jKN24KF3kFb", audio_tracks_only=True)
+        regular_album = yt.get_album("MPREb_jKN24KF3kFb", audio_tracks_only=False)
+        assert album["tracks"] != regular_album["tracks"]
+
     def test_get_song(self, config, yt, yt_oauth, sample_video):
         song = yt_oauth.get_song(config["uploads"]["private_upload_id"])  # private upload
         assert len(song) == 5
