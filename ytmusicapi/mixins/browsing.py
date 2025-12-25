@@ -578,10 +578,8 @@ class BrowsingMixin(MixinProtocol):
         if not audio_tracks_only:
             album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
         else:
-            urlCanonical: str | None = nav(response, ["microformat", "microformatDataRenderer", "urlCanonical"], True)
-            if urlCanonical:
-                playlistid = urlCanonical.split("list=")[-1]
-                playlist = self._send_request("browse", {"browseId": "VL" + playlistid})
+            if album.get("audioPlaylistId"):
+                playlist = self._send_request("browse", {"browseId": "VL" + album["audioPlaylistId"]})
                 album["tracks"] = parse_playlist_items(nav(playlist, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, "musicPlaylistShelfRenderer", "contents"], True) or [])
             else:
                 raise YTMusicError(
