@@ -139,7 +139,12 @@ class PlaylistsMixin(MixinProtocol):
 
         request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
         if playlistId.startswith("OLA") or playlistId.startswith("VLOLA"):
-            return parse_audio_playlist(response, limit, request_func_continuations)
+            # Try parsing as audio/album playlist - returns None if not all tracks have album info
+            # (e.g., chart playlists use OLAK prefix but contain music videos without album info)
+            result = parse_audio_playlist(response, limit, request_func_continuations)
+            if result is not None:
+                return result
+            # Fall through to regular playlist parsing
 
         header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
         section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
