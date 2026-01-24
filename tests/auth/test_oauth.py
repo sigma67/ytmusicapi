@@ -43,7 +43,7 @@ class TestOAuth:
         session_mock.return_value = Response()
         token_code = json.loads(config["auth"]["oauth_token"])
         json_mock.side_effect = [blank_code, token_code]
-        oauth_file = tempfile.NamedTemporaryFile(delete=False)
+        oauth_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding="utf-8")
         oauth_filepath = oauth_file.name
         with (
             mock.patch("builtins.input", return_value="y"),
@@ -81,7 +81,7 @@ class TestOAuth:
         assert yt_oauth._token is not None
 
         # set reference file
-        with open(oauth_filepath) as f:
+        with open(oauth_filepath, encoding="utf-8") as f:
             first_json = json.load(f)
 
         # pull reference values from underlying token
@@ -103,7 +103,7 @@ class TestOAuth:
         # check token is propagating properly
         assert second_token == second_token_inner
 
-        with open(oauth_filepath) as f2:
+        with open(oauth_filepath, encoding="utf-8") as f2:
             second_json = json.load(f2)
 
         # ensure token is updating local file
@@ -114,7 +114,7 @@ class TestOAuth:
     ):
         # ensure client works/ignores alt if browser credentials passed as auth
         assert yt_alt_oauth.auth_type != AuthType.OAUTH_CUSTOM_CLIENT
-        with open(oauth_filepath) as f:
+        with open(oauth_filepath, encoding="utf-8") as f:
             token_dict = json.load(f)
 
         # oauth token dict entry and alt
