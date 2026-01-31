@@ -39,6 +39,15 @@ def setup_browser(filepath: str | None = None, headers_raw: str | None = None) -
             if len(header) == 1:
                 if chrome_remembered_key:  # pragma: no cover
                     user_headers[chrome_remembered_key] = header[0]
+                    if not header[0].endswith(":") and (
+                        chrome_remembered_key != "Decoded" or header[0] == "}"
+                    ):
+                        # support chrome format with or without colons for headers
+                        # and handle corner case of "Decoded:" multi-line header
+                        chrome_remembered_key = ""
+                else:  # pragma: no cover
+                    # set key when header does not end in colon
+                    chrome_remembered_key = header[0]
                 continue
 
             user_headers[header[0].lower()] = ": ".join(header[1:])
