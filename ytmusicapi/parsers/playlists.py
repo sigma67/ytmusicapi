@@ -110,7 +110,6 @@ def parse_audio_playlist(
     content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
 
     playlist["id"] = nav(content_data, ["targetId"])
-    playlist["trackCount"] = nav(content_data, ["collapsedItemCount"])
 
     playlist["tracks"] = []
     if "contents" in content_data:
@@ -118,6 +117,8 @@ def parse_audio_playlist(
 
         parse_func: ParseFuncType = lambda contents: parse_playlist_items(contents)
         playlist["tracks"].extend(get_continuations_2025(content_data, limit, request_func, parse_func))
+
+    playlist["trackCount"] = len(playlist["tracks"])
 
     playlist["title"] = playlist["tracks"][0]["album"]["name"]
 

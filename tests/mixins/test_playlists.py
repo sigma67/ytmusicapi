@@ -70,6 +70,7 @@ class TestPlaylists:
     def test_get_large_audio_playlist(self, yt_oauth):
         album = yt_oauth.get_playlist("OLAK5uy_noLNRtYnrcRVVO9rOyGMx64XyjVSCz1YU", limit=500)
         assert len(album["tracks"]) == 456
+        assert album["trackCount"] == 456
 
     @pytest.mark.parametrize(
         "playlist_id",
