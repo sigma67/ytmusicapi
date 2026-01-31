@@ -19,6 +19,7 @@ class TestPlaylists:
             ("2024_03_get_playlist_public.json", "RDCLAK5uy_lWy02cQBnTVTlwuRauaGKeUDH3L6PXNxI"),
             ("2025_10_get_playlist_collaborative.json", "PLxyTaDz8f5PBc-8kE36gvB-eflhODG2dw"),
             ("2025_12_get_playlist_audio.json", "OLAK5uy_n0x1TMX8DL2eli2g_LysCSg-6Nq5YQa1g"),
+            ("2025_01_get_playlist_chart.json", "OLAK5uy_mzYnlaHgFOvLaxqIPnnouEr-idiUn4NIM"),
         ],
     )
     def test_get_playlist(self, yt, test_file, playlist_id):
