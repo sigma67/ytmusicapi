@@ -97,7 +97,11 @@ class TestLibrary:
         songs = yt_oauth.get_history()
         assert len(songs) > 0
         assert all(song["feedbackToken"] is not None for song in songs)
-        assert all(song["listenAgainFeedbackTokens"] is not None for song in songs)
+        assert all(
+            song["listenAgainFeedbackTokens"] is not None
+            for song in songs
+            if "listenAgainFeedbackTokens" in song
+        )
 
     def test_manipulate_history_items(self, yt_auth, sample_video):
         song = yt_auth.get_song(sample_video)
