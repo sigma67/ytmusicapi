@@ -1,5 +1,3 @@
-from urllib import response
-import requests
 from pathlib import Path
 
 from ytmusicapi.continuations import *
@@ -9,7 +7,6 @@ from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
-from ytmusicapi.constants import YTM_BASE_API
 
 from ._protocol import MixinProtocol
 from ._utils import *
@@ -466,14 +463,14 @@ class PlaylistsMixin(MixinProtocol):
         
         if not Path(filepath).is_file():
             raise YTMusicUserError(f"File {filepath} does not exist")         
-        
-        # Get uploaod_id by sending an empty request to the upload endpoint    
+                
         filesize = Path(filepath).stat().st_size
         if filesize >= 314572800:  # 300MB in bytes
             msg = f"File {filepath} has size {filesize} bytes, which is larger than the limit of 300MB"
             raise YTMusicUserError(msg)
         
-        headers = self.headers.copy()    
+        headers = self.headers.copy()  
+        # Get upload_url by sending an empty request to the upload endpoint      
         upload_url = "https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"                                   
         
         headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
