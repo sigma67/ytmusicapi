@@ -355,9 +355,7 @@ class PlaylistsMixin(MixinProtocol):
                         },
                         'playlistScottyEncryptedBlobId': blob_id
                     }
-                })
-            else:
-                return blob_id  # Return error response from thumbnail upload
+                })             
 
         body["actions"] = actions
         endpoint = "browse/edit_playlist"
@@ -498,8 +496,7 @@ class PlaylistsMixin(MixinProtocol):
         response = self._session.post(real_upload_url, headers=headers, data=img_data)
         response.raise_for_status()
         
-        result = response.json()            
-            
+        result = response.json()                        
         
         if "playlistScottyEncryptedBlobId" in result:
             return result["playlistScottyEncryptedBlobId"]
