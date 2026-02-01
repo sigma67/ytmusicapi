@@ -15,5 +15,6 @@ Reference for the YTMusic class.
    library
    playlists
    podcasts
+   profiles
    uploads
    api/modules
