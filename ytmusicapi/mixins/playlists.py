@@ -475,8 +475,7 @@ class PlaylistsMixin(MixinProtocol):
         
         headers = self.headers.copy()    
         upload_url = "https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"                                   
-
-        #headers.pop("content-encoding", None)
+        
         headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
         headers["X-Goog-Upload-Command"] = "start"
         headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
