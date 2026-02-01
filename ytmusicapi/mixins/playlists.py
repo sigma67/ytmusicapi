@@ -1,3 +1,7 @@
+from urllib import response
+import requests
+from pathlib import Path
+
 from ytmusicapi.continuations import *
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.helpers import sum_total_duration
@@ -5,6 +9,7 @@ from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
+from ytmusicapi.constants import YTM_BASE_API
 
 from ._protocol import MixinProtocol
 from ._utils import *
@@ -288,6 +293,7 @@ class PlaylistsMixin(MixinProtocol):
         moveItem: str | tuple[str, str] | None = None,
         addPlaylistId: str | None = None,
         addToTop: bool | None = None,
+        thumbnail: str | None = None,
     ) -> str | JsonDict:
         """
         Edit title, description or privacyStatus of a playlist.
@@ -302,6 +308,7 @@ class PlaylistsMixin(MixinProtocol):
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
             or the bottom of the playlist (if False - this is also the default of a new playlist).
+        :param thumbnail: Optional. Path to an image file to set as the playlist thumbnail
         :return: Status String or full response
         """
         self._check_auth()
@@ -333,10 +340,29 @@ class PlaylistsMixin(MixinProtocol):
 
         if addToTop is not None:
             actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop)})
+                    
+        if thumbnail:
+            # 2-step upload (Handshake + Upload)
+            blob_id = self._upload_playlist_thumbnail(thumbnail)
+            if blob_id:
+                actions.append({
+                    'action': 'ACTION_SET_CUSTOM_THUMBNAIL',
+                    'playlistId': playlistId,
+                    'addedCustomThumbnail': {
+                        'imageKey': {
+                            'type': 'PLAYLIST_IMAGE_TYPE_CUSTOM_THUMBNAIL',
+                            'name': 'studio_square_thumbnail'
+                        },
+                        'playlistScottyEncryptedBlobId': blob_id
+                    }
+                })
+            else:
+                return blob_id  # Return error response from thumbnail upload
 
         body["actions"] = actions
         endpoint = "browse/edit_playlist"
         response = self._send_request(endpoint, body)
+        
         return response["status"] if "status" in response else response
 
     def delete_playlist(self, playlistId: str) -> str | JsonDict:
@@ -430,3 +456,54 @@ class PlaylistsMixin(MixinProtocol):
         endpoint = "browse/edit_playlist"
         response = self._send_request(endpoint, body)
         return response["status"] if "status" in response else response
+    
+    def _upload_playlist_thumbnail(self, filepath: str) -> str | JsonDict:
+        """
+        Uploads a custom thumbnail for a Youtube Music playlist.
+
+        :param filepath: Path to the image file to upload
+        :return: Status String or full response
+        """
+        self._check_auth()     
+        
+        if not Path(filepath).is_file():
+            raise YTMusicUserError(f"File {filepath} does not exist")         
+        
+        # Get uploaod_id by sending an empty request to the upload endpoint    
+        filesize = Path(filepath).stat().st_size
+        if filesize >= 314572800:  # 300MB in bytes
+            msg = f"File {filepath} has size {filesize} bytes, which is larger than the limit of 300MB"
+            raise YTMusicUserError(msg)
+        
+        headers = self.headers.copy()    
+        upload_url = "https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"                                   
+
+        #headers.pop("content-encoding", None)
+        headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
+        headers["X-Goog-Upload-Command"] = "start"
+        headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
+        headers["X-Goog-Upload-Protocol"] = "resumable"
+        
+        response = self._session.post(upload_url, headers=headers, data={})
+        response.raise_for_status()                  
+        
+        real_upload_url = response.headers["X-Goog-Upload-URL"]
+        if not real_upload_url:
+            raise YTMusicUserError("Could not retrieve upload URL during handshake.")
+        
+        img_data = Path(filepath).read_bytes() 
+        headers["X-Goog-Upload-Command"] = "upload, finalize"
+        headers["X-Goog-Upload-Offset"] = "0"
+        
+        response = self._session.post(real_upload_url, headers=headers, data=img_data)
+        response.raise_for_status()
+        
+        result = response.json()            
+            
+        
+        if "playlistScottyEncryptedBlobId" in result:
+            return result["playlistScottyEncryptedBlobId"]
+        elif "encryptedBlobId" in result:
+            return result["encryptedBlobId"]
+        else:
+            raise YTMusicUserError("Upload failed: No blob ID in response.")
