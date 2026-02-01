@@ -38,6 +38,8 @@ perform library management:
 - ``feedbackTokens``: ``add``/``remove`` from library (refer to ``inLibrary`` for the current status)
 - ``listenAgainFeedbackTokens``: ``pin``/``unpin`` from the "Listen Again" carousel (refer to ``pinnedToListenAgain`` for the current status)
 
+.. warning:: Due to a YouTube Music bug, content might not be unpinned from "Listen Again".
+
 `get_history <reference/library.html#ytmusicapi.YTMusic.get_history>`__ items include ``feedbackToken``, which can be passed to
 `remove_history_items <reference/library.html#ytmusicapi.YTMusic.remove_history_items>`__.
 
