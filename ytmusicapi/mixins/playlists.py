@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from ytmusicapi.constants import YTM_DOMAIN
 from ytmusicapi.continuations import *
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.helpers import sum_total_duration
@@ -290,7 +291,7 @@ class PlaylistsMixin(MixinProtocol):
         moveItem: str | tuple[str, str] | None = None,
         addPlaylistId: str | None = None,
         addToTop: bool | None = None,
-        thumbnail: str | None = None,
+        thumbnail: Path | None = None,
     ) -> str | JsonDict:
         """
         Edit title, description or privacyStatus of a playlist.
@@ -471,7 +472,7 @@ class PlaylistsMixin(MixinProtocol):
         
         headers = self.headers.copy()  
         # Get upload_url by sending an empty request to the upload endpoint      
-        upload_url = "https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"                                   
+        upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"                                   
         
         headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
         headers["X-Goog-Upload-Command"] = "start"
