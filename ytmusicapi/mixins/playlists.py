@@ -473,8 +473,13 @@ class PlaylistsMixin(MixinProtocol):
         headers = self.headers.copy()  
         # Get upload_url by sending an empty request to the upload endpoint      
         upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"                                   
-        
-        headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
+                
+        # Clear Content-Type to avoid making server think we're sending form data
+        if "content-type" in headers:
+            del headers["content-type"]
+        if "Content-Type" in headers:
+            del headers["Content-Type"]
+            
         headers["X-Goog-Upload-Command"] = "start"
         headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
         headers["X-Goog-Upload-Protocol"] = "resumable"
