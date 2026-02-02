@@ -1,3 +1,4 @@
+import mimetypes
 from pathlib import Path
 
 from ytmusicapi.constants import YTM_DOMAIN
@@ -474,12 +475,12 @@ class PlaylistsMixin(MixinProtocol):
         # Get upload_url by sending an empty request to the upload endpoint      
         upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"                                   
                 
-        # Clear Content-Type to avoid making server think we're sending form data
-        if "content-type" in headers:
-            del headers["content-type"]
-        if "Content-Type" in headers:
-            del headers["Content-Type"]
-            
+        # Clear Content-Type to avoid making server think form data is being sent
+        content_type, _ = mimetypes.guess_type(filepath)
+        if not content_type:
+            content_type = "application/octet-stream"
+        
+        headers["Content-Type"] = content_type
         headers["X-Goog-Upload-Command"] = "start"
         headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
         headers["X-Goog-Upload-Protocol"] = "resumable"
