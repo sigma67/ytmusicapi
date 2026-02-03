@@ -1,5 +1,6 @@
-import mimetypes
 from pathlib import Path
+
+import requests
 
 from ytmusicapi.constants import YTM_DOMAIN
 from ytmusicapi.continuations import *
@@ -339,27 +340,28 @@ class PlaylistsMixin(MixinProtocol):
 
         if addToTop is not None:
             actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop)})
-                    
+
         if thumbnail:
             # 2-step upload (Handshake + Upload)
             blob_id = self._upload_playlist_thumbnail(thumbnail)
             if blob_id:
-                actions.append({
-                    'action': 'ACTION_SET_CUSTOM_THUMBNAIL',
-                    'playlistId': playlistId,
-                    'addedCustomThumbnail': {
-                        'imageKey': {
-                            'type': 'PLAYLIST_IMAGE_TYPE_CUSTOM_THUMBNAIL',
-                            'name': 'studio_square_thumbnail'
+                thumbnail_action: JsonDict = {
+                    "action": "ACTION_SET_CUSTOM_THUMBNAIL",
+                    "playlistId": playlistId,
+                    "addedCustomThumbnail": {
+                        "imageKey": {
+                            "type": "PLAYLIST_IMAGE_TYPE_CUSTOM_THUMBNAIL",
+                            "name": "studio_square_thumbnail",
                         },
-                        'playlistScottyEncryptedBlobId': blob_id
-                    }
-                })             
+                        "playlistScottyEncryptedBlobId": blob_id,
+                    },
+                }
+                actions.append(thumbnail_action)
 
         body["actions"] = actions
         endpoint = "browse/edit_playlist"
         response = self._send_request(endpoint, body)
-        
+
         return response["status"] if "status" in response else response
 
     def delete_playlist(self, playlistId: str) -> str | JsonDict:
@@ -453,59 +455,62 @@ class PlaylistsMixin(MixinProtocol):
         endpoint = "browse/edit_playlist"
         response = self._send_request(endpoint, body)
         return response["status"] if "status" in response else response
-    
-    def _upload_playlist_thumbnail(self, filepath: str) -> str | JsonDict:
+
+    def _upload_playlist_thumbnail(self, filepath: Path) -> str | JsonDict:
         """
         Uploads a custom thumbnail for a Youtube Music playlist.
 
         :param filepath: Path to the image file to upload
         :return: Status String or full response
         """
-        self._check_auth()     
-        
+        self._check_auth()
+
         if not Path(filepath).is_file():
-            raise YTMusicUserError(f"File {filepath} does not exist")         
-                
+            raise YTMusicUserError(f"File {filepath} does not exist")
+
         filesize = Path(filepath).stat().st_size
         if filesize >= 314572800:  # 300MB in bytes
             msg = f"File {filepath} has size {filesize} bytes, which is larger than the limit of 300MB"
             raise YTMusicUserError(msg)
-        
-        headers = self.headers.copy()  
-        headers.pop("content-encoding", None) 
-               
-        # Get upload_url by sending an empty request to the upload endpoint      
-        upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"                                   
-                
-        # Clear Content-Type to avoid making server think form data is being sent
-        content_type, _ = mimetypes.guess_type(filepath)
-        if not content_type:
-            content_type = "application/octet-stream"
+
+        headers = self.headers.copy()
+        headers.pop("content-encoding", None)
+
+        # Get upload_url by sending an empty request to the upload endpoint
+        upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"
+        content_type = "text/plain; charset=utf-8"
 
         headers["Content-Type"] = content_type
+        headers["origin"] = YTM_DOMAIN
         headers["X-Goog-Upload-Command"] = "start"
         headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
         headers["X-Goog-Upload-Protocol"] = "resumable"
-        
-        response = self._session.post(upload_url, headers=headers, data={})
-        response.raise_for_status()                  
-        
+
+        response = requests.post(upload_url, headers=headers, data=b"")
+        response.raise_for_status()
+
         real_upload_url = response.headers["X-Goog-Upload-URL"]
         if not real_upload_url:
             raise YTMusicUserError("Could not retrieve upload URL during handshake.")
-        
-        img_data = Path(filepath).read_bytes() 
+
+        # Remove the header-content-length
+        if "X-Goog-Upload-Header-Content-Length" in headers:
+            del headers["X-Goog-Upload-Header-Content-Length"]
+
+        img_data = Path(filepath).read_bytes()
+
+        headers["Content-Type"] = "text/html; charset=UTF-8"
         headers["X-Goog-Upload-Command"] = "upload, finalize"
         headers["X-Goog-Upload-Offset"] = "0"
-        
-        response = self._session.post(real_upload_url, headers=headers, data=img_data)
+
+        response = requests.post(real_upload_url, headers=headers, data=img_data)
         response.raise_for_status()
-        
-        result = response.json()                        
-        
+
+        result = response.json()
+
         if "playlistScottyEncryptedBlobId" in result:
-            return result["playlistScottyEncryptedBlobId"]
+            return str(result["playlistScottyEncryptedBlobId"])
         elif "encryptedBlobId" in result:
-            return result["encryptedBlobId"]
+            return str(result["encryptedBlobId"])
         else:
             raise YTMusicUserError("Upload failed: No blob ID in response.")
