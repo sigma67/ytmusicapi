@@ -472,6 +472,8 @@ class PlaylistsMixin(MixinProtocol):
             raise YTMusicUserError(msg)
         
         headers = self.headers.copy()  
+        headers.pop("content-encoding", None) 
+               
         # Get upload_url by sending an empty request to the upload endpoint      
         upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"                                   
                 
@@ -479,7 +481,7 @@ class PlaylistsMixin(MixinProtocol):
         content_type, _ = mimetypes.guess_type(filepath)
         if not content_type:
             content_type = "application/octet-stream"
-        
+
         headers["Content-Type"] = content_type
         headers["X-Goog-Upload-Command"] = "start"
         headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
