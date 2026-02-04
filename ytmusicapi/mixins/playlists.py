@@ -477,7 +477,10 @@ class PlaylistsMixin(MixinProtocol):
         headers.pop("content-encoding", None)
 
         # Get upload_url by sending an empty request to the upload endpoint
-        upload_url = YTM_DOMAIN + "/playlist_image_upload/playlist_custom_thumbnail"
+        upload_url = (
+            YTM_DOMAIN
+            + f"/playlist_image_upload/playlist_custom_thumbnail?authuser={headers['x-goog-authuser']}"
+        )
         content_type = "text/plain; charset=utf-8"
 
         headers["Content-Type"] = content_type
