@@ -150,6 +150,12 @@ class TestPlaylists:
         )
         assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
 
+    def test_edit_playlist_thumbnail(self, config, yt_oauth):
+        playlist = yt_oauth.get_playlist(config["playlists"]["own"])
+        image_path1 = Path(__file__).parent.parent / "data" / "mock_playlist_image.jpg"
+        response1 = yt_oauth.edit_playlist(playlist["id"], thumbnail=image_path1)
+        assert response1 == ResponseStatus.SUCCEEDED, "Playlist thumbnail edit failed"
+
     def test_create_playlist_invalid_title(self, yt_brand):
         with pytest.raises(YTMusicUserError, match="invalid characters"):
             yt_brand.create_playlist("test >", description="test")
