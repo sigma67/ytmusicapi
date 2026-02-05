@@ -115,7 +115,9 @@ class PlaylistsMixin(MixinProtocol):
         The setVideoId is the unique id of this playlist item and
         needed for moving/removing playlist items.
 
-        For playlists with voting enabled, tracks will contain ``voteStatus`` with a vote sort value.
+        For collaborative playlists with voting enabled, tracks will contain ``voteStatus``.
+        This is an internal sort value used by YouTube Music to order tracks by votes
+        (higher values appear first when sorted by votes). It is not a direct vote count.
 
         Collaborative playlists replace ``author`` with limited data about ``collaborators``::
             {

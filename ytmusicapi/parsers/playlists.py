@@ -150,12 +150,7 @@ def parse_playlist_item(
 ) -> JsonDict | None:
     videoId = setVideoId = None
     like = None
-    voteStatus = None
-
-    # Extract vote status from playlistItemData if present (for playlists with voting enabled)
-    if "playlistItemData" in data:
-        playlist_item_data = data["playlistItemData"]
-        voteStatus = playlist_item_data.get("voteSortValue")
+    voteStatus = nav(data, ["playlistItemData", "voteSortValue"], True)
 
     # if the item has a menu, find its setVideoId
     if "menu" in data:

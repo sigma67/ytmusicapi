@@ -48,6 +48,12 @@ class TestPlaylists:
                 if track["videoType"] == "MUSIC_VIDEO_TYPE_ATV":
                     assert isinstance(track["album"]["name"], str) and track["album"]["name"]
 
+            # Collaborative playlists should have voteStatus on tracks
+            if "collaborators" in playlist:
+                for track in playlist["tracks"]:
+                    assert "voteStatus" in track
+                    assert isinstance(track["voteStatus"], int)
+
     @pytest.mark.parametrize(
         "playlist_id, tracks_len, related_len",
         [
