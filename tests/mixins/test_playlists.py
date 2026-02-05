@@ -150,10 +150,10 @@ class TestPlaylists:
         )
         assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
 
-    def test_edit_playlist_thumbnail(self, config, yt_brand):
-        playlist = yt_brand.get_playlist(config["playlists"]["own"])
+    def test_edit_playlist_thumbnail(self, config, yt_oauth):
+        playlist = yt_oauth.get_playlist(config["playlists"]["own"])
         image_path1 = Path(__file__).parent.parent / "data" / "mock_playlist_image.jpg"
-        response1 = yt_brand.edit_playlist(playlist["id"], thumbnail=image_path1)
+        response1 = yt_oauth.edit_playlist(playlist["id"], thumbnail=image_path1)
         assert response1 == ResponseStatus.SUCCEEDED, "Playlist thumbnail edit failed"
 
     def test_create_playlist_invalid_title(self, yt_brand):
