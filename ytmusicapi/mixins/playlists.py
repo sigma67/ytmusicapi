@@ -107,12 +107,15 @@ class PlaylistsMixin(MixinProtocol):
                     "pin": "AB9zfpImL2k...",
                     "unpin": "AB9zfpJt6pA..."
                   },
+                  "voteStatus": 1759349873
 
               ]
             }
 
         The setVideoId is the unique id of this playlist item and
-        needed for moving/removing playlist items
+        needed for moving/removing playlist items.
+
+        For playlists with voting enabled, tracks will contain ``voteStatus`` with a vote sort value.
 
         Collaborative playlists replace ``author`` with limited data about ``collaborators``::
             {
