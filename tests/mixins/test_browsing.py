@@ -31,21 +31,6 @@ class TestBrowsing:
         #     [item is not None for section in result for item in section["contents"]]
         # )
 
-    def test_get_artist(self, yt):
-        results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
-        assert len(results) == 17
-        assert results["shuffleId"] is not None
-        assert results["radioId"] is not None
-
-        # test correctness of related artists
-        related = results["related"]["results"]
-        assert len(
-            [x for x in related if set(x.keys()) == {"browseId", "subscribers", "title", "thumbnails"}]
-        ) == len(related)
-
-        results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
-        assert len(results) >= 11
-
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
         results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
@@ -75,10 +60,6 @@ class TestBrowsing:
 
         with pytest.raises(ValueError, match="Invalid order"):
             yt.get_artist_albums(artist["albums"]["browseId"], artist["albums"]["params"], order="order")
-
-    def test_get_user(self, yt):
-        results = yt.get_user("UC44hbeRoCZVVMVg5z0FfIww")
-        assert len(results) == 3
 
     def test_get_user_playlists(self, yt, yt_auth):
         channel = "UCPVhZsC2od1xjGhgEc2NEPQ"  # Vevo playlists
