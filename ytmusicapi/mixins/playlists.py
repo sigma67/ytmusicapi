@@ -347,7 +347,6 @@ class PlaylistsMixin(MixinProtocol):
             if blob_id:
                 thumbnail_action: JsonDict = {
                     "action": "ACTION_SET_CUSTOM_THUMBNAIL",
-                    "playlistId": playlistId,
                     "addedCustomThumbnail": {
                         "imageKey": {
                             "type": "PLAYLIST_IMAGE_TYPE_CUSTOM_THUMBNAIL",
@@ -359,6 +358,7 @@ class PlaylistsMixin(MixinProtocol):
                 actions.append(thumbnail_action)
 
         body["actions"] = actions
+        body["playlistId"] = playlistId
         endpoint = "browse/edit_playlist"
         response = self._send_request(endpoint, body)
 
