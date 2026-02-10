@@ -481,6 +481,12 @@ class PlaylistsMixin(MixinProtocol):
             YTM_DOMAIN
             + f"/playlist_image_upload/playlist_custom_thumbnail?authuser={headers['x-goog-authuser']}"
         )
+        if (
+            "context" in self.context
+            and "user" in self.context["context"]
+            and "onBehalfOfUser" in self.context["context"]["user"]
+        ):
+            upload_url += f"&onBehalfOfUser={self.context['context']['user']['onBehalfOfUser']}"
         content_type = "text/plain; charset=utf-8"
 
         headers["Content-Type"] = content_type
