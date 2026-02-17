@@ -288,6 +288,7 @@ class PlaylistsMixin(MixinProtocol):
         moveItem: str | tuple[str, str] | None = None,
         addPlaylistId: str | None = None,
         addToTop: bool | None = None,
+        voting: int | None = None,
     ) -> str | JsonDict:
         """
         Edit title, description or privacyStatus of a playlist.
@@ -302,6 +303,7 @@ class PlaylistsMixin(MixinProtocol):
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
             or the bottom of the playlist (if False - this is also the default of a new playlist).
+        :param voting: Optional. Set voting mode using numeric itemVotePermission (values observed in web client payload).
         :return: Status String or full response
         """
         self._check_auth()
@@ -316,6 +318,12 @@ class PlaylistsMixin(MixinProtocol):
         if privacyStatus:
             actions.append({"action": "ACTION_SET_PLAYLIST_PRIVACY", "playlistPrivacy": privacyStatus})
 
+        if voting is not None:
+            actions.append({
+                "action": "ACTION_SET_ALLOW_ITEM_VOTE",
+                "itemVotePermission": voting
+            })
+
         if moveItem:
             action = {
                 "action": "ACTION_MOVE_VIDEO_BEFORE",
@@ -327,9 +335,6 @@ class PlaylistsMixin(MixinProtocol):
 
         if addPlaylistId:
             actions.append({"action": "ACTION_ADD_PLAYLIST", "addedFullListId": addPlaylistId})
-
-        if addToTop:
-            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": "true"})
 
         if addToTop is not None:
             actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop)})
