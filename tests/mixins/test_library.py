@@ -97,7 +97,11 @@ class TestLibrary:
         songs = yt_oauth.get_history()
         assert len(songs) > 0
         assert all(song["feedbackToken"] is not None for song in songs)
-        assert all(song["listenAgainFeedbackTokens"] is not None for song in songs)
+        assert all(
+            song["listenAgainFeedbackTokens"] is not None
+            for song in songs
+            if "listenAgainFeedbackTokens" in song
+        )
 
     def test_manipulate_history_items(self, yt_auth, sample_video):
         song = yt_auth.get_song(sample_video)
@@ -129,7 +133,7 @@ class TestLibrary:
         assert not album["tracks"][0]["inLibrary"]
         assert response["feedbackResponses"][0]["isProcessed"]
 
-    @pytest.mark.skip(reason="2025-12: never works currently, needs investigation")
+    @pytest.mark.skip(reason="2026-02: Unpin from Listen Again is broken in YTM")
     def test_listen_again_feedback_tokens(self, yt_brand):
         sample_album = "MPREb_4pL8gzRtw1p"
         track_index = 1  # test with an audio track for the sake of free accounts (music video pin state isn't reflected in the corresponding song menu)

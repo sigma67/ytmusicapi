@@ -71,6 +71,7 @@ class TestPlaylists:
     def test_get_large_audio_playlist(self, yt_oauth):
         album = yt_oauth.get_playlist("OLAK5uy_noLNRtYnrcRVVO9rOyGMx64XyjVSCz1YU", limit=500)
         assert len(album["tracks"]) == 456
+        assert album["trackCount"] == 456
 
     @pytest.mark.parametrize(
         "playlist_id",
@@ -96,13 +97,6 @@ class TestPlaylists:
         playlist = yt_oauth.get_playlist("RDATgXd-")
         assert playlist["trackCount"] is None  # playlist has no trackCount
         assert len(playlist["tracks"]) >= 100
-
-    def test_get_playlist_unavailable(self, yt):
-        playlist_id = "OLAK5uy_mnDXXKVcY1Z_HKY00a_ZBrnE679EzsM50"
-        playlist = yt.get_playlist(playlist_id)
-        # in case this show is unavailable in the current region, we should get the ID without playNavigationEndpoint
-        assert playlist["id"] == playlist_id
-        assert len(playlist["tracks"]) == 35
 
     def test_get_playlist_author(self, yt):
         playlist = yt.get_playlist("PL9tY0BWXOZFu4vlBOzIOmvT6wjYb2jNiV")

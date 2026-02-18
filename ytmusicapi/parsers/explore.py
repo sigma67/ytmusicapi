@@ -34,7 +34,7 @@ def parse_chart_episode(data: JsonDict) -> JsonDict:
     episode = parse_episode(data)
     del episode["index"]
     episode["podcast"] = parse_id_name(nav(data, ["secondTitle", "runs", 0]))
-    episode["duration"] = nav(data, SUBTITLE2, True)
+    episode["duration"] = nav(data, ["playbackProgress", *PROGRESS_RENDERER, *DURATION_TEXT], True)
     return episode
 
 

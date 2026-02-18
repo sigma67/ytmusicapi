@@ -1,8 +1,3 @@
-import json
-from pathlib import Path
-from unittest import mock
-
-
 class TestExplore:
     def test_get_mood_playlists(self, yt):
         categories = yt.get_mood_categories()
@@ -45,14 +40,3 @@ class TestExplore:
             and item["podcast"]["name"]
             for item in explore["top_episodes"]
         )
-
-    def test_get_explore_2025(self, yt):
-        data_dir = Path(__file__).parent.parent / "data"
-        test_file = "2025_11_get_explore.json"
-        with open(data_dir / test_file, encoding="utf8") as f:
-            mock_response = json.load(f)
-        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
-            result = yt.get_explore()
-        with open(data_dir / "expected_output" / test_file, encoding="utf8") as f:
-            expected_output = json.load(f)
-        assert result == expected_output

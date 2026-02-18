@@ -71,7 +71,7 @@ class OAuthToken(Token):
     @classmethod
     def from_json(cls, file_path: Path) -> "OAuthToken":
         if file_path.is_file():
-            with open(file_path) as json_file:
+            with open(file_path, encoding="utf-8") as json_file:
                 file_pack = json.load(json_file)
 
         return cls(**file_pack)
