@@ -94,14 +94,7 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
 
 def parse_audio_playlist(
     response: JsonDict, limit: int | None, request_func: RequestFuncBodyType
-) -> JsonDict | None:
-    """Parse an OLAK playlist as an audio/album playlist.
-
-    Returns None if the playlist doesn't have album info on all tracks,
-    indicating the caller should fall back to regular playlist parsing.
-    This handles cases like chart playlists that use OLAK prefix but contain
-    music videos without album info.
-    """
+) -> JsonDict:
     playlist: JsonDict = {
         "owned": False,
         "privacy": "PUBLIC",
@@ -126,11 +119,6 @@ def parse_audio_playlist(
         playlist["tracks"].extend(get_continuations_2025(content_data, limit, request_func, parse_func))
 
     playlist["trackCount"] = len(playlist["tracks"])
-
-    # Verify all tracks have album info - if not, this isn't an album playlist
-    # (e.g., chart playlists use OLAK prefix but contain music videos without album info)
-    if not playlist["tracks"] or not all(track.get("album") for track in playlist["tracks"]):
-        return None
 
     playlist["title"] = playlist["tracks"][0]["album"]["name"]
 
