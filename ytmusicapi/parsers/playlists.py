@@ -19,9 +19,14 @@ def parse_playlist_header(response: JsonDict) -> JsonDict:
     else:
         header = nav(response, HEADER_DETAIL, True)
         if header is None:
+            # Try twoColumnBrowseResultsRenderer first, then singleColumnBrowseResultsRenderer
             header = nav(
-                response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER]
+                response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER], True
             )
+            if header is None:
+                header = nav(
+                    response, [*SINGLE_COLUMN, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER], True
+                )
 
     playlist.update(parse_playlist_header_meta(header))
     if playlist["thumbnails"] is None:
@@ -106,7 +111,12 @@ def parse_audio_playlist(
         "related": [],
     }
 
-    section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+    # Try twoColumn first, fallback to singleColumn
+    section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION], True)
+    if section_list is None:
+        section_list = nav(response, [*SINGLE_COLUMN, *TAB_CONTENT, *SECTION], True)
+    if section_list is None:
+        section_list = nav(response, [*SINGLE_COLUMN, "secondaryContents", *SECTION])
     content_data = nav(section_list, [*CONTENT, "musicPlaylistShelfRenderer"])
 
     playlist["id"] = nav(content_data, ["targetId"])

@@ -137,7 +137,10 @@ class PodcastsMixin(MixinProtocol):
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        two_columns = nav(response, TWO_COLUMN_RENDERER)
+        # Try twoColumn first, fallback to singleColumn
+        two_columns = nav(response, TWO_COLUMN_RENDERER, True)
+        if two_columns is None:
+            two_columns = nav(response, SINGLE_COLUMN)
         header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
         podcast: JsonDict = parse_podcast_header(header)
 
@@ -220,7 +223,10 @@ class PodcastsMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
 
-        two_columns = nav(response, TWO_COLUMN_RENDERER)
+        # Try twoColumn first, fallback to singleColumn
+        two_columns = nav(response, TWO_COLUMN_RENDERER, True)
+        if two_columns is None:
+            two_columns = nav(response, SINGLE_COLUMN)
         header = nav(two_columns, [*TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
         episode = parse_episode_header(header)
 
@@ -249,7 +255,16 @@ class PodcastsMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         playlist = parse_playlist_header(response)
 
-        results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
+        # Try twoColumn first, fallback to singleColumn
+        results = nav(
+            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF], True
+        )
+        if results is None:
+            results = nav(
+                response, [*SINGLE_COLUMN, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF], True
+            )
+        if results is None:
+            results = nav(response, [*SINGLE_COLUMN, *TAB_CONTENT, *SECTION_LIST_ITEM, *MUSIC_SHELF])
         parse_func: ParseFuncType = lambda contents: parse_content_list(contents, parse_episode, MMRIR)
         playlist["episodes"] = parse_func(results["contents"])
 
