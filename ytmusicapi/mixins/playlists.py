@@ -138,7 +138,9 @@ class PlaylistsMixin(MixinProtocol):
         response = request_func("")
 
         request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
-        if playlistId.startswith("OLA") or playlistId.startswith("VLOLA"):
+        is_ola = playlistId.startswith("OLA") or playlistId.startswith("VLOLA")
+        has_playlist_header = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM], True)
+        if is_ola and not has_playlist_header:
             return parse_audio_playlist(response, limit, request_func_continuations)
 
         header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])

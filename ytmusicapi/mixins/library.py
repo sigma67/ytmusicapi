@@ -375,11 +375,15 @@ class LibraryMixin(MixinProtocol):
 
     def edit_song_library_status(self, feedbackTokens: list[str] | None = None) -> JsonDict:
         """
-        Adds or removes a song from your library depending on the token provided.
+        Depending on the provided tokens:
+        - Adds or removes songs from your library
+        - Pins or unpins content from the "Listen Again" carousel
 
         :param feedbackTokens: List of feedbackTokens obtained from authenticated requests
             to endpoints that return songs (i.e. :py:func:`get_album`)
         :return: Full response
+
+        .. warning:: Due to a YouTube Music bug, content might not be unpinned from "Listen Again".
         """
         self._check_auth()
         body = {"feedbackTokens": feedbackTokens}
