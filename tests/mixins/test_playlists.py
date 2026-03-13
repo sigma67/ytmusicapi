@@ -55,7 +55,7 @@ class TestPlaylists:
             ("RDCLAK5uy_nfjzC9YC1NVPPZHvdoAtKVBOILMDOuxOs", 200, 10),
             ("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", 200, 0),  # no related tracks
             ("PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u", 1000, 10),  # very large
-            ("PL5ZNf-B8WWSZFIvpJWRjgt7iRqWT7_KF1", 10, 10),  # track duration > 1k hours
+            ("PLf6FAPI9j8OOAwvsj_FdO5tyd0GcPLnkm", 200, 0),  # track duration > 1k hours
         ],
     )
     def test_get_playlist_foreign(self, yt_oauth, playlist_id, tracks_len, related_len):
