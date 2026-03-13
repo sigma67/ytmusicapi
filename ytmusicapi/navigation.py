@@ -101,6 +101,14 @@ TIMESTAMPED_LYRICS = [
     "timedLyricsModel",
     "lyricsData",
 ]
+CREDITS_SECTIONS = [
+    "onResponseReceivedActions",
+    0,
+    "openPopupAction",
+    "popup",
+    "dismissableDialogRenderer",
+    "sections",
+]
 
 
 @overload
