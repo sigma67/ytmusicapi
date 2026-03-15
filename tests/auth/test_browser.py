@@ -20,6 +20,7 @@ def _validate_headers(headers_json_as_str):
 
 class TestBrowser:
     def test_setup_browser(self, config, browser_filepath: str):
+        # Creates a browser.json that gets used for subsequent tests
         headers = ytmusicapi.setup(browser_filepath, config["auth"]["headers_raw"])
         assert len(headers) >= 2
         headers_raw = config["auth"]["headers_raw"].split("\n")
@@ -34,7 +35,10 @@ class TestBrowser:
         "raw_headers_path",
         ["raw_chrome_headers.txt", "raw_firefox_headers.txt"],
     )
-    def test_setup_browser_from_headers(self, browser_filepath: str, raw_headers_path):
+    def test_setup_browser_multiple_formats(self, tmp_path, raw_headers_path):
+        # Temp browser.json -- does not collide with browser.json from prev test
+        browser_filepath = str(tmp_path / "browser.json")
+
         data_dir = Path(__file__).parent.parent / "data"
         with open(data_dir / raw_headers_path, encoding="utf8") as f:
             raw_headers = f.read()
