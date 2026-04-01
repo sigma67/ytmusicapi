@@ -98,3 +98,7 @@ def sum_total_duration(item: JsonDict) -> int:
             for track in item["tracks"]
         ]
     )
+
+
+def format_markdown_link(desc: str, link: str):
+    return f"[{desc}]({link})"

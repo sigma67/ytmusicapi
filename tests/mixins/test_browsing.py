@@ -46,6 +46,34 @@ class TestBrowsing:
         results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         assert len(results) >= 11
 
+    def test_get_artist_description(self, yt):
+        with open(Path(__file__).parent.parent / "data" / "2026_04_get_artist1.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            Path(__file__).parent.parent / "data" / "expected_output" / "2026_04_get_artist1.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCJwGWV914kBlV4dKRn7AEFA")
+            assert result["description"] == expected_output["description"]
+
+        with open(Path(__file__).parent.parent / "data" / "2026_04_get_artist2.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            Path(__file__).parent.parent / "data" / "expected_output" / "2026_04_get_artist2.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UC5CwaMl1eIgY8h02uZw7u8A")
+            print(f"result is {result['description']}")
+            assert result["description"] == expected_output["description"]
+
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
         results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
