@@ -6,7 +6,7 @@ from ytmusicapi.continuations import (
     get_continuations,
     get_reloadable_continuation_params,
 )
-from ytmusicapi.helpers import YTM_DOMAIN, format_markdown_link, sum_total_duration
+from ytmusicapi.helpers import YTM_DOMAIN, parse_description, sum_total_duration
 from ytmusicapi.models.lyrics import LyricLine, Lyrics, TimedLyrics
 from ytmusicapi.parsers.albums import parse_album_header_2024
 from ytmusicapi.parsers.browsing import (
@@ -257,7 +257,7 @@ class BrowsingMixin(MixinProtocol):
         artist["name"] = nav(header, TITLE_TEXT)
         descriptionShelf = find_object_by_key(results, DESCRIPTION_SHELF[0], is_key=True)
         if descriptionShelf:
-            artist["description"] = self.parse_description(nav(descriptionShelf, ARTIST_DESCRIPTION))
+            artist["description"] = parse_description(nav(descriptionShelf, DESCRIPTION_RUN_LIST))
             artist["views"] = (
                 None
                 if "subheader" not in descriptionShelf
@@ -1041,20 +1041,3 @@ class BrowsingMixin(MixinProtocol):
 
         body = {"browseId": "FEmusic_home", "formData": formData}
         self._send_request("browse", body)
-
-    def parse_description(self, descriptionRunsList: list[dict]):
-        if not isinstance(descriptionRunsList, list):
-            return ""
-
-        description = ""
-        for run in descriptionRunsList:
-            if "navigationEndpoint" in run:
-                link = nav(run, ["navigationEndpoint", "urlEndpoint", "url"])
-                desc = run["text"]
-
-                description += format_markdown_link(desc=desc, link=link)
-                continue
-
-            description += run["text"]
-
-        return description

@@ -6,11 +6,13 @@ import unicodedata
 from collections.abc import Callable
 from hashlib import sha1
 from http.cookies import SimpleCookie
+from typing import Any
 
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.constants import *
+from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import JsonDict
 
 
@@ -100,5 +102,23 @@ def sum_total_duration(item: JsonDict) -> int:
     )
 
 
-def format_markdown_link(desc: str, link: str):
+def parse_description(descriptionRunsList: Any | None) -> str:
+    if not isinstance(descriptionRunsList, list):
+        return ""
+
+    description = ""
+    for run in descriptionRunsList:
+        if "navigationEndpoint" in run:
+            link = nav(run, ["navigationEndpoint", "urlEndpoint", "url"])
+            desc = run["text"]
+
+            description += format_markdown_link(desc=desc, link=link)
+            continue
+
+        description += run["text"]
+
+    return description
+
+
+def format_markdown_link(desc: str, link: str) -> str:
     return f"[{desc}]({link})"
