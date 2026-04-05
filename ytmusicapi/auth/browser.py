@@ -16,7 +16,7 @@ def setup_browser(filepath: str | None = None, headers_raw: str | None = None) -
     contents = []
     if not headers_raw:
         eof = "Ctrl-D" if platform.system() != "Windows" else "'Enter, Ctrl-Z, Enter'"
-        print(f"Please paste the request headers from Firefox and press {eof} to continue:")
+        print(f"Please paste the request headers from Firefox or Chrome/Edge and press {eof} to continue:")
         while True:
             try:
                 line = input()
