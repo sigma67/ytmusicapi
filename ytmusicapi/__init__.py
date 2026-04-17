@@ -4,6 +4,7 @@ from ytmusicapi.auth.oauth.credentials import OAuthCredentials
 from ytmusicapi.models.content.enums import LikeStatus
 from ytmusicapi.setup import setup, setup_oauth
 from ytmusicapi.ytmusic import YTMusic
+from ytmusicapi.async_ytmusic import AsyncYTMusic
 
 try:
     __version__ = version("ytmusicapi")
