@@ -71,7 +71,7 @@ class AsyncYTMusicBase(YTMusicBase):
     def _prepare_session(self, async_client: httpx.AsyncClient | None) -> requests.Session:
         """
             Prepare a httpx AsyncClient or use the user-provided client
-            Note httpx async client cannot change the proxy per request similar to the requests module in order to change the module will need to destroy old object and create a new one
+            Note httpx async client cannot change the proxy per request similar to the requests module in order to change the proxy will need to destroy old object and create a new one
         """
         if isinstance(async_client, httpx.AsyncClient):
             return async_client
@@ -120,16 +120,8 @@ class AsyncYTMusicBase(YTMusicBase):
 
 
 class AsyncYTMusic(
-    YTMusicBase,
+    AsyncYTMusicBase,
     BrowsingMixin,
-    SearchMixin,
-    WatchMixin,
-    ChartsMixin,
-    ExploreMixin,
-    LibraryMixin,
-    PlaylistsMixin,
-    PodcastsMixin,
-    UploadsMixin,
 ):
     """
     Allows automated interactions with YouTube Music by emulating the YouTube web client's requests.
