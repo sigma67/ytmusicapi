@@ -1,9 +1,7 @@
-name: Code coverage
+name: Code coverage (PR)
 
 on:
-  push:
-    branches:
-      - main
+  pull_request_target:
     paths:
       - ytmusicapi/**
       - tests/**
@@ -13,12 +11,17 @@ permissions: {}
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Static environment name — GitHub reliably enforces required reviewers here.
+    # Configure the 'coverage' environment in Settings → Environments with
+    # required reviewers and "Allow self-reviews" to gate this job on PRs.
+    environment: coverage
     permissions:
       contents: read
     steps:
     - name: Checkout repository
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
+        ref: ${{ github.event.pull_request.head.sha }}
         persist-credentials: false
         fetch-depth: 1
     - name: Setup Python
