@@ -17,22 +17,28 @@ permissions: {}
 jobs:
   build:
     runs-on: ubuntu-latest
+    # For pull_request_target, requires maintainer approval via the 'coverage'
+    # environment before the job runs and secrets are exposed.
+    environment: ${{ github.event_name == 'pull_request_target' && 'coverage' || '' }}
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@master
+    - name: Checkout repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
         ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
+        fetch-depth: 1
     - name: Setup Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
         python-version: "3.10"
     - name: Setup PDM
-      uses: pdm-project/setup-pdm@v4
-    - name: create-json
-      uses: jsdaniell/create-json@v1.2.3
-      with:
-        name: "oauth.json"
-        dir: "tests/"
-        json: ${{ secrets.OAUTH_JSON }}
+      uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0  # v4.4
+    - name: Write OAuth credentials
+      env:
+        OAUTH_JSON: ${{ secrets.OAUTH_JSON }}
+      run: printf '%s\n' "$OAUTH_JSON" > tests/oauth.json
     - name: Install dependencies
       run: pdm install
     - name: Generate coverage report
@@ -40,13 +46,13 @@ jobs:
         HEADERS_AUTH: ${{ secrets.HEADERS_AUTH }}
         TEST_CFG: ${{ secrets.TEST_CFG }}
       run: |
-        curl -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
-        cat <<< "$HEADERS_AUTH" > tests/browser.json
-        cat <<< "$TEST_CFG" > tests/test.cfg
+        curl -fsSL -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
+        printf '%s\n' "$HEADERS_AUTH" > tests/browser.json
+        printf '%s\n' "$TEST_CFG" > tests/test.cfg
         pdm run pytest --junitxml=test-results.xml
         pdm run coverage xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe  # v5.5.4
       if: ${{ !cancelled() }}
       with:
         flags: unittests
@@ -54,7 +60,7 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
     - name: Upload test results to Codecov
       if: ${{ !cancelled() }}
-      uses: codecov/test-results-action@v1
+      uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3  # v1.2.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: test-results.xml
