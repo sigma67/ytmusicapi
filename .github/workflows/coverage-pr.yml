@@ -11,9 +11,10 @@ permissions: {}
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Static environment name — GitHub reliably enforces required reviewers here.
-    # Configure the 'coverage' environment in Settings → Environments with
-    # required reviewers and "Allow self-reviews" to gate this job on PRs.
+    # Requires maintainer approval via the 'coverage' environment before the job
+    # runs and secrets are exposed. Configure in Settings → Environments →
+    # coverage → Required reviewers. Enable "Prevent administrators from
+    # bypassing configured protection rules" to enforce this for admins too.
     environment: coverage
     permissions:
       contents: read
