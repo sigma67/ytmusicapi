@@ -12,6 +12,8 @@ on:
       - ytmusicapi/**
       - tests/**
 
+permissions: {}
+
 jobs:
   build:
     runs-on: ubuntu-latest
