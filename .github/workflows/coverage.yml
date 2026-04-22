@@ -7,18 +7,29 @@ on:
     paths:
       - ytmusicapi/**
       - tests/**
+  pull_request_target:
+    paths:
+      - ytmusicapi/**
+      - tests/**
 
 permissions: {}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # For pull_request_target events, requires maintainer approval via the
+    # 'coverage' environment before the job runs and secrets are exposed.
+    # Configure in Settings → Environments → coverage → Required reviewers.
+    # Enable "Prevent administrators from bypassing configured protection rules"
+    # to enforce this for admins too.
+    environment: ${{ github.event_name != 'push' && 'coverage' || '' }}
     permissions:
       contents: read
     steps:
     - name: Checkout repository
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
         persist-credentials: false
         fetch-depth: 1
     - name: Setup Python
