@@ -65,8 +65,12 @@ def parse_content_list(results: JsonList, parse_func: ParseFuncDictType, key: st
 def parse_album(result: JsonDict) -> JsonDict:
     album = {
         "title": nav(result, TITLE_TEXT),
-        "type": nav(result, SUBTITLE),
-        "artists": [parse_id_name(x) for x in nav(result, ["subtitle", "runs"]) if "navigationEndpoint" in x],
+        "type": nav(result, SUBTITLE, True),
+        "artists": [
+            parse_id_name(x)
+            for x in (nav(result, ["subtitle", "runs"], True) or [])
+            if "navigationEndpoint" in x
+        ],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
         "audioPlaylistId": parse_album_playlistid_if_exists(nav(result, THUMBNAIL_OVERLAY_NAVIGATION, True)),
         "thumbnails": nav(result, THUMBNAIL_RENDERER),
