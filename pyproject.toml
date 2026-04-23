@@ -10,6 +10,7 @@ classifiers = [
 ]
 dependencies = [
     "requests >= 2.22",
+    "typing_extensions >= 4.3.0",
 ]
 dynamic = ["version", "readme"]
 
