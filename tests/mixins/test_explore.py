@@ -8,7 +8,7 @@ class TestExplore:
         assert len(playlists) > 0
 
     def test_get_explore(self, yt, yt_oauth):
-        assert len(yt.get_explore()) == 5
+        assert len(yt.get_explore()) == 4
 
         explore = yt_oauth.get_explore()
         assert len(explore) >= 5
@@ -32,11 +32,12 @@ class TestExplore:
             for item in explore["trending"]["items"]
         )
 
-        assert all(
-            item["videoId"]
-            and item["videoType"]
-            and item["duration"]
-            and item["podcast"]["id"]
-            and item["podcast"]["name"]
-            for item in explore["top_episodes"]
-        )
+        # sigma67 2026-04-23: Commenting out top_episodes check since it's missing on Explore page.
+        # assert all(
+        #     item["videoId"]
+        #     and item["videoType"]
+        #     and item["duration"]
+        #     and item["podcast"]["id"]
+        #     and item["podcast"]["name"]
+        #     for item in explore["top_episodes"]
+        # )
