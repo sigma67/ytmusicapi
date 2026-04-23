@@ -1,6 +1,5 @@
 import json
 import warnings
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -46,12 +45,12 @@ class TestBrowsing:
         results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         assert len(results) >= 11
 
-    def test_get_artist_description(self, yt):
-        with open(Path(__file__).parent.parent / "data" / "2026_04_get_artist1.json", encoding="utf8") as f:
+    def test_get_artist_description(self, yt, data_path):
+        with open(data_path / "2026_04_get_artist1.json", encoding="utf8") as f:
             mock_response = json.load(f)
 
         with open(
-            Path(__file__).parent.parent / "data" / "expected_output" / "2026_04_get_artist1.json",
+            data_path / "expected_output" / "2026_04_get_artist1.json",
             encoding="utf8",
         ) as f:
             expected_output = json.load(f)
@@ -60,11 +59,11 @@ class TestBrowsing:
             result = yt.get_artist("UCJwGWV914kBlV4dKRn7AEFA")
             assert result["description"] == expected_output["description"]
 
-        with open(Path(__file__).parent.parent / "data" / "2026_04_get_artist2.json", encoding="utf8") as f:
+        with open(data_path / "2026_04_get_artist2.json", encoding="utf8") as f:
             mock_response = json.load(f)
 
         with open(
-            Path(__file__).parent.parent / "data" / "expected_output" / "2026_04_get_artist2.json",
+            data_path / "expected_output" / "2026_04_get_artist2.json",
             encoding="utf8",
         ) as f:
             expected_output = json.load(f)
@@ -134,8 +133,8 @@ class TestBrowsing:
         escaped_browse_id = yt.get_album_browse_id("OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
         assert len(escaped_browse_id) == 17
 
-    def test_get_album_2024(self, yt):
-        with open(Path(__file__).parent.parent / "data" / "2024_03_get_album.json", encoding="utf8") as f:
+    def test_get_album_2024(self, yt, data_path):
+        with open(data_path / "2024_03_get_album.json", encoding="utf8") as f:
             mock_response = json.load(f)
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
             album = yt.get_album("MPREabc")
@@ -175,12 +174,12 @@ class TestBrowsing:
         assert album["tracks"][12]["trackNumber"] is None
         assert not album["tracks"][12]["isAvailable"]
 
-    def test_get_album_with_description_contain_link(self, yt):
-        with open(Path(__file__).parent.parent / "data" / "2026_04_get_album.json", encoding="utf8") as f:
+    def test_get_album_with_description_contain_link(self, yt, data_path):
+        with open(data_path / "2026_04_get_album.json", encoding="utf8") as f:
             mock_response = json.load(f)
 
         with open(
-            Path(__file__).parent.parent / "data" / "expected_output" / "2026_04_get_album.json",
+            data_path / "expected_output" / "2026_04_get_album.json",
             encoding="utf8",
         ) as f:
             expected_output = json.load(f)
