@@ -23,3 +23,10 @@ class VideoType(str, Enum):
     UGC = "MUSIC_VIDEO_TYPE_UGC"
     ATV = "MUSIC_VIDEO_TYPE_ATV"
     OFFICIAL_SOURCE_MUSIC = "MUSIC_VIDEO_TYPE_OFFICIAL_SOURCE_MUSIC"
+
+
+class PlaylistSortOrder(Enum):
+    MANUAL = 0
+    NEWEST_FIRST = 1
+    NEWEST_LAST = 2
+    TOP_VOTED = 6
