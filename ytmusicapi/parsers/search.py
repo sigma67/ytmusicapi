@@ -128,9 +128,7 @@ def parse_search_result(data: JsonDict, result_type: str | None, category: str |
     elif result_type == "playlist":
         flex_item = nav(get_flex_column_item(data, 1), TEXT_RUNS)
         has_author = len(flex_item) == default_offset + 3
-        search_result["itemCount"] = (get_item_text(data, 1, default_offset + has_author * 2) or "").split(
-            " "
-        )[0]
+        search_result["itemCount"] = (get_item_text(data, 1, has_author * 2) or "").split(" ")[0]
         if search_result["itemCount"] and search_result["itemCount"].isnumeric():
             search_result["itemCount"] = to_int(search_result["itemCount"])
         search_result["author"] = None if not has_author else get_item_text(data, 1, default_offset)
