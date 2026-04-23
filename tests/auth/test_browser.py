@@ -21,7 +21,6 @@ def _validate_headers(headers_json_as_str):
 class TestBrowser:
     def test_setup_browser(self, config, tmp_path):
         # Creates a browser.json that gets used for subsequent tests
-        headers = ytmusicapi.setup(tmp_path, config["auth"]["headers_raw"])
         headers_raw = config["auth"]["headers_raw"]
         tmp_file = str(tmp_path / "browser.json")
         headers = ytmusicapi.setup(tmp_file, headers_raw)
