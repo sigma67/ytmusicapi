@@ -1,6 +1,5 @@
 import json
 import time
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -22,11 +21,10 @@ class TestPlaylists:
             ("2025_01_get_playlist_chart.json", "OLAK5uy_mzYnlaHgFOvLaxqIPnnouEr-idiUn4NIM"),
         ],
     )
-    def test_get_playlist(self, yt, test_file, playlist_id):
-        data_dir = Path(__file__).parent.parent / "data"
-        with open(data_dir / test_file, encoding="utf8") as f:
+    def test_get_playlist(self, yt, test_file, playlist_id, data_path):
+        with open(data_path / test_file, encoding="utf8") as f:
             mock_response = json.load(f)
-        with open(data_dir / "expected_output" / test_file, encoding="utf8") as f:
+        with open(data_path / "expected_output" / test_file, encoding="utf8") as f:
             expected_output = json.load(f)
 
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
