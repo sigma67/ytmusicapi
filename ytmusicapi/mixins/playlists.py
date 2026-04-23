@@ -110,7 +110,7 @@ class PlaylistsMixin(MixinProtocol):
                     "pin": "AB9zfpImL2k...",
                     "unpin": "AB9zfpJt6pA..."
                   },
-
+                  "creditsBrowseId": "MPTCekz1IJ9I0sw"
               ]
             }
 

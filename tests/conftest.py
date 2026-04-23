@@ -73,3 +73,9 @@ def fixture_yt_brand(config) -> YTMusic:
 @pytest.fixture(name="yt_empty")
 def fixture_yt_empty(config) -> YTMusic:
     return YTMusic(config["auth"]["headers_empty"], config["auth"]["brand_account_empty"])
+
+
+@pytest.fixture(name="sample_credits")
+def fixture_sample_credits() -> str:
+    """KANGTA - The Cure"""
+    return "MPTCJpKLGcWBJ5Y"
