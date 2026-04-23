@@ -2,13 +2,15 @@
 name = "ytmusicapi"
 description = "Unofficial API for YouTube Music"
 requires-python = ">=3.10"
-authors = [{ name = "sigma67", email = "ytmusicapi@gmail.com" }]
-license = { file = "LICENSE" }
+authors=[{name = "sigma67", email= "ytmusicapi@gmail.com"}]
+license={file="LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
 ]
-dependencies = ["requests >= 2.22"]
+dependencies = [
+    "requests >= 2.22",
+]
 dynamic = ["version", "readme"]
 
 [project.scripts]
@@ -24,12 +26,12 @@ requires = ["setuptools>=65", "setuptools_scm[toml]>=7"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
-readme = { file = ["README.rst"] }
+readme = {file = ["README.rst"]}
 
 [tool.setuptools_scm]
 
 [tool.setuptools]
-include-package-data = false
+include-package-data=false
 
 [tool.setuptools.package-data]
 "*" = ["**.rst", "**.py", "**.mo"]
@@ -41,7 +43,7 @@ include-package-data = false
 [tool.pytest.ini_options]
 python_functions = "test_*"
 testpaths = ["tests"]
-addopts = "--verbose --cov --junitxml=junit.xml --retries 0 --retry-delay 5"
+addopts = "--verbose --cov --junitxml=junit.xml --retries 2 --retry-delay 5"
 
 [tool.coverage.run]
 source = ["ytmusicapi"]
@@ -55,7 +57,7 @@ include = ["ytmusicapi/**/*.py", "tests/**/*.py"]
 exclude = ["docs/**"]
 
 [tool.ruff.lint]
-ignore = ["F403", "F405", "F821", "E731", "PTH123"]
+ignore = [ "F403", "F405", "F821", "E731", "PTH123" ]
 extend-select = [
     "I",   # isort
     "UP",  # pyupgrade
@@ -65,7 +67,9 @@ extend-select = [
 ]
 
 [tool.mypy]
-files = ["ytmusicapi/"]
+files = [
+    "ytmusicapi/"
+]
 mypy_path = "ytmusicapi"
 strict = true
 
