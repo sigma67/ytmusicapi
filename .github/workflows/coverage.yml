@@ -50,12 +50,12 @@ jobs:
         TEST_CFG: ${{ secrets.TEST_CFG }}
       run: |
         curl -fsSL -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
-        printf '%s\n' "$HEADERS_AUTH" > tests/browser.json
-        printf '%s\n' "$TEST_CFG" > tests/test.cfg
+        cat <<< "$HEADERS_AUTH" > tests/browser.json
+        cat <<< "$TEST_CFG" > tests/test.cfg
         pdm run pytest --junitxml=test-results.xml
         pdm run coverage xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe  # v5.5.4
+      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6.0.0
       if: ${{ !cancelled() }}
       with:
         flags: unittests
