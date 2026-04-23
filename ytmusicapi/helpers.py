@@ -48,7 +48,6 @@ def get_visitor_id(request_func: Callable[[str], Response]) -> dict[str, str]:
         visitor_id = ytcfg.get("VISITOR_DATA")
     return {"X-Goog-Visitor-Id": visitor_id}
 
-
 def sapisid_from_cookie(raw_cookie: str) -> str:
     cookie = SimpleCookie()
     cookie.load(raw_cookie.replace('"', ""))
