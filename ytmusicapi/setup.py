@@ -61,7 +61,6 @@ def parse_args(args: list[str]) -> argparse.Namespace:
         version=f"ytmusicapi {importlib.metadata.version('ytmusicapi')}",
         help="Installed version of ytmusicapi",
     )
-    # parser.add_argument("setup_type", type=str, choices=["oauth", "browser"], help="choose a setup type.")
     subparsers = parser.add_subparsers(help="choose a setup type.", dest="setup_type", required=True)
     oauth_parser = subparsers.add_parser(
         "oauth",
