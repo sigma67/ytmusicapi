@@ -209,6 +209,7 @@ class BrowsingMixin(MixinProtocol):
                         {
                             "title": "Stand By Me (Mustique Demo)",
                             "thumbnails": [...],
+                            "type": "Single",
                             "year": "2016",
                             "browseId": "MPREb_7MPKLhibN5G"
                         }
