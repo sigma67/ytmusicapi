@@ -94,7 +94,7 @@ class YTMusicBase:
         self._session = self._prepare_session(requests_session)
         self.proxies: dict[str, str] | None = proxies  #: params for session modification
         # see google cookie docs: https://policies.google.com/technologies/cookies
-        # value from https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L502
+        # value from https://github.com/yt-dlp/yt-dlp/blob/2023.09.24/yt_dlp/extractor/youtube.py#L502
         self.cookies = {"SOCS": "CAI"}
 
         self._auth_headers: CaseInsensitiveDict[str] = CaseInsensitiveDict[str]()

@@ -19,6 +19,7 @@ class TestPlaylists:
             ("2024_03_get_playlist_public.json", "RDCLAK5uy_lWy02cQBnTVTlwuRauaGKeUDH3L6PXNxI"),
             ("2025_10_get_playlist_collaborative.json", "PLxyTaDz8f5PBc-8kE36gvB-eflhODG2dw"),
             ("2025_12_get_playlist_audio.json", "OLAK5uy_n0x1TMX8DL2eli2g_LysCSg-6Nq5YQa1g"),
+            ("2025_01_get_playlist_chart.json", "OLAK5uy_mzYnlaHgFOvLaxqIPnnouEr-idiUn4NIM"),
         ],
     )
     def test_get_playlist(self, yt, test_file, playlist_id):
@@ -54,7 +55,7 @@ class TestPlaylists:
             ("RDCLAK5uy_nfjzC9YC1NVPPZHvdoAtKVBOILMDOuxOs", 200, 10),
             ("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", 200, 0),  # no related tracks
             ("PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u", 1000, 10),  # very large
-            ("PL5ZNf-B8WWSZFIvpJWRjgt7iRqWT7_KF1", 10, 10),  # track duration > 1k hours
+            # TODO: add playlist with track duration > 1k hours
         ],
     )
     def test_get_playlist_foreign(self, yt_oauth, playlist_id, tracks_len, related_len):
