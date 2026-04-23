@@ -24,7 +24,7 @@ class TestPodcasts:
         assert podcast["saved"]
 
     def test_many_podcasts(self, yt):
-        results = yt.search("podcast", filter="podcasts")
+        results = yt.search("europe", filter="podcasts")
         for result in results:
             results = yt.get_podcast(result["browseId"])
             assert len(results) > 0
@@ -41,10 +41,15 @@ class TestPodcasts:
         assert episode["saved"]
 
     def test_many_episodes(self, yt):
-        results = yt.search("episode", filter="episodes")
+        results = yt.search("europe", filter="episodes")
+        episodes = []
         for result in results:
-            result = yt.get_episode(result["videoId"])
-            assert result["description"] is None or len(result["description"].text) > 0
+            episode = yt.get_episode(result["videoId"])
+            episodes.append(episode)
+
+        assert all(
+            episode["description"] is None or len(episode["description"].text) > 0 for episode in episodes
+        )
 
     def test_get_episodes_playlist(self, yt_brand):
         playlist = yt_brand.get_episodes_playlist()
