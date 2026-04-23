@@ -9,6 +9,7 @@ from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
 from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.models.content.enums import PlaylistSortOrder
 
 
 class TestPlaylists:
@@ -156,17 +157,30 @@ class TestPlaylists:
         assert len(playlist_id) == 34, "Playlist creation failed"
 
         try:
-            response = yt_oauth.edit_playlist(playlist_id, collaboration=True)
+            response = yt_oauth.edit_playlist(
+                playlist_id, collaboration=True, sortOrder=PlaylistSortOrder.TOP_VOTED
+            )
             assert response["status"] == ResponseStatus.SUCCEEDED
+            join_collaboration_token = response["joinCollaborationToken"]
+
+            TRACK_COUNT = 101
+            response = yt_oauth.add_playlist_items(
+                playlist_id, ["lYBUbBu4W08"] * TRACK_COUNT, duplicates=True
+            )
+            assert response["status"] == ResponseStatus.SUCCEEDED, "Adding playlist items failed"
+
             time.sleep(15)  # wait for collaboration to be enabled
             assert (
-                yt_brand.join_collaborative_playlist(playlist_id, response["joinCollaborationToken"])
+                yt_brand.join_collaborative_playlist(playlist_id, join_collaboration_token)
                 == ResponseStatus.SUCCEEDED
             )
 
-            playlist = yt_oauth.get_playlist(playlist_id)
+            playlist = yt_oauth.get_playlist(playlist_id, limit=None)
             assert len(playlist["collaborators"]["avatars"]) == 2
             assert "author" not in playlist
+
+            # we should have continuations for large vote-sorted playlists
+            assert len(playlist["tracks"]) == TRACK_COUNT
 
             assert yt_oauth.edit_playlist(playlist_id, collaboration=False) == ResponseStatus.SUCCEEDED
             time.sleep(3)
