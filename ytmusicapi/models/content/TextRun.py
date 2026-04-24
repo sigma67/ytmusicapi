@@ -1,7 +1,5 @@
 from typing import TypedDict
 
-type TextRun = HyperLink | PlainText
-
 
 class HyperLink(TypedDict):
     text: str
@@ -10,3 +8,6 @@ class HyperLink(TypedDict):
 
 class PlainText(TypedDict):
     text: str
+
+
+TextRun = HyperLink | PlainText
