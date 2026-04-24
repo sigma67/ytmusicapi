@@ -12,6 +12,7 @@ from requests import Response
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.constants import *
+from ytmusicapi.models.content.TextRun import TextRun
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import JsonDict
 
@@ -102,23 +103,19 @@ def sum_total_duration(item: JsonDict) -> int:
     )
 
 
-def parse_description(descriptionRunsList: Any | None) -> str:
+def parse_description(descriptionRunsList: Any | None) -> list[TextRun]:
     if not isinstance(descriptionRunsList, list):
-        return ""
+        return []
 
-    description = ""
+    description: list[TextRun] = []
     for run in descriptionRunsList:
         if "navigationEndpoint" in run:
             link = nav(run, ["navigationEndpoint", "urlEndpoint", "url"])
             desc = run["text"]
 
-            description += format_markdown_link(desc=desc, link=link)
+            description.append({"text": desc, "url": link})
             continue
 
-        description += run["text"]
+        description.append({"text": run["text"]})
 
     return description
-
-
-def format_markdown_link(desc: str, link: str) -> str:
-    return f"[{desc}]({link})"

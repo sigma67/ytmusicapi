@@ -170,7 +170,11 @@ class BrowsingMixin(MixinProtocol):
         Example::
 
             {
-                "description": "Oasis were ...",
+                "description": [
+                    {
+                        "text":"Oasis were ..."
+                    }
+                ],
                 "views": "3,693,390,359 views",
                 "name": "Oasis",
                 "channelId": "UCUDVBtnOQi4c7E8jebpjc9Q",
@@ -244,6 +248,10 @@ class BrowsingMixin(MixinProtocol):
                     ]
                 }
             }
+
+        Note that description is a list of dictionaries which contains the text runs. There are two types of text runs.
+            1. PlainText: which has format {"text": string}
+            2. HyperLink: which has format {"text": string, "url": string}
         """
         if channelId.startswith("MPLA"):
             channelId = channelId[4:]
@@ -513,7 +521,9 @@ class BrowsingMixin(MixinProtocol):
               "title": "Revival",
               "type": "Album",
               "thumbnails": [],
-              "description": "Revival is the...",
+              "description": [
+                  {"text": "Revival is the..."},
+              ],
               "artists": [
                 {
                   "name": "Eminem",
@@ -565,6 +575,10 @@ class BrowsingMixin(MixinProtocol):
               ],
               "duration_seconds": 4657
             }
+
+        Note that description is a list of dictionaries which contains the text runs. There are two types of text runs.
+            1. PlainText: which has format {"text": string}
+            2. HyperLink: which has format {"text": string, "url": string}
         """
         if not browseId or not browseId.startswith("MPRE"):
             raise YTMusicUserError("Invalid album browseId provided, must start with MPRE.")
