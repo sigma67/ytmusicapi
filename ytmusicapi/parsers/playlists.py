@@ -2,6 +2,7 @@ import re
 
 from ytmusicapi.continuations import *
 from ytmusicapi.helpers import sum_total_duration
+from ytmusicapi.models.content.enums import VoteStatus
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType
 
 from ..helpers import to_int
@@ -266,6 +267,17 @@ def parse_playlist_item(
         True,
     )
 
+    voting_status = nav(data, ENGAGEMENT_BAR, none_if_absent=True)
+
+    community_vote_status = (
+        None
+        if voting_status is None
+        else {
+            "netVoteValue": voting_status["votes"],
+            "status": VoteStatus(voting_status["status"]),
+        }
+    )
+
     song = {
         "videoId": videoId,
         "title": title,
@@ -278,6 +290,7 @@ def parse_playlist_item(
         "isExplicit": isExplicit,
         "videoType": videoType,
         "views": views,
+        "communityVoteStatus": community_vote_status,
     }
 
     if is_album:

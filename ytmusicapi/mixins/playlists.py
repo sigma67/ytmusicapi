@@ -110,12 +110,19 @@ class PlaylistsMixin(MixinProtocol):
                     "pin": "AB9zfpImL2k...",
                     "unpin": "AB9zfpJt6pA..."
                   },
+                  "communityVoteStatus": {
+                    "netVoteValue": 12,
+                    "status": "VOTE_STATUS_UPVOTED""
+                  }
+                }
                   "creditsBrowseId": "MPTCekz1IJ9I0sw"
               ]
             }
 
         The setVideoId is the unique id of this playlist item and
         needed for moving/removing playlist items
+
+        Note that communityVoteStatus can be null if the information is not available (i.e. playlist does not have that setting enabled, the request is not authenticated, ...)
 
         Collaborative playlists replace ``author`` with limited data about ``collaborators``::
             {
