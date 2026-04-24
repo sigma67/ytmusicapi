@@ -209,6 +209,7 @@ class BrowsingMixin(MixinProtocol):
                         {
                             "title": "Stand By Me (Mustique Demo)",
                             "thumbnails": [...],
+                            "type": "Single",
                             "year": "2016",
                             "browseId": "MPREb_7MPKLhibN5G"
                         }
@@ -552,6 +553,7 @@ class BrowsingMixin(MixinProtocol):
                     "pin": "AB9zfpJ...",
                     "unpin": "AB9zfpL..."
                   },
+                  "creditsBrowseId": "MPTCiKLU7z_xdYQ"
                 }
               ],
               "other_versions": [
@@ -594,6 +596,56 @@ class BrowsingMixin(MixinProtocol):
             album["tracks"][i]["artists"] = album["tracks"][i]["artists"] or album["artists"]
 
         return album
+
+    def get_song_credits(self, browseId: str) -> JsonDict:
+        """
+        Get credits for a song. Returned entries are not fixed by YouTube and may vary
+        between songs, but common ones include ``performed_by``, ``written_by`` ,
+        ``produced_by`` and ``music_metadata_provided_by``.
+
+        :param browseId: browseId for the credits of a song, for example returned as ``creditsBrowseId`` in the tracks of :py:func:`get_album`
+        :return: Dictionary with credit sections.
+
+        Example::
+
+            {
+              "performed_by": [
+                "Eminem",
+                "Beyoncé"
+              ],
+              "written_by": [
+                "Marshall Mathers",
+                "Beyoncé Knowles",
+                "Holly Hafermann"
+              ],
+              "produced_by": [
+                "Rick Rubin"
+              ],
+              "music_metadata_provided_by": [
+                "Eminem Catalog PS"
+              ]
+            }
+        """
+        if not browseId or not browseId.startswith("MPTC"):
+            raise YTMusicUserError("Invalid song credits browseId provided, must start with MPTC.")
+
+        body = {"browseId": browseId}
+        endpoint = "browse"
+        response = self._send_request(endpoint, body)
+
+        credits: JsonDict = {}
+        sections = nav(response, CREDITS_SECTIONS)
+        for section in sections:
+            section_data = section["dismissableDialogContentSectionRenderer"]
+
+            section_pretty_name: str = nav(section_data, TITLE_TEXT)
+            section_snake_case_name = section_pretty_name.lower().replace(" ", "_")
+
+            credits[section_snake_case_name] = []
+            for item in nav(section_data, SUBTITLE_RUNS)[::2]:
+                credits[section_snake_case_name].append(item["text"])
+
+        return credits
 
     def get_song(self, videoId: str, signatureTimestamp: int | None = None) -> JsonDict:
         """

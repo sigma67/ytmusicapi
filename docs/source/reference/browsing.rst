@@ -15,3 +15,4 @@ Browsing
 .. automethod:: YTMusic.get_lyrics
 .. automethod:: YTMusic.get_tasteprofile
 .. automethod:: YTMusic.set_tasteprofile
+.. automethod:: YTMusic.get_song_credits

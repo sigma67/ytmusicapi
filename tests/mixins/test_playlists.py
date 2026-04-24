@@ -60,7 +60,7 @@ class TestPlaylists:
             ("RDCLAK5uy_nfjzC9YC1NVPPZHvdoAtKVBOILMDOuxOs", 200, 10),
             ("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk", 200, 0),  # no related tracks
             ("PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u", 1000, 10),  # very large
-            # TODO: add playlist with track duration > 1k hours
+            ("PLf6FAPI9j8OOAwvsj_FdO5tyd0GcPLnkm", 200, 0),  # track duration > 1k hours
         ],
     )
     def test_get_playlist_foreign(self, yt_oauth, playlist_id, tracks_len, related_len):
@@ -175,6 +175,32 @@ class TestPlaylists:
             moveItem=playlist["tracks"][0]["setVideoId"],
         )
         assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
+
+    def test_edit_playlist_collaboration(self, yt_oauth, yt_brand):
+        playlist_id = yt_oauth.create_playlist("test collaboration", "", privacy_status="UNLISTED")
+        assert len(playlist_id) == 34, "Playlist creation failed"
+
+        try:
+            response = yt_oauth.edit_playlist(playlist_id, collaboration=True)
+            assert response["status"] == ResponseStatus.SUCCEEDED
+            time.sleep(15)  # wait for collaboration to be enabled
+            assert (
+                yt_brand.join_collaborative_playlist(playlist_id, response["joinCollaborationToken"])
+                == ResponseStatus.SUCCEEDED
+            )
+
+            playlist = yt_oauth.get_playlist(playlist_id)
+            assert len(playlist["collaborators"]["avatars"]) == 2
+            assert "author" not in playlist
+
+            assert yt_oauth.edit_playlist(playlist_id, collaboration=False) == ResponseStatus.SUCCEEDED
+            time.sleep(3)
+
+            playlist = yt_oauth.get_playlist(playlist_id)
+            assert "collaborators" not in playlist
+            assert playlist["author"]
+        finally:
+            yt_oauth.delete_playlist(playlist_id)
 
     def test_create_playlist_invalid_title(self, yt_brand):
         with pytest.raises(YTMusicUserError, match="invalid characters"):

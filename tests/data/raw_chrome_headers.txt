@@ -1,0 +1,87 @@
+accept
+*/*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+en-US,en;q=0.9
+authorization
+[REDACTED]
+cache-control
+no-cache
+content-encoding
+gzip
+content-length
+2170
+content-type
+application/json
+cookie
+[REDACTED]
+dnt
+1
+origin
+https://music.youtube.com
+pragma
+no-cache
+priority
+u=1, i
+referer
+https://music.youtube.com/
+sec-ch-ua
+"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+sec-ch-ua-arch
+"x86"
+sec-ch-ua-bitness
+"64"
+sec-ch-ua-form-factors
+"Desktop"
+sec-ch-ua-full-version
+"145.0.7632.110"
+sec-ch-ua-full-version-list
+"Not:A-Brand";v="99.0.0.0", "Google Chrome";v="145.0.7632.110", "Chromium";v="145.0.7632.110"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-model
+""
+sec-ch-ua-platform
+"Windows"
+sec-ch-ua-platform-version
+"19.0.0"
+sec-ch-ua-wow64
+?0
+sec-fetch-dest
+empty
+sec-fetch-mode
+same-origin
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+x-browser-channel
+stable
+x-browser-copyright
+Copyright 2026 Google LLC. All Rights reserved.
+x-browser-validation
+oWQepDUHextb1hsYrtJDGvl4nAw=
+x-browser-year
+2026
+x-client-data
+[REDACTED]
+Decoded:
+message ClientVariations {
+  // Active Google-visible variation IDs on this client. These are reported for analysis, but do not directly affect any server-side behavior.
+  repeated int32 variation_id = [REDACTED];
+  // Active Google-visible variation IDs on this client that trigger server-side behavior. These are reported for analysis *and* directly affect server-side behavior.
+  repeated int32 trigger_variation_id = [REDACTED];
+}
+x-goog-authuser
+[REDACTED]
+x-goog-visitor-id
+[REDACTED]
+x-origin
+https://music.youtube.com
+x-youtube-bootstrap-logged-in
+true
+x-youtube-client-name
+67
+x-youtube-client-version
+1.20260218.03.00
