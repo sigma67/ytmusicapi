@@ -155,3 +155,17 @@ def find_objects_by_key(object_list: JsonList, key: str, nested: str | None = No
         if key in item:
             objects.append(item)
     return objects
+
+
+def get_browse_renderer(response: JsonDict) -> JsonDict | None:
+    """
+    Get browse results renderer from response, handling both twoColumn and singleColumn formats.
+    YouTube Music can return either format depending on A/B testing or account settings.
+    """
+    # Try twoColumnBrowseResultsRenderer first (legacy/most common)
+    two_col: JsonDict | None = nav(response, TWO_COLUMN_RENDERER, none_if_absent=True)
+    if two_col is not None:
+        return two_col
+    # Fallback to singleColumnBrowseResultsRenderer (newer format)
+    single_col: JsonDict | None = nav(response, SINGLE_COLUMN, none_if_absent=True)
+    return single_col

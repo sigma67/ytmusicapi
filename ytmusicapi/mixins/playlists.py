@@ -142,12 +142,34 @@ class PlaylistsMixin(MixinProtocol):
 
         request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
         is_ola = playlistId.startswith("OLA") or playlistId.startswith("VLOLA")
-        has_playlist_header = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM], True)
-        if is_ola and not has_playlist_header:
-            return parse_audio_playlist(response, limit, request_func_continuations)
 
-        header_data = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM])
-        section_list = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION])
+        # Try twoColumnBrowseResultsRenderer first, fallback to singleColumnBrowseResultsRenderer
+        # YouTube Music may return either format depending on A/B testing
+        two_col = nav(response, TWO_COLUMN_RENDERER, True)
+        if two_col is not None:
+            has_playlist_header = nav(two_col, [*TAB_CONTENT, *SECTION_LIST_ITEM], True)
+            if is_ola and not has_playlist_header:
+                return parse_audio_playlist(response, limit, request_func_continuations)
+            header_data = nav(two_col, [*TAB_CONTENT, *SECTION_LIST_ITEM])
+            section_list = nav(two_col, ["secondaryContents", *SECTION])
+        else:
+            # singleColumnBrowseResultsRenderer format
+            single_col = nav(response, SINGLE_COLUMN, True)
+            if single_col is None:
+                raise KeyError(
+                    "Response contains neither twoColumnBrowseResultsRenderer nor singleColumnBrowseResultsRenderer"
+                )
+            has_playlist_header = nav(single_col, [*TAB_CONTENT, *SECTION_LIST_ITEM], True)
+            if is_ola and not has_playlist_header:
+                return parse_audio_playlist(response, limit, request_func_continuations)
+            header_data = nav(single_col, [*TAB_CONTENT, *SECTION_LIST_ITEM])
+            # In single column, section list might be in a different location
+            section_list = nav(single_col, [*TAB_CONTENT, *SECTION], True)
+            if section_list is None:
+                # Try alternate path for single column
+                section_list = nav(single_col, ["secondaryContents", *SECTION], True)
+            if section_list is None:
+                section_list = nav(single_col, TAB_CONTENT + SECTION)
         playlist: JsonDict = {}
         playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
         if not playlist["owned"]:

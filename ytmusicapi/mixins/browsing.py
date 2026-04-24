@@ -576,12 +576,21 @@ class BrowsingMixin(MixinProtocol):
         response = self._send_request(endpoint, body)
         album: JsonDict = parse_album_header_2024(response)
 
-        results = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
+        # Try twoColumn first, fallback to singleColumn
+        results = nav(
+            response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF], True
+        )
+        if results is None:
+            results = nav(response, [*SINGLE_COLUMN, *TAB_CONTENT, *SECTION_LIST_ITEM, *MUSIC_SHELF], True)
+        if results is None:
+            results = nav(response, [*SINGLE_COLUMN, "secondaryContents", *SECTION_LIST_ITEM, *MUSIC_SHELF])
         album["tracks"] = parse_playlist_items(results["contents"], is_album=True)
 
-        secondary_carousels = (
-            nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True) or []
-        )
+        # Try twoColumn first, fallback to singleColumn
+        secondary_carousels = nav(response, [*TWO_COLUMN_RENDERER, "secondaryContents", *SECTION_LIST], True)
+        if secondary_carousels is None:
+            secondary_carousels = nav(response, [*SINGLE_COLUMN, "secondaryContents", *SECTION_LIST], True)
+        secondary_carousels = secondary_carousels or []
         for section in secondary_carousels[1:]:
             carousel = nav(section, CAROUSEL)
             key = {
