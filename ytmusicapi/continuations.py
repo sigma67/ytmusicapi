@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import (
@@ -12,11 +12,29 @@ from ytmusicapi.type_alias import (
 )
 
 CONTINUATION_TOKEN = ["continuationItemRenderer", "continuationEndpoint", "continuationCommand", "token"]
+COMMAND_EXECUTOR_COMMANDS = [
+    "continuationItemRenderer",
+    "continuationEndpoint",
+    "commandExecutorCommand",
+    "commands",
+]
 CONTINUATION_ITEMS = ["onResponseReceivedActions", 0, "appendContinuationItemsAction", "continuationItems"]
 
 
 def get_continuation_token(results: JsonList) -> str | None:
-    return nav(results[-1], CONTINUATION_TOKEN, True)
+    last_result = results[-1]
+
+    if token := nav(last_result, CONTINUATION_TOKEN, True):
+        return cast(str, token)
+
+    # continuation tokens may be nested in a commandExecutorCommand list
+    # (alongside playlistVotingRefreshPopupCommand, for example)
+    commands = nav(last_result, COMMAND_EXECUTOR_COMMANDS, True) or []
+    for command in commands:
+        if nav(command, ["continuationCommand", "request"], True) == "CONTINUATION_REQUEST_TYPE_BROWSE":
+            return cast(str, nav(command, ["continuationCommand", "token"]))
+
+    return None
 
 
 def get_continuations_2025(

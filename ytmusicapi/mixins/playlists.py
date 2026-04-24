@@ -4,6 +4,7 @@ from ytmusicapi.continuations import *
 from ytmusicapi.enums import ResponseStatus
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.helpers import sum_total_duration
+from ytmusicapi.models.content.enums import PlaylistSortOrder
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
@@ -320,6 +321,7 @@ class PlaylistsMixin(MixinProtocol):
         collaboration: bool | None = None,
         moveItem: str | tuple[str, str] | None = None,
         addPlaylistId: str | None = None,
+        sortOrder: PlaylistSortOrder | None = None,
         addToTop: bool | None = None,
     ) -> str | JsonDict:
         """
@@ -337,6 +339,7 @@ class PlaylistsMixin(MixinProtocol):
         :param moveItem: Optional. Move one item before another. Items are specified by setVideoId, which is the
             unique id of this playlist item. See :py:func:`get_playlist`
         :param addPlaylistId: Optional. Id of another playlist to add to this playlist
+        :param sortOrder: Optional. Change the order tracks are returned in. The default is ``MANUAL``.
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
             or the bottom of the playlist (if False - this is also the default of a new playlist).
         :return: Status String, ``collaboration`` dict described below, or full response
@@ -376,6 +379,11 @@ class PlaylistsMixin(MixinProtocol):
 
         if addPlaylistId:
             actions.append({"action": "ACTION_ADD_PLAYLIST", "addedFullListId": addPlaylistId})
+
+        if sortOrder:
+            actions.append(
+                {"action": "ACTION_SET_PLAYLIST_VIDEO_ORDER", "playlistVideoOrder": sortOrder.value}
+            )
 
         if addToTop:
             actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": "true"})
