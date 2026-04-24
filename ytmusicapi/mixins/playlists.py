@@ -110,15 +110,12 @@ class PlaylistsMixin(MixinProtocol):
                     "pin": "AB9zfpImL2k...",
                     "unpin": "AB9zfpJt6pA..."
                   },
-<<<<<<< HEAD
                   "communityVoteStatus": {
                     "netVoteValue": 12,
                     "status": "VOTE_STATUS_UPVOTED""
                   }
                 }
-=======
                   "creditsBrowseId": "MPTCekz1IJ9I0sw"
->>>>>>> origin/main
               ]
             }
 

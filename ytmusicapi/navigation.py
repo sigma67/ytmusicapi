@@ -108,6 +108,7 @@ ENGAGEMENT_BAR = [
     0,
     "votingViewModel",
     "initialState",
+]
 CREDITS_SECTIONS = [
     "onResponseReceivedActions",
     0,
