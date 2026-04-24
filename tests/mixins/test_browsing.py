@@ -43,6 +43,12 @@ class TestBrowsing:
             [x for x in related if set(x.keys()) == {"browseId", "subscribers", "title", "thumbnails"}]
         ) == len(related)
 
+        # test that album type and year are being parsed correctly #899
+        assert all(album["year"].isnumeric() for album in results["albums"]["results"])
+        assert all(not album["type"].isnumeric() for album in results["albums"]["results"] if "type" in album)
+        assert all(single["year"].isnumeric() for single in results["singles"]["results"])
+        assert all(not single["type"].isnumeric() for single in results["singles"]["results"])
+
         results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         assert len(results) >= 11
 

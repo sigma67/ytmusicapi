@@ -30,3 +30,9 @@ class PlaylistSortOrder(Enum):
     NEWEST_FIRST = 1
     NEWEST_LAST = 2
     TOP_VOTED = 6
+
+
+class VoteStatus(str, Enum):
+    UPVOTED = "VOTE_STATUS_UPVOTED"
+    DOWNVOTED = "VOTE_STATUS_DOWNVOTED"
+    UNSPECIFIED = "VOTE_STATUS_UNSPECIFIED"

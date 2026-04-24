@@ -9,7 +9,7 @@ from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
 from ytmusicapi.exceptions import YTMusicUserError
-from ytmusicapi.models.content.enums import PlaylistSortOrder
+from ytmusicapi.models.content.enums import PlaylistSortOrder, VoteStatus
 
 
 class TestPlaylists:
@@ -49,6 +49,10 @@ class TestPlaylists:
 
                 if track["videoType"] == "MUSIC_VIDEO_TYPE_ATV":
                     assert isinstance(track["album"]["name"], str) and track["album"]["name"]
+
+                if (vote_status := track["communityVoteStatus"]) is not None:
+                    assert isinstance(vote_status["netVoteValue"], int)
+                    assert vote_status["status"] in VoteStatus
 
     @pytest.mark.parametrize(
         "playlist_id, tracks_len, related_len",
@@ -118,6 +122,26 @@ class TestPlaylists:
         assert len(playlist["suggestions"]) == 21
         assert len(playlist["related"]) == 10
         assert playlist["owned"] is True
+
+    @pytest.mark.parametrize(
+        "playlist_id, has_vote",
+        [("PLa90Y86mjW3fKMrV_EPZ2-WZH8a50ss-b", True), ("PLa90Y86mjW3d57WTbI8aBp6Cgx9MHOuHD", False)],
+    )
+    def test_get_playlist_with_votes(self, yt_oauth: YTMusic, playlist_id: str, has_vote: bool):
+        playlist = yt_oauth.get_playlist(playlist_id)
+        tracks = playlist["tracks"]
+        assert len(tracks) > 0
+
+        if not has_vote:
+            for track in tracks:
+                assert track["communityVoteStatus"] is None
+
+            return
+
+        for track in tracks:
+            assert (vote_status := track["communityVoteStatus"]) is not None
+            assert isinstance(vote_status["netVoteValue"], int)
+            assert vote_status["status"] in VoteStatus
 
     def test_edit_playlist(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"])
