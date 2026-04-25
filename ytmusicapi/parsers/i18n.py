@@ -50,6 +50,15 @@ class Parser:
         ]
 
     @i18n
+    def get_song_credit_section_map(self) -> JsonDict:
+        return {
+            _("performed_by"): "performed_by",
+            _("written_by"): "written_by",
+            _("produced_by"): "produced_by",
+            _("music_metadata_provided_by"): "music_metadata_provided_by",
+        }
+
+    @i18n
     def parse_channel_contents(self, results: JsonList) -> JsonDict:
         categories = [
             ("albums", _("albums"), parse_album, MTRIR),

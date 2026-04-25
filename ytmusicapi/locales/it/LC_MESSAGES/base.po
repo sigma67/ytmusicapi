@@ -62,33 +62,49 @@ msgid "ep"
 msgstr "ep"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "Eseguito da"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "Scritto da"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "Prodotto da"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "Metadati dei contenuti musicali forniti da"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "album"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "singoli ed ep"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "Audiolibri e programmi"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "video"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "playlist"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "ai fan potrebbe anche piacere"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "puntate più recenti"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "podcast"

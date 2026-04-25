@@ -62,33 +62,49 @@ msgid "ep"
 msgstr "ईपी"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "परफ़ॉर्म करने वाले कलाकार"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "लेखक"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "प्रोड्यूसर"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "संगीत का मेटाडेटा देने वाला लेबल"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "एलबम"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "गाने और ईपी"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "ऑडियो बुक और ऑडियो शो"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "वीडियो"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "प्लेलिस्ट"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "सम्बंधित"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "सबसे नए एपिसोड"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "पॉडकास्ट"

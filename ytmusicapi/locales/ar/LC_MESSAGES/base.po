@@ -62,33 +62,49 @@ msgid "ep"
 msgstr "ألبوم قصير"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "أداء"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "تأليف"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "إنتاج"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "الجهة التي قدّمت البيانات الوصفية للمحتوى الموسيقي"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "ألبومات"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "أغانٍ منفردة وحلقات"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "الكتب المسموعة والعروض"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "أشرطة فيديو"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "قوائم التشغيل"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "ذات صلة"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "أحدث الحلقات"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "بودكاست"

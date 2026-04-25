@@ -61,33 +61,49 @@ msgid "ep"
 msgstr "迷你专辑"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "表演者"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "词曲作者"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "制作人"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "音乐元数据提供者"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "专辑"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "单曲和迷你专辑"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "有声读物和节目"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "视频"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "精选"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "粉丝可能还会喜欢"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "最新分集"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "播客"
