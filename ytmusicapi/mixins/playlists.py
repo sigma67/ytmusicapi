@@ -4,7 +4,7 @@ from ytmusicapi.continuations import *
 from ytmusicapi.enums import ResponseStatus
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.helpers import sum_total_duration
-from ytmusicapi.models.content.enums import PlaylistSortOrder
+from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditOptions
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
@@ -323,6 +323,7 @@ class PlaylistsMixin(MixinProtocol):
         addPlaylistId: str | None = None,
         sortOrder: PlaylistSortOrder | None = None,
         addToTop: bool | None = None,
+        voteOption: PlaylistVoteEditOptions | None = None,
     ) -> str | JsonDict:
         """
         Edit title, description or privacyStatus of a playlist.
@@ -342,6 +343,8 @@ class PlaylistsMixin(MixinProtocol):
         :param sortOrder: Optional. Change the order tracks are returned in. The default is ``MANUAL``.
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
             or the bottom of the playlist (if False - this is also the default of a new playlist).
+        :param VoteOption: Optional. Change who can participate in community voting in this playlist.
+            Note that a bad request will be thrown if voteOption is PlaylistVoteEditOptions.COLLABORATORS_ONLY but the playlist is not enabled for collaboration prior to the edit.
         :return: Status String, ``collaboration`` dict described below, or full response
 
         Dictionary returned when ``collaboration`` is True and the request is successful::
@@ -390,6 +393,14 @@ class PlaylistsMixin(MixinProtocol):
 
         if addToTop is not None:
             actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop)})
+
+        if voteOption is not None:
+            actions.append(
+                {
+                    "action": "ACTION_SET_ALLOW_ITEM_VOTE",
+                    "itemVotePermission": voteOption.get_argument_for_request(),
+                }
+            )
 
         body["actions"] = actions
         endpoint = "browse/edit_playlist"

@@ -36,3 +36,19 @@ class VoteStatus(str, Enum):
     UPVOTED = "VOTE_STATUS_UPVOTED"
     DOWNVOTED = "VOTE_STATUS_DOWNVOTED"
     UNSPECIFIED = "VOTE_STATUS_UNSPECIFIED"
+
+
+class PlaylistVoteEditOptions(Enum):
+    EVERYONE_CAN_VOTE = "EVERYONE_CAN_VOTE"
+    # only available for playlists where collaborate is on.
+    COLLABORATORS_ONLY = "COLLABORATORS_ONLY"
+    OFF = "OFF"
+
+    def get_argument_for_request(self) -> int:
+        match self:
+            case PlaylistVoteEditOptions.EVERYONE_CAN_VOTE:
+                return 1
+            case PlaylistVoteEditOptions.COLLABORATORS_ONLY:
+                return 2
+            case PlaylistVoteEditOptions.OFF:
+                return 3
