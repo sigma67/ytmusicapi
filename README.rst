@@ -107,6 +107,18 @@ The `tests <https://github.com/sigma67/ytmusicapi/blob/master/tests/>`_ are also
 
 .. end-features
 
+Related projects
+----------------
+
+Tools and libraries that build on ytmusicapi:
+
+* `ytm-cli <https://github.com/chadfurman/ytm-cli>`_ — macOS terminal client
+  for YouTube Music. Uses ytmusicapi for history, library, playlists, search,
+  and playlist editing; drives the live YT Music tab in Google Chrome via
+  AppleScript for playback.
+
+If your project uses ytmusicapi and you'd like it listed, please open a PR.
+
 Contributing
 ------------
 
