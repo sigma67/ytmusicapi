@@ -599,9 +599,8 @@ class BrowsingMixin(MixinProtocol):
 
     def get_song_credits(self, browseId: str) -> JsonDict:
         """
-        Get credits for a song. Returned entries are not fixed by YouTube and may vary
-        between songs, but common ones include ``performed_by``, ``written_by`` ,
-        ``produced_by`` and ``music_metadata_provided_by``.
+        Get credits for a song. Returned entries are limited to ``performed_by``,
+        ``written_by``, ``produced_by`` and ``music_metadata_provided_by``.
 
         :param browseId: browseId for the credits of a song, for example returned as ``creditsBrowseId`` in the tracks of :py:func:`get_album`
         :return: Dictionary with credit sections.
@@ -635,11 +634,14 @@ class BrowsingMixin(MixinProtocol):
 
         credits: JsonDict = {}
         sections = nav(response, CREDITS_SECTIONS)
+        localized_section_map = self.parser.get_song_credit_section_map()
         for section in sections:
             section_data = section["dismissableDialogContentSectionRenderer"]
 
-            section_pretty_name: str = nav(section_data, TITLE_TEXT)
-            section_snake_case_name = section_pretty_name.lower().replace(" ", "_")
+            section_local_name: str = nav(section_data, TITLE_TEXT)
+            section_snake_case_name = localized_section_map.get(section_local_name)
+            if section_snake_case_name is None:  # pragma: no cover
+                continue
 
             credits[section_snake_case_name] = []
             for item in nav(section_data, SUBTITLE_RUNS)[::2]:

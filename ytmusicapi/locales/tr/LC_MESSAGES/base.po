@@ -62,33 +62,49 @@ msgid "ep"
 msgstr "ep"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "Seslendiren"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "Yazar"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "Yapımcı"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "Müzik meta verisini sağlayan"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "albümler"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "single'lar ve ep'ler"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "Sesli kitaplar ve programlar"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "videolar"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "çalma listeleri"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "ilişkili"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "son bölümler"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "podcast'ler"

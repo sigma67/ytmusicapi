@@ -62,33 +62,49 @@ msgid "ep"
 msgstr "ep"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "연주"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "작곡"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "프로듀싱"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "음악 메타데이터 제공"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "앨범"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "싱글 및 ep"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "오디오북 및 프로그램"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "동영상"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "재싱목록"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "fans might also like"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "최신 에피소드"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "팟캐스트"

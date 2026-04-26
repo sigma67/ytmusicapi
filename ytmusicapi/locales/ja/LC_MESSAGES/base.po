@@ -62,33 +62,49 @@ msgid "ep"
 msgstr "ep"
 
 #: parsers/i18n.py:55
+msgid "performed_by"
+msgstr "演奏"
+
+#: parsers/i18n.py:56
+msgid "written_by"
+msgstr "作詞・作曲"
+
+#: parsers/i18n.py:57
+msgid "produced_by"
+msgstr "プロデューサー"
+
+#: parsers/i18n.py:58
+msgid "music_metadata_provided_by"
+msgstr "音楽のメタデータの提供者"
+
+#: parsers/i18n.py:64
 msgid "albums"
 msgstr "アルバム"
 
-#: parsers/i18n.py:56
+#: parsers/i18n.py:65
 msgid "singles & eps"
 msgstr "シングルと ep"
 
-#: parsers/i18n.py:57
+#: parsers/i18n.py:66
 msgid "shows"
 msgstr "オーディオブックと番組"
 
-#: parsers/i18n.py:58
+#: parsers/i18n.py:67
 msgid "videos"
 msgstr "動画"
 
-#: parsers/i18n.py:59
+#: parsers/i18n.py:68
 msgid "playlists"
 msgstr "プレイリスト"
 
-#: parsers/i18n.py:60
+#: parsers/i18n.py:69
 msgid "related"
 msgstr "おすすめのアーティスト"
 
-#: parsers/i18n.py:61
+#: parsers/i18n.py:70
 msgid "episodes"
 msgstr "最新エピソード"
 
-#: parsers/i18n.py:62
+#: parsers/i18n.py:71
 msgid "podcasts"
 msgstr "ポッドキャスト"
