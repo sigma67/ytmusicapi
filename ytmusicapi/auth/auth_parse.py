@@ -55,14 +55,19 @@ def determine_auth_type(auth_headers: CaseInsensitiveDict[str]) -> AuthType:
     :param auth_headers: auth headers dict
     :return: AuthType enum
     """
-    auth_type = AuthType.OAUTH_CUSTOM_CLIENT
-    if OAuthToken.is_oauth(auth_headers):
-        auth_type = AuthType.OAUTH_CUSTOM_CLIENT
-
     if authorization := auth_headers.get("authorization"):
         if "SAPISIDHASH" in authorization:
-            auth_type = AuthType.BROWSER
-        elif authorization.startswith("Bearer"):
-            auth_type = AuthType.OAUTH_CUSTOM_FULL
+            return AuthType.BROWSER
+        if authorization.startswith("Bearer"):
+            return AuthType.OAUTH_CUSTOM_FULL
 
-    return auth_type
+    if OAuthToken.is_oauth(auth_headers):
+        return AuthType.OAUTH_CUSTOM_CLIENT
+
+    # Browser auth files contain cookies with SAPISID but no authorization
+    # header (it's computed at request time from the SAPISID cookie).
+    cookie = auth_headers.get("cookie", "")
+    if "SAPISID" in cookie:
+        return AuthType.BROWSER
+
+    return AuthType.OAUTH_CUSTOM_CLIENT

@@ -74,6 +74,10 @@ class OAuthToken(Token):
             with open(file_path, encoding="utf-8") as json_file:
                 file_pack = json.load(json_file)
 
+        # Filter to recognized Token fields — previously saved tokens may
+        # contain extra fields from Google's OAuth response.
+        known_fields = set(Token.members())
+        file_pack = {k: v for k, v in file_pack.items() if k in known_fields}
         return cls(**file_pack)
 
 
@@ -128,7 +132,12 @@ class RefreshingToken(OAuthToken):
             webbrowser.open(url)
         input(f"Go to {url} , finish the login flow and press Enter when done, Ctrl-C to abort")
         raw_token = credentials.token_from_code(code["device_code"])
-        ref_token = cls(credentials=credentials, **raw_token)
+        # Filter to only recognized Token fields — Google's OAuth response may
+        # include additional fields (e.g. refresh_token_expires_in) that are
+        # not part of the Token dataclass.
+        known_fields = set(Token.members())
+        filtered_token = {k: v for k, v in raw_token.items() if k in known_fields}
+        ref_token = cls(credentials=credentials, **filtered_token)
         ref_token.update(ref_token.as_dict())
         if to_file:
             ref_token.local_cache = Path(to_file)
