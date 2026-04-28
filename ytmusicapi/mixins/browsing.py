@@ -599,8 +599,9 @@ class BrowsingMixin(MixinProtocol):
 
     def get_song_credits(self, browseId: str) -> JsonDict:
         """
-        Get credits for a song. Returned entries are limited to ``performed_by``,
+        Get credits for a song. Top-level entries are limited to ``performed_by``,
         ``written_by``, ``produced_by`` and ``music_metadata_provided_by``.
+        If YouTube returns additional data, it will be returned in ``other_sections``.
 
         :param browseId: browseId for the credits of a song, for example returned as ``creditsBrowseId`` in the tracks of :py:func:`get_album`
         :return: Dictionary with credit sections.
@@ -608,20 +609,40 @@ class BrowsingMixin(MixinProtocol):
         Example::
 
             {
-              "performed_by": [
-                "Eminem",
-                "Beyoncé"
-              ],
-              "written_by": [
-                "Marshall Mathers",
-                "Beyoncé Knowles",
-                "Holly Hafermann"
-              ],
-              "produced_by": [
-                "Rick Rubin"
-              ],
-              "music_metadata_provided_by": [
-                "Eminem Catalog PS"
+              "performed_by": {
+                "localized_title": "Performed by"
+                "data": [
+                  "Eminem",
+                  "Beyoncé"
+                ]
+              },
+              "written_by": {
+                "localized_title": "Written by",
+                "data": [
+                  "Marshall Mathers",
+                  "Beyoncé Knowles",
+                  "Holly Hafermann"
+                ]
+              },
+              "produced_by": {
+                "localized_title": "Produced by",
+                "data": [
+                  "Rick Rubin"
+                ]
+              },
+              "music_metadata_provided_by": {
+                "localized_title": "Music metadata provided by"
+                "data": [
+                  "Eminem Catalog PS"
+                ]
+              },
+              "other_sections": [
+                {
+                  "localized_title": "Piano",
+                  "data": [
+                    "Skylar Grey"
+                  ]
+                }
               ]
             }
         """
@@ -632,20 +653,24 @@ class BrowsingMixin(MixinProtocol):
         endpoint = "browse"
         response = self._send_request(endpoint, body)
 
-        credits: JsonDict = {}
+        credits: JsonDict = {"other_sections": []}
         sections = nav(response, CREDITS_SECTIONS)
         localized_section_map = self.parser.get_song_credit_section_map()
         for section in sections:
-            section_data = section["dismissableDialogContentSectionRenderer"]
+            section_content = section["dismissableDialogContentSectionRenderer"]
 
-            section_local_name: str = nav(section_data, TITLE_TEXT)
+            section_local_name: str = nav(section_content, TITLE_TEXT)
             section_snake_case_name = localized_section_map.get(section_local_name)
-            if section_snake_case_name is None:  # pragma: no cover
-                continue
 
-            credits[section_snake_case_name] = []
-            for item in nav(section_data, SUBTITLE_RUNS)[::2]:
-                credits[section_snake_case_name].append(item["text"])
+            section_data = {
+                "localized_title": section_local_name,
+                "data": [item["text"] for item in nav(section_content, SUBTITLE_RUNS)[::2]],
+            }
+
+            if section_snake_case_name is not None:
+                credits[section_snake_case_name] = section_data
+            else:  # pragma: no cover
+                credits["other_sections"].append(section_data)
 
         return credits
 

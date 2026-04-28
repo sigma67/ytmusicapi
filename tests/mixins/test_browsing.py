@@ -277,12 +277,14 @@ class TestBrowsing:
         for section in SECTIONS:
             assert section in credits
             assert credits[section] is not None
-            assert len(credits[section]) > 0
-            assert all(isinstance(item, str) and item for item in credits[section])
-            assert "\n" not in credits[section]
+            assert isinstance(credits[section]["localized_title"], str)
+            assert len(credits[section]["data"]) > 0
+            assert all(isinstance(item, str) and item for item in credits[section]["data"])
+            assert "\n" not in credits[section]["data"]
 
-        assert len(credits["performed_by"]) == 12
-        assert credits["performed_by"][0] == "KANGTA"
-        assert credits["written_by"][4] == "Eirik Røland"
-        assert credits["produced_by"][1] == "David Zandén"
-        assert credits["music_metadata_provided_by"][0] == "SM Entertainment"
+        assert len(credits["performed_by"]["data"]) == 12
+        assert credits["performed_by"]["data"][0] == "KANGTA"
+        assert credits["written_by"]["data"][4] == "Eirik Røland"
+        assert credits["produced_by"]["data"][1] == "David Zandén"
+        assert credits["music_metadata_provided_by"]["data"][0] == "SM Entertainment"
+        assert len(credits["other_sections"]) == 0
