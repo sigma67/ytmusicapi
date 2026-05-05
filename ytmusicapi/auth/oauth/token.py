@@ -4,7 +4,7 @@ import webbrowser
 from collections.abc import KeysView
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from requests.structures import CaseInsensitiveDict
 
@@ -110,6 +110,13 @@ class RefreshingToken(OAuthToken):
         self._local_cache = path
         self.store_token()
 
+    @staticmethod
+    def _supported_token_fields(token: RefreshableTokenDict) -> RefreshableTokenDict:
+        return cast(
+            RefreshableTokenDict,
+            {key: value for key, value in token.items() if key in Token.members()},
+        )
+
     @classmethod
     def prompt_for_token(
         cls, credentials: OAuthCredentials, open_browser: bool = False, to_file: str | None = None
@@ -128,7 +135,7 @@ class RefreshingToken(OAuthToken):
             webbrowser.open(url)
         input(f"Go to {url} , finish the login flow and press Enter when done, Ctrl-C to abort")
         raw_token = credentials.token_from_code(code["device_code"])
-        ref_token = cls(credentials=credentials, **raw_token)
+        ref_token = cls(credentials=credentials, **cls._supported_token_fields(raw_token))
         ref_token.update(ref_token.as_dict())
         if to_file:
             ref_token.local_cache = Path(to_file)

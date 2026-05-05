@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 from requests import Response
 
-from ytmusicapi.auth.oauth import OAuthToken
+from ytmusicapi.auth.oauth import OAuthToken, RefreshingToken
 from ytmusicapi.auth.types import AuthType
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.setup import main
@@ -73,6 +73,25 @@ class TestOAuth:
 
         oauth_file.close()
         Path(oauth_file.name).unlink()
+
+    def test_setup_oauth_ignores_unexpected_token_fields(self, blank_code):
+        credentials = mock.Mock()
+        credentials.get_code.return_value = blank_code
+        credentials.token_from_code.return_value = {
+            "access_token": "test_access_token",
+            "expires_in": 3600,
+            "refresh_token": "test_refresh_token",
+            "scope": "https://www.googleapis.com/auth/youtube",
+            "token_type": "Bearer",
+            "refresh_token_expires_in": 604799,
+        }
+
+        with mock.patch("builtins.input", return_value=""):
+            token = RefreshingToken.prompt_for_token(credentials)
+
+        assert token.access_token == "test_access_token"
+        assert token.refresh_token == "test_refresh_token"
+        assert not hasattr(token, "refresh_token_expires_in")
 
     @pytest.mark.skip(reason="oauth is currently not working, see #813")
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
