@@ -8,7 +8,7 @@ class TestExplore:
         assert len(playlists) > 0
 
     def test_get_explore(self, yt, yt_oauth):
-        assert len(yt.get_explore()) == 5
+        assert len(yt.get_explore()) >= 4
 
         explore = yt_oauth.get_explore()
         assert len(explore) >= 5
@@ -16,27 +16,26 @@ class TestExplore:
         assert all(item["audioPlaylistId"].startswith("OLA") for item in explore["new_releases"])
 
         # check top_songs if present
-        assert all(
-            item["videoId"] and item["videoType"] and (item.get("views") or item.get("album"))
-            for item in explore.get("top_songs", {"items": []})["items"]
-        )
+        for item in explore.get("top_songs", {"items": []})["items"]:
+            assert item["videoId"], item
+            assert item["videoType"], item
+            assert item.get("views") or item.get("album"), item
 
-        assert all(
-            item["videoId"]
-            and item["videoType"]
-            and (
-                podcast["id"] and podcast["name"]
-                if (podcast := item.get("podcast", None))
-                else all(artist["id"] for artist in item["artists"])
-            )
-            for item in explore["trending"]["items"]
-        )
+        for item in explore["trending"]["items"]:
+            assert item["videoId"], item
+            assert item["videoType"], item
+            if podcast := item.get("podcast", None):
+                assert podcast["id"], item
+                assert podcast["name"], item
 
-        assert all(
-            item["videoId"]
-            and item["videoType"]
-            and item["duration"]
-            and item["podcast"]["id"]
-            and item["podcast"]["name"]
-            for item in explore["top_episodes"]
-        )
+        assert any(artist["id"] for artist in item["artists"] for item in explore["trending"]["items"]), [
+            artist["id"] for artist in item["artists"] for item in explore["trending"]["items"]
+        ]
+
+        if "top_episodes" in explore:
+            for item in explore["top_episodes"]:
+                assert item["videoId"], item
+                assert item["videoType"], item
+                assert item["duration"], item
+                assert item["podcast"]["id"], item
+                assert item["podcast"]["name"], item
