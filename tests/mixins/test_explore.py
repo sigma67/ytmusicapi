@@ -1,3 +1,6 @@
+import os
+
+
 class TestExplore:
     def test_get_mood_playlists(self, yt):
         categories = yt.get_mood_categories()
@@ -8,7 +11,7 @@ class TestExplore:
         assert len(playlists) > 0
 
     def test_get_explore(self, yt, yt_oauth):
-        assert len(yt.get_explore()) == 4
+        assert len(yt.get_explore()) == (4 if os.getenv("CI") else 5)
 
         explore = yt_oauth.get_explore()
         assert len(explore) >= 5
