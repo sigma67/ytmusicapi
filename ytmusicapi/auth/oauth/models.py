@@ -20,6 +20,7 @@ class RefreshableTokenDict(BaseTokenDict, total=False):
 
     expires_at: int  #: UNIX epoch timestamp in seconds
     refresh_token: str  #: str used to obtain new access token upon expiration
+    refresh_token_expires_in: int  #: seconds until refresh token expiration from request timestamp
 
 
 class AuthCodeDict(TypedDict, total=False):

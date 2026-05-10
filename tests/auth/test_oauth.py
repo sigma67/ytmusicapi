@@ -74,7 +74,7 @@ class TestOAuth:
         oauth_file.close()
         Path(oauth_file.name).unlink()
 
-    def test_setup_oauth_ignores_unexpected_token_fields(self, blank_code):
+    def test_setup_oauth_uses_refresh_token_expiration(self, blank_code):
         credentials = mock.Mock()
         credentials.get_code.return_value = blank_code
         credentials.token_from_code.return_value = {
@@ -86,12 +86,16 @@ class TestOAuth:
             "refresh_token_expires_in": 604799,
         }
 
-        with mock.patch("builtins.input", return_value=""):
+        with (
+            mock.patch("builtins.input", return_value=""),
+            mock.patch("ytmusicapi.auth.oauth.token.time.time", return_value=1000),
+        ):
             token = RefreshingToken.prompt_for_token(credentials)
-
-        assert token.access_token == "test_access_token"
-        assert token.refresh_token == "test_refresh_token"
-        assert not hasattr(token, "refresh_token_expires_in")
+            assert token.access_token == "test_access_token"
+            assert token.refresh_token == "test_refresh_token"
+            assert token.expires_at == 4600
+            assert token.expires_in == 604799
+            assert not hasattr(token, "refresh_token_expires_in")
 
     @pytest.mark.skip(reason="oauth is currently not working, see #813")
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
