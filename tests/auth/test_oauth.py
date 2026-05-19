@@ -97,6 +97,30 @@ class TestOAuth:
             assert token.expires_in == 604799
             assert not hasattr(token, "refresh_token_expires_in")
 
+    def test_oauth_token_dict_ignores_unexpected_fields(self):
+        """Regression for #887 / #921: a saved oauth.json may contain extra
+        fields like ``refresh_token_expires_in`` (added to Google's device-flow
+        response). Loading such a token via ``YTMusic`` must not crash on the
+        strict Token dataclass.
+        """
+        credentials = mock.Mock(spec=OAuthCredentials)
+        token_dict = {
+            "scope": "https://www.googleapis.com/auth/youtube",
+            "token_type": "Bearer",
+            "access_token": "test_access_token",
+            "refresh_token": "test_refresh_token",
+            "expires_at": int(time.time()) + 3600,
+            "expires_in": 3600,
+            "refresh_token_expires_in": 604799,
+        }
+
+        yt = YTMusic(token_dict, oauth_credentials=credentials)
+
+        assert yt.auth_type == AuthType.OAUTH_CUSTOM_CLIENT
+        assert yt._token is not None
+        assert yt._token.refresh_token == "test_refresh_token"
+        assert not hasattr(yt._token, "refresh_token_expires_in")
+
     @pytest.mark.skip(reason="oauth is currently not working, see #813")
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
         # ensure instance initialized token

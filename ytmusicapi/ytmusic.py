@@ -110,11 +110,14 @@ class YTMusicBase:
                         "oauth JSON provided via auth argument, but oauth_credentials not provided."
                         "Please provide oauth_credentials as specified in the OAuth setup documentation."
                     )
+                # Filter unknown keys (e.g. ``refresh_token_expires_in`` from Google's
+                # device flow) so previously saved oauth.json files load cleanly. See #921.
+                token_kwargs = {k: self._auth_headers[k] for k in Token.members() if k in self._auth_headers}
                 #: OAuth credential handler
                 self._token = RefreshingToken(
                     credentials=oauth_credentials,
                     _local_cache=auth_path,
-                    **self._auth_headers,  # type: ignore[arg-type]
+                    **token_kwargs,  # type: ignore[arg-type]
                 )
 
         # prepare context
