@@ -121,14 +121,12 @@ class TestSearch:
         assert all((item["itemCount"] is not None and isinstance(item["itemCount"], int)) for item in results)
 
     def test_search_episode_category(self, yt_auth):
-        """Test resultType detection for episodes by searching for a podcast without a filter.
-        Note 2025/10/20: categories are currently gone from default search, therefore category changed to None
-        """
-        results = yt_auth.search("Stanford Graduate School of Business")
+        """Test resultType detection for episodes by searching for a podcast without a filter."""
+        results = yt_auth.search("Stanford GSB Podcasts Grit")
         episode = next(
             item
             for item in results
-            if item["category"] is None
+            if item["category"] == "Episode"
             and "podcast" in item
             and item["podcast"]["name"] == "Stanford GSB Podcasts"
         )
