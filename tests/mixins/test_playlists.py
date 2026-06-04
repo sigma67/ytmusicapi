@@ -287,3 +287,125 @@ class TestPlaylists:
         response = yt_brand.remove_playlist_items(playlist_id, playlist["tracks"])
         assert response == ResponseStatus.SUCCEEDED, "Playlist item removal failed"
         yt_brand.delete_playlist(playlist_id)
+
+    def test_edit_playlist_image_auth_error(self, yt_oauth: YTMusic):
+        """Test that non-browser auth raises error when uploading image"""
+        from pathlib import Path
+        from ytmusicapi.exceptions import YTMusicUserError
+
+        with pytest.raises(YTMusicUserError, match="browser authentication"):
+            yt_oauth.edit_playlist("PL_test", image=Path("test.jpg"))
+
+    def test_edit_playlist_image_invalid_filetype(self, yt_brand):
+        """Test that invalid file type raises error"""
+        from pathlib import Path
+        from ytmusicapi.exceptions import YTMusicUserError
+
+        # Create a temp file with invalid extension
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".gif", delete=False) as f:
+            temp_path = Path(f.name)
+
+        try:
+            with pytest.raises(YTMusicUserError, match="not supported"):
+                yt_brand.edit_playlist("PL_test", image=temp_path)
+        finally:
+            temp_path.unlink()
+
+    def test_edit_playlist_image_file_not_found(self, yt_brand):
+        """Test that missing file raises error"""
+        from pathlib import Path
+        from ytmusicapi.exceptions import YTMusicUserError
+
+        with pytest.raises(YTMusicUserError, match="does not exist"):
+            yt_brand.edit_playlist("PL_test", image=Path("/nonexistent/path/image.jpg"))
+
+    def test_edit_playlist_image_upload_success(self, yt_brand, browser_filepath):
+        """Test that image upload with valid image works correctly"""
+        from pathlib import Path
+        from ytmusicapi.auth.types import AuthType
+        from ytmusicapi.exceptions import YTMusicUserError
+        from unittest import mock
+        import tempfile
+
+        # Create a temp valid jpg file
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
+            temp_path = Path(f.name)
+            f.write(b"fake jpeg content")
+
+        # Verify yt_brand has browser auth
+        assert yt_brand.auth_type == AuthType.BROWSER, "Test requires browser authentication"
+
+        try:
+            # Mock the image upload response
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"encryptedBlobId": "test_encrypted_blob_id_12345"}
+
+            # Mock the edit_playlist response
+            mock_edit_response = {"status": "STATUS_SUCCEEDED"}
+
+            with mock.patch("requests.post", return_value=mock_response) as mock_post:
+                with mock.patch.object(yt_brand, "_send_request", return_value=mock_edit_response) as mock_send:
+                    response = yt_brand.edit_playlist("PL_test123", image=temp_path)
+
+                    assert response == "STATUS_SUCCEEDED"
+                    # Verify _send_request was called with correct action
+                    call_args = mock_send.call_args
+                    body = call_args[0][1]  # positional args: (endpoint, body, ...)
+                    assert "actions" in body
+                    thumbnail_action = None
+                    for action in body["actions"]:
+                        if action.get("action") == "ACTION_SET_CUSTOM_THUMBNAIL":
+                            thumbnail_action = action
+                            break
+                    assert thumbnail_action is not None
+                    assert thumbnail_action["addedCustomThumbnail"]["playlistScottyEncryptedBlobId"] == "test_encrypted_blob_id_12345"
+        finally:
+            temp_path.unlink()
+
+    def test_edit_playlist_image_combined_with_other_edits(self, yt_brand):
+        """Test that image upload can be combined with other playlist edits"""
+        from pathlib import Path
+        from ytmusicapi.auth.types import AuthType
+        from unittest import mock
+        import tempfile
+
+        # Create a temp valid jpg file
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
+            temp_path = Path(f.name)
+            f.write(b"fake jpeg content")
+
+        assert yt_brand.auth_type == AuthType.BROWSER, "Test requires browser authentication"
+
+        try:
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"encryptedBlobId": "test_blob_id"}
+
+            mock_edit_response = {"status": "STATUS_SUCCEEDED"}
+
+            with mock.patch("requests.post", return_value=mock_response):
+                with mock.patch.object(yt_brand, "_send_request", return_value=mock_edit_response) as mock_send:
+                    response = yt_brand.edit_playlist(
+                        "PL_test123",
+                        title="New Title",
+                        description="New Description",
+                        privacyStatus="PUBLIC",
+                        image=temp_path
+                    )
+
+                    assert response == "STATUS_SUCCEEDED"
+                    call_args = mock_send.call_args
+                    body = call_args[0][1]
+
+                    # Verify image action is present along with other actions
+                    actions = body["actions"]
+                    action_types = [a["action"] for a in actions]
+
+                    assert "ACTION_SET_CUSTOM_THUMBNAIL" in action_types
+                    assert "ACTION_SET_PLAYLIST_NAME" in action_types
+                    assert "ACTION_SET_PLAYLIST_DESCRIPTION" in action_types
+                    assert "ACTION_SET_PLAYLIST_PRIVACY" in action_types
+        finally:
+            temp_path.unlink()
