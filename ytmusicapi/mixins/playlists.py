@@ -1,4 +1,8 @@
+import typing
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+import requests
 
 from ytmusicapi.continuations import *
 from ytmusicapi.enums import ResponseStatus
@@ -10,6 +14,7 @@ from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
 
+from ..auth.types import AuthType
 from ._protocol import MixinProtocol
 from ._utils import *
 
@@ -324,6 +329,7 @@ class PlaylistsMixin(MixinProtocol):
         sortOrder: PlaylistSortOrder | None = None,
         addToTop: bool | None = None,
         voteOption: PlaylistVoteEditOptions | None = None,
+        image: Path | None = None,
     ) -> str | JsonDict:
         """
         Edit title, description or privacyStatus of a playlist.
@@ -343,8 +349,10 @@ class PlaylistsMixin(MixinProtocol):
         :param sortOrder: Optional. Change the order tracks are returned in. The default is ``MANUAL``.
         :param addToTop: Optional. Change the state of this playlist to add items to the top of the playlist (if True)
             or the bottom of the playlist (if False - this is also the default of a new playlist).
-        :param VoteOption: Optional. Change who can participate in community voting in this playlist.
+        :param voteOption: Optional. Change who can participate in community voting in this playlist.
             Note that a bad request will be thrown if voteOption is PlaylistVoteEditOptions.COLLABORATORS_ONLY but the playlist is not enabled for collaboration prior to the edit.
+        :param image: Optional. Path to an image file (jpg, png) to set as the playlist thumbnail.
+            Requires ``AuthType.BROWSER`` authentication.
         :return: Status String, ``collaboration`` dict described below, or full response
 
         Dictionary returned when ``collaboration`` is True and the request is successful::
@@ -357,6 +365,21 @@ class PlaylistsMixin(MixinProtocol):
         self._check_auth()
         body: JsonDict = {"playlistId": validate_playlist_id(playlistId)}
         actions: JsonList = []
+
+        if image:
+            encrypted_blob_id = self._upload_playlist_image(image, playlistId)
+            actions.append(
+                {
+                    "action": "ACTION_SET_CUSTOM_THUMBNAIL",
+                    "addedCustomThumbnail": {
+                        "imageKey": {
+                            "type": "PLAYLIST_IMAGE_TYPE_CUSTOM_THUMBNAIL",
+                            "name": "studio_square_thumbnail",
+                        },
+                        "playlistScottyEncryptedBlobId": encrypted_blob_id,
+                    },
+                }
+            )
         if title:
             actions.append({"action": "ACTION_SET_PLAYLIST_NAME", "playlistName": title})
 
@@ -506,3 +529,58 @@ class PlaylistsMixin(MixinProtocol):
         endpoint = "browse/edit_playlist"
         response = self._send_request(endpoint, body)
         return response["status"] if "status" in response else response
+
+    def _upload_playlist_image(self, image: Path, playlistId: str) -> str:
+        """
+        Upload a playlist thumbnail image using the resumable upload protocol.
+
+        :param image: Path to the image file (jpg, png)
+        :param playlistId: Playlist id
+        :return: The encrypted blob ID for the uploaded image
+        """
+        if not self.auth_type == AuthType.BROWSER:
+            raise YTMusicUserError("Please provide browser authentication before uploading playlist images")
+
+        fp = Path(image)
+        if not fp.is_file():
+            raise YTMusicUserError("The provided image file does not exist.")
+
+        supported_filetypes = ["jpg", "jpeg", "png"]
+        if fp.suffix.lower().lstrip(".") not in supported_filetypes:
+            raise YTMusicUserError(
+                "The provided file type is not supported for playlist images. Supported file types are "
+                + ", ".join(supported_filetypes)
+            )
+
+        headers = self.headers.copy()
+        upload_url = f"https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"
+        filesize = fp.stat().st_size
+
+        # Step 1: POST to get the upload URL from headers
+        headers.pop("content-encoding", None)
+        headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
+        headers["X-Goog-Upload-Command"] = "start"
+        headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
+        headers["X-Goog-Upload-Protocol"] = "resumable"
+
+        response = requests.post(
+            upload_url,
+            data="",
+            headers=headers,
+            proxies=self.proxies,
+        )
+
+        # Step 2: Upload the image data using the URL from the response
+        upload_url = response.headers["X-Goog-Upload-URL"]
+        headers["X-Goog-Upload-Command"] = "upload, finalize"
+        headers["X-Goog-Upload-Offset"] = "0"
+
+        with open(fp, "rb") as file:
+            response = requests.post(upload_url, data=file, headers=headers, proxies=self.proxies)
+
+        if response.status_code != 200:
+            raise YTMusicUserError(f"Image upload failed with status code {response.status_code}: {response.text}")
+
+        # The response contains JSON with the encrypted blob ID
+        response_data = response.json()
+        return response_data["encryptedBlobId"]
