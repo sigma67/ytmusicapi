@@ -198,7 +198,7 @@ class TestSearch:
     def test_remove_search_suggestions_valid(self, yt_auth):
         first_pass = yt_auth.search("b")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
-        time.sleep(10)
+        time.sleep(15)
         results = yt_auth.get_search_suggestions("b", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
