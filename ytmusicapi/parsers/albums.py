@@ -1,4 +1,4 @@
-from ytmusicapi.helpers import to_int
+from ytmusicapi.helpers import parse_description_runs, to_int
 from ytmusicapi.type_alias import JsonDict
 
 from ._utils import *
@@ -48,8 +48,11 @@ def parse_album_header_2024(response: JsonDict) -> JsonDict:
         "thumbnails": nav(header, THUMBNAILS),
         "isExplicit": nav(header, SUBTITLE_BADGE_LABEL, True) is not None,
     }
-
-    album["description"] = nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION], True)
+    description, description_runs = parse_description_runs(
+        nav(header, ["description", *DESCRIPTION_SHELF, *DESCRIPTION_RUN_LIST], True)
+    )
+    album["description"] = description
+    album["descriptionRuns"] = description_runs
 
     album_info = parse_song_runs(header["subtitle"]["runs"][2:])
     strapline_runs = nav(header, ["straplineTextOne", "runs"], True)

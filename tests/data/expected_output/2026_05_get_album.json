@@ -1,0 +1,619 @@
+{
+  "title": "17",
+  "type": "Album",
+  "thumbnails": [
+    {
+      "url": "https://yt3.googleusercontent.com/JL-pqw66BmaGlVp-ALu2ycJ1sYbuS-ln7xTqjzQzZqols1MTgHCP41p_x6DSvQfjPVH95IQTewnhtnX0=w60-h60-l90-rj",
+      "width": 60,
+      "height": 60
+    },
+    {
+      "url": "https://yt3.googleusercontent.com/JL-pqw66BmaGlVp-ALu2ycJ1sYbuS-ln7xTqjzQzZqols1MTgHCP41p_x6DSvQfjPVH95IQTewnhtnX0=w120-h120-l90-rj",
+      "width": 120,
+      "height": 120
+    },
+    {
+      "url": "https://yt3.googleusercontent.com/JL-pqw66BmaGlVp-ALu2ycJ1sYbuS-ln7xTqjzQzZqols1MTgHCP41p_x6DSvQfjPVH95IQTewnhtnX0=w226-h226-l90-rj",
+      "width": 226,
+      "height": 226
+    },
+    {
+      "url": "https://yt3.googleusercontent.com/JL-pqw66BmaGlVp-ALu2ycJ1sYbuS-ln7xTqjzQzZqols1MTgHCP41p_x6DSvQfjPVH95IQTewnhtnX0=w544-h544-l90-rj",
+      "width": 544,
+      "height": 544
+    }
+  ],
+  "isExplicit": false,
+  "description": "17 is the debut studio album by American rapper XXXTentacion. It was released through Bad Vibes Forever and Empire Distribution on August 25, 2017. With a runtime of just under 22 minutes, 17 is a brief album and does not feature a song longer than three minutes. The album was supported by the lead single \"Revenge\", and is XXXTentacion's second commercial record, following the compilation mixtape of the same name. 17 includes a sole guest appearance from Trippie Redd and samples by Shiloh Dynasty. Production was handled by XXXTentacion, among others.\nThe album is built on acoustic and piano-driven songs, rather than the \"turn-up\" style and distortion bass sounds that was popular in XXXTentacion's native Florida scene. It experiments with a variety of genres, such as emo, lo-fi, indie rock, alternative R&B and grunge, while the lyrics are based around themes such as suicide, failed relationships, and infidelity. XXXTentacion stated that the album's target audience is people who suffer with depression, and that the album is also an \"entry\" into his mind.\n\nFrom Wikipedia (https://en.wikipedia.org/wiki/17_(XXX...) under Creative Commons Attribution CC-BY-SA 3.0 (https://creativecommons.org/licenses/...)",
+  "descriptionRuns": [
+    {
+      "text": "17 is the debut studio album by American rapper XXXTentacion. It was released through Bad Vibes Forever and Empire Distribution on August 25, 2017. With a runtime of just under 22 minutes, 17 is a brief album and does not feature a song longer than three minutes. The album was supported by the lead single \"Revenge\", and is XXXTentacion's second commercial record, following the compilation mixtape of the same name. 17 includes a sole guest appearance from Trippie Redd and samples by Shiloh Dynasty. Production was handled by XXXTentacion, among others.\nThe album is built on acoustic and piano-driven songs, rather than the \"turn-up\" style and distortion bass sounds that was popular in XXXTentacion's native Florida scene. It experiments with a variety of genres, such as emo, lo-fi, indie rock, alternative R&B and grunge, while the lyrics are based around themes such as suicide, failed relationships, and infidelity. XXXTentacion stated that the album's target audience is people who suffer with depression, and that the album is also an \"entry\" into his mind.\n\nFrom Wikipedia ("
+    },
+    {
+      "text": "https://en.wikipedia.org/wiki/17_(XXX...",
+      "url": "https://en.wikipedia.org/wiki/17_(XXXTentacion_album)"
+    },
+    {
+      "text": ") under Creative Commons Attribution CC-BY-SA 3.0 ("
+    },
+    {
+      "text": "https://creativecommons.org/licenses/...",
+      "url": "https://creativecommons.org/licenses/by-sa/3.0/legalcode"
+    },
+    {
+      "text": ")"
+    }
+  ],
+  "year": "2017",
+  "artists": [
+    {
+      "name": "XXXTENTACION",
+      "id": "UCnAcxgRZ065f_eXK1o85c1w"
+    }
+  ],
+  "trackCount": 11,
+  "duration": "22 minutes",
+  "audioPlaylistId": "OLAK5uy_kW9hN-oBmekJ06jhhfStpwRd5pcRKIztY",
+  "likeStatus": "INDIFFERENT",
+  "tracks": [
+    {
+      "videoId": "0m68rsj48X0",
+      "title": "The Explanation",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpIVKaNb4RsEILpZWvTU5NcfWPpDVku8VO7Q3BRjnBxpuFVEc9dKfIBLprpqV6Kbl1VDkr97L_P6a7CcgGgTNMjCHaexew"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "26M plays",
+      "trackNumber": 1,
+      "duration": "0:51",
+      "duration_seconds": 51
+    },
+    {
+      "videoId": "FAucVNRx_mU",
+      "title": "Jocelyn Flores",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpL2OnoJ3g1NWa1kpgrzSiH3i2tnYKa28BYAR2PJCIXNo5EcURibfuwXC5u3VVIcrKjILp5rsnnTumGPWIYS8sqeSXtw9g"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "1B plays",
+      "trackNumber": 2,
+      "duration": "2:00",
+      "duration_seconds": 120
+    },
+    {
+      "videoId": "yas2vpTPWWY",
+      "title": "Depression & Obsession",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpIESBhYDHMQXwybo7IiFq2-tLvttoirfHZTNQK46LsVc6drz_L9sU1vz0aGaqGynS0p1a_M7YuQGdOGm4zjr6322hhBcQ"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "99M plays",
+      "trackNumber": 3,
+      "duration": "2:25",
+      "duration_seconds": 145
+    },
+    {
+      "videoId": "7JGDWKJfgxQ",
+      "title": "Everybody Dies In Their Nightmares",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpIWCvtOkqj4Cakgb6TYWPOosZyoP1GjF-_FBPTFo4XpTdQGHr7wUc1ZYk7fXvgKWTfaNyYNXX93c5fbBIwzBk8iwUI71Q"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "584M plays",
+      "trackNumber": 4,
+      "duration": "1:36",
+      "duration_seconds": 96
+    },
+    {
+      "videoId": "CD_tD26E7k0",
+      "title": "Revenge",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpI4PPABdkbC7_s2oGEAb_Pg9ZY71MQAiUTezzwGKFvGTuwwsh6BWVGyO59kAUB7TfkvQ3-vAG-TMvPNjN1puE08hUEvXA"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "423M plays",
+      "trackNumber": 5,
+      "duration": "2:01",
+      "duration_seconds": 121
+    },
+    {
+      "videoId": "-8xdDaRFdwc",
+      "title": "Save Me",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpJ7_oxivG5zIVpbuDB-vQUK82SnYSwHF31NHeEeRUvoNL3qXYwAWmuXU0lQhYDM11hRvTgwPohPPTDVD44xjwfXz_0z_Q"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "207M plays",
+      "trackNumber": 6,
+      "duration": "2:44",
+      "duration_seconds": 164
+    },
+    {
+      "videoId": "n83f7_aTzgA",
+      "title": "Dead Inside (Interlude)",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpK21AEUFiHfpv8S6jpmQU6_Ka53Cj3JO_gCSUcgu5FgWhVDSZYBnBsNOsW42caFP_AiLQxR-AQYeNbhOjFrIMdIVn72tw"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "39M plays",
+      "trackNumber": 7,
+      "duration": "1:27",
+      "duration_seconds": 87
+    },
+    {
+      "videoId": "JcWOSgImiRw",
+      "title": "Fuck Love",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        },
+        {
+          "name": "Trippie Redd",
+          "id": "UCc8qwNDy-XWx8P3qMx1b6Wg"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpKTOM3z6-yUaAtY5aNu6EmjUVeKGHZR-ZC6Lg3pbDa5V2_StTPsMoFiVnf6cD6Z7siXK-NzPNRgYX8ox1I4tPL93jB75Q"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "613M plays",
+      "trackNumber": 8,
+      "duration": "2:27",
+      "duration_seconds": 147
+    },
+    {
+      "videoId": "EhTH8OIPoY4",
+      "title": "Carry On",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpLziT6mCkDXi50QiA82x5V2zjINfbtchPCWT7CLidXQyWmrvGu0dO5yWHTQa36kJKqsq0LZ-hRwuIQFQSJcdDOY7HOCRw"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "159M plays",
+      "trackNumber": 9,
+      "duration": "2:10",
+      "duration_seconds": 130
+    },
+    {
+      "videoId": "cnNfYsfyiMc",
+      "title": "Orlando",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpJ2YrR8VlFzSO-enOY_lWEBJMtVZJA7467i2HQjNfBDjulCiuM261poN4PLp-oqIJrpzlwg9S0B5OyQ1ko5dt7KAL-E-A"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "65M plays",
+      "trackNumber": 10,
+      "duration": "2:44",
+      "duration_seconds": 164
+    },
+    {
+      "videoId": "KbxlSQVWbDw",
+      "title": "Ayala (Outro)",
+      "artists": [
+        {
+          "name": "XXXTENTACION",
+          "id": "UCnAcxgRZ065f_eXK1o85c1w"
+        }
+      ],
+      "album": "17",
+      "likeStatus": "INDIFFERENT",
+      "inLibrary": false,
+      "pinnedToListenAgain": false,
+      "feedbackTokens": {
+        "add": null,
+        "remove": "AB9zfpK45GALmZPRWVI2cW3NWnPTtP8WnCG70uL-5Hgb0thUHIh7J1V8UjuzF-u8lkS7yhmQoMNdmhQN7d9jAnd1lKppgA32pQ"
+      },
+      "thumbnails": null,
+      "isAvailable": true,
+      "isExplicit": true,
+      "videoType": "MUSIC_VIDEO_TYPE_OMV",
+      "views": "32M plays",
+      "trackNumber": 11,
+      "duration": "1:40",
+      "duration_seconds": 100
+    }
+  ],
+  "related_recommendations": [
+    {
+      "title": "Cursed",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UCmtIz_MUL1vp1Yin1w_CU9g",
+          "name": "999ALBS"
+        }
+      ],
+      "browseId": "MPREb_zTSKgMsDIHX",
+      "audioPlaylistId": "OLAK5uy_mvZES4Gx0T9Coqpjp2i_H1lomAPmtY8j0",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/Uzs8S6YYmVWL0YutNNfw5AcYUbsnIzlMy9R8aK9BlcEs1hNxXl6fnTT-NHMrvX9C8-5SwdW6W9KXHnJE=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/Uzs8S6YYmVWL0YutNNfw5AcYUbsnIzlMy9R8aK9BlcEs1hNxXl6fnTT-NHMrvX9C8-5SwdW6W9KXHnJE=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": false
+    },
+    {
+      "title": "tell me why i'm waiting",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UCj1G64WqdPUubjZrSuoo1HA",
+          "name": "gsounds99"
+        },
+        {
+          "id": "UC_1uKFtloL04fUniGATpSzA",
+          "name": "Shiloh Dynasty"
+        }
+      ],
+      "browseId": "MPREb_31vNxYRer1W",
+      "audioPlaylistId": "OLAK5uy_nAaiQYajQP3NkM69cQo2tQuaWJs_0qo3Y",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/Mxb81bfQ8eTN_3wmMONfOv_UHWHXnzQsna066JbPZpv_tzBWnw0QPQrnzbjjc4poXJNiofkFHeJPggsS=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/Mxb81bfQ8eTN_3wmMONfOv_UHWHXnzQsna066JbPZpv_tzBWnw0QPQrnzbjjc4poXJNiofkFHeJPggsS=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": false
+    },
+    {
+      "title": "Bones",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UCVRwC9ql1FSp3gaWTWyyMCg",
+          "name": "Paris Shadows"
+        }
+      ],
+      "browseId": "MPREb_jr3psNnIXPW",
+      "audioPlaylistId": "OLAK5uy_kbyLe_krAF-Ueu0rsbFtzlrNipZOV62ZM",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/9l-8_uvbMQsfWZR_kP8yAPi32JnLzNLIye861DarygSFGwSM0fn8UcHd-6zJ7sF6rXaXjKePVW5WTO-FiQ=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/9l-8_uvbMQsfWZR_kP8yAPi32JnLzNLIye861DarygSFGwSM0fn8UcHd-6zJ7sF6rXaXjKePVW5WTO-FiQ=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": false
+    },
+    {
+      "title": "Paris",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UC0PsqWsDU7JJKqztI8V6spA",
+          "name": "$Uicideboy$"
+        }
+      ],
+      "browseId": "MPREb_8ryfpa8kQBP",
+      "audioPlaylistId": "OLAK5uy_l3LJAQx04t_nLCC6d2CH9ujwlyadnTIME",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/g79FsGx87yoh6ngd1THYRDo5kBxmTJ0_Lo95K-Ogq3Q-KL1W7ivbbY-SwrOr4kkO0UnubqREg_BTKQqf=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/g79FsGx87yoh6ngd1THYRDo5kBxmTJ0_Lo95K-Ogq3Q-KL1W7ivbbY-SwrOr4kkO0UnubqREg_BTKQqf=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": true
+    },
+    {
+      "title": "EP",
+      "type": "EP",
+      "artists": [
+        {
+          "id": "UCGZFMAkGoik-vMd9DXT-TOQ",
+          "name": "PapiTHBK"
+        }
+      ],
+      "browseId": "MPREb_KssQ56TBrPl",
+      "audioPlaylistId": "OLAK5uy_nrzgmiBdEh-4i3PcQqZM_gOFLIy5yt9ps",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/7LT7Ow7K77_tdU-8TgPG6bVxb6w0YNHmLZurqyLep5znljIoYpnyDbMeG_KNt9eNnAJgU0zk_-JNdtLaVQ=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/7LT7Ow7K77_tdU-8TgPG6bVxb6w0YNHmLZurqyLep5znljIoYpnyDbMeG_KNt9eNnAJgU0zk_-JNdtLaVQ=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": true
+    },
+    {
+      "title": "Reminds Me Of You",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UCof4hiuvv9BPhVCh90QHErw",
+          "name": "The Kid LAROI"
+        },
+        {
+          "id": "UCbn0GRdgsQtl9hlV-IqxFGg",
+          "name": "Juice WRLD"
+        }
+      ],
+      "browseId": "MPREb_iJxEKTGusnr",
+      "audioPlaylistId": "OLAK5uy_nwXYntPxwUPvUrMGyQtQdXXm80jDG6tvM",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/_HF-e5WUUjJdxjw7cjPnxq0Xs31FneSoXMP377Cw6sYge8oQbp20QKB0H8WagnOdTwbM2R3P_jZy9I6d6g=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/_HF-e5WUUjJdxjw7cjPnxq0Xs31FneSoXMP377Cw6sYge8oQbp20QKB0H8WagnOdTwbM2R3P_jZy9I6d6g=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": true
+    },
+    {
+      "title": "Me and You",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UCw8E45mi85XvO86LTH6358Q",
+          "name": "Cold Hart"
+        },
+        {
+          "id": "UCxcyWcW0kZFGRyetDHr3UuA",
+          "name": "Lil Peep"
+        }
+      ],
+      "browseId": "MPREb_sk144ZBcwmp",
+      "audioPlaylistId": "OLAK5uy_m1hXJGS2OxHmVTNFJi7kNc8HTmoUIQSSY",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/FF27WWvLTdSvUNOg4_r81ORHrS9cb7feiI0HCrbXHKBXH7lwNd0ksgM_LvekBlgjoQANlVbwzUfQbMwSqQ=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/FF27WWvLTdSvUNOg4_r81ORHrS9cb7feiI0HCrbXHKBXH7lwNd0ksgM_LvekBlgjoQANlVbwzUfQbMwSqQ=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": false
+    },
+    {
+      "title": "Thbk.",
+      "type": "Album",
+      "artists": [
+        {
+          "id": "UCGZFMAkGoik-vMd9DXT-TOQ",
+          "name": "Papithbk"
+        }
+      ],
+      "browseId": "MPREb_H7AthzHz45P",
+      "audioPlaylistId": "OLAK5uy_lozVzJzpyHwnF2B3yVeQV4QR9qSrpTVlk",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/RtoZodTiOI9ZzfnB0PDdxvpK-90khFwCQ-LF9ci7_LA6OPyn2bL5wVgfzCupdsEZdFjm0RfJ_grjsow=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/RtoZodTiOI9ZzfnB0PDdxvpK-90khFwCQ-LF9ci7_LA6OPyn2bL5wVgfzCupdsEZdFjm0RfJ_grjsow=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": true
+    },
+    {
+      "title": "21XXX",
+      "type": "Album",
+      "artists": [
+        {
+          "id": "UCoC_a7lWbj2v7rt4ujp4n2A",
+          "name": "21 Savage"
+        },
+        {
+          "id": "UCnAcxgRZ065f_eXK1o85c1w",
+          "name": "Xxxtentacion"
+        }
+      ],
+      "browseId": "MPREb_pn1ItZtZSMx",
+      "audioPlaylistId": "OLAK5uy_mR8qh6fCyij7PwmOG8oPc4EnkODut-OjQ",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/D-HYXzsQ9AbQXDG1ZFjGauJpl8-dWI01NqiraFzj6S_NDevV4tribueX2H6aIeZHtJueV0ku9htSkjI=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/D-HYXzsQ9AbQXDG1ZFjGauJpl8-dWI01NqiraFzj6S_NDevV4tribueX2H6aIeZHtJueV0ku9htSkjI=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": true
+    },
+    {
+      "title": "Dead and Cold",
+      "type": "Single",
+      "artists": [
+        {
+          "id": "UCfOZS29liUb6Mpr-Z6kpBhg",
+          "name": "SadBoyProlific"
+        }
+      ],
+      "browseId": "MPREb_D5sPX7k8X0l",
+      "audioPlaylistId": "OLAK5uy_mprU259MpxCfKtiUaqrD6msMmbJG3Dj90",
+      "thumbnails": [
+        {
+          "url": "https://yt3.googleusercontent.com/CsCNXKgTCpjVH-XvEM94OXAbpnMXM8RW1wyHkIwEv2QEStWD-GHoQVRdtH8s63SiD47pl89JiATdDoVF=w226-h226-l90-rj",
+          "width": 226,
+          "height": 226
+        },
+        {
+          "url": "https://yt3.googleusercontent.com/CsCNXKgTCpjVH-XvEM94OXAbpnMXM8RW1wyHkIwEv2QEStWD-GHoQVRdtH8s63SiD47pl89JiATdDoVF=w544-h544-l90-rj",
+          "width": 544,
+          "height": 544
+        }
+      ],
+      "isExplicit": true
+    }
+  ],
+  "duration_seconds": 1325
+}

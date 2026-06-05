@@ -1,6 +1,5 @@
 import json
 import warnings
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -33,7 +32,7 @@ class TestBrowsing:
 
     def test_get_artist(self, yt):
         results = yt.get_artist("MPLAUCmMUZbaYdNH0bEd1PAlAqsA")
-        assert len(results) == 17
+        assert len(results) == 18
         assert results["shuffleId"] is not None
         assert results["radioId"] is not None
 
@@ -51,6 +50,35 @@ class TestBrowsing:
 
         results = yt.get_artist("UCLZ7tlKC06ResyDmEStSrOw")  # no album year
         assert len(results) >= 11
+
+    def test_get_artist_description(self, yt, data_path):
+        with open(data_path / "2026_05_get_artist1.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            data_path / "expected_output" / "2026_05_get_artist1.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCJwGWV914kBlV4dKRn7AEFA")
+            assert result["description"] == expected_output["description"]
+            assert result["descriptionRuns"] == expected_output["descriptionRuns"]
+
+        with open(data_path / "2026_05_get_artist2.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            data_path / "expected_output" / "2026_05_get_artist2.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UC5CwaMl1eIgY8h02uZw7u8A")
+            assert result["description"] == expected_output["description"]
+            assert result["descriptionRuns"] == expected_output["descriptionRuns"]
 
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
@@ -113,14 +141,14 @@ class TestBrowsing:
         escaped_browse_id = yt.get_album_browse_id("OLAK5uy_nbMYyrfeg5ZgknoOsOGBL268hGxtcbnDM")
         assert len(escaped_browse_id) == 17
 
-    def test_get_album_2024(self, yt):
-        with open(Path(__file__).parent.parent / "data" / "2024_03_get_album.json", encoding="utf8") as f:
+    def test_get_album_2024(self, yt, data_path):
+        with open(data_path / "2024_03_get_album.json", encoding="utf8") as f:
             mock_response = json.load(f)
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
             album = yt.get_album("MPREabc")
             assert len(album["tracks"]) == 19
             assert len(album["artists"]) == 1
-            assert len(album) == 14
+            assert len(album) == 15
             for track in album["tracks"]:
                 assert isinstance(track["title"], str) and track["title"]
                 assert len(track["artists"]) > 0
@@ -156,6 +184,21 @@ class TestBrowsing:
         assert album["audioPlaylistId"] is not None
         assert album["tracks"][12]["trackNumber"] is None
         assert not album["tracks"][12]["isAvailable"]
+
+    def test_get_album_with_description_contain_link(self, yt, data_path):
+        with open(data_path / "2026_05_get_album.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            data_path / "expected_output" / "2026_05_get_album.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_album(yt.get_album_browse_id("OLAK5uy_kW9hN-oBmekJ06jhhfStpwRd5pcRKIztY"))
+            assert result["description"] == expected_output["description"]
+            assert result["descriptionRuns"] == expected_output["descriptionRuns"]
 
     def test_get_album_errors(self, yt):
         with pytest.raises(Exception, match="Invalid album browseId"):

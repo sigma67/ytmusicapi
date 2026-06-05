@@ -6,11 +6,14 @@ import unicodedata
 from collections.abc import Callable
 from hashlib import sha1
 from http.cookies import SimpleCookie
+from typing import Any
 
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.constants import *
+from ytmusicapi.models.content.TextRun import TextRun
+from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import JsonDict
 
 
@@ -98,3 +101,24 @@ def sum_total_duration(item: JsonDict) -> int:
             for track in item["tracks"]
         ]
     )
+
+
+def parse_description_runs(descriptionRunsList: Any | None) -> tuple[str, list[TextRun]]:
+    if not isinstance(descriptionRunsList, list):
+        return "", []
+
+    description_runs: list[TextRun] = []
+    description = ""
+    for run in descriptionRunsList:
+        description += run["text"]
+
+        if "navigationEndpoint" in run:
+            link = nav(run, ["navigationEndpoint", "urlEndpoint", "url"])
+            desc = run["text"]
+
+            description_runs.append({"text": desc, "url": link})
+            continue
+        else:
+            description_runs.append({"text": run["text"]})
+
+    return description, description_runs
