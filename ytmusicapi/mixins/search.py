@@ -256,6 +256,11 @@ class SearchMixin(MixinProtocol):
                 if internal_filter and not scope == scopes[1]:
                     result_type = internal_filter[:-1].lower()
 
+            elif "itemSectionRenderer" in res:
+                shelf_contents = res["itemSectionRenderer"]["contents"]
+                if MRLIR not in shelf_contents[0]:
+                    continue
+
             else:
                 continue
 

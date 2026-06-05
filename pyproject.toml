@@ -5,9 +5,7 @@ requires-python = ">=3.10"
 authors = [{ name = "sigma67", email = "ytmusicapi@gmail.com" }]
 license-files = ["LICENSE"]
 license = "MIT"
-classifiers = [
-    "Programming Language :: Python :: 3",
-]
+classifiers = ["Programming Language :: Python :: 3"]
 dependencies = ["requests >= 2.22"]
 dynamic = ["version", "readme"]
 
@@ -41,7 +39,7 @@ include-package-data = false
 [tool.pytest.ini_options]
 python_functions = "test_*"
 testpaths = ["tests"]
-addopts = "--verbose --cov --junitxml=junit.xml --retries 2 --retry-delay 5 --durations=0"
+addopts = "--verbose --cov --junitxml=junit.xml --retries 0 --retry-delay 5 --durations=0"
 
 [tool.coverage.run]
 source = ["ytmusicapi"]
