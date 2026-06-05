@@ -277,8 +277,7 @@ class SearchMixin(MixinProtocol):
                         1,
                         "musicResponsiveListItemFlexColumnRenderer",
                         "text",
-                        "runs",
-                        0,
+                        *RUN_TEXT,
                     ],
                 )
 

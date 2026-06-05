@@ -149,8 +149,9 @@ class WatchMixin(MixinProtocol):
             ],
         )
 
-        lyrics_browse_id = get_tab_browse_id(watchNextRenderer, 1)
-        related_browse_id = get_tab_browse_id(watchNextRenderer, 2)
+        browse_ids = get_tab_browse_ids(watchNextRenderer)
+        lyrics_browse_id = browse_ids.get("MUSIC_PAGE_TYPE_TRACK_LYRICS")
+        related_browse_id = browse_ids.get("MUSIC_PAGE_TYPE_TRACK_RELATED")
 
         results = nav(
             watchNextRenderer, [*TAB_CONTENT, "musicQueueRenderer", "content", "playlistPanelRenderer"], True
