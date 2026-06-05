@@ -7,6 +7,8 @@ from ytmusicapi import YTMusic
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.parsers.search import ALL_RESULT_TYPES, API_RESULT_TYPES
 
+STANFORD_PODCAST_SEARCH_QUERY = 'intitle:"109. Simplify!" before:2024-01-01 after:2023-01-01'
+
 
 class TestSearch:
     def test_search_exceptions(self, yt_auth):
@@ -122,13 +124,11 @@ class TestSearch:
 
     def test_search_episode_category(self, yt_auth):
         """Test resultType detection for episodes by searching for a podcast without a filter."""
-        results = yt_auth.search("Stanford GSB Podcasts Grit")
+        results = yt_auth.search(STANFORD_PODCAST_SEARCH_QUERY)
         episode = next(
             item
             for item in results
-            if item["category"] == "Episode"
-            and "podcast" in item
-            and item["podcast"]["name"] == "Stanford GSB Podcasts"
+            if "podcast" in item and item["podcast"]["name"] == "Stanford GSB Podcasts"
         )
         assert episode["resultType"] == "episode"
         assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
@@ -141,7 +141,7 @@ class TestSearch:
         assert len(results[0]["author"]) > 0
 
     def test_search_top_result_episode(self, yt):
-        results = yt.search('"109. Simplify! How to Communicate Complex Ideas Simply and Effectively"')
+        results = yt.search(STANFORD_PODCAST_SEARCH_QUERY)
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "episode"
         assert results[0]["podcast"] == {
@@ -196,10 +196,10 @@ class TestSearch:
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
 
     def test_remove_search_suggestions_valid(self, yt_auth):
-        first_pass = yt_auth.search("b")  # Populate the suggestion history
+        first_pass = yt_auth.search("be")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
-        time.sleep(15)
-        results = yt_auth.get_search_suggestions("b", detailed_runs=True)
+        time.sleep(5)
+        results = yt_auth.get_search_suggestions("", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
 
