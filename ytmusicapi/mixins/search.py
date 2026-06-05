@@ -253,24 +253,8 @@ class SearchMixin(MixinProtocol):
 
             elif "itemSectionRenderer" in res:
                 shelf_contents = res["itemSectionRenderer"]["contents"]
-
-                is_did_you_mean_section = nav(shelf_contents, [0, "didYouMeanRenderer"], True)
-
-                if is_did_you_mean_section is not None:
+                if MRLIR not in shelf_contents[0]:
                     continue
-
-                category = nav(
-                    shelf_contents,
-                    [
-                        0,
-                        MRLIR,
-                        "flexColumns",
-                        1,
-                        "musicResponsiveListItemFlexColumnRenderer",
-                        "text",
-                        *RUN_TEXT,
-                    ],
-                )
             else:
                 continue
 
