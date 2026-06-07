@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest
 
+from tests.conftest import get_resource
 from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
@@ -326,12 +327,8 @@ class TestPlaylists:
         from ytmusicapi.auth.types import AuthType
         from ytmusicapi.exceptions import YTMusicUserError
         from unittest import mock
-        import tempfile
 
-        # Create a temp valid jpg file
-        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
-            temp_path = Path(f.name)
-            f.write(b"fake jpeg content")
+        temp_path = Path(get_resource("test_image_128x128.jpg"))
 
         # Verify yt_brand has browser auth
         assert yt_brand.auth_type == AuthType.BROWSER, "Test requires browser authentication"
@@ -362,19 +359,15 @@ class TestPlaylists:
                     assert thumbnail_action is not None
                     assert thumbnail_action["addedCustomThumbnail"]["playlistScottyEncryptedBlobId"] == "test_encrypted_blob_id_12345"
         finally:
-            temp_path.unlink()
+            pass  # temp file is in tests/data/, not a temp file
 
     def test_edit_playlist_image_combined_with_other_edits(self, yt_brand):
         """Test that image upload can be combined with other playlist edits"""
         from pathlib import Path
         from ytmusicapi.auth.types import AuthType
         from unittest import mock
-        import tempfile
 
-        # Create a temp valid jpg file
-        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
-            temp_path = Path(f.name)
-            f.write(b"fake jpeg content")
+        temp_path = Path(get_resource("test_image_128x128.png"))
 
         assert yt_brand.auth_type == AuthType.BROWSER, "Test requires browser authentication"
 
@@ -408,4 +401,4 @@ class TestPlaylists:
                     assert "ACTION_SET_PLAYLIST_DESCRIPTION" in action_types
                     assert "ACTION_SET_PLAYLIST_PRIVACY" in action_types
         finally:
-            temp_path.unlink()
+            pass  # temp file is in tests/data/, not a temp file
