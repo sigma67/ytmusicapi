@@ -41,7 +41,10 @@ def parse_album_header(response: JsonDict) -> JsonDict:
 
 
 def parse_album_header_2024(response: JsonDict) -> JsonDict:
-    header = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
+    # Try twoColumn first, fallback to singleColumn
+    header = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER], True)
+    if header is None:
+        header = nav(response, [*SINGLE_COLUMN, *TAB_CONTENT, *SECTION_LIST_ITEM, *RESPONSIVE_HEADER])
     album = {
         "title": nav(header, TITLE_TEXT),
         "type": nav(header, SUBTITLE),
