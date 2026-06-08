@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from random import randint
+import warnings
 
 from requests import Response
 
@@ -408,17 +409,38 @@ class LibraryMixin(MixinProtocol):
         endpoint = prepare_like_endpoint(rating)
         return self._send_request(endpoint, body)
 
+    def subscribe_artist(self, channelId: str) -> JsonDict:
+        """
+        Subscribe to an artist. Adds the artist to your library
+
+        :param channelId: Artist channel id
+        :return: Full response
+        """
+        self._check_auth()
+        body = {"channelIds": [channelId]}
+        endpoint = "subscription/subscribe"
+        return self._send_request(endpoint, body)
+
     def subscribe_artists(self, channelIds: list[str]) -> JsonDict:
         """
         Subscribe to artists. Adds the artists to your library
 
+        .. deprecated::
+            Use :meth:`subscribe_artist` instead. YouTube Music only supports
+            subscribing to one artist at a time.
+
         :param channelIds: Artist channel ids
         :return: Full response
         """
-        self._check_auth()
-        body = {"channelIds": channelIds}
-        endpoint = "subscription/subscribe"
-        return self._send_request(endpoint, body)
+        warnings.warn(
+            "subscribe_artists is deprecated, use subscribe_artist instead. "
+            "YouTube Music only supports subscribing to one artist at a time.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        if len(channelIds) > 1:
+            raise YTMusicUserError("YouTube Music only supports subscribing to one artist at a time. Use subscribe_artist instead.")
+        return self.subscribe_artist(channelIds[0])
 
     def unsubscribe_artists(self, channelIds: list[str]) -> JsonDict:
         """
