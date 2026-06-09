@@ -292,6 +292,7 @@ class TestPlaylists:
     def test_edit_playlist_image_auth_error(self, yt_oauth: YTMusic):
         """Test that non-browser auth raises error when uploading image"""
         from pathlib import Path
+
         from ytmusicapi.exceptions import YTMusicUserError
 
         with pytest.raises(YTMusicUserError, match="browser authentication"):
@@ -299,11 +300,11 @@ class TestPlaylists:
 
     def test_edit_playlist_image_invalid_filetype(self, yt_brand):
         """Test that invalid file type raises error"""
-        from pathlib import Path
-        from ytmusicapi.exceptions import YTMusicUserError
-
         # Create a temp file with invalid extension
         import tempfile
+        from pathlib import Path
+
+        from ytmusicapi.exceptions import YTMusicUserError
         with tempfile.NamedTemporaryFile(suffix=".gif", delete=False) as f:
             temp_path = Path(f.name)
 
@@ -316,6 +317,7 @@ class TestPlaylists:
     def test_edit_playlist_image_file_not_found(self, yt_brand):
         """Test that missing file raises error"""
         from pathlib import Path
+
         from ytmusicapi.exceptions import YTMusicUserError
 
         with pytest.raises(YTMusicUserError, match="does not exist"):
@@ -324,9 +326,9 @@ class TestPlaylists:
     def test_edit_playlist_image_upload_success(self, yt_brand, browser_filepath):
         """Test that image upload with valid image works correctly"""
         from pathlib import Path
-        from ytmusicapi.auth.types import AuthType
-        from ytmusicapi.exceptions import YTMusicUserError
         from unittest import mock
+
+        from ytmusicapi.auth.types import AuthType
 
         temp_path = Path(get_resource("test_image_128x128.jpg"))
 
@@ -342,7 +344,7 @@ class TestPlaylists:
             # Mock the edit_playlist response
             mock_edit_response = {"status": "STATUS_SUCCEEDED"}
 
-            with mock.patch("requests.post", return_value=mock_response) as mock_post:
+            with mock.patch("requests.post", return_value=mock_response):
                 with mock.patch.object(yt_brand, "_send_request", return_value=mock_edit_response) as mock_send:
                     response = yt_brand.edit_playlist("PL_test123", image=temp_path)
 
@@ -364,8 +366,9 @@ class TestPlaylists:
     def test_edit_playlist_image_combined_with_other_edits(self, yt_brand):
         """Test that image upload can be combined with other playlist edits"""
         from pathlib import Path
-        from ytmusicapi.auth.types import AuthType
         from unittest import mock
+
+        from ytmusicapi.auth.types import AuthType
 
         temp_path = Path(get_resource("test_image_128x128.png"))
 
