@@ -1,4 +1,3 @@
-import typing
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -553,7 +552,7 @@ class PlaylistsMixin(MixinProtocol):
             )
 
         headers = self.headers.copy()
-        upload_url = f"https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"
+        upload_url = "https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"
         filesize = fp.stat().st_size
 
         # Step 1: POST to get the upload URL from headers
