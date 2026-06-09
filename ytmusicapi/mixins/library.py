@@ -1,6 +1,6 @@
+import warnings
 from collections.abc import Callable
 from random import randint
-import warnings
 
 from requests import Response
 
