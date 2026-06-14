@@ -1,9 +1,14 @@
+import json
 import re
 from datetime import date
+from pathlib import Path
 from typing import Literal
+
+import requests
 
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.models.content.enums import LikeStatus
+from ytmusicapi.type_alias import JsonDict
 
 LibraryOrderType = Literal["a_to_z", "z_to_a", "recently_added"]
 
@@ -60,3 +65,67 @@ def get_datestamp() -> int:
     """Returns the number of days since January 1, 1970.
     Currently only used for the signature timestamp in :py:func:`get_song`."""
     return (date.today() - date.fromtimestamp(0)).days
+
+
+def _resumable_upload(
+    file_path: Path,
+    upload_endpoint: str,
+    headers: JsonDict,
+    file_size: int | None = None,
+    file_size_limit: int | None = None,
+    size_limit_msg: str = "",
+    proxies: JsonDict | None = None,
+    require_empty_body: bool = False,
+) -> JsonDict:
+    """Generic resumable file upload using Google's resumable upload protocol.
+
+    Shared between song uploads (uploads.py) and playlist image uploads (playlists.py).
+
+    :param file_path: Path to the file to upload
+    :param upload_endpoint: Full URL for the upload endpoint
+    :param headers: Headers dict (will be modified in-place for the upload)
+    :param file_size: Pre-computed file size in bytes. If None, computed from file_path.
+    :param file_size_limit: Maximum allowed file size in bytes (optional)
+    :param size_limit_msg: Error message if file exceeds size limit
+    :param proxies: Proxies dict for requests
+    :param require_empty_body: If True, send empty body on initial POST (for playlist images).
+        If False, send filename body (for song uploads).
+    :return: Response JSON dict containing encryptedBlobId or upload result
+    """
+    if not file_path.is_file():
+        raise YTMusicUserError("The provided file does not exist.")
+
+    if file_size is None:
+        file_size = file_path.stat().st_size
+
+    if file_size_limit is not None and file_size >= file_size_limit:
+        raise YTMusicUserError(
+            size_limit_msg if size_limit_msg else f"File {file_path} exceeds the size limit of {file_size_limit} bytes"
+        )
+
+    headers.pop("content-encoding", None)
+    headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
+    headers["X-Goog-Upload-Command"] = "start"
+    headers["X-Goog-Upload-Header-Content-Length"] = str(file_size)
+    headers["X-Goog-Upload-Protocol"] = "resumable"
+
+    body = "" if require_empty_body else ("filename=" + file_path.name).encode("utf-8")
+
+    response = requests.post(
+        upload_endpoint,
+        data=body,
+        headers=headers,
+        proxies=proxies,
+    )
+
+    upload_url = response.headers["X-Goog-Upload-URL"]
+    headers["X-Goog-Upload-Command"] = "upload, finalize"
+    headers["X-Goog-Upload-Offset"] = "0"
+
+    with open(file_path, "rb") as file:
+        response = requests.post(upload_url, data=file, headers=headers, proxies=proxies)
+
+    if response.status_code != 200:
+        raise YTMusicUserError(f"Upload failed with status code {response.status_code}: {response.text}")
+
+    return response.json()

@@ -15,7 +15,7 @@ from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFunc
 
 from ..auth.types import AuthType
 from ._protocol import MixinProtocol
-from ._utils import *
+from ._utils import _resumable_upload, html_to_txt
 
 
 class PlaylistsMixin(MixinProtocol):
@@ -537,13 +537,10 @@ class PlaylistsMixin(MixinProtocol):
         :param playlistId: Playlist id
         :return: The encrypted blob ID for the uploaded image
         """
-        if not self.auth_type == AuthType.BROWSER:
-            raise YTMusicUserError("Please provide browser authentication before uploading playlist images")
+        if self.auth_type == AuthType.UNAUTHORIZED:
+            raise YTMusicUserError("Please provide browser or OAuth authentication before uploading playlist images")
 
         fp = Path(image)
-        if not fp.is_file():
-            raise YTMusicUserError("The provided image file does not exist.")
-
         supported_filetypes = ["jpg", "jpeg", "png"]
         if fp.suffix.lower().lstrip(".") not in supported_filetypes:
             raise YTMusicUserError(
@@ -551,35 +548,26 @@ class PlaylistsMixin(MixinProtocol):
                 + ", ".join(supported_filetypes)
             )
 
+        # Client-side size pre-check: playlist images should be small
+        filesize = fp.stat().st_size
+        MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB limit for playlist images
+        if filesize >= MAX_IMAGE_SIZE:
+            raise YTMusicUserError(
+                f"Image {fp} is {filesize / (1024*1024):.1f}MB, which exceeds the playlist image size limit of 10MB"
+            )
+
         headers = self.headers.copy()
         upload_url = "https://music.youtube.com/playlist_image_upload/playlist_custom_thumbnail"
-        filesize = fp.stat().st_size
+        proxies = self.proxies
 
-        # Step 1: POST to get the upload URL from headers
-        headers.pop("content-encoding", None)
-        headers["content-type"] = "application/x-www-form-urlencoded;charset=utf-8"
-        headers["X-Goog-Upload-Command"] = "start"
-        headers["X-Goog-Upload-Header-Content-Length"] = str(filesize)
-        headers["X-Goog-Upload-Protocol"] = "resumable"
-
-        response = requests.post(
-            upload_url,
-            data="",
+        # Use shared resumable upload helper (require_empty_body=True for playlist images)
+        response_data = _resumable_upload(
+            file_path=fp,
+            upload_endpoint=upload_url,
             headers=headers,
-            proxies=self.proxies,
+            file_size=filesize,
+            proxies=proxies,
+            require_empty_body=True,
         )
 
-        # Step 2: Upload the image data using the URL from the response
-        upload_url = response.headers["X-Goog-Upload-URL"]
-        headers["X-Goog-Upload-Command"] = "upload, finalize"
-        headers["X-Goog-Upload-Offset"] = "0"
-
-        with open(fp, "rb") as file:
-            response = requests.post(upload_url, data=file, headers=headers, proxies=self.proxies)
-
-        if response.status_code != 200:
-            raise YTMusicUserError(f"Image upload failed with status code {response.status_code}: {response.text}")
-
-        # The response contains JSON with the encrypted blob ID
-        response_data = response.json()
         return response_data["encryptedBlobId"]

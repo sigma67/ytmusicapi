@@ -289,14 +289,16 @@ class TestPlaylists:
         assert response == ResponseStatus.SUCCEEDED, "Playlist item removal failed"
         yt_brand.delete_playlist(playlist_id)
 
-    def test_edit_playlist_image_auth_error(self, yt_oauth: YTMusic):
-        """Test that non-browser auth raises error when uploading image"""
+    def test_edit_playlist_image_auth_error(self):
+        """Test that unauthenticated YTMusic raises error when uploading image"""
         from pathlib import Path
 
+        from ytmusicapi import YTMusic
         from ytmusicapi.exceptions import YTMusicUserError
 
-        with pytest.raises(YTMusicUserError, match="browser authentication"):
-            yt_oauth.edit_playlist("PL_test", image=Path("test.jpg"))
+        yt_unauth = YTMusic()
+        with pytest.raises(YTMusicUserError, match="browser or OAuth"):
+            yt_unauth.edit_playlist("PL_test", image=Path("test.jpg"))
 
     def test_edit_playlist_image_invalid_filetype(self, yt_brand):
         """Test that invalid file type raises error"""
