@@ -147,7 +147,7 @@ For the list of values you can use for the ``language`` parameter, see below:
 
    <details>
    <br>
-   <summary><a>Supported locations</a></summary>
+   <summary><a>Supported languages</a></summary>
 
 .. container::
 
