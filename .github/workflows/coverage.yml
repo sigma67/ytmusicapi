@@ -32,6 +32,10 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
         persist-credentials: false
         fetch-depth: 1
+        # v7 blocks fork PR checkouts on pull_request_target by default.
+        # Safe here because the 'coverage' environment gate requires maintainer approval
+        # before this job runs and secrets are exposed (see environment: field above).
+        allow-unsafe-pr-checkout: true
     - name: Setup Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
