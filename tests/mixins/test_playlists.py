@@ -76,6 +76,16 @@ class TestPlaylists:
         assert len(album["tracks"]) == 456
         assert album["trackCount"] == 456
 
+    def test_get_playlist_validate_responses(self, yt_oauth):
+        playlist_id = "PL6bPxvf5dW5clc3y9wAoslzqUrmkZ5c-u"  # very large
+        playlist = yt_oauth.get_playlist(playlist_id, limit=None, validate_responses=True)
+        # validated continuations should retrieve all tracks of the playlist
+        assert len(playlist["tracks"]) == playlist["trackCount"]
+
+    def test_get_playlist_validate_responses_no_track_count(self, yt_oauth):
+        with pytest.raises(YTMusicUserError):
+            yt_oauth.get_playlist("RDATgXd-", limit=None, validate_responses=True)
+
     @pytest.mark.parametrize(
         "playlist_id",
         [

@@ -16,7 +16,12 @@ from ._utils import *
 
 class PlaylistsMixin(MixinProtocol):
     def get_playlist(
-        self, playlistId: str, limit: int | None = 100, related: bool = False, suggestions_limit: int = 0
+        self,
+        playlistId: str,
+        limit: int | None = 100,
+        related: bool = False,
+        suggestions_limit: int = 0,
+        validate_responses: bool = False,
     ) -> JsonDict:
         """
         Returns a list of playlist items
@@ -27,6 +32,9 @@ class PlaylistsMixin(MixinProtocol):
         :param suggestions_limit: How many suggestions to return. The result is a list of
             suggested playlist items (videos) contained in a "suggestions" key.
             7 items are retrieved in each internal request. Default: 0
+        :param validate_responses: Flag indicating if responses from YTM should be validated and retried
+            in case when some tracks are missing. This helps to retrieve all tracks of large playlists,
+            where YouTube Music sometimes returns fewer items than expected per continuation. Default: False
         :return: Dictionary with information about the playlist.
             The key ``tracks`` contains a List of playlistItem dictionaries
 
@@ -225,9 +233,33 @@ class PlaylistsMixin(MixinProtocol):
             )
 
             parse_func = lambda contents: parse_playlist_items(contents, is_collaborative=is_collaborative)
-            playlist["tracks"].extend(
-                get_continuations_2025(content_data, limit, request_func_continuations, parse_func)
-            )
+            if validate_responses:
+                per_page = 100
+                track_count = playlist["trackCount"]
+                if limit is None:
+                    request_count = track_count
+                elif track_count is None:
+                    request_count = limit
+                else:
+                    request_count = min(limit, track_count)
+                if request_count is None:
+                    raise YTMusicUserError(
+                        "Validation is not supported for playlists without a known trackCount. "
+                        "Please provide a limit."
+                    )
+                playlist["tracks"].extend(
+                    get_validated_continuations_2025(
+                        content_data,
+                        request_count - len(playlist["tracks"]),
+                        per_page,
+                        request_func_continuations,
+                        parse_func,
+                    )
+                )
+            else:
+                playlist["tracks"].extend(
+                    get_continuations_2025(content_data, limit, request_func_continuations, parse_func)
+                )
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist
