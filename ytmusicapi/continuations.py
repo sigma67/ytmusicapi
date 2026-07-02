@@ -76,7 +76,8 @@ def get_validated_continuations_2025(
     This retries each continuation request until the expected amount of items is returned.
 
     :param results: result dict containing the initial ``contents`` and continuation token
-    :param limit: minimum number of items to retrieve in total
+    :param limit: minimum number of items to retrieve in total. Whole pages are fetched, so the
+        result may exceed this value
     :param per_page: expected number of items per continuation request
     :param request_func: request func that accepts a body dict (see :py:data:`RequestFuncBodyType`)
     :param parse_func: parse func to apply on the returned continuation items
