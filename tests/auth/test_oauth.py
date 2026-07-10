@@ -121,6 +121,14 @@ class TestOAuth:
         assert yt._token.refresh_token == "test_refresh_token"
         assert not hasattr(yt._token, "refresh_token_expires_in")
 
+    def test_from_json_missing_file_raises_filenotfound(self, tmp_path):
+        """Regression for #954: loading a non-existent path should raise
+        FileNotFoundError naming the path, not UnboundLocalError.
+        """
+        missing = tmp_path / "does-not-exist.json"
+        with pytest.raises(FileNotFoundError):
+            OAuthToken.from_json(missing)
+
     @pytest.mark.skip(reason="oauth is currently not working, see #813")
     def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
         # ensure instance initialized token
