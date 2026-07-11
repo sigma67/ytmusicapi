@@ -80,6 +80,87 @@ class TestBrowsing:
             assert result["description"] == expected_output["description"]
             assert result["descriptionRuns"] == expected_output["descriptionRuns"]
 
+    def test_get_artist_two_column_layout(self, yt):
+        """regression test for #929: some artist pages are served as
+        twoColumnBrowseResultsRenderer instead of singleColumnBrowseResultsRenderer"""
+        mock_response = {
+            "header": {
+                "musicImmersiveHeaderRenderer": {
+                    "title": {"runs": [{"text": "Test Artist"}]},
+                    "subscriptionButton": {
+                        "subscribeButtonRenderer": {
+                            "channelId": "UCTestChannelId",
+                            "subscribed": False,
+                        }
+                    },
+                }
+            },
+            "contents": {
+                "twoColumnBrowseResultsRenderer": {
+                    "tabs": [
+                        {
+                            "tabRenderer": {
+                                "content": {
+                                    "sectionListRenderer": {
+                                        "contents": [
+                                            {
+                                                "musicShelfRenderer": {
+                                                    "title": {"runs": [{"text": "Songs"}]},
+                                                    "contents": [],
+                                                }
+                                            },
+                                            {
+                                                "musicCarouselShelfRenderer": {
+                                                    "header": {
+                                                        "musicCarouselShelfBasicHeaderRenderer": {
+                                                            "title": {"runs": [{"text": "Albums"}]}
+                                                        }
+                                                    },
+                                                    "contents": [
+                                                        {
+                                                            "musicTwoRowItemRenderer": {
+                                                                "title": {
+                                                                    "runs": [
+                                                                        {
+                                                                            "text": "Test Album",
+                                                                            "navigationEndpoint": {
+                                                                                "browseEndpoint": {
+                                                                                    "browseId": "MPREb_test123"
+                                                                                }
+                                                                            },
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "subtitle": {"runs": [{"text": "2024"}]},
+                                                                "thumbnailRenderer": {
+                                                                    "musicThumbnailRenderer": {
+                                                                        "thumbnail": {"thumbnails": []}
+                                                                    }
+                                                                },
+                                                            }
+                                                        }
+                                                    ],
+                                                }
+                                            },
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+        }
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCTestChannelId")
+
+        assert result["name"] == "Test Artist"
+        assert result["songs"]["results"] == []
+        assert len(result["albums"]["results"]) == 1
+        assert result["albums"]["results"][0]["title"] == "Test Album"
+        assert result["albums"]["results"][0]["browseId"] == "MPREb_test123"
+
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
         results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
