@@ -28,15 +28,19 @@ def parse_song_run(run: JsonDict) -> JsonDict:
         else:  # artist
             return {"type": "artist", "data": item}
     else:
-        # note: YT uses non-breaking space \xa0 to separate number and magnitude
-        if re.match(r"^\d([^ ])* [^ ]*$", text):
-            return {"type": "views", "data": text.split(" ")[0]}
-
-        elif re.match(r"^(\d+:)*\d+:\d+$", text):
+        if re.match(r"^(\d+:)*\d+:\d+$", text):
             return {"type": "duration", "data": text}
 
         elif re.match(r"^\d{4}$", text):
             return {"type": "year", "data": text}
+
+        elif re.match(r"^\d", text):
+            # view counts, e.g. "34M views" (en) or "3406万回視聴" (ja)
+            # note: YT uses a non-breaking space \xa0 to separate number and magnitude, and some
+            # locales (e.g. ja) don't use a space to separate the number/magnitude from the word
+            # for "views" at all, so only split on a space if one is actually present (#952)
+            data = text.split(" ")[0] if " " in text else text
+            return {"type": "views", "data": data}
 
         else:  # artist without id
             return {"type": "artist", "data": {"name": text, "id": None}}
