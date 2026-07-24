@@ -21,7 +21,10 @@ def parse_mixed_content(
             results = next(iter(row.values()))
             if "contents" not in results:
                 continue
-            title = nav(results, [*CAROUSEL_TITLE, "text"])
+            # some carousel headers only carry a strapline (e.g. "MORE FROM") instead of a title
+            title = nav(results, [*CAROUSEL_TITLE, "text"], True) or nav(
+                results, [*CAROUSEL_STRAPLINE, "text"], True
+            )
             contents = []
             for result in results["contents"]:
                 data = nav(result, [MTRIR], True)

@@ -90,6 +90,7 @@ CAROUSEL = ["musicCarouselShelfRenderer"]
 IMMERSIVE_CAROUSEL = ["musicImmersiveCarouselShelfRenderer"]
 CAROUSEL_CONTENTS = [*CAROUSEL, "contents"]
 CAROUSEL_TITLE = [*HEADER, "musicCarouselShelfBasicHeaderRenderer", *TITLE]
+CAROUSEL_STRAPLINE = [*HEADER, "musicCarouselShelfBasicHeaderRenderer", "strapline", "runs", 0]
 CARD_SHELF_TITLE = [*HEADER, "musicCardShelfHeaderBasicRenderer", *TITLE_TEXT]
 FRAMEWORK_MUTATIONS = ["frameworkUpdates", "entityBatchUpdate", "mutations"]
 TIMESTAMPED_LYRICS = [

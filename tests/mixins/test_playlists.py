@@ -195,7 +195,7 @@ class TestPlaylists:
 
     def test_edit_playlist_collaboration(self, yt_oauth, yt_brand):
         playlist_id = yt_oauth.create_playlist("test collaboration", "", privacy_status="UNLISTED")
-        assert len(playlist_id) == 34, "Playlist creation failed"
+        assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
 
         try:
             response = yt_oauth.edit_playlist(
@@ -234,8 +234,7 @@ class TestPlaylists:
 
     def test_edit_playlist_community_vote(self, yt_oauth: YTMusic):
         playlist_id = yt_oauth.create_playlist("test edit community vote", "", privacy_status="UNLISTED")
-        assert len(playlist_id) == 34, "Playlist creation failed"
-        assert isinstance(playlist_id, str), "Playlist creation failed"
+        assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
 
         try:
             response = yt_oauth.edit_playlist(playlist_id, collaboration=True)
@@ -269,7 +268,7 @@ class TestPlaylists:
             "test description",
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
         )
-        assert len(playlist_id) == 34, "Playlist creation failed"
+        assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
         yt_brand.edit_playlist(playlist_id, addToTop=True)
         response = yt_brand.add_playlist_items(
             playlist_id,

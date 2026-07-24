@@ -134,7 +134,7 @@ class TestSearch:
         assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
 
     def test_search_top_result_playlist(self, yt_oauth):
-        results = yt_oauth.search("grace ost complete playlist")  # issue 524
+        results = yt_oauth.search('intitle:"grace OST" playlist')  # issue 524
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "playlist"
         assert results[0]["playlistId"].startswith("PL")
