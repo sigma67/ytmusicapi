@@ -50,13 +50,15 @@ def parse_song_runs(runs: JsonList, skip_type_spec: bool = False) -> JsonDict:
     parsed: JsonDict = {}
 
     # prevent type specifier from being parsed as an artist
-    # it's the first run, separated from the actual artists by " • "
+    # it's the unlinked first run, separated by " • " from the artists, or from
+    # metadata (duration/views/year) when the song lists no artist at all
     if (
         skip_type_spec
         and len(runs) > 2
+        and "navigationEndpoint" not in runs[0]
         and parse_song_run(runs[0])["type"] == "artist"
         and runs[1] == DOT_SEPARATOR_RUN
-        and parse_song_run(runs[2])["type"] == "artist"
+        and parse_song_run(runs[2])["type"] in ("artist", "duration", "views", "year")
     ):
         runs = runs[2:]
 
