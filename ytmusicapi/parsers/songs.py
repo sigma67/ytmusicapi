@@ -129,9 +129,12 @@ def parse_song_menu_data(data: JsonDict) -> JsonDict:
         feedback_token: Callable[[str], str | None] = lambda endpoint_type: nav(
             menu_item, [endpoint_type, *FEEDBACK_TOKEN], True
         )
+        # YTM signals the current state with isToggled instead of swapping the default/toggled icons
+        is_toggled = bool(menu_item.get("isToggled"))
 
         match current_icon_type:
             case "KEEP":  # pin to listen again
+                song_data["pinnedToListenAgain"] = is_toggled
                 song_data["listenAgainFeedbackTokens"] = {
                     "pin": feedback_token("defaultServiceEndpoint"),
                     "unpin": feedback_token("toggledServiceEndpoint"),
@@ -143,6 +146,7 @@ def parse_song_menu_data(data: JsonDict) -> JsonDict:
                     "unpin": feedback_token("defaultServiceEndpoint"),
                 }
             case "BOOKMARK_BORDER":  # add to library
+                song_data["inLibrary"] = is_toggled
                 song_data["feedbackTokens"] = {
                     "add": feedback_token("defaultServiceEndpoint"),
                     "remove": feedback_token("toggledServiceEndpoint"),
