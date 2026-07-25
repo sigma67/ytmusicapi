@@ -1,5 +1,7 @@
+import pytest
+
 from ytmusicapi.parsers.constants import DOT_SEPARATOR_RUN
-from ytmusicapi.parsers.songs import parse_song_runs
+from ytmusicapi.parsers.songs import parse_song_run, parse_song_runs
 
 DOT = DOT_SEPARATOR_RUN
 
@@ -27,3 +29,38 @@ class TestParseSongRuns:
         runs = [_linked("Eminem", "UCedvOgsKFzcK3hA5taf3KoQ"), DOT, {"text": "2:16"}]
         parsed = parse_song_runs(runs, skip_type_spec=True)
         assert parsed["artists"] == [{"name": "Eminem", "id": "UCedvOgsKFzcK3hA5taf3KoQ"}]
+
+
+class TestParseSongRun:
+    # all view count strings below are verbatim API responses for the respective language
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ("1.7B views", "1.7B"),
+            ("1,234,567 views", "1,234,567"),
+            ("340 views", "340"),
+            ("1,7\xa0Mrd. Aufrufe", "1,7\xa0Mrd."),
+            ("125.459 Aufrufe", "125.459"),
+            ("109\xa0тыс. просмотров", "109\xa0тыс."),  # noqa: RUF001
+            ("1,7\xa0Md de vues", "1,7\xa0Md"),
+            ("88\xa0k\xa0vues", "88\xa0k"),
+            ("2\xa0M de visualizaciones", "2\xa0M"),
+            ("6,1\xa0Mln di visualizzazioni", "6,1\xa0Mln"),
+            ("3406万回視聴", "3406万回視聴"),
+            ("747万次观看", "747万次观看"),
+            ("1.7\xa0مليار", "1.7\xa0مليار"),  # noqa: RUF001
+            ("74\xa0लाख", "74\xa0लाख"),
+        ],
+    )
+    def test_views(self, text, expected):
+        assert parse_song_run({"text": text}) == {"type": "views", "data": expected}
+
+    @pytest.mark.parametrize("text", ["2Pac", "21", "6ix9ine", "The Wolfpack & Reel Wolf"])
+    def test_unlinked_artist(self, text):
+        assert parse_song_run({"text": text}) == {"type": "artist", "data": {"name": text, "id": None}}
+
+    @pytest.mark.parametrize(
+        ("text", "expected_type"), [("3:48", "duration"), ("1:23:45", "duration"), ("2020", "year")]
+    )
+    def test_duration_and_year(self, text, expected_type):
+        assert parse_song_run({"text": text}) == {"type": expected_type, "data": text}
