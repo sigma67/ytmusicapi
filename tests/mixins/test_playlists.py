@@ -1,5 +1,7 @@
 import json
 import time
+from collections.abc import Callable
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -9,6 +11,21 @@ from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
 from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditOptions, VoteStatus
+
+
+def retry_playlist_edit(edit: Callable[[], Any], attempts: int = 8, delay: int = 5) -> Any:
+    """Run the first edit of a freshly created playlist.
+
+    YTM rejects these (409 Conflict, or 400 Precondition for collaboration) for up to ~20s
+    after creation, until the new playlist has settled server-side.
+    """
+    for attempt in range(1, attempts + 1):
+        try:
+            return edit()
+        except YTMusicServerError:
+            if attempt == attempts:
+                raise
+            time.sleep(delay)
 
 
 class TestPlaylists:
@@ -198,8 +215,10 @@ class TestPlaylists:
         assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
 
         try:
-            response = yt_oauth.edit_playlist(
-                playlist_id, collaboration=True, sortOrder=PlaylistSortOrder.TOP_VOTED
+            response = retry_playlist_edit(
+                lambda: yt_oauth.edit_playlist(
+                    playlist_id, collaboration=True, sortOrder=PlaylistSortOrder.TOP_VOTED
+                )
             )
             assert response["status"] == ResponseStatus.SUCCEEDED
             join_collaboration_token = response["joinCollaborationToken"]
@@ -237,7 +256,7 @@ class TestPlaylists:
         assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
 
         try:
-            response = yt_oauth.edit_playlist(playlist_id, collaboration=True)
+            response = retry_playlist_edit(lambda: yt_oauth.edit_playlist(playlist_id, collaboration=True))
             assert isinstance(response, dict)
             # Enable collaboration so can test all 3 vote options.
             assert response["status"] == ResponseStatus.SUCCEEDED
@@ -285,7 +304,7 @@ class TestPlaylists:
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
         )
         assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
-        yt_brand.edit_playlist(playlist_id, addToTop=True)
+        retry_playlist_edit(lambda: yt_brand.edit_playlist(playlist_id, addToTop=True))
         response = yt_brand.add_playlist_items(
             playlist_id,
             [sample_video, sample_video],
