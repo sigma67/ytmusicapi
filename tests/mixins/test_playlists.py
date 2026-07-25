@@ -136,7 +136,9 @@ class TestPlaylists:
         playlist = yt.get_playlist("RDCLAK5uy_l2pHac-aawJYLcesgTf67gaKU-B9ekk1o")
         assert playlist["author"] == {"name": "YouTube Music", "id": None}
 
-    @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
+    # sorted: SUPPORTED_LANGUAGES is a set, so its order varies with PYTHONHASHSEED and
+    # xdist workers would each collect a different parametrization
+    @pytest.mark.parametrize("language", sorted(SUPPORTED_LANGUAGES))
     def test_get_playlist_languages(self, language):
         yt = YTMusic(language=language)
         result = yt.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk")
