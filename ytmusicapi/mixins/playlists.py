@@ -393,11 +393,8 @@ class PlaylistsMixin(MixinProtocol):
                 {"action": "ACTION_SET_PLAYLIST_VIDEO_ORDER", "playlistVideoOrder": sortOrder.value}
             )
 
-        if addToTop:
-            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": "true"})
-
         if addToTop is not None:
-            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop)})
+            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop).lower()})
 
         if voteOption is not None:
             actions.append(
