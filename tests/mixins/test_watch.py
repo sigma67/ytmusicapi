@@ -2,6 +2,7 @@ import pytest
 
 
 class TestWatch:
+    @pytest.mark.xdist_group("playlist")
     def test_get_watch_playlist(self, config, yt, yt_brand, yt_oauth):
         playlist = yt_oauth.get_watch_playlist(
             playlistId="RDAMPLOLAK5uy_l_fKDQGOUsk8kbWsm9s86n4-nZNd2JR8Q",

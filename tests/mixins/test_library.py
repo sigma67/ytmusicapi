@@ -93,6 +93,7 @@ class TestLibrary:
         episodes = yt_empty.get_saved_episodes()
         assert episodes["trackCount"] == 0
 
+    @pytest.mark.xdist_group("history")
     def test_get_history(self, yt_oauth):
         songs = yt_oauth.get_history()
         assert len(songs) > 0
@@ -103,6 +104,7 @@ class TestLibrary:
             if "listenAgainFeedbackTokens" in song
         )
 
+    @pytest.mark.xdist_group("history")
     def test_manipulate_history_items(self, yt_auth, sample_video):
         song = yt_auth.get_song(sample_video)
         response = yt_auth.add_history_item(song)
