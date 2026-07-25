@@ -8,11 +8,15 @@ from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from functools import cached_property, partial
 from pathlib import Path
-from typing import Any
+from types import TracebackType
+from typing import TYPE_CHECKING
 
 import requests
 from requests import Response
 from requests.structures import CaseInsensitiveDict
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,
@@ -269,14 +273,14 @@ class YTMusicBase:
         if self.auth_type == AuthType.UNAUTHORIZED:
             raise YTMusicUserError("Please provide authentication before using this function")
 
-    def __enter__(self) -> YTMusicBase:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
         exc_value: BaseException | None,
-        traceback: Any | None,
+        traceback: TracebackType | None,
     ) -> bool | None:
         pass
 

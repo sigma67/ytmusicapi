@@ -102,9 +102,8 @@ def parse_library_artists(response: JsonDict, request_func: RequestFuncType, lim
 
 def pop_songs_random_mix(results: JsonDict | None) -> None:
     """remove the random mix that conditionally appears at the start of library songs"""
-    if results:
-        if len(results["contents"]) >= 2:
-            results["contents"].pop(0)
+    if results and len(results["contents"]) >= 2:
+        results["contents"].pop(0)
 
 
 def parse_library_songs(response: JsonDict) -> JsonDict:

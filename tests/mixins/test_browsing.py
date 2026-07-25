@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 
 from tests.test_helpers import is_ci
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.models.lyrics import LyricLine
 
 
@@ -16,13 +17,11 @@ class TestBrowsing:
         assert len(result) >= 15
         assert all(
             # ensure we aren't parsing specifiers like "Song" as artist names
-            [
-                item["artists"][0]["id"]
-                or item["artists"][0]["name"].lower() not in yt_auth.parser.get_api_result_types()
-                for section in result
-                for item in section["contents"]
-                if item and len(item.get("artists", [])) > 1
-            ]
+            item["artists"][0]["id"]
+            or item["artists"][0]["name"].lower() not in yt_auth.parser.get_api_result_types()
+            for section in result
+            for item in section["contents"]
+            if item and len(item.get("artists", [])) > 1
         )
         # disabling this assert for now as failure cannot be reproduced
         # assert all(
@@ -267,12 +266,10 @@ class TestBrowsing:
         assert len(song) >= 5
         assert all(
             # ensure every video is associated with a view count or music album
-            [
-                item.get("views") or item.get("album")
-                for section in song
-                for item in section["contents"]
-                if "videoId" in item
-            ]
+            item.get("views") or item.get("album")
+            for section in song
+            for item in section["contents"]
+            if "videoId" in item
         )
 
     def test_get_lyrics(self, config, yt, sample_video):
@@ -301,7 +298,7 @@ class TestBrowsing:
         assert signature_timestamp is not None
 
     def test_set_tasteprofile(self, yt_brand):
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_brand.set_tasteprofile(["test", "test2"])
         taste_profile = yt_brand.get_tasteprofile()
         assert yt_brand.set_tasteprofile(list(taste_profile)[:1], taste_profile) is None

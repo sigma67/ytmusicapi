@@ -94,7 +94,7 @@ class TestPlaylists:
         assert len(playlist["duration"]) > 5
         assert playlist["trackCount"] > tracks_len
         # serialize each track to detect duplicates
-        assert len(set(json.dumps(track) for track in playlist["tracks"])) > tracks_len
+        assert len({json.dumps(track) for track in playlist["tracks"]}) > tracks_len
         assert len(playlist["related"]) == related_len
         assert "suggestions" not in playlist
         assert playlist["owned"] is False
@@ -114,14 +114,12 @@ class TestPlaylists:
     def test_get_playlist_audiobook(self, yt, playlist_id):
         playlist = yt.get_playlist(playlist_id)
         assert all(
-            [
-                track["album"]["id"] and track["album"]["name"] == playlist["title"]
-                for track in playlist["tracks"]
-            ]
+            track["album"]["id"] and track["album"]["name"] == playlist["title"]
+            for track in playlist["tracks"]
         )
 
     def test_get_playlist_empty(self, yt_empty):
-        with pytest.raises(Exception):
+        with pytest.raises((YTMusicServerError, KeyError, IndexError)):
             yt_empty.get_playlist("PLABC")
 
     def test_get_playlist_no_track_count(self, yt_oauth):
@@ -302,9 +300,11 @@ class TestPlaylists:
                 }
             ]
         }
-        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
-            with pytest.raises(YTMusicGatedError, match="PAfeature_enablement"):
-                yt_brand.create_playlist("test", description="test")
+        with (
+            mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response),
+            pytest.raises(YTMusicGatedError, match="PAfeature_enablement"),
+        ):
+            yt_brand.create_playlist("test", description="test")
 
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = create_playlist(

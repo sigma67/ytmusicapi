@@ -7,7 +7,7 @@ class TestCharts:
         charts = yt_oauth.get_charts()
         assert len(charts) >= 3
         # authed sessions should have ranked artists
-        assert all([artist["rank"] and artist["trend"] for artist in charts["artists"]])
+        assert all(artist["rank"] and artist["trend"] for artist in charts["artists"])
         charts = yt.get_charts(country="US")
         assert {"countries", "videos", "artists"} <= charts.keys()  # "genres" is not always returned
         charts = yt.get_charts(country="BE")

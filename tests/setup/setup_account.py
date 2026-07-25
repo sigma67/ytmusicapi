@@ -21,14 +21,14 @@ def populate_music():
     playlist_id = "RDCLAK5uy_l9ex2d91-Qb1i-W7d0MLCEl_ZjRXss0Dk"  # fixed playlist with many artists
     yt_playlist = yt_brand.get_playlist(playlist_id)
     artists = [track["artists"] for track in yt_playlist["tracks"]]
-    unique_artists = list(set(artist["id"] for artist in itertools.chain.from_iterable(artists)))
+    unique_artists = list({artist["id"] for artist in itertools.chain.from_iterable(artists)})
     with suppress(Exception):
         for artist in unique_artists:
             print(f"Adding artist {artist}")
             yt_brand.subscribe_artists([artist])  # add one by one to avoid "requested entity not found"
 
     # add some albums, which also populates songs and artists as a side effect
-    unique_albums = set(track["album"]["id"] for track in yt_playlist["tracks"])
+    unique_albums = {track["album"]["id"] for track in yt_playlist["tracks"]}
     albums = [yt_brand.get_album(album) for album in unique_albums if album]
     playlist_ids = [album["audioPlaylistId"] for album in albums]
     for playlist_id in playlist_ids:
@@ -37,9 +37,7 @@ def populate_music():
 
     # like some songs
     videoIds = list(
-        set(
-            track["videoId"] for track in itertools.chain.from_iterable([album["tracks"] for album in albums])
-        )
+        {track["videoId"] for track in itertools.chain.from_iterable([album["tracks"] for album in albums])}
     )
     for videoId in videoIds[:200]:
         print(f"Liking track {videoId}")

@@ -170,12 +170,13 @@ def parse_playlist_item(
     song_menu_data = {"inLibrary": None, "pinnedToListenAgain": None} | parse_song_menu_data(data)
 
     # if item is not playable, the videoId was retrieved above
-    if nav(data, PLAY_BUTTON, none_if_absent=True) is not None:
-        if "playNavigationEndpoint" in nav(data, PLAY_BUTTON):
-            videoId = nav(data, PLAY_BUTTON)["playNavigationEndpoint"]["watchEndpoint"]["videoId"]
+    if nav(data, PLAY_BUTTON, none_if_absent=True) is not None and "playNavigationEndpoint" in nav(
+        data, PLAY_BUTTON
+    ):
+        videoId = nav(data, PLAY_BUTTON)["playNavigationEndpoint"]["watchEndpoint"]["videoId"]
 
-            if "menu" in data:
-                like = nav(data, MENU_LIKE_STATUS, True)
+        if "menu" in data:
+            like = nav(data, MENU_LIKE_STATUS, True)
 
     isAvailable = True
     if "musicItemRendererDisplayPolicy" in data:

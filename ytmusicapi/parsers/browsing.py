@@ -115,7 +115,7 @@ def parse_song(result: JsonDict) -> JsonDict:
 
 
 def parse_song_flat(data: JsonDict, with_playlist_id: bool = False) -> JsonDict:
-    columns = [get_flex_column_item(data, i) for i in range(0, len(data["flexColumns"]))]
+    columns = [get_flex_column_item(data, i) for i in range(len(data["flexColumns"]))]
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
         "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),

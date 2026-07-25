@@ -55,7 +55,7 @@ def setup_browser(filepath: str | None = None, headers_raw: str | None = None) -
     except Exception as e:
         raise YTMusicError(f"Error parsing your input, please try again. Full error: {e}") from e
 
-    missing_headers = {"cookie", "x-goog-authuser"} - set(k.lower() for k in user_headers.keys())
+    missing_headers = {"cookie", "x-goog-authuser"} - {k.lower() for k in user_headers}
     if missing_headers:
         raise YTMusicUserError(
             "The following entries are missing in your headers: "
@@ -64,7 +64,7 @@ def setup_browser(filepath: str | None = None, headers_raw: str | None = None) -
         )
 
     ignore_headers = {"host", "content-length", "accept-encoding"}
-    for key in user_headers.copy().keys():
+    for key in user_headers.copy():
         if key.startswith("sec") or key in ignore_headers:
             user_headers.pop(key, None)
 

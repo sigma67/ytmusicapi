@@ -339,7 +339,7 @@ class LibraryMixin(MixinProtocol):
         self._check_auth()
         url = song["playbackTracking"]["videostatsPlaybackUrl"]["baseUrl"]
         CPNA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
-        cpn = "".join(CPNA[randint(0, 256) & 63] for _ in range(0, 16))
+        cpn = "".join(CPNA[randint(0, 256) & 63] for _ in range(16))
         params = {"ver": 2, "c": "WEB_REMIX", "cpn": cpn}
         return self._send_get_request(url, params)
 
