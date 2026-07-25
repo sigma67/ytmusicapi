@@ -35,12 +35,10 @@ def parse_song_run(run: JsonDict) -> JsonDict:
             return {"type": "year", "data": text}
 
         elif re.match(r"^\d", text):
-            # view counts, e.g. "34M views" (en) or "3406万回視聴" (ja)
-            # note: YT uses a non-breaking space \xa0 to separate number and magnitude, and some
-            # locales (e.g. ja) don't use a space to separate the number/magnitude from the word
-            # for "views" at all, so only split on a space if one is actually present (#952)
-            data = text.split(" ")[0] if " " in text else text
-            return {"type": "views", "data": data}
+            # note: \xa0 glues number and magnitude ("1,7\xa0Mrd. Aufrufe"), but some locales use
+            # it before the views word too ("88\xa0k\xa0vues"); CJK has no separator ("3406万回視聴")
+            head = text.split(" ")[0].split("\xa0")
+            return {"type": "views", "data": "\xa0".join(head[:2])}
 
         else:  # artist without id
             return {"type": "artist", "data": {"name": text, "id": None}}
