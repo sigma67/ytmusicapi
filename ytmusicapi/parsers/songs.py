@@ -17,6 +17,29 @@ def parse_song_artists(data: JsonDict, index: int) -> JsonList:
         return parse_artists_runs(runs)
 
 
+# leading views word ("조회수 17억회", "播放次數：4505") or bidi mark (ur), up to the first digit  # noqa: RUF003
+VIEWS_PREFIX = re.compile(r"^\D*?[\s:\uff1a\u200e-\u200f\u202a-\u202e]")
+
+
+def parse_views(text: str) -> str | None:
+    # only for non-latin scripts: "Maroon 5" is indistinguishable from a prefixed count
+    prefixed = 0
+    if not re.search(r"[a-zA-Z]", text):
+        text, prefixed = VIEWS_PREFIX.subn("", text)
+
+    if not re.match(r"^\d", text):
+        return None
+
+    # a bare ASCII token like "2Pac" is an artist, not a view count with a stripped word
+    if not prefixed and text.isascii() and " " not in text:
+        return None
+
+    # note: \xa0 glues number and magnitude ("1,7\xa0Mrd. Aufrufe"), but some locales use
+    # it before the views word too ("88\xa0k\xa0vues"); CJK has no separator ("3406万回視聴")
+    head = text.split(" ")[0].split("\xa0")
+    return "\xa0".join(head[:2])
+
+
 def parse_song_run(run: JsonDict) -> JsonDict:
     text = run["text"]
 
@@ -28,15 +51,14 @@ def parse_song_run(run: JsonDict) -> JsonDict:
         else:  # artist
             return {"type": "artist", "data": item}
     else:
-        # note: YT uses non-breaking space \xa0 to separate number and magnitude
-        if re.match(r"^\d([^ ])* [^ ]*$", text):
-            return {"type": "views", "data": text.split(" ")[0]}
-
-        elif re.match(r"^(\d+:)*\d+:\d+$", text):
+        if re.match(r"^(\d+:)*\d+:\d+$", text):
             return {"type": "duration", "data": text}
 
         elif re.match(r"^\d{4}$", text):
             return {"type": "year", "data": text}
+
+        elif (views := parse_views(text)) is not None:
+            return {"type": "views", "data": views}
 
         else:  # artist without id
             return {"type": "artist", "data": {"name": text, "id": None}}
