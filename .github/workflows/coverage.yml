@@ -27,13 +27,17 @@ jobs:
       contents: read
     steps:
     - name: Checkout repository
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
         persist-credentials: false
         fetch-depth: 1
+        # v7 blocks fork PR checkouts on pull_request_target by default.
+        # Safe here because the 'coverage' environment gate requires maintainer approval
+        # before this job runs and secrets are exposed (see environment: field above).
+        allow-unsafe-pr-checkout: true
     - name: Setup Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
       with:
         python-version: "3.10"
     - name: Setup PDM
@@ -55,7 +59,7 @@ jobs:
         pdm run pytest --junitxml=test-results.xml
         pdm run coverage xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354  # v6.0.1
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f  # v7.0.0
       if: ${{ !cancelled() }}
       with:
         flags: unittests

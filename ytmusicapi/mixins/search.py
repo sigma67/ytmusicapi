@@ -251,40 +251,19 @@ class SearchMixin(MixinProtocol):
                 shelf_contents = res["musicShelfRenderer"]["contents"]
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
 
+            elif "itemSectionRenderer" in res:
+                shelf_contents = res["itemSectionRenderer"]["contents"]
+                if MRLIR not in shelf_contents[0]:
+                    continue
+            else:
+                continue
+
+            if "musicShelfRenderer" in res or "itemSectionRenderer" in res:
                 # if we know the filter it's easy to set the result type
                 # unfortunately uploads is modeled as a filter (historical reasons),
                 #  so we take care to not set the result type for that scope
                 if internal_filter and not scope == scopes[1]:
                     result_type = internal_filter[:-1].lower()
-
-            elif "itemSectionRenderer" in res:
-                # TODO: This was done hastily so may not be 100% correct
-                # but it is currently passing all search tests it seems.
-                # investigate the parsing logic for this and make sure its correct
-                shelf_contents = res["itemSectionRenderer"]["contents"]
-
-                is_did_you_mean_section = nav(shelf_contents, [0, "didYouMeanRenderer"], True)
-
-                if is_did_you_mean_section is not None:
-                    continue
-
-                category = nav(
-                    shelf_contents,
-                    [
-                        0,
-                        MRLIR,
-                        "flexColumns",
-                        1,
-                        "musicResponsiveListItemFlexColumnRenderer",
-                        "text",
-                        *RUN_TEXT,
-                    ],
-                )
-
-                if internal_filter and not scope == scopes[1]:
-                    result_type = internal_filter[:-1].lower()
-            else:
-                continue
 
             search_results.extend(parse_search_results(shelf_contents, result_type, category))
 

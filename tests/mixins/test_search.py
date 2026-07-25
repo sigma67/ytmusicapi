@@ -7,6 +7,8 @@ from ytmusicapi import YTMusic
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.parsers.search import ALL_RESULT_TYPES, API_RESULT_TYPES
 
+STANFORD_PODCAST_SEARCH_QUERY = 'intitle:"109. Simplify!" before:2024-01-01 after:2023-01-01'
+
 
 class TestSearch:
     def test_search_exceptions(self, yt_auth):
@@ -90,7 +92,8 @@ class TestSearch:
         assert len(results) > 20
         assert all(item["resultType"] == "album" for item in results)
         results = yt_auth.search("armen van buren", filter="artists", ignore_spelling=True)
-        assert len(results) < 5
+        # without ignore_spelling the query is corrected to "armin van buuren", matching far more artists
+        assert len(results) < len(yt_auth.search("armen van buren", filter="artists"))
         assert all(item["resultType"] == "artist" for item in results)
         results = yt_auth.search("classical music", filter="playlists")
         assert len(results) > 10
@@ -122,26 +125,24 @@ class TestSearch:
 
     def test_search_episode_category(self, yt_auth):
         """Test resultType detection for episodes by searching for a podcast without a filter."""
-        results = yt_auth.search("Stanford GSB Podcasts Grit")
+        results = yt_auth.search(STANFORD_PODCAST_SEARCH_QUERY)
         episode = next(
             item
             for item in results
-            if item["category"] == "Episode"
-            and "podcast" in item
-            and item["podcast"]["name"] == "Stanford GSB Podcasts"
+            if "podcast" in item and item["podcast"]["name"] == "Stanford GSB Podcasts"
         )
         assert episode["resultType"] == "episode"
         assert episode["podcast"]["id"] == "MPSPPLxq_lXOUlvQDUNyoBYLkN8aVt5yAwEtG9"
 
     def test_search_top_result_playlist(self, yt_oauth):
-        results = yt_oauth.search("grace ost complete playlist")  # issue 524
+        results = yt_oauth.search('intitle:"grace OST" playlist')  # issue 524
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "playlist"
         assert results[0]["playlistId"].startswith("PL")
         assert len(results[0]["author"]) > 0
 
     def test_search_top_result_episode(self, yt):
-        results = yt.search('"110. Write It Well: How to Craft an Email to Capture Busy Readers" Stanford')
+        results = yt.search(STANFORD_PODCAST_SEARCH_QUERY)
         assert results[0]["category"] == "Top result"
         assert results[0]["resultType"] == "episode"
         assert results[0]["podcast"] == {
@@ -196,10 +197,10 @@ class TestSearch:
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
 
     def test_remove_search_suggestions_valid(self, yt_auth):
-        first_pass = yt_auth.search("b")  # Populate the suggestion history
+        first_pass = yt_auth.search("be")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
-        time.sleep(10)
-        results = yt_auth.get_search_suggestions("b", detailed_runs=True)
+        time.sleep(5)
+        results = yt_auth.get_search_suggestions("", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"
         assert any(item.get("fromHistory") for item in results), "No suggestions from history found"
 
@@ -209,6 +210,7 @@ class TestSearch:
     def test_remove_search_suggestions_errors(self, yt_auth, yt):
         first_pass = yt_auth.search("a")
         assert len(first_pass) > 0, "Search returned no results"
+        time.sleep(5)  # wait for the search to reach the history
 
         results = yt_auth.get_search_suggestions("a", detailed_runs=True)
         assert len(results) > 0, "No search suggestions returned"

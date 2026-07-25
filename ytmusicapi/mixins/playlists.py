@@ -290,7 +290,12 @@ class PlaylistsMixin(MixinProtocol):
 
         endpoint = "playlist/create"
         response = self._send_request(endpoint, body)
-        return response["playlistId"] if "playlistId" in response else response
+        if "playlistId" in response:
+            playlist_id: str = response["playlistId"]
+            return playlist_id
+
+        validate_write_response(response)
+        return response
 
     def join_collaborative_playlist(self, playlistId: str, joinCollaborationToken: str) -> str | JsonDict:
         """
@@ -388,11 +393,8 @@ class PlaylistsMixin(MixinProtocol):
                 {"action": "ACTION_SET_PLAYLIST_VIDEO_ORDER", "playlistVideoOrder": sortOrder.value}
             )
 
-        if addToTop:
-            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": "true"})
-
         if addToTop is not None:
-            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop)})
+            actions.append({"action": "ACTION_SET_ADD_TO_TOP", "addToTop": str(addToTop).lower()})
 
         if voteOption is not None:
             actions.append(

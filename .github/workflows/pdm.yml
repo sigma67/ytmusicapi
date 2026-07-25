@@ -4,14 +4,17 @@ on:
   schedule:
     - cron: "5 3 1 * *"
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
+    permissions:
+      # update-deps-action runs create-pull-request internally, which pushes a branch and opens the PR
+      contents: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Update dependencies
         uses: pdm-project/update-deps-action@main
