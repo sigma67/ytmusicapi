@@ -14,3 +14,7 @@ class YTMusicUserError(YTMusicError):
 
 class YTMusicServerError(YTMusicError):
     """error caused by the YouTube Music backend"""
+
+
+class YTMusicGatedError(YTMusicServerError):
+    """the YouTube Music backend did not perform a request and asked for interaction with a dialog"""
