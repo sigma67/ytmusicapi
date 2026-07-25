@@ -163,8 +163,14 @@ class TestLibrary:
         assert "actions" in response
 
     def test_subscribe_artists(self, yt_auth):
-        yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+        with pytest.warns(DeprecationWarning):
+            yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+        yt_auth.subscribe_artist("UCUDVBtnOQi4c7E8jebpjc9Q")
         yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+
+    def test_subscribe_artists_rejects_multiple(self, yt_auth):
+        with pytest.raises(YTMusicUserError, match="only supports subscribing to one artist"):
+            yt_auth.subscribe_artists(["UC1", "UC2"])
 
     def test_get_account_info(self, config, yt, yt_oauth):
         with pytest.raises(Exception, match="Please provide authentication"):
