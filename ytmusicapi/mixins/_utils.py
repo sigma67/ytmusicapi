@@ -2,8 +2,10 @@ import re
 from datetime import date
 from typing import Literal
 
-from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.models.content.enums import LikeStatus
+from ytmusicapi.navigation import nav
+from ytmusicapi.type_alias import JsonDict
 
 LibraryOrderType = Literal["a_to_z", "z_to_a", "recently_added"]
 
@@ -54,6 +56,25 @@ def html_to_txt(html_text: str) -> str:
     for tag in tags:
         html_text = html_text.replace(tag, "")
     return html_text
+
+
+def validate_write_response(response: JsonDict) -> None:
+    """Check that YTM performed a write request instead of answering with a dialog.
+
+    A gated request returns HTTP 200 with only a ``showEngagementPanelEndpoint`` action carrying the
+    original request, for the web client to replay once the user has dealt with the dialog.
+
+    :raises YTMusicServerError: if the request was not performed
+    """
+    panel = nav(response, ["actions", 0, "showEngagementPanelEndpoint"], True)
+    if panel is None:
+        return
+
+    tag = nav(panel, ["identifier", "tag"], True)
+    raise YTMusicServerError(
+        f"YouTube Music did not perform this request and asked for interaction with its '{tag}' dialog. "
+        "The account may be temporarily restricted from this action."
+    )
 
 
 def get_datestamp() -> int:

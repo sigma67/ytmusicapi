@@ -290,7 +290,12 @@ class PlaylistsMixin(MixinProtocol):
 
         endpoint = "playlist/create"
         response = self._send_request(endpoint, body)
-        return response["playlistId"] if "playlistId" in response else response
+        if "playlistId" in response:
+            playlist_id: str = response["playlistId"]
+            return playlist_id
+
+        validate_write_response(response)
+        return response
 
     def join_collaborative_playlist(self, playlistId: str, joinCollaborationToken: str) -> str | JsonDict:
         """

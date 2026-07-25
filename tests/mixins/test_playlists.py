@@ -7,7 +7,7 @@ import pytest
 from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
-from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditOptions, VoteStatus
 
 
@@ -261,6 +261,22 @@ class TestPlaylists:
     def test_create_playlist_invalid_title(self, yt_brand):
         with pytest.raises(YTMusicUserError, match="invalid characters"):
             yt_brand.create_playlist("test >", description="test")
+
+    def test_create_playlist_gated(self, yt_brand):
+        """YTM answers with a dialog instead of creating the playlist, e.g. after many creations"""
+        mock_response = {
+            "actions": [
+                {
+                    "showEngagementPanelEndpoint": {
+                        "sourcePanelIdentifier": "PAfeature_enablement",
+                        "identifier": {"tag": "PAfeature_enablement"},
+                    }
+                }
+            ]
+        }
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            with pytest.raises(YTMusicServerError, match="PAfeature_enablement"):
+                yt_brand.create_playlist("test", description="test")
 
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = yt_brand.create_playlist(
