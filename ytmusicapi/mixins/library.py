@@ -439,7 +439,9 @@ class LibraryMixin(MixinProtocol):
             stacklevel=2,
         )
         if len(channelIds) > 1:
-            raise YTMusicUserError("YouTube Music only supports subscribing to one artist at a time. Use subscribe_artist instead.")
+            raise YTMusicUserError(
+                "YouTube Music only supports subscribing to one artist at a time. Use subscribe_artist instead."
+            )
         return self.subscribe_artist(channelIds[0])
 
     def unsubscribe_artists(self, channelIds: list[str]) -> JsonDict:
