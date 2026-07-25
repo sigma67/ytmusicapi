@@ -55,7 +55,24 @@ class TestParseSongRun:
     def test_views(self, text, expected):
         assert parse_song_run({"text": text}) == {"type": "views", "data": expected}
 
-    @pytest.mark.parametrize("text", ["2Pac", "21", "6ix9ine", "The Wolfpack & Reel Wolf"])
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ("조회수 17억회", "17억회"),
+            ("조회수 340회", "340회"),
+            ("觀看次數：17億次", "17億次"),  # noqa: RUF001
+            ("播放次數：4505", "4505"),  # noqa: RUF001
+            ("播放次数：3908万", "3908万"),  # noqa: RUF001
+            ("再生回数 4.3億 回", "4.3億"),
+            ("‫3.5\xa0ارب بار چلائے گئے", "3.5\xa0ارب"),  # noqa: RUF001
+        ],
+    )
+    def test_views_with_leading_word(self, text, expected):
+        assert parse_song_run({"text": text}) == {"type": "views", "data": expected}
+
+    @pytest.mark.parametrize(
+        "text", ["2Pac", "21", "6ix9ine", "AKB48", "乃木坂46", "22/7", "The Wolfpack & Reel Wolf"]
+    )
     def test_unlinked_artist(self, text):
         assert parse_song_run({"text": text}) == {"type": "artist", "data": {"name": text, "id": None}}
 
