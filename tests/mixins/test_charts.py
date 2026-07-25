@@ -13,21 +13,10 @@ class TestCharts:
         charts = yt.get_charts(country="BE")
         assert charts.keys() == {"countries", "videos", "artists"}
 
-    def test_get_charts_without_genres(self, yt, data_path):
-        """US responses do not always contain the genres carousel"""
-        with open(data_path / "2026_07_get_charts_us_no_genres.json", encoding="utf8") as f:
-            mock_response = json.load(f)
-
-        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
-            charts = yt.get_charts(country="US")
-
-        assert charts.keys() == {"countries", "videos", "artists"}
-        assert len(charts["videos"]) > 0
-        assert len(charts["artists"]) > 0
-
-    def test_get_charts_unknown_carousel(self, yt, data_path):
-        """an extra carousel (album charts in some regions) must not shift the known categories"""
-        with open(data_path / "2026_07_get_charts_us_albums.json", encoding="utf8") as f:
+    def test_get_charts_us_carousels(self, yt, data_path):
+        """some US responses omit the genres carousel and add an album one, neither of which
+        may shift the known categories"""
+        with open(data_path / "2026_07_get_charts_us_albums_no_genres.json", encoding="utf8") as f:
             mock_response = json.load(f)
 
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
