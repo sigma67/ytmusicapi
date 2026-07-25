@@ -1,6 +1,9 @@
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.explore import *
-from ytmusicapi.type_alias import JsonDict
+from ytmusicapi.type_alias import JsonDict, JsonList
+
+# extra playlist carousel some countries return between the video charts and the artists
+COUNTRY_EXTRA_CATEGORY = {"US": "genres", "IN": "languages"}
 
 
 class ChartsMixin(MixinProtocol):
@@ -8,11 +11,11 @@ class ChartsMixin(MixinProtocol):
         """
         Get latest charts data from YouTube Music: Artists and playlists of top videos.
         Unauthenticated requests return unranked Artists with "rank" and "trend" set to None.
-        US charts have an extra Genres section with some Genre charts.
+        US charts have an extra Genres section, IN charts an extra Languages section.
 
         :param country: ISO 3166-1 Alpha-2 country code. Default: ``ZZ`` = Global
         :return: Dictionary containing chart video playlists (with separate daily/weekly charts if authenticated with a premium account),
-            chart genres (US-only, not returned by every response), and chart artists.
+            chart genres (US-only, not returned by every response), chart languages (IN-only) and chart artists.
 
         Example::
 
@@ -82,32 +85,31 @@ class ChartsMixin(MixinProtocol):
             )
         )
 
-        charts_categories = [
-            ("videos", parse_chart_playlist, MTRIR),
-            *([("genres", parse_chart_playlist, MTRIR)] if country == "US" else []),
-            ("artists", parse_chart_artist, MRLIR),
-        ]
-
-        # use result length to determine if the daily/weekly chart categories are present
-        # could also be done via an is_premium attribute on YTMusic instance
-        if (len(results) - 1) > len(charts_categories):
-            # daily and weekly replace the "videos" playlist carousel
-            charts_categories = [
-                ("daily", parse_chart_playlist, MTRIR),
-                ("weekly", parse_chart_playlist, MTRIR),
-                *charts_categories[1:],
-            ]
-
-        # match each category to a carousel by renderer type; YTM omits categories unpredictably,
-        # e.g. "genres" is missing from some US responses
-        carousels = results[1:]
-        for name, parse_func, key in charts_categories:
-            if not carousels:
-                break
-            contents = nav(carousels[0], CAROUSEL_CONTENTS)
-            if key not in contents[0]:
+        # carousels carry no machine-readable identity, so classify them by contents: chart
+        # playlists have "VL" browse ids, artists are list items. Carousels of anything else
+        # (some regions add an album chart) are ignored instead of shifting the known ones.
+        playlist_carousels: list[JsonList] = []
+        artist_carousels: list[JsonList] = []
+        for section in results[1:]:
+            contents = nav(section, CAROUSEL_CONTENTS, True)
+            if not contents:
                 continue
-            charts[name] = parse_content_list(contents, parse_func, key)
-            carousels.pop(0)
+            if MRLIR in contents[0]:
+                artist_carousels.append(contents)
+            elif str(nav(contents[0], [MTRIR, *TITLE, *NAVIGATION_BROWSE_ID], True)).startswith("VL"):
+                playlist_carousels.append(contents)
+
+        # the extra category is not returned by every response
+        extra_category = COUNTRY_EXTRA_CATEGORY.get(country)
+        playlist_names = ["videos", *([extra_category] if extra_category else [])]
+        # premium sessions get daily and weekly carousels instead of a single "videos" one
+        if len(playlist_carousels) > len(playlist_names):
+            playlist_names = ["daily", "weekly", *playlist_names[1:]]
+
+        for name, contents in zip(playlist_names, playlist_carousels):
+            charts[name] = parse_content_list(contents, parse_chart_playlist, MTRIR)
+
+        if artist_carousels:
+            charts["artists"] = parse_content_list(artist_carousels[0], parse_chart_artist, MRLIR)
 
         return charts
