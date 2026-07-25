@@ -12,7 +12,7 @@ class ChartsMixin(MixinProtocol):
 
         :param country: ISO 3166-1 Alpha-2 country code. Default: ``ZZ`` = Global
         :return: Dictionary containing chart video playlists (with separate daily/weekly charts if authenticated with a premium account),
-            chart genres (US-only), and chart artists.
+            chart genres (US-only, not returned by every response), and chart artists.
 
         Example::
 
@@ -98,7 +98,16 @@ class ChartsMixin(MixinProtocol):
                 *charts_categories[1:],
             ]
 
-        for i, (name, parse_func, key) in enumerate(charts_categories):
-            charts[name] = parse_content_list(nav(results[1 + i], CAROUSEL_CONTENTS), parse_func, key)
+        # match each category to a carousel by renderer type; YTM omits categories unpredictably,
+        # e.g. "genres" is missing from some US responses
+        carousels = results[1:]
+        for name, parse_func, key in charts_categories:
+            if not carousels:
+                break
+            contents = nav(carousels[0], CAROUSEL_CONTENTS)
+            if key not in contents[0]:
+                continue
+            charts[name] = parse_content_list(contents, parse_func, key)
+            carousels.pop(0)
 
         return charts
