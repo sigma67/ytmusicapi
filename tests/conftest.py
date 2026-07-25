@@ -6,6 +6,23 @@ import pytest
 from tests.fixtures import *
 from ytmusicapi import YTMusic
 
+#: serial xdist groups, longest first (see tests/README.rst)
+LANE_ORDER = ["playlist", "uploads", "search_history", "history"]
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """xdist pops work units in collection order and only refills a worker at <=2 pending,
+    so a long lane collected late strands a worker at the end of the run.
+    """
+    if config.getoption("dist", "no") != "loadgroup":
+        return
+
+    def lane(item: pytest.Item) -> int:
+        marker = item.get_closest_marker("xdist_group")
+        return LANE_ORDER.index(marker.args[0]) if marker else len(LANE_ORDER)
+
+    items.sort(key=lane)  # stable, so order within each lane is preserved
+
 
 def get_resource(file: str) -> str:
     data_dir = Path(__file__).parent

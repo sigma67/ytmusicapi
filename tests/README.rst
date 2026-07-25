@@ -36,6 +36,28 @@ profile drop down in the top right, the brand ID should then be present in the U
 
 You can populate the brand account with content using the script provided in ``tests/setup/setup_account.py``.
 
+Running tests in parallel
+-------------------------
+Most tests only read from YouTube Music and can run concurrently:
+
+.. code-block:: bash
+
+    pdm run pytest -n 2 --dist loadgroup
+
+``--dist loadgroup`` is required. Tests that share mutable server-side state are pinned to a single
+worker via ``@pytest.mark.xdist_group``, so they still run sequentially and in file order:
+
+===================  ============================================================================
+``playlist``         create/edit playlists, plus the tests reading ``playlists.own``
+``uploads``          the whole upload suite; ``test_upload_song`` expects the file to already exist,
+                     which ``test_upload_song_and_verify`` deletes and re-uploads
+``search_history``   ``test_remove_search_suggestions_valid`` wipes the account's suggestion history
+``history``          watch history is written by one test and read by another
+===================  ============================================================================
+
+Add a test to a group if it reads or writes state another test in that group touches. Raising ``-n``
+past 2 gives little benefit and increases the risk of YouTube Music rate limiting the test account.
+
 Coverage badge
 --------------
 Make sure you installed the dev requirements as explained in `CONTRIBUTING.rst <https://github.com/sigma67/ytmusicapi/blob/master/CONTRIBUTING.rst>`_. Run

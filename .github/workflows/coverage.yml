@@ -56,7 +56,7 @@ jobs:
         curl -fsSL -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/browser.json
         cat <<< "$TEST_CFG" > tests/test.cfg
-        pdm run pytest --junitxml=test-results.xml
+        pdm run pytest -n 2 --dist loadgroup --junitxml=test-results.xml
         pdm run coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f  # v7.0.0

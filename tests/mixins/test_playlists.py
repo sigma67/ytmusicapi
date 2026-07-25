@@ -142,6 +142,7 @@ class TestPlaylists:
         result = yt.get_playlist("PLj4BSJLnVpNyIjbCWXWNAmybc97FXLlTk")
         assert result["trackCount"] == 255
 
+    @pytest.mark.xdist_group("playlist")
     def test_get_playlist_owned(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"], related=True, suggestions_limit=21)
         assert len(playlist["tracks"]) < 100
@@ -188,6 +189,7 @@ class TestPlaylists:
             assert isinstance(vote_status["netVoteValue"], int)
             assert vote_status["status"] in VoteStatus
 
+    @pytest.mark.xdist_group("playlist")
     def test_edit_playlist(self, config, yt_brand):
         playlist = yt_brand.get_playlist(config["playlists"]["own"])
         response1 = yt_brand.edit_playlist(
@@ -221,6 +223,7 @@ class TestPlaylists:
         )
         assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
 
+    @pytest.mark.xdist_group("playlist")
     def test_edit_playlist_collaboration(self, yt_oauth, yt_brand):
         playlist_id = create_playlist(yt_oauth, "test collaboration", "", privacy_status="UNLISTED")
 
@@ -261,6 +264,7 @@ class TestPlaylists:
         finally:
             yt_oauth.delete_playlist(playlist_id)
 
+    @pytest.mark.xdist_group("playlist")
     def test_edit_playlist_community_vote(self, yt_oauth: YTMusic):
         playlist_id = create_playlist(yt_oauth, "test edit community vote", "", privacy_status="UNLISTED")
 
@@ -306,6 +310,7 @@ class TestPlaylists:
             with pytest.raises(YTMusicGatedError, match="PAfeature_enablement"):
                 yt_brand.create_playlist("test", description="test")
 
+    @pytest.mark.xdist_group("playlist")
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = create_playlist(
             yt_brand,
