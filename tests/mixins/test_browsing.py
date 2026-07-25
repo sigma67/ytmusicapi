@@ -80,6 +80,20 @@ class TestBrowsing:
             assert result["description"] == expected_output["description"]
             assert result["descriptionRuns"] == expected_output["descriptionRuns"]
 
+        with open(data_path / "2026_07_get_artist_hashtag.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            data_path / "expected_output" / "2026_07_get_artist_hashtag.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCRHts_o65erNP48E0j2qYkw")
+            assert result["description"] == expected_output["description"]
+            assert result["descriptionRuns"] == expected_output["descriptionRuns"]
+
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
         results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
