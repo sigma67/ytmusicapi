@@ -1,8 +1,6 @@
 import json
 from unittest import mock
 
-from ytmusicapi.navigation import SECTION_LIST, SINGLE_COLUMN_TAB, nav
-
 
 class TestCharts:
     def test_get_charts(self, yt, yt_oauth):
@@ -29,30 +27,8 @@ class TestCharts:
 
     def test_get_charts_unknown_carousel(self, yt, data_path):
         """an extra carousel (album charts in some regions) must not shift the known categories"""
-        with open(data_path / "2026_07_get_charts_us_no_genres.json", encoding="utf8") as f:
+        with open(data_path / "2026_07_get_charts_us_albums.json", encoding="utf8") as f:
             mock_response = json.load(f)
-
-        album_carousel = {
-            "musicCarouselShelfRenderer": {
-                "contents": [
-                    {
-                        "musicTwoRowItemRenderer": {
-                            "title": {
-                                "runs": [
-                                    {
-                                        "text": "Some Album",
-                                        "navigationEndpoint": {
-                                            "browseEndpoint": {"browseId": "MPREb_iNWH4dO6PQO"}
-                                        },
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-        nav(mock_response, SINGLE_COLUMN_TAB + SECTION_LIST).insert(1, album_carousel)
 
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
             charts = yt.get_charts(country="US")
