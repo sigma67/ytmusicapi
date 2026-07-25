@@ -9,8 +9,19 @@ import pytest
 from ytmusicapi import YTMusic
 from ytmusicapi.constants import SUPPORTED_LANGUAGES
 from ytmusicapi.enums import ResponseStatus
-from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
+from ytmusicapi.exceptions import YTMusicGatedError, YTMusicServerError, YTMusicUserError
 from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditOptions, VoteStatus
+
+
+def create_playlist(yt: YTMusic, *args: Any, **kwargs: Any) -> str:
+    """Create a playlist, skipping the test while YTM gates creation for the account."""
+    try:
+        playlist_id = yt.create_playlist(*args, **kwargs)
+    except YTMusicGatedError as e:
+        pytest.skip(str(e))
+
+    assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
+    return playlist_id
 
 
 def retry_playlist_edit(edit: Callable[[], Any], attempts: int = 8, delay: int = 5) -> Any:
@@ -211,8 +222,7 @@ class TestPlaylists:
         assert response3 == "STATUS_SUCCEEDED", "Playlist edit 3 failed"
 
     def test_edit_playlist_collaboration(self, yt_oauth, yt_brand):
-        playlist_id = yt_oauth.create_playlist("test collaboration", "", privacy_status="UNLISTED")
-        assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
+        playlist_id = create_playlist(yt_oauth, "test collaboration", "", privacy_status="UNLISTED")
 
         try:
             response = retry_playlist_edit(
@@ -252,8 +262,7 @@ class TestPlaylists:
             yt_oauth.delete_playlist(playlist_id)
 
     def test_edit_playlist_community_vote(self, yt_oauth: YTMusic):
-        playlist_id = yt_oauth.create_playlist("test edit community vote", "", privacy_status="UNLISTED")
-        assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
+        playlist_id = create_playlist(yt_oauth, "test edit community vote", "", privacy_status="UNLISTED")
 
         try:
             response = retry_playlist_edit(lambda: yt_oauth.edit_playlist(playlist_id, collaboration=True))
@@ -294,16 +303,16 @@ class TestPlaylists:
             ]
         }
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
-            with pytest.raises(YTMusicServerError, match="PAfeature_enablement"):
+            with pytest.raises(YTMusicGatedError, match="PAfeature_enablement"):
                 yt_brand.create_playlist("test", description="test")
 
     def test_end2end(self, yt_brand, sample_video):
-        playlist_id = yt_brand.create_playlist(
+        playlist_id = create_playlist(
+            yt_brand,
             "test",
             "test description",
             source_playlist="OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
         )
-        assert isinstance(playlist_id, str) and playlist_id.startswith("PL"), "Playlist creation failed"
         retry_playlist_edit(lambda: yt_brand.edit_playlist(playlist_id, addToTop=True))
         response = yt_brand.add_playlist_items(
             playlist_id,

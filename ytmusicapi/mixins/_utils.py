@@ -2,7 +2,7 @@ import re
 from datetime import date
 from typing import Literal
 
-from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
+from ytmusicapi.exceptions import YTMusicGatedError, YTMusicUserError
 from ytmusicapi.models.content.enums import LikeStatus
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import JsonDict
@@ -64,14 +64,14 @@ def validate_write_response(response: JsonDict) -> None:
     A gated request returns HTTP 200 with only a ``showEngagementPanelEndpoint`` action carrying the
     original request, for the web client to replay once the user has dealt with the dialog.
 
-    :raises YTMusicServerError: if the request was not performed
+    :raises YTMusicGatedError: if the request was not performed
     """
     panel = nav(response, ["actions", 0, "showEngagementPanelEndpoint"], True)
     if panel is None:
         return
 
     tag = nav(panel, ["identifier", "tag"], True)
-    raise YTMusicServerError(
+    raise YTMusicGatedError(
         f"YouTube Music did not perform this request and asked for interaction with its '{tag}' dialog. "
         "The account may be temporarily restricted from this action."
     )
