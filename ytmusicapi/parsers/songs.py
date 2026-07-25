@@ -34,7 +34,8 @@ def parse_song_run(run: JsonDict) -> JsonDict:
         elif re.match(r"^\d{4}$", text):
             return {"type": "year", "data": text}
 
-        elif re.match(r"^\d", text):
+        # a bare ASCII token like "2Pac" is an artist, not a view count with a stripped word
+        elif re.match(r"^\d", text) and (" " in text or "\xa0" in text or not text.isascii()):
             # note: \xa0 glues number and magnitude ("1,7\xa0Mrd. Aufrufe"), but some locales use
             # it before the views word too ("88\xa0k\xa0vues"); CJK has no separator ("3406万回視聴")
             head = text.split(" ")[0].split("\xa0")
