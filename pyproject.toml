@@ -39,7 +39,9 @@ include-package-data = false
 [tool.pytest.ini_options]
 python_functions = "test_*"
 testpaths = ["tests"]
-addopts = "--verbose --cov --junitxml=junit.xml --retries 0 --retry-delay 5 --durations=0"
+# TEMP: -n/--dist belong in coverage.yml, but pull_request_target takes the workflow
+# from the base ref, so they have to live here to be measurable before merge.
+addopts = "--verbose --cov --junitxml=junit.xml --retries 0 --retry-delay 5 --durations=0 -n 2 --dist loadgroup"
 
 [tool.coverage.run]
 source = ["ytmusicapi"]
