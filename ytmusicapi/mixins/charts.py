@@ -105,10 +105,13 @@ class ChartsMixin(MixinProtocol):
         playlist_names = ["videos"]
         if country in COUNTRY_EXTRA_CATEGORY:
             playlist_names.append(COUNTRY_EXTRA_CATEGORY[country])
-        # premium sessions get daily and weekly carousels instead of a single "videos" one
+        # premium sessions get daily and weekly carousels in place of the "videos" one
+        # could also be done via an is_premium attribute on YTMusic instance
         if len(playlist_carousels) > len(playlist_names):
             playlist_names = ["daily", "weekly", *playlist_names[1:]]
 
+        # zip leaves trailing names unused: YTM omits categories unpredictably,
+        # e.g. "genres" is missing from some US responses
         for name, contents in zip(playlist_names, playlist_carousels):
             charts[name] = parse_content_list(contents, parse_chart_playlist, MTRIR)
 
