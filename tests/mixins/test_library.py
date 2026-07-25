@@ -18,7 +18,7 @@ class TestLibrary:
         assert len(playlists) <= 1  # "Episodes saved for later"
 
     def test_get_library_songs(self, config, yt_oauth, yt_empty):
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_oauth.get_library_songs(None, True)
         songs = yt_oauth.get_library_songs(100)
         assert len(songs) >= 100
@@ -30,7 +30,7 @@ class TestLibrary:
         assert len(songs) == 0
 
     def test_get_library_albums_invalid_order(self, yt):
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt.get_library_albums(100, order="invalid")
 
     def test_get_library_albums(self, yt_oauth, yt_brand, yt_empty):

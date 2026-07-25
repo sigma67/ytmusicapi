@@ -43,7 +43,8 @@ class TestOAuth:
         session_mock.return_value = Response()
         token_code = json.loads(config["auth"]["oauth_token"])
         json_mock.side_effect = [blank_code, token_code]
-        oauth_filepath = tempfile.NamedTemporaryFile(delete=False).name
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            oauth_filepath = f.name
         with (
             mock.patch("builtins.input", return_value="y"),
             mock.patch(

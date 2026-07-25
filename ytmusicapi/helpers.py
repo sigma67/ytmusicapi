@@ -12,7 +12,7 @@ from requests import Response
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.constants import *
-from ytmusicapi.models.content.TextRun import TextRun
+from ytmusicapi.models.content.text_run import TextRun
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import JsonDict
 

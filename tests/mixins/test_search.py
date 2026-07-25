@@ -191,9 +191,9 @@ class TestSearch:
         assert len(results) >= 1
         results = yt_oauth.search(config["queries"]["library_playlists"], filter="playlists", scope="library")
         assert len(results) >= 1
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_oauth.search("beatles", filter="community_playlists", scope="library", limit=40)
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
 
     @pytest.mark.xdist_group("search_history")

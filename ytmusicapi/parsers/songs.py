@@ -1,5 +1,4 @@
 import re
-from collections.abc import Callable
 
 from ytmusicapi.type_alias import JsonDict, JsonList
 
@@ -148,9 +147,10 @@ def parse_song_menu_data(data: JsonDict) -> JsonDict:
         current_icon_type = nav(menu_item, ["defaultIcon", "iconType"], True) or nav(
             menu_item, ["icon", "iconType"], True
         )
-        feedback_token: Callable[[str], str | None] = lambda endpoint_type: nav(
-            menu_item, [endpoint_type, *FEEDBACK_TOKEN], True
-        )
+
+        def feedback_token(endpoint_type: str, menu_item: JsonDict = menu_item) -> str | None:
+            return nav(menu_item, [endpoint_type, *FEEDBACK_TOKEN], True)
+
         # YTM signals the current state with isToggled instead of swapping the default/toggled icons
         is_toggled = bool(menu_item.get("isToggled"))
 

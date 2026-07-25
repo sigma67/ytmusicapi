@@ -5,22 +5,22 @@ from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.navigation import MRLIR
 from ytmusicapi.parsers.search import *
-from ytmusicapi.type_alias import JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi.type_alias import JsonList, RequestFuncType
 
-_SearchFilterType = (
-    Literal["songs"]
-    | Literal["videos"]
-    | Literal["albums"]
-    | Literal["artists"]
-    | Literal["playlists"]
-    | Literal["community_playlists"]
-    | Literal["featured_playlists"]
-    | Literal["profiles"]
-    | Literal["podcasts"]
-    | Literal["episodes"]
-)
+_SearchFilterType = Literal[
+    "songs",
+    "videos",
+    "albums",
+    "artists",
+    "playlists",
+    "community_playlists",
+    "featured_playlists",
+    "profiles",
+    "podcasts",
+    "episodes",
+]
 
-_SearchScopeType = Literal["uploads"] | Literal["library"]
+_SearchScopeType = Literal["uploads", "library"]
 
 
 class SearchMixin(MixinProtocol):
@@ -258,12 +258,15 @@ class SearchMixin(MixinProtocol):
             else:
                 continue
 
-            if "musicShelfRenderer" in res or "itemSectionRenderer" in res:
-                # if we know the filter it's easy to set the result type
-                # unfortunately uploads is modeled as a filter (historical reasons),
-                #  so we take care to not set the result type for that scope
-                if internal_filter and not scope == scopes[1]:
-                    result_type = internal_filter[:-1].lower()
+            # if we know the filter it's easy to set the result type
+            # unfortunately uploads is modeled as a filter (historical reasons),
+            #  so we take care to not set the result type for that scope
+            if (
+                ("musicShelfRenderer" in res or "itemSectionRenderer" in res)
+                and internal_filter
+                and scope != scopes[1]
+            ):
+                result_type = internal_filter[:-1].lower()
 
             search_results.extend(parse_search_results(shelf_contents, result_type, category))
 
@@ -271,9 +274,11 @@ class SearchMixin(MixinProtocol):
                 request_func: RequestFuncType = lambda additionalParams: self._send_request(
                     endpoint, body, additionalParams
                 )
-                parse_func: ParseFuncType = lambda contents: parse_search_results(
-                    contents, result_type, category
-                )
+
+                def parse_func(
+                    contents: JsonList, result_type: str | None = result_type, category: str | None = category
+                ) -> JsonList:
+                    return parse_search_results(contents, result_type, category)
 
                 search_results.extend(
                     get_continuations(

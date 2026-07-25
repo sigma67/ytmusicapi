@@ -256,8 +256,7 @@ class BrowsingMixin(MixinProtocol):
             1. PlainText: which has format {"text": string}
             2. HyperLink: which has format {"text": string, "url": string}
         """
-        if channelId.startswith("MPLA"):
-            channelId = channelId[4:]
+        channelId = channelId.removeprefix("MPLA")
         body = {"browseId": channelId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)

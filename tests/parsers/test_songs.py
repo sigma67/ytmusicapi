@@ -64,7 +64,7 @@ class TestParseSongRun:
             ("播放次數：4505", "4505"),  # noqa: RUF001
             ("播放次数：3908万", "3908万"),  # noqa: RUF001
             ("再生回数 4.3億 回", "4.3億"),
-            ("‫3.5\xa0ارب بار چلائے گئے", "3.5\xa0ارب"),  # noqa: RUF001
+            ("‫3.5\xa0ارب بار چلائے گئے", "3.5\xa0ارب"),  # noqa: RUF001, PLE2502
         ],
     )
     def test_views_with_leading_word(self, text, expected):

@@ -130,7 +130,7 @@ class WatchMixin(MixinProtocol):
         is_playlist = False
         if playlistId:
             playlist_id = validate_playlist_id(playlistId)
-            is_playlist = playlist_id.startswith("PL") or playlist_id.startswith("OLA")
+            is_playlist = playlist_id.startswith(("PL", "OLA"))
             body["playlistId"] = playlist_id
 
         if shuffle and playlistId is not None:
@@ -165,9 +165,9 @@ class WatchMixin(MixinProtocol):
         playlist = next(
             filter(
                 bool,
-                map(
-                    lambda x: nav(x, ["playlistPanelVideoRenderer", *NAVIGATION_PLAYLIST_ID], True),
-                    results["contents"],
+                (
+                    nav(x, ["playlistPanelVideoRenderer", *NAVIGATION_PLAYLIST_ID], True)
+                    for x in results["contents"]
                 ),
             ),
             None,
@@ -190,4 +190,9 @@ class WatchMixin(MixinProtocol):
                 )
             )
 
-        return dict(tracks=tracks, playlistId=playlist, lyrics=lyrics_browse_id, related=related_browse_id)
+        return {
+            "tracks": tracks,
+            "playlistId": playlist,
+            "lyrics": lyrics_browse_id,
+            "related": related_browse_id,
+        }
