@@ -53,7 +53,6 @@ jobs:
         HEADERS_AUTH: ${{ secrets.HEADERS_AUTH }}
         TEST_CFG: ${{ secrets.TEST_CFG }}
       run: |
-        curl -fsSL -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/browser.json
         cat <<< "$TEST_CFG" > tests/test.cfg
         pdm run pytest -n 2 --dist loadgroup --junitxml=test-results.xml

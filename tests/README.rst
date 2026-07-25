@@ -21,8 +21,10 @@ First, run
     cp tests/test.example.cfg tests/test.cfg
 
 The entry descriptions should be self-explanatory.
-For the headers_raw, you need to indent the overflowing lines with a tab character. For the upload test you need a suitable music file in the test directory.
+For the headers_raw, you need to indent the overflowing lines with a tab character.
 Adjust the file to contain appropriate information for your YouTube account and local setup.
+
+The upload test uses ``tests/test.mp3``, which is checked into the repository.
 
 ``account_name`` and ``channel_handle`` for test.cfg can be obtained by visiting either YouTube or YouTube Music and
 clicking your profile picture icon in the top right while signed in with your test account.
