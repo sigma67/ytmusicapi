@@ -6,6 +6,16 @@ from ytmusicapi.type_alias import JsonDict, JsonList
 COUNTRY_EXTRA_CATEGORY = {"US": "genres", "IN": "languages"}
 
 
+def is_playlist_carousel(contents: JsonList) -> bool:
+    """chart playlists are the only carousel items linking to a "VL" playlist"""
+    browse_id = nav(contents[0], [MTRIR, *TITLE, *NAVIGATION_BROWSE_ID], True)
+    return bool(browse_id and browse_id.startswith("VL"))
+
+
+def is_artist_carousel(contents: JsonList) -> bool:
+    return MRLIR in contents[0]
+
+
 class ChartsMixin(MixinProtocol):
     def get_charts(self, country: str = "ZZ") -> JsonDict:
         """
@@ -85,23 +95,16 @@ class ChartsMixin(MixinProtocol):
             )
         )
 
-        # carousels carry no machine-readable identity, so classify them by contents: chart
-        # playlists have "VL" browse ids, artists are list items. Carousels of anything else
-        # (some regions add an album chart) are ignored instead of shifting the known ones.
-        playlist_carousels: list[JsonList] = []
-        artist_carousels: list[JsonList] = []
-        for section in results[1:]:
-            contents = nav(section, CAROUSEL_CONTENTS, True)
-            if not contents:
-                continue
-            if MRLIR in contents[0]:
-                artist_carousels.append(contents)
-            elif str(nav(contents[0], [MTRIR, *TITLE, *NAVIGATION_BROWSE_ID], True)).startswith("VL"):
-                playlist_carousels.append(contents)
+        # carousels carry no machine-readable identity, so recognize them by their contents;
+        # anything else (some regions add an album chart) is ignored instead of shifting the
+        # categories that come after it
+        carousels = [c for section in results[1:] if (c := nav(section, CAROUSEL_CONTENTS, True))]
+        playlist_carousels = [c for c in carousels if is_playlist_carousel(c)]
+        artist_carousels = [c for c in carousels if is_artist_carousel(c)]
 
-        # the extra category is not returned by every response
-        extra_category = COUNTRY_EXTRA_CATEGORY.get(country)
-        playlist_names = ["videos", *([extra_category] if extra_category else [])]
+        playlist_names = ["videos"]
+        if country in COUNTRY_EXTRA_CATEGORY:
+            playlist_names.append(COUNTRY_EXTRA_CATEGORY[country])
         # premium sessions get daily and weekly carousels instead of a single "videos" one
         if len(playlist_carousels) > len(playlist_names):
             playlist_names = ["daily", "weekly", *playlist_names[1:]]
