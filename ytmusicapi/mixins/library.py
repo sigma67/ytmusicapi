@@ -31,7 +31,7 @@ class LibraryMixin(MixinProtocol):
                 'playlistId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
                 'title': 'Playlist title',
                 'thumbnails': [...],
-                'count': 5,
+                'count': '5',
                 'owned': True
             }
         """
