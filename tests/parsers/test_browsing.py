@@ -45,7 +45,9 @@ def test_parse_playlist_marks_playlist_with_editor_endpoint_as_owned():
 
 def test_parse_playlist_marks_playlist_without_editor_endpoint_as_not_owned():
     saved_playlist = deepcopy(OWNED_PLAYLIST)
-    del saved_playlist["menu"]
+    saved_playlist["menu"]["menuRenderer"]["items"][0]["menuNavigationItemRenderer"]["navigationEndpoint"] = {
+        "watchPlaylistEndpoint": {"playlistId": "PL_family"}
+    }
 
     playlist = parse_playlist(saved_playlist)
 
