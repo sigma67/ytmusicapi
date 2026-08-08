@@ -266,6 +266,11 @@ class SearchMixin(MixinProtocol):
                 and internal_filter
                 and scope != scopes[1]
             ):
+                # YTM sometimes pads results with a differently-categorized shelf
+                # (e.g. a "Songs" shelf when filtering by featured_playlists) - skip
+                # it rather than mislabeling its contents as the requested type
+                if category and internal_filter[:-1].lower() not in category.lower():
+                    continue
                 result_type = internal_filter[:-1].lower()
 
             search_results.extend(parse_search_results(shelf_contents, result_type, category))
