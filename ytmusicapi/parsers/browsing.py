@@ -169,7 +169,7 @@ def parse_playlist(data: JsonDict) -> JsonDict:
             none_if_absent=True,  # rare but possible for playlist title to be missing
         ),
         "playlistId": playlist_id,
-        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
         "owned": any(
             nav(
                 item,
