@@ -1,6 +1,7 @@
 import pytest
 
-from ytmusicapi.parsers.browsing import parse_playlist
+from ytmusicapi.navigation import MRLIR, MTRIR
+from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 
 
 def _playlist_item(thumbnail_renderer: dict) -> dict:
@@ -47,3 +48,16 @@ class TestParsePlaylist:
         parsed = parse_playlist(_playlist_item(thumbnail_renderer))
         assert parsed["playlistId"] == "PLabc123"
         assert parsed["thumbnails"] is None
+
+
+class TestParseContentList:
+    def test_mixed_renderers_are_skipped(self):
+        """A mood/genre carousel can mix renderer types; only the requested key is parsed."""
+        results = [
+            {MTRIR: {"id": 1}},
+            {MRLIR: {"id": 2}},
+            {MTRIR: {"id": 3}},
+        ]
+
+        assert parse_content_list(results, lambda item: item["id"], MTRIR) == [1, 3]
+        assert parse_content_list(results, lambda item: item["id"], MRLIR) == [2]
