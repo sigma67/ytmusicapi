@@ -167,7 +167,7 @@ def parse_playlist(data: JsonDict) -> JsonDict:
             none_if_absent=True,  # rare but possible for playlist title to be missing
         ),
         "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
-        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
     }
     subtitle = data["subtitle"]
     if "runs" in subtitle:
