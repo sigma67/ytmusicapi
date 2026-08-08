@@ -60,6 +60,11 @@ def parse_mixed_content(
 def parse_content_list(results: JsonList, parse_func: ParseFuncDictType, key: str = MTRIR) -> JsonList:
     contents = []
     for result in results:
+        # carousels can mix renderer types (e.g. songs/videos alongside playlists),
+        # so skip anything that isn't the renderer parse_func expects
+        if key not in result:
+            continue
+
         contents.append(parse_func(result[key]))
 
     return contents
