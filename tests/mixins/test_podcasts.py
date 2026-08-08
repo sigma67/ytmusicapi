@@ -29,8 +29,10 @@ class TestPodcasts:
     def test_many_podcasts(self, yt):
         results = yt.search("europe", filter="podcasts")
         for result in results:
-            results = yt.get_podcast(result["browseId"])
-            assert len(results) > 0
+            if result["browseId"] is None:
+                continue  # search can surface non-podcast results even with the podcasts filter
+            podcast = yt.get_podcast(result["browseId"])
+            assert len(podcast) > 0
 
     def test_get_episode(self, config, yt, yt_brand):
         episode_id = config["podcasts"]["episode_id"]
