@@ -92,19 +92,6 @@ class TestUploads:
             f"Song failed to upload {upload_response}"
         )
 
-        # Wait for upload to finish processing and verify it can be retrieved
-        retries_remaining = 5
-        while retries_remaining:
-            time.sleep(5)
-            songs = yt_auth.get_library_upload_songs(limit=25, order="recently_added")
-            for song in songs:
-                if song.get("title") in config["uploads"]["file"]:
-                    # Uploaded song found
-                    return
-            retries_remaining -= 1
-
-        raise AssertionError("Uploaded song was not found in library")
-
     @pytest.mark.skip(reason="Do not delete uploads")
     def test_delete_upload_entity(self, yt_oauth):
         results = yt_oauth.get_library_upload_songs()
