@@ -75,7 +75,7 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
                     True,
                 ),
             }
-    if "runs" in header["secondSubtitle"]:
+    if "runs" in header.get("secondSubtitle", {}):
         second_subtitle_runs = header["secondSubtitle"]["runs"]
         has_views = (len(second_subtitle_runs) > 3) * 2
         playlist_meta["views"] = None if not has_views else to_int(second_subtitle_runs[0]["text"])
