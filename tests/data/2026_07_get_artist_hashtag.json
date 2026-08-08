@@ -1,0 +1,58 @@
+{
+  "contents": {
+    "singleColumnBrowseResultsRenderer": {
+      "tabs": [
+        {
+          "tabRenderer": {
+            "content": {
+              "sectionListRenderer": {
+                "contents": [
+                  {
+                    "musicDescriptionShelfRenderer": {
+                      "description": {
+                        "runs": [
+                          {
+                            "text": "his fourth "
+                          },
+                          {
+                            "text": "#1Billboard",
+                            "navigationEndpoint": {
+                              "searchEndpoint": {
+                                "query": "#1Billboard",
+                                "params": "agIoAQ%3D%3D"
+                              }
+                            }
+                          },
+                          {
+                            "text": " Gospel Airplay single"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "header": {
+    "musicImmersiveHeaderRenderer": {
+      "title": {
+        "runs": [
+          {
+            "text": "Zacardi Cortez"
+          }
+        ]
+      },
+      "subscriptionButton": {
+        "subscribeButtonRenderer": {
+          "channelId": "UCrHXgjbVIX4tNY_8vy6C2ug",
+          "subscribed": false
+        }
+      }
+    }
+  }
+}

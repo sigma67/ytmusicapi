@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import datetime, timezone
 from typing import Literal
 
 from ytmusicapi.exceptions import YTMusicGatedError, YTMusicUserError
@@ -80,4 +80,5 @@ def validate_write_response(response: JsonDict) -> None:
 def get_datestamp() -> int:
     """Returns the number of days since January 1, 1970.
     Currently only used for the signature timestamp in :py:func:`get_song`."""
-    return (date.today() - date.fromtimestamp(0)).days
+    epoch = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return (datetime.now(timezone.utc) - epoch).days

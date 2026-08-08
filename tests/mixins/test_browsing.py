@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 
 from tests.test_helpers import is_ci
+from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.models.lyrics import LyricLine
 
 
@@ -16,13 +17,11 @@ class TestBrowsing:
         assert len(result) >= 15
         assert all(
             # ensure we aren't parsing specifiers like "Song" as artist names
-            [
-                item["artists"][0]["id"]
-                or item["artists"][0]["name"].lower() not in yt_auth.parser.get_api_result_types()
-                for section in result
-                for item in section["contents"]
-                if item and len(item.get("artists", [])) > 1
-            ]
+            item["artists"][0]["id"]
+            or item["artists"][0]["name"].lower() not in yt_auth.parser.get_api_result_types()
+            for section in result
+            for item in section["contents"]
+            if item and len(item.get("artists", [])) > 1
         )
         # disabling this assert for now as failure cannot be reproduced
         # assert all(
@@ -80,77 +79,25 @@ class TestBrowsing:
             assert result["description"] == expected_output["description"]
             assert result["descriptionRuns"] == expected_output["descriptionRuns"]
 
-    def test_get_artist_two_column_layout(self, yt):
+        with open(data_path / "2026_07_get_artist_hashtag.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with open(
+            data_path / "expected_output" / "2026_07_get_artist_hashtag.json",
+            encoding="utf8",
+        ) as f:
+            expected_output = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCRHts_o65erNP48E0j2qYkw")
+            assert result["description"] == expected_output["description"]
+            assert result["descriptionRuns"] == expected_output["descriptionRuns"]
+
+    def test_get_artist_two_column_layout(self, yt, data_path):
         """regression test for #929: some artist pages are served as
         twoColumnBrowseResultsRenderer instead of singleColumnBrowseResultsRenderer"""
-        mock_response = {
-            "header": {
-                "musicImmersiveHeaderRenderer": {
-                    "title": {"runs": [{"text": "Test Artist"}]},
-                    "subscriptionButton": {
-                        "subscribeButtonRenderer": {
-                            "channelId": "UCTestChannelId",
-                            "subscribed": False,
-                        }
-                    },
-                }
-            },
-            "contents": {
-                "twoColumnBrowseResultsRenderer": {
-                    "tabs": [
-                        {
-                            "tabRenderer": {
-                                "content": {
-                                    "sectionListRenderer": {
-                                        "contents": [
-                                            {
-                                                "musicShelfRenderer": {
-                                                    "title": {"runs": [{"text": "Songs"}]},
-                                                    "contents": [],
-                                                }
-                                            },
-                                            {
-                                                "musicCarouselShelfRenderer": {
-                                                    "header": {
-                                                        "musicCarouselShelfBasicHeaderRenderer": {
-                                                            "title": {"runs": [{"text": "Albums"}]}
-                                                        }
-                                                    },
-                                                    "contents": [
-                                                        {
-                                                            "musicTwoRowItemRenderer": {
-                                                                "title": {
-                                                                    "runs": [
-                                                                        {
-                                                                            "text": "Test Album",
-                                                                            "navigationEndpoint": {
-                                                                                "browseEndpoint": {
-                                                                                    "browseId": "MPREb_test123"
-                                                                                }
-                                                                            },
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                "subtitle": {"runs": [{"text": "2024"}]},
-                                                                "thumbnailRenderer": {
-                                                                    "musicThumbnailRenderer": {
-                                                                        "thumbnail": {"thumbnails": []}
-                                                                    }
-                                                                },
-                                                            }
-                                                        }
-                                                    ],
-                                                }
-                                            },
-                                        ]
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-        }
+        with open(data_path / "2026_07_get_artist_two_column.json", encoding="utf8") as f:
+            mock_response = json.load(f)
 
         with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
             result = yt.get_artist("UCTestChannelId")
@@ -334,12 +281,10 @@ class TestBrowsing:
         assert len(song) >= 5
         assert all(
             # ensure every video is associated with a view count or music album
-            [
-                item.get("views") or item.get("album")
-                for section in song
-                for item in section["contents"]
-                if "videoId" in item
-            ]
+            item.get("views") or item.get("album")
+            for section in song
+            for item in section["contents"]
+            if "videoId" in item
         )
 
     def test_get_lyrics(self, config, yt, sample_video):
@@ -368,7 +313,7 @@ class TestBrowsing:
         assert signature_timestamp is not None
 
     def test_set_tasteprofile(self, yt_brand):
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_brand.set_tasteprofile(["test", "test2"])
         taste_profile = yt_brand.get_tasteprofile()
         assert yt_brand.set_tasteprofile(list(taste_profile)[:1], taste_profile) is None

@@ -27,7 +27,7 @@ jobs:
       contents: read
     steps:
     - name: Checkout repository
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
         persist-credentials: false
@@ -41,7 +41,7 @@ jobs:
       with:
         python-version: "3.10"
     - name: Setup PDM
-      uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0  # v4.4
+      uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f  # v4.5
     - name: Write OAuth credentials
       env:
         OAUTH_JSON: ${{ secrets.OAUTH_JSON }}
@@ -53,10 +53,9 @@ jobs:
         HEADERS_AUTH: ${{ secrets.HEADERS_AUTH }}
         TEST_CFG: ${{ secrets.TEST_CFG }}
       run: |
-        curl -fsSL -o tests/test.mp3 https://www.kozco.com/tech/piano2-CoolEdit.mp3
         cat <<< "$HEADERS_AUTH" > tests/browser.json
         cat <<< "$TEST_CFG" > tests/test.cfg
-        pdm run pytest --junitxml=test-results.xml
+        pdm run pytest -n 2 --dist loadgroup --junitxml=test-results.xml
         pdm run coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f  # v7.0.0

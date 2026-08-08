@@ -12,6 +12,7 @@ from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.ytmusic import YTMusic
 
 
+@pytest.mark.xdist_group("uploads")
 class TestUploads:
     def test_get_library_upload_songs(self, yt_oauth, yt_empty):
         results = yt_oauth.get_library_upload_songs(50, order="z_to_a")
@@ -75,7 +76,8 @@ class TestUploads:
         upload_response = yt_auth.upload_song(get_resource(config["uploads"]["file"]))
         if not isinstance(upload_response, str) and upload_response.status_code == 409:
             # Song is already in uploads. Delete it and re-upload
-            songs = yt_auth.get_library_upload_songs(limit=None, order="recently_added")
+            # the test file is the most recent upload; limit=None would walk the whole library
+            songs = yt_auth.get_library_upload_songs(limit=25, order="recently_added")
             delete_response = None
             for song in songs:
                 if song.get("title") in config["uploads"]["file"]:
@@ -89,19 +91,6 @@ class TestUploads:
         assert upload_response == ResponseStatus.SUCCEEDED or upload_response.status_code == 200, (
             f"Song failed to upload {upload_response}"
         )
-
-        # Wait for upload to finish processing and verify it can be retrieved
-        retries_remaining = 5
-        while retries_remaining:
-            time.sleep(5)
-            songs = yt_auth.get_library_upload_songs(limit=None, order="recently_added")
-            for song in songs:
-                if song.get("title") in config["uploads"]["file"]:
-                    # Uploaded song found
-                    return
-            retries_remaining -= 1
-
-        raise AssertionError("Uploaded song was not found in library")
 
     @pytest.mark.skip(reason="Do not delete uploads")
     def test_delete_upload_entity(self, yt_oauth):

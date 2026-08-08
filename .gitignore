@@ -6,6 +6,7 @@ docs/build
 docs/source/reference/api
 test.cfg
 **.mp3
+!tests/test.mp3
 .coverage
 **/__pycache__/
 venv*/

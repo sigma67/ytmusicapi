@@ -12,9 +12,6 @@ from .constants import DOT_SEPARATOR_RUN
 P = ParamSpec("P")
 R = TypeVar("R")
 
-if typing.TYPE_CHECKING:
-    pass
-
 
 def parse_menu_playlists(data: JsonDict, result: JsonDict) -> None:
     """performs in-place replacement based on :param:data: in :param:result"""

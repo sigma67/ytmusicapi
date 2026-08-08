@@ -191,11 +191,12 @@ class TestSearch:
         assert len(results) >= 1
         results = yt_oauth.search(config["queries"]["library_playlists"], filter="playlists", scope="library")
         assert len(results) >= 1
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_oauth.search("beatles", filter="community_playlists", scope="library", limit=40)
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
 
+    @pytest.mark.xdist_group("search_history")
     def test_remove_search_suggestions_valid(self, yt_auth):
         first_pass = yt_auth.search("be")  # Populate the suggestion history
         assert len(first_pass) > 0, "Search returned no results"
@@ -207,6 +208,7 @@ class TestSearch:
         response = yt_auth.remove_search_suggestions(results)
         assert response is True, "Failed to remove search suggestions"
 
+    @pytest.mark.xdist_group("search_history")
     def test_remove_search_suggestions_errors(self, yt_auth, yt):
         first_pass = yt_auth.search("a")
         assert len(first_pass) > 0, "Search returned no results"

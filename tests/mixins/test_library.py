@@ -18,7 +18,7 @@ class TestLibrary:
         assert len(playlists) <= 1  # "Episodes saved for later"
 
     def test_get_library_songs(self, config, yt_oauth, yt_empty):
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt_oauth.get_library_songs(None, True)
         songs = yt_oauth.get_library_songs(100)
         assert len(songs) >= 100
@@ -30,7 +30,7 @@ class TestLibrary:
         assert len(songs) == 0
 
     def test_get_library_albums_invalid_order(self, yt):
-        with pytest.raises(Exception):
+        with pytest.raises(YTMusicUserError):
             yt.get_library_albums(100, order="invalid")
 
     def test_get_library_albums(self, yt_oauth, yt_brand, yt_empty):
@@ -93,6 +93,7 @@ class TestLibrary:
         episodes = yt_empty.get_saved_episodes()
         assert episodes["trackCount"] == 0
 
+    @pytest.mark.xdist_group("history")
     def test_get_history(self, yt_oauth):
         songs = yt_oauth.get_history()
         assert len(songs) > 0
@@ -103,6 +104,7 @@ class TestLibrary:
             if "listenAgainFeedbackTokens" in song
         )
 
+    @pytest.mark.xdist_group("history")
     def test_manipulate_history_items(self, yt_auth, sample_video):
         song = yt_auth.get_song(sample_video)
         response = yt_auth.add_history_item(song)
@@ -163,8 +165,14 @@ class TestLibrary:
         assert "actions" in response
 
     def test_subscribe_artists(self, yt_auth):
-        yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+        with pytest.warns(DeprecationWarning):
+            yt_auth.subscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+        yt_auth.subscribe_artist("UCUDVBtnOQi4c7E8jebpjc9Q")
         yt_auth.unsubscribe_artists(["UCUDVBtnOQi4c7E8jebpjc9Q"])
+
+    def test_subscribe_artists_rejects_multiple(self, yt_auth):
+        with pytest.raises(YTMusicUserError, match="only supports subscribing to one artist"):
+            yt_auth.subscribe_artists(["UC1", "UC2"])
 
     def test_get_account_info(self, config, yt, yt_oauth):
         with pytest.raises(Exception, match="Please provide authentication"):

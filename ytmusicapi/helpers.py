@@ -12,7 +12,7 @@ from requests import Response
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.constants import *
-from ytmusicapi.models.content.TextRun import TextRun
+from ytmusicapi.models.content.text_run import TextRun
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import JsonDict
 
@@ -112,12 +112,10 @@ def parse_description_runs(descriptionRunsList: Any | None) -> tuple[str, list[T
     for run in descriptionRunsList:
         description += run["text"]
 
-        if "navigationEndpoint" in run:
-            link = nav(run, ["navigationEndpoint", "urlEndpoint", "url"])
-            desc = run["text"]
-
-            description_runs.append({"text": desc, "url": link})
-            continue
+        # hashtag runs carry a searchEndpoint instead of an urlEndpoint - treat them as plain text
+        link = nav(run, ["navigationEndpoint", "urlEndpoint", "url"], True)
+        if link is not None:
+            description_runs.append({"text": run["text"], "url": link})
         else:
             description_runs.append({"text": run["text"]})
 

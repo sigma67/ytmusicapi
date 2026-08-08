@@ -256,15 +256,14 @@ class BrowsingMixin(MixinProtocol):
             1. PlainText: which has format {"text": string}
             2. HyperLink: which has format {"text": string, "url": string}
         """
-        if channelId.startswith("MPLA"):
-            channelId = channelId[4:]
+        channelId = channelId.removeprefix("MPLA")
         body = {"browseId": channelId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        # Try twoColumn first, fallback to singleColumn
-        results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST], True)
+        # some artist pages use twoColumnBrowseResultsRenderer instead of singleColumn (#929)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
         if results is None:
-            results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+            results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST])
 
         artist: JsonDict = {"description": None, "descriptionRuns": [], "views": None}
 
