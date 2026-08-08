@@ -23,15 +23,16 @@ class LibraryMixin(MixinProtocol):
         Retrieves the playlists in the user's library.
 
         :param limit: Number of playlists to retrieve. ``None`` retrieves them all.
-        :return: List of owned playlists.
+        :return: List of playlists in the user's library.
 
         Each item is in the following format::
 
             {
                 'playlistId': 'PLQwVIlKxHM6rz0fDJVv_0UlXGEWf-bFys',
                 'title': 'Playlist title',
-                'thumbnails: [...],
-                'count': 5
+                'thumbnails': [...],
+                'count': '5',
+                'owned': True
             }
         """
         self._check_auth()

@@ -165,14 +165,30 @@ def parse_video(result: JsonDict) -> JsonDict:
 
 
 def parse_playlist(data: JsonDict) -> JsonDict:
+    playlist_id = nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:]
+    menu_items = nav(data, ["menu", "menuRenderer", "items"], True) or []
     playlist = {
         "title": nav(
             data,
             TITLE_TEXT,
             none_if_absent=True,  # rare but possible for playlist title to be missing
         ),
-        "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
+        "playlistId": playlist_id,
         "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
+        "owned": any(
+            nav(
+                item,
+                [
+                    "menuNavigationItemRenderer",
+                    "navigationEndpoint",
+                    "playlistEditorEndpoint",
+                    "playlistId",
+                ],
+                True,
+            )
+            == playlist_id
+            for item in menu_items
+        ),
     }
     subtitle = data["subtitle"]
     if "runs" in subtitle:

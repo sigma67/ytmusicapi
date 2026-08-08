@@ -1,7 +1,27 @@
+from copy import deepcopy
+
 import pytest
 
+from tests.parsers.data import OWNED_PLAYLIST
 from ytmusicapi.navigation import MRLIR, MTRIR
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
+
+
+def test_parse_playlist_marks_playlist_with_editor_endpoint_as_owned():
+    playlist = parse_playlist(OWNED_PLAYLIST)
+
+    assert playlist["owned"] is True
+
+
+def test_parse_playlist_marks_playlist_without_editor_endpoint_as_not_owned():
+    saved_playlist = deepcopy(OWNED_PLAYLIST)
+    saved_playlist["menu"]["menuRenderer"]["items"][0]["menuNavigationItemRenderer"]["navigationEndpoint"] = {
+        "watchPlaylistEndpoint": {"playlistId": "PL_family"}
+    }
+
+    playlist = parse_playlist(saved_playlist)
+
+    assert playlist["owned"] is False
 
 
 def _playlist_item(thumbnail_renderer: dict) -> dict:
