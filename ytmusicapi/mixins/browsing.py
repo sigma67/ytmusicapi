@@ -260,7 +260,10 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": channelId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
+        # some artist pages use twoColumnBrowseResultsRenderer instead of singleColumn (#929)
+        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
+        if results is None:
+            results = nav(response, [*TWO_COLUMN_RENDERER, *TAB_CONTENT, *SECTION_LIST])
 
         artist: JsonDict = {"description": None, "descriptionRuns": [], "views": None}
 

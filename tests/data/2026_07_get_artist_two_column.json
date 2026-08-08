@@ -1,0 +1,64 @@
+{
+  "header": {
+    "musicImmersiveHeaderRenderer": {
+      "title": { "runs": [{ "text": "Test Artist" }] },
+      "subscriptionButton": {
+        "subscribeButtonRenderer": {
+          "channelId": "UCTestChannelId",
+          "subscribed": false
+        }
+      }
+    }
+  },
+  "contents": {
+    "twoColumnBrowseResultsRenderer": {
+      "tabs": [
+        {
+          "tabRenderer": {
+            "content": {
+              "sectionListRenderer": {
+                "contents": [
+                  {
+                    "musicShelfRenderer": {
+                      "title": { "runs": [{ "text": "Songs" }] },
+                      "contents": []
+                    }
+                  },
+                  {
+                    "musicCarouselShelfRenderer": {
+                      "header": {
+                        "musicCarouselShelfBasicHeaderRenderer": {
+                          "title": { "runs": [{ "text": "Albums" }] }
+                        }
+                      },
+                      "contents": [
+                        {
+                          "musicTwoRowItemRenderer": {
+                            "title": {
+                              "runs": [
+                                {
+                                  "text": "Test Album",
+                                  "navigationEndpoint": {
+                                    "browseEndpoint": { "browseId": "MPREb_test123" }
+                                  }
+                                }
+                              ]
+                            },
+                            "subtitle": { "runs": [{ "text": "2024" }] },
+                            "thumbnailRenderer": {
+                              "musicThumbnailRenderer": { "thumbnail": { "thumbnails": [] } }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

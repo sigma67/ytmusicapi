@@ -93,6 +93,21 @@ class TestBrowsing:
             assert result["description"] == expected_output["description"]
             assert result["descriptionRuns"] == expected_output["descriptionRuns"]
 
+    def test_get_artist_two_column_layout(self, yt, data_path):
+        """regression test for #929: some artist pages are served as
+        twoColumnBrowseResultsRenderer instead of singleColumnBrowseResultsRenderer"""
+        with open(data_path / "2026_07_get_artist_two_column.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCTestChannelId")
+
+        assert result["name"] == "Test Artist"
+        assert result["songs"]["results"] == []
+        assert len(result["albums"]["results"]) == 1
+        assert result["albums"]["results"][0]["title"] == "Test Album"
+        assert result["albums"]["results"][0]["browseId"] == "MPREb_test123"
+
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
         results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
