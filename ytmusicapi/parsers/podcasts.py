@@ -76,7 +76,7 @@ def parse_base_header(header: JsonDict) -> JsonDict:
     return {
         "author": author if author["name"] else None,
         "title": nav(header, TITLE_TEXT),
-        "thumbnails": nav(header, THUMBNAILS),
+        "thumbnails": nav(header, THUMBNAILS, True),
     }
 
 
@@ -107,7 +107,7 @@ def parse_episode_header(header: JsonDict) -> JsonDict:
 
 def parse_episode(data: JsonDict) -> JsonDict:
     """Parses a single episode under "Episodes" on a channel page or on a podcast page"""
-    thumbnails = nav(data, THUMBNAILS)
+    thumbnails = nav(data, THUMBNAILS, True)
     date = nav(data, SUBTITLE, True)
     duration = nav(data, ["playbackProgress", *PROGRESS_RENDERER, *DURATION_TEXT], True)
     title = nav(data, TITLE_TEXT)
@@ -138,7 +138,7 @@ def parse_episode_flat(data: JsonDict) -> JsonDict:
         "playlistId": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *WATCH_PLAYLIST_ID]),
         "videoType": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE]),
         "date": nav(get_flex_column_item(data, 2), TEXT_RUN_TEXT),
-        "thumbnails": nav(data, THUMBNAILS),
+        "thumbnails": nav(data, THUMBNAILS, True),
     }
 
 
@@ -149,5 +149,5 @@ def parse_podcast(data: JsonDict) -> JsonDict:
         "channel": parse_id_name(nav(data, [*SUBTITLE_RUNS, 0], True)),
         "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
         "podcastId": nav(data, THUMBNAIL_OVERLAY, True),
-        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
     }

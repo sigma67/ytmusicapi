@@ -26,7 +26,7 @@ def parse_chart_playlist(data: JsonDict) -> JsonDict:
     return {
         "title": nav(data, TITLE_TEXT),
         "playlistId": nav(data, TITLE + NAVIGATION_BROWSE_ID)[2:],
-        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
     }
 
 
@@ -47,7 +47,7 @@ def parse_chart_artist(data: JsonDict) -> JsonDict:
         "title": nav(get_flex_column_item(data, 0), TEXT_RUN_TEXT),
         "browseId": nav(data, NAVIGATION_BROWSE_ID),
         "subscribers": subscribers,
-        "thumbnails": nav(data, THUMBNAILS),
+        "thumbnails": nav(data, THUMBNAILS, True),
     }
     parsed.update(parse_ranking(data, none_if_absent=True))
     return parsed

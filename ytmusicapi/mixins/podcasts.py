@@ -71,7 +71,7 @@ class PodcastsMixin(MixinProtocol):
 
         channel = {
             "title": nav(response, [*HEADER_MUSIC_VISUAL, *TITLE_TEXT]),
-            "thumbnails": nav(response, [*HEADER_MUSIC_VISUAL, *THUMBNAILS]),
+            "thumbnails": nav(response, [*HEADER_MUSIC_VISUAL, *THUMBNAILS], True),
         }
 
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
