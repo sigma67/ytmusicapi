@@ -91,7 +91,7 @@ def parse_album(result: JsonDict) -> JsonDict:
         ],
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
         "audioPlaylistId": parse_album_playlistid_if_exists(nav(result, THUMBNAIL_OVERLAY_NAVIGATION, True)),
-        "thumbnails": nav(result, THUMBNAIL_RENDERER),
+        "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
         "isExplicit": nav(result, SUBTITLE_BADGE_LABEL, True) is not None,
     }
 
@@ -102,7 +102,7 @@ def parse_single(result: JsonDict) -> JsonDict:
     single = {
         "title": nav(result, TITLE_TEXT),
         "browseId": nav(result, TITLE + NAVIGATION_BROWSE_ID),
-        "thumbnails": nav(result, THUMBNAIL_RENDERER),
+        "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
     }
 
     return _parse_album_single_subtitle(result, single)
@@ -113,7 +113,7 @@ def parse_song(result: JsonDict) -> JsonDict:
         "title": nav(result, TITLE_TEXT),
         "videoId": nav(result, NAVIGATION_VIDEO_ID),
         "playlistId": nav(result, NAVIGATION_PLAYLIST_ID, True),
-        "thumbnails": nav(result, THUMBNAIL_RENDERER),
+        "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
     }
     song.update(parse_song_runs(nav(result, SUBTITLE_RUNS), skip_type_spec=True))
     return song
@@ -125,7 +125,7 @@ def parse_song_flat(data: JsonDict, with_playlist_id: bool = False) -> JsonDict:
         "title": nav(columns[0], TEXT_RUN_TEXT),
         "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
         "videoType": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
-        "thumbnails": nav(data, THUMBNAILS),
+        "thumbnails": nav(data, THUMBNAILS, True),
         "isExplicit": nav(data, BADGE_LABEL, True) is not None,
     }
 
@@ -208,7 +208,7 @@ def parse_related_artist(data: JsonDict) -> JsonDict:
         "title": nav(data, TITLE_TEXT),
         "browseId": nav(data, TITLE + NAVIGATION_BROWSE_ID),
         "subscribers": subscribers,
-        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
     }
 
 
@@ -216,5 +216,5 @@ def parse_watch_playlist(data: JsonDict) -> JsonDict:
     return {
         "title": nav(data, TITLE_TEXT),
         "playlistId": nav(data, NAVIGATION_WATCH_PLAYLIST_ID),
-        "thumbnails": nav(data, THUMBNAIL_RENDERER),
+        "thumbnails": nav(data, THUMBNAIL_RENDERER, True),
     }

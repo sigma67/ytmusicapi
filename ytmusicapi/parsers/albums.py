@@ -11,7 +11,7 @@ def parse_album_header(response: JsonDict) -> JsonDict:
     album = {
         "title": nav(header, TITLE_TEXT),
         "type": nav(header, SUBTITLE),
-        "thumbnails": nav(header, THUMBNAIL_CROPPED),
+        "thumbnails": nav(header, THUMBNAIL_CROPPED, True),
         "isExplicit": nav(header, SUBTITLE_BADGE_LABEL, True) is not None,
     }
 
@@ -45,7 +45,7 @@ def parse_album_header_2024(response: JsonDict) -> JsonDict:
     album = {
         "title": nav(header, TITLE_TEXT),
         "type": nav(header, SUBTITLE),
-        "thumbnails": nav(header, THUMBNAILS),
+        "thumbnails": nav(header, THUMBNAILS, True),
         "isExplicit": nav(header, SUBTITLE_BADGE_LABEL, True) is not None,
     }
     description, description_runs = parse_description_runs(

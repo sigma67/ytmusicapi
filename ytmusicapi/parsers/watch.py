@@ -38,7 +38,7 @@ def parse_watch_track(data: JsonDict) -> JsonDict:
         "videoId": data["videoId"],
         "title": nav(data, TITLE_TEXT),
         "length": nav(data, ["lengthText", "runs", 0, "text"], True),
-        "thumbnail": nav(data, THUMBNAIL),
+        "thumbnail": nav(data, THUMBNAIL, True),
         "likeStatus": like_status,
         "videoType": nav(data, ["navigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
     }

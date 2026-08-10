@@ -31,7 +31,7 @@ def parse_uploaded_items(results: JsonList) -> JsonList:
 
         title = get_item_text(data, 0)
         like = nav(data, MENU_LIKE_STATUS)
-        thumbnails = nav(data, THUMBNAILS) if "thumbnail" in data else None
+        thumbnails = nav(data, THUMBNAILS, True)
         duration = None
         if "fixedColumns" in data:
             duration = nav(get_fixed_column_item(data, 0), TEXT_RUN_TEXT)

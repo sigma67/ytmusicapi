@@ -39,7 +39,7 @@ def parse_playlist_header_meta(header: JsonDict) -> JsonDict:
         "duration": None,
         "trackCount": None,
         "title": "".join([run["text"] for run in header.get("title", {}).get("runs", [])]),
-        "thumbnails": nav(header, THUMBNAILS),
+        "thumbnails": nav(header, THUMBNAILS, True),
     }
     if "facepile" in header:
         avatar_renderer = nav(header, ["facepile", "avatarStackViewModel", "rendererContext"])
