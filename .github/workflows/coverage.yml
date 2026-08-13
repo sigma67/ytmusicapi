@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ytmusicapi-2
     paths:
       - ytmusicapi/**
       - tests/**
