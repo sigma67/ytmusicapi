@@ -73,8 +73,7 @@ class SearchMixin(MixinProtocol):
                 "views": "1.4M",
                 "videoType": "MUSIC_VIDEO_TYPE_OMV",
                 "duration": "4:38",
-                "duration_seconds": 278,
-                "isAvailable": true
+                "duration_seconds": 278
               },
               {
                 "category": "Songs",
