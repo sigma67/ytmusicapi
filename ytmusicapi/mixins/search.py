@@ -73,7 +73,8 @@ class SearchMixin(MixinProtocol):
                 "views": "1.4M",
                 "videoType": "MUSIC_VIDEO_TYPE_OMV",
                 "duration": "4:38",
-                "duration_seconds": 278
+                "duration_seconds": 278,
+                "isAvailable": true
               },
               {
                 "category": "Songs",
@@ -91,7 +92,8 @@ class SearchMixin(MixinProtocol):
                   "id": "MPREb_9nqEki4ZDpp"
                 },
                 "duration": "4:19",
-                "duration_seconds": 259
+                "duration_seconds": 259,
+                "isAvailable": true,
                 "isExplicit": false,
                 "inLibrary": false,
                 "feedbackTokens": {
@@ -138,7 +140,8 @@ class SearchMixin(MixinProtocol):
                 ],
                 "views": "386M",
                 "duration": "4:38",
-                "duration_seconds": 278
+                "duration_seconds": 278,
+                "isAvailable": true
               },
               {
                 "category": "Artists",
