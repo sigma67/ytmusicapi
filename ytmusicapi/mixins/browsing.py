@@ -1034,7 +1034,11 @@ class BrowsingMixin(MixinProtocol):
                 return None
 
             lyrics = TimedLyrics(
-                lyrics=list(map(LyricLine.from_raw, data["timedLyricsData"])),
+                lyrics=[
+                    LyricLine.from_raw(raw_lyric)
+                    for raw_lyric in data["timedLyricsData"]
+                    if "cueRange" in raw_lyric
+                ],
                 source=data.get("sourceMessage"),
                 hasTimestamps=True,
             )
