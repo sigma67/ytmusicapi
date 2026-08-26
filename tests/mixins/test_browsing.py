@@ -308,6 +308,47 @@ class TestBrowsing:
         assert song.start_time <= song.end_time
         assert isinstance(song.id, int)
 
+    def test_get_lyrics_skips_entries_without_cue_range(self, yt):
+        """regression test for #1002: blank/instrumental gap lines don't have a
+        cueRange and shouldn't crash the whole lyrics fetch with a KeyError"""
+        mock_response = {
+            "contents": {
+                "elementRenderer": {
+                    "newElement": {
+                        "type": {
+                            "componentType": {
+                                "model": {
+                                    "timedLyricsModel": {
+                                        "lyricsData": {
+                                            "timedLyricsData": [
+                                                {
+                                                    "lyricLine": "I was a liar",
+                                                    "cueRange": {
+                                                        "startTimeMilliseconds": "9200",
+                                                        "endTimeMilliseconds": "10630",
+                                                        "metadata": {"id": "1"},
+                                                    },
+                                                },
+                                                {"lyricLine": ""},
+                                            ],
+                                            "sourceMessage": "Source: Test",
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            lyrics_song = yt.get_lyrics("browseId", timestamps=True)
+
+        assert lyrics_song is not None
+        assert len(lyrics_song["lyrics"]) == 1
+        assert lyrics_song["lyrics"][0].text == "I was a liar"
+
     def test_get_signatureTimestamp(self, yt):
         signature_timestamp = yt.get_signatureTimestamp()
         assert signature_timestamp is not None
