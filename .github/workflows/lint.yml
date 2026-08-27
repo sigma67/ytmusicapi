@@ -31,5 +31,5 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - run: pip install mypy==2.3.0
+      - run: pip install mypy==2.3.0 pydantic
       - run:  mypy --install-types --non-interactive

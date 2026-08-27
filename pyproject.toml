@@ -6,7 +6,7 @@ authors = [{ name = "sigma67", email = "ytmusicapi@gmail.com" }]
 license-files = ["LICENSE"]
 license = "MIT"
 classifiers = ["Programming Language :: Python :: 3"]
-dependencies = ["requests >= 2.22"]
+dependencies = ["requests >= 2.22", "pydantic >= 2"]
 dynamic = ["version", "readme"]
 
 [project.scripts]
