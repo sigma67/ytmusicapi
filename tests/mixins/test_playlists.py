@@ -108,7 +108,7 @@ class TestPlaylists:
         "playlist_id",
         [
             "OLAK5uy_nT1mL8aZvxqfIRFN9L8FgIzfvk6HUkd0I",  # Show
-            "OLAK5uy_ksLYkcnrOSKYl62uxB3ga2zfBZfCuvnJ4",  # Audiobook
+            "OLAK5uy_kIzblCjlA2EThP40umbI81GfLrDaOhp5s",  # Audiobook
         ],
     )
     def test_get_playlist_audiobook(self, yt, playlist_id):
