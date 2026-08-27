@@ -14,5 +14,5 @@ repos:
   hooks:
   -   id: mypy
       verbose: true
-      additional_dependencies: [ 'types-requests' ]
+      additional_dependencies: [ 'types-requests', 'pydantic>=2' ]
       pass_filenames: false
