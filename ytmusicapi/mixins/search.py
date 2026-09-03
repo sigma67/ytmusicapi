@@ -270,8 +270,12 @@ class SearchMixin(MixinProtocol):
             ):
                 # YTM sometimes pads results with a differently-categorized shelf
                 # (e.g. a "Songs" shelf when filtering by featured_playlists) - skip
-                # it rather than mislabeling its contents as the requested type
-                if category and internal_filter[:-1].lower() not in category.lower():
+                # it rather than mislabeling its contents as the requested type.
+                # The shelf's category text is localized, so translate the expected
+                # category through the same gettext catalog instead of comparing
+                # against the English filter stem directly.
+                expected_category = self.parser.lang.gettext(internal_filter[:-1])
+                if category and expected_category.lower() not in category.lower():
                     continue
                 result_type = internal_filter[:-1].lower()
 

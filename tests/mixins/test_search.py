@@ -5,6 +5,7 @@ import pytest
 
 from ytmusicapi import YTMusic
 from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.navigation import MRLIR
 from ytmusicapi.parsers.search import ALL_RESULT_TYPES, API_RESULT_TYPES
 
 STANFORD_PODCAST_SEARCH_QUERY = 'intitle:"109. Simplify!" before:2024-01-01 after:2023-01-01'
@@ -195,6 +196,59 @@ class TestSearch:
             yt_oauth.search("beatles", filter="community_playlists", scope="library", limit=40)
         with pytest.raises(YTMusicUserError):
             yt_oauth.search("beatles", filter="featured_playlists", scope="library", limit=40)
+
+    def _flex_item(self, title: str) -> dict:
+        return {
+            MRLIR: {
+                "flexColumns": [
+                    {"musicResponsiveListItemFlexColumnRenderer": {"text": {"runs": [{"text": title}]}}},
+                    {"musicResponsiveListItemFlexColumnRenderer": {"text": {"runs": [{"text": "Artist"}]}}},
+                ]
+            }
+        }
+
+    def _shelf_response(self, shelf_title: str, item_titles: list[str]) -> dict:
+        return {
+            "contents": {
+                "sectionListRenderer": {
+                    "contents": [
+                        {
+                            "musicShelfRenderer": {
+                                "title": {"runs": [{"text": shelf_title}]},
+                                "contents": [self._flex_item(title) for title in item_titles],
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+
+    def test_search_filtered_localized_shelf_title_is_matched(self, monkeypatch: pytest.MonkeyPatch):
+        """Regression test for #1006.
+
+        The shelf's category text is localized (e.g. Korean "앨범" for "Albums"),
+        so matching a filter against it must go through the same gettext catalog
+        used to translate the shelf title in the first place, rather than the
+        raw English filter stem.
+        """
+        yt_ko = YTMusic(language="ko")
+        response = self._shelf_response("앨범", ["Test Album"])
+        monkeypatch.setattr(yt_ko, "_send_request", lambda endpoint, body, additionalParams="": response)
+
+        results = yt_ko.search("test", filter="albums")
+
+        assert len(results) == 1
+        assert results[0]["resultType"] == "album"
+
+    def test_search_filtered_mismatched_shelf_is_still_skipped(self, monkeypatch: pytest.MonkeyPatch):
+        """A shelf that genuinely doesn't match the requested filter is still dropped."""
+        yt_ko = YTMusic(language="ko")
+        response = self._shelf_response("노래", ["Test Song"])  # "Songs", padded into an albums search
+        monkeypatch.setattr(yt_ko, "_send_request", lambda endpoint, body, additionalParams="": response)
+
+        results = yt_ko.search("test", filter="albums")
+
+        assert results == []
 
     @pytest.mark.xdist_group("search_history")
     def test_remove_search_suggestions_valid(self, yt_auth):
