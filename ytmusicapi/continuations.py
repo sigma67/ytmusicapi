@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, TypeVar, cast
 
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import (
@@ -10,6 +10,8 @@ from ytmusicapi.type_alias import (
     RequestFuncBodyType,
     RequestFuncType,
 )
+
+T = TypeVar("T")
 
 CONTINUATION_TOKEN = ["continuationItemRenderer", "continuationEndpoint", "continuationCommand", "token"]
 COMMAND_EXECUTOR_COMMANDS = [
@@ -79,10 +81,10 @@ def get_continuations(
     continuation_type: str,
     limit: int | None,
     request_func: RequestFuncType,
-    parse_func: ParseFuncType,
+    parse_func: Callable[[JsonList], list[T]],
     ctoken_path: str = "",
     additionalParams: str | None = None,
-) -> JsonList:
+) -> list[T]:
     """
 
     :param results: result list from request data
@@ -97,7 +99,7 @@ def get_continuations(
     :param additionalParams: Optional additional params to pass to the request func. Default: use get_continuation_params
     :return: list of parsed continuation results
     """
-    items: JsonList = []
+    items: list[T] = []
     while "continuations" in results and (limit is None or len(items) < limit):
         additional_params = additionalParams or get_continuation_params(results, ctoken_path)
         response = request_func(additional_params)
@@ -165,7 +167,7 @@ def get_continuation_string(ctoken: str) -> str:
     return "&ctoken=" + ctoken + "&continuation=" + ctoken
 
 
-def get_continuation_contents(continuation: JsonDict, parse_func: ParseFuncType) -> JsonList:
+def get_continuation_contents(continuation: JsonDict, parse_func: Callable[[JsonList], list[T]]) -> list[T]:
     for term in ["contents", "items"]:
         if term in continuation:
             return parse_func(continuation[term])
