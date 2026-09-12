@@ -84,11 +84,9 @@ class TestPlaylists:
         with open(data_path / "2024_03_get_playlist_public.json", encoding="utf8") as f:
             mock_response = json.load(f)
 
-        header = (
-            mock_response["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"][
-                "sectionListRenderer"
-            ]["contents"][0]["musicResponsiveHeaderRenderer"]
-        )
+        header = mock_response["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"][
+            "content"
+        ]["sectionListRenderer"]["contents"][0]["musicResponsiveHeaderRenderer"]
         # Shift musicPlayButtonRenderer (e.g. Taste Match playlists have an extra button preceding it)
         header["buttons"].insert(1, {"tasteMatchButtonRenderer": {}})
 
