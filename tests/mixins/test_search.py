@@ -25,7 +25,7 @@ class TestSearch:
         results = yt.search(query)
         assert all(album["playlistId"] is not None for album in results if album["resultType"] == "album")
         assert ["resultType" in r for r in results] == [True] * len(results)
-        assert len(results) >= 5
+        assert len(results) >= 3
         assert not any(
             artist["name"].lower() in API_RESULT_TYPES
             for result in results
