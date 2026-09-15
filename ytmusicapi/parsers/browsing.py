@@ -125,9 +125,14 @@ def parse_song(result: JsonDict) -> JsonDict:
 
 def parse_song_flat(data: JsonDict, with_playlist_id: bool = False) -> JsonDict:
     columns = [get_flex_column_item(data, i) for i in range(len(data["flexColumns"]))]
+    # podcast episodes link their title to the episode page instead of a watchEndpoint,
+    # so the playable videoId must come from the play button instead
+    video_id = nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True) or nav(
+        data, [*PLAY_BUTTON, "playNavigationEndpoint", *WATCH_VIDEO_ID], True
+    )
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
-        "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
+        "videoId": video_id,
         "videoType": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
         "thumbnails": nav(data, THUMBNAILS, True),
         "isExplicit": nav(data, BADGE_LABEL, True) is not None,
