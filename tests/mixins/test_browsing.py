@@ -308,6 +308,86 @@ class TestBrowsing:
         assert song.start_time <= song.end_time
         assert isinstance(song.id, int)
 
+    @pytest.mark.parametrize(
+        ("timed_lyrics_data", "expected_lyrics", "has_timestamps"),
+        [
+            (
+                [
+                    {
+                        "lyricLine": "First line",
+                        "cueRange": {
+                            "startTimeMilliseconds": "1000",
+                            "endTimeMilliseconds": "2000",
+                            "metadata": {"id": "1"},
+                        },
+                    },
+                    {
+                        "lyricLine": "Second line",
+                        "cueRange": {
+                            "startTimeMilliseconds": "2000",
+                            "endTimeMilliseconds": "3000",
+                            "metadata": {"id": "2"},
+                        },
+                    },
+                ],
+                [
+                    LyricLine(text="First line", start_time=1000, end_time=2000, id=1),
+                    LyricLine(text="Second line", start_time=2000, end_time=3000, id=2),
+                ],
+                True,
+            ),
+            (
+                [{"lyricLine": "First line"}, {"lyricLine": "Second line"}],
+                "First line\nSecond line",
+                False,
+            ),
+            (
+                [
+                    {
+                        "lyricLine": "First line",
+                        "cueRange": {
+                            "startTimeMilliseconds": "1000",
+                            "endTimeMilliseconds": "2000",
+                            "metadata": {"id": "1"},
+                        },
+                    },
+                    {"lyricLine": "Second line"},
+                ],
+                "First line\nSecond line",
+                False,
+            ),
+        ],
+    )
+    def test_get_lyrics_timestamp_shapes(self, yt, timed_lyrics_data, expected_lyrics, has_timestamps):
+        mock_response = {
+            "contents": {
+                "elementRenderer": {
+                    "newElement": {
+                        "type": {
+                            "componentType": {
+                                "model": {
+                                    "timedLyricsModel": {
+                                        "lyricsData": {
+                                            "timedLyricsData": timed_lyrics_data,
+                                            "sourceMessage": "Source: Test",
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            lyrics_song = yt.get_lyrics("MPLYtest", timestamps=True)
+
+        assert lyrics_song is not None
+        assert lyrics_song["lyrics"] == expected_lyrics
+        assert lyrics_song["source"] == "Source: Test"
+        assert lyrics_song["hasTimestamps"] is has_timestamps
+
     def test_get_signatureTimestamp(self, yt):
         signature_timestamp = yt.get_signatureTimestamp()
         assert signature_timestamp is not None
