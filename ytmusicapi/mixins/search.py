@@ -251,6 +251,8 @@ class SearchMixin(MixinProtocol):
 
             elif "musicShelfRenderer" in res:
                 shelf_contents = res["musicShelfRenderer"]["contents"]
+                if MRLIR not in shelf_contents[0]:
+                    continue
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
 
             elif "itemSectionRenderer" in res:
