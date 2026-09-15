@@ -1033,11 +1033,19 @@ class BrowsingMixin(MixinProtocol):
             if "timedLyricsData" not in data:  # pragma: no cover
                 return None
 
-            lyrics = TimedLyrics(
-                lyrics=list(map(LyricLine.from_raw, data["timedLyricsData"])),
-                source=data.get("sourceMessage"),
-                hasTimestamps=True,
-            )
+            raw_lyrics = data["timedLyricsData"]
+            if all("cueRange" in raw_lyric for raw_lyric in raw_lyrics):
+                lyrics = TimedLyrics(
+                    lyrics=list(map(LyricLine.from_raw, raw_lyrics)),
+                    source=data.get("sourceMessage"),
+                    hasTimestamps=True,
+                )
+            else:
+                lyrics = Lyrics(
+                    lyrics="\n".join(raw_lyric["lyricLine"] for raw_lyric in raw_lyrics),
+                    source=data.get("sourceMessage"),
+                    hasTimestamps=False,
+                )
         else:
             lyrics_str = nav(
                 response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *DESCRIPTION], True
