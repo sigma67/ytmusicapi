@@ -182,7 +182,7 @@ def parse_search_result(data: JsonDict, result_type: str | None, category: str |
         )
         search_result["videoType"] = video_type
 
-    if result_type in ["song", "video"]:
+    if result_type in ["song", "video", "episode"]:
         isAvailable = True
         if "musicItemRendererDisplayPolicy" in data:
             isAvailable = (

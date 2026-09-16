@@ -34,6 +34,15 @@ class TestParseSearchResultIsAvailable:
         assert parsed["isAvailable"] is True
 
     def test_other_result_types_are_unaffected(self):
-        # isAvailable is only meaningful for playable song/video results
+        # isAvailable is only meaningful for playable song/video/episode results
         parsed = parse_search_result(_flex_result(), "album", "Albums")
         assert "isAvailable" not in parsed
+
+    def test_grey_out_policy_marks_episode_unavailable(self):
+        parsed = parse_search_result(
+            _flex_result(musicItemRendererDisplayPolicy="MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT"),
+            "episode",
+            "Episodes",
+        )
+        assert parsed["isAvailable"] is False
+        assert parsed["videoId"] is None
