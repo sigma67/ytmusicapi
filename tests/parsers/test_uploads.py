@@ -86,7 +86,7 @@ class TestParseUploadedItems:
         assert song.likeStatus == "LIKE"
         assert song.thumbnails[0].url == "https://i.ytimg.com/vi/Uise6RPKoek/s.jpg"
 
-    # missing data stays a present key with None value, per the #307 semantics
+    # Missing fields remain present as keys with None values.
     def test_missing_fields_are_present_with_none(self):
         item = _upload_song_item()
         del item["musicResponsiveListItemRenderer"]["fixedColumns"]

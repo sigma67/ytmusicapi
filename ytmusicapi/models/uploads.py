@@ -17,14 +17,20 @@ class Thumbnail(YTMusicModel):
     height: int | None = None
 
 
-class ArtistRef(YTMusicModel):
+class _NamedRef(YTMusicModel):
+    """A ``{name, id}`` reference. #981 keeps artist and album references
+    separately named, so they subclass this rather than collapse into one."""
+
     name: str | None = None
     id: str | None = None
 
 
-class AlbumRef(YTMusicModel):
-    name: str | None = None
-    id: str | None = None
+class ArtistRef(_NamedRef):
+    pass
+
+
+class AlbumRef(_NamedRef):
+    pass
 
 
 class UploadSong(YTMusicModel):
