@@ -5,16 +5,16 @@ import requests
 
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.helpers import *
+from ytmusicapi.models.uploads import UploadAlbum, UploadSong
 from ytmusicapi.navigation import *
-from ytmusicapi.parsers.albums import parse_album_header
 from ytmusicapi.parsers.library import (
     get_library_contents,
     parse_library_albums,
     parse_library_artists,
     pop_songs_random_mix,
 )
-from ytmusicapi.parsers.uploads import parse_uploaded_items
-from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
+from ytmusicapi.parsers.uploads import parse_upload_album, parse_uploaded_items
+from ytmusicapi.type_alias import JsonDict, JsonList, RequestFuncType
 
 from ..auth.types import AuthType
 from ..enums import ResponseStatus
@@ -26,28 +26,13 @@ from ._utils import LibraryOrderType, prepare_order_params, validate_order_param
 class UploadsMixin(MixinProtocol):
     def get_library_upload_songs(
         self, limit: int | None = 25, order: LibraryOrderType | None = None
-    ) -> JsonList:
+    ) -> list[UploadSong]:
         """
         Returns a list of uploaded songs
 
         :param limit: How many songs to return. ``None`` retrieves them all. Default: 25
         :param order: Order of songs to return. Allowed values: ``a_to_z``, ``z_to_a``, ``recently_added``. Default: Default order.
-        :return: List of uploaded songs.
-
-        Each item is in the following format::
-
-            {
-              "entityId": "t_po_CICr2crg7OWpchDpjPjrBA",
-              "videoId": "Uise6RPKoek",
-              "artists": [{
-                'name': 'Coldplay',
-                'id': 'FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIIY29sZHBsYXk',
-              }],
-              "title": "A Sky Full Of Stars",
-              "album": "Ghost Stories",
-              "likeStatus": "LIKE",
-              "thumbnails": [...]
-            }
+        :return: List of uploaded songs, see :py:class:`ytmusicapi.models.uploads.UploadSong`
         """
         self._check_auth()
         endpoint = "browse"
@@ -60,7 +45,7 @@ class UploadsMixin(MixinProtocol):
         if results is None:
             return []
         pop_songs_random_mix(results)
-        songs: JsonList = parse_uploaded_items(results["contents"])
+        songs: list[UploadSong] = parse_uploaded_items(results["contents"])
 
         if "continuations" in results:
             request_func: RequestFuncType = lambda additionalParams: self._send_request(
@@ -117,32 +102,13 @@ class UploadsMixin(MixinProtocol):
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
 
-    def get_library_upload_artist(self, browseId: str, limit: int = 25) -> JsonList:
+    def get_library_upload_artist(self, browseId: str, limit: int = 25) -> list[UploadSong]:
         """
         Returns a list of uploaded tracks for the artist.
 
         :param browseId: Browse id of the upload artist, i.e. from :py:func:`get_library_upload_songs`
         :param limit: Number of songs to return (increments of 25).
-        :return: List of uploaded songs.
-
-        Example List::
-
-            [
-              {
-                "entityId": "t_po_CICr2crg7OWpchDKwoakAQ",
-                "videoId": "Dtffhy8WJgw",
-                "title": "Hold Me (Original Mix)",
-                "artists": [
-                  {
-                    "name": "Jakko",
-                    "id": "FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIFamFra28"
-                  }
-                ],
-                "album": null,
-                "likeStatus": "LIKE",
-                "thumbnails": [...]
-              }
-            ]
+        :return: List of uploaded songs, see :py:class:`ytmusicapi.models.uploads.UploadSong`
         """
         self._check_auth()
         body = {"browseId": browseId}
@@ -158,7 +124,7 @@ class UploadsMixin(MixinProtocol):
             request_func: RequestFuncType = lambda additionalParams: self._send_request(
                 endpoint, body, additionalParams
             )
-            parse_func: ParseFuncType = lambda contents: parse_uploaded_items(contents)
+            parse_func = lambda contents: parse_uploaded_items(contents)
             remaining_limit = None if limit is None else (limit - len(items))
             items.extend(
                 get_continuations(
@@ -168,47 +134,19 @@ class UploadsMixin(MixinProtocol):
 
         return items
 
-    def get_library_upload_album(self, browseId: str) -> JsonDict:
+    def get_library_upload_album(self, browseId: str) -> UploadAlbum:
         """
         Get information and tracks of an album associated with uploaded tracks
 
         :param browseId: Browse id of the upload album, i.e. from i.e. from :py:func:`get_library_upload_songs`
-        :return: Dictionary with title, description, artist and tracks.
-
-        Example album::
-
-            {
-              "title": "18 Months",
-              "type": "Album",
-              "thumbnails": [...],
-              "trackCount": 7,
-              "duration": "24 minutes",
-              "audioPlaylistId": "MLPRb_po_55chars",
-              "tracks": [
-                {
-                  "entityId": "t_po_22chars",
-                  "videoId": "FVo-UZoPygI",
-                  "title": "Feel So Close",
-                  "duration": "4:15",
-                  "duration_seconds": 255,
-                  "artists": None,
-                  "album": {
-                    "name": "18 Months",
-                    "id": "FEmusic_library_privately_owned_release_detailb_po_55chars"
-                  },
-                  "likeStatus": "INDIFFERENT",
-                  "thumbnails": None
-                },
+        :return: Album with title, description, artist and tracks,
+            see :py:class:`ytmusicapi.models.uploads.UploadAlbum`
         """
         self._check_auth()
         body = {"browseId": browseId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
-        album = parse_album_header(response)
-        results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
-        album["tracks"] = parse_uploaded_items(results["contents"])
-        album["duration_seconds"] = sum_total_duration(album)
-        return album
+        return parse_upload_album(response)
 
     def upload_song(self, filepath: str) -> ResponseStatus | requests.Response:
         """
