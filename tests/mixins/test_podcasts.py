@@ -49,6 +49,8 @@ class TestPodcasts:
         results = yt.search("europe", filter="episodes")
         episodes = []
         for result in results:
+            if not result["isAvailable"]:
+                continue  # search can surface episodes that are no longer available
             try:
                 episode = yt.get_episode(result["videoId"])
             except YTMusicServerError:
