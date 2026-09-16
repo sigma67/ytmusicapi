@@ -1,10 +1,13 @@
-from ytmusicapi.type_alias import JsonList
+from ytmusicapi.helpers import sum_total_duration
+from ytmusicapi.models.uploads import AlbumRef, ArtistRef, UploadAlbum, UploadSong
+from ytmusicapi.type_alias import JsonDict, JsonList
 
 from ._utils import *
+from .albums import parse_album_header
 from .songs import parse_song_album, parse_song_artists
 
 
-def parse_uploaded_items(results: JsonList) -> JsonList:
+def parse_uploaded_items(results: JsonList) -> list[UploadSong]:
     songs = []
     for result in results:
         data = result[MRLIR]
@@ -35,18 +38,26 @@ def parse_uploaded_items(results: JsonList) -> JsonList:
         duration = None
         if "fixedColumns" in data:
             duration = nav(get_fixed_column_item(data, 0), TEXT_RUN_TEXT)
-        song = {
-            "entityId": entityId,
-            "videoId": videoId,
-            "title": title,
-            "duration": duration,
-            "duration_seconds": parse_duration(duration),
-            "artists": parse_song_artists(data, 1),
-            "album": parse_song_album(data, 2),
-            "likeStatus": like,
-            "thumbnails": thumbnails,
-        }
+        song = UploadSong(
+            entityId=entityId,
+            videoId=videoId,
+            title=title,
+            duration=duration,
+            duration_seconds=parse_duration(duration),
+            artists=[ArtistRef(**artist) for artist in parse_song_artists(data, 1)],
+            album=AlbumRef(**album) if (album := parse_song_album(data, 2)) else None,
+            likeStatus=like,
+            thumbnails=thumbnails,
+        )
 
         songs.append(song)
 
     return songs
+
+
+def parse_upload_album(response: JsonDict) -> UploadAlbum:
+    album = parse_album_header(response)
+    results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST_ITEM + MUSIC_SHELF)
+    album["tracks"] = parse_uploaded_items(results["contents"])
+    album["duration_seconds"] = sum_total_duration(album)
+    return UploadAlbum(**album)
