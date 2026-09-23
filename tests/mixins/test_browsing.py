@@ -36,6 +36,8 @@ class TestBrowsing:
         assert len(results) == 18
         assert results["shuffleId"] is not None
         assert results["radioId"] is not None
+        # the page for the artist's own channelId links the radio with a watchPlaylistEndpoint
+        assert yt.get_artist(results["channelId"])["radioId"] == results["radioId"]
 
         # test correctness of related artists
         related = results["related"]["results"]
