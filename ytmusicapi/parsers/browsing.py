@@ -34,8 +34,12 @@ def parse_mixed_content(
                     if page_type is None:  # song or watch_playlist
                         if nav(data, NAVIGATION_WATCH_PLAYLIST_ID, True) is not None:
                             content = parse_watch_playlist(data)
-                        else:
+                        elif nav(data, NAVIGATION_VIDEO_ID, True) is not None:
                             content = parse_song(data)
+                        else:
+                            # Deleted uploads can still appear in Listen again
+                            # without a usable browse or playback destination.
+                            continue
                     elif page_type in ["MUSIC_PAGE_TYPE_ALBUM", "MUSIC_PAGE_TYPE_AUDIOBOOK"]:
                         content = parse_album(data)
                     elif page_type in ["MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL"]:
