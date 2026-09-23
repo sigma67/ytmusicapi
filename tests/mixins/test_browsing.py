@@ -13,8 +13,10 @@ class TestBrowsing:
     def test_get_home(self, yt, yt_auth):
         result = yt.get_home()
         assert len(result) >= 2
+        first_page = yt_auth.get_home(limit=1)
         result = yt_auth.get_home(limit=20)
-        assert len(result) >= 15
+        # feed length is personalized and varies, so only assert that continuations were followed
+        assert len(result) > len(first_page)
         assert all(
             # ensure we aren't parsing specifiers like "Song" as artist names
             item["artists"][0]["id"]
