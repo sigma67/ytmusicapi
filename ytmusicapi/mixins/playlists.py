@@ -160,9 +160,10 @@ class PlaylistsMixin(MixinProtocol):
         playlist["owned"] = EDITABLE_PLAYLIST_DETAIL_HEADER[0] in header_data
         if not playlist["owned"]:
             header = nav(header_data, RESPONSIVE_HEADER)
+            play_button = find_object_by_key(nav(header, ["buttons"], True) or [], "musicPlayButtonRenderer")
             playlist["id"] = nav(
-                header,
-                ["buttons", 1, "musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
+                play_button,
+                ["musicPlayButtonRenderer", "playNavigationEndpoint", *WATCH_PLAYLIST_ID],
                 True,
             )
             playlist["privacy"] = "PUBLIC"
