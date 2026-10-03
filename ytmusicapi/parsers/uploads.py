@@ -1,5 +1,6 @@
 from ytmusicapi.helpers import sum_total_duration
-from ytmusicapi.models.uploads import AlbumRef, ArtistRef, UploadAlbum, UploadSong
+from ytmusicapi.models.content import AlbumRef, ArtistRef
+from ytmusicapi.models.uploads import UploadAlbum, UploadSong
 from ytmusicapi.type_alias import JsonDict, JsonList
 
 from ._utils import *

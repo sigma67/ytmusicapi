@@ -1,36 +1,11 @@
 """Response models for the upload-library methods.
 
 Uploaded items are similar to but not the same as regular songs: they carry an
-``entityId`` and lack several fields YTM-hosted songs have. Until the song model
-from #983 and the shared leaf models from #981 land, the shapes are modelled
-here; the leaves deliberately match #981 so they can be re-homed onto the
-shared models without touching callers.
+``entityId`` and lack several fields YTM-hosted songs have.
 """
 
 from .base import YTMusicModel
-from .content.enums import LikeStatus
-
-
-class Thumbnail(YTMusicModel):
-    url: str
-    width: int | None = None
-    height: int | None = None
-
-
-class _NamedRef(YTMusicModel):
-    """A ``{name, id}`` reference. #981 keeps artist and album references
-    separately named, so they subclass this rather than collapse into one."""
-
-    name: str | None = None
-    id: str | None = None
-
-
-class ArtistRef(_NamedRef):
-    pass
-
-
-class AlbumRef(_NamedRef):
-    pass
+from .content import AlbumRef, ArtistRef, LikeStatus, Thumbnail
 
 
 class UploadSong(YTMusicModel):

@@ -1,12 +1,12 @@
-from typing import TypedDict
+from ..base import YTMusicModel
 
 
-class HyperLink(TypedDict):
+class HyperLink(YTMusicModel):
     text: str
     url: str
 
 
-class PlainText(TypedDict):
+class PlainText(YTMusicModel):
     text: str
 
 
