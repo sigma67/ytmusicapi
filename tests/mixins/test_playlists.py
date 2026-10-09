@@ -137,6 +137,10 @@ class TestPlaylists:
         with pytest.raises((YTMusicServerError, KeyError, IndexError)):
             yt_empty.get_playlist("PLABC")
 
+    def test_get_playlist_errors(self, yt):
+        with pytest.raises(YTMusicUserError, match="Upload album playlists are not supported"):
+            yt.get_playlist("MLPRb_po_abc")
+
     def test_get_playlist_no_track_count(self, yt_oauth):
         playlist = yt_oauth.get_playlist("RDATgXd-")
         assert playlist["trackCount"] is None  # playlist has no trackCount
