@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, TypeVar, cast
 
 from ytmusicapi.navigation import nav
 from ytmusicapi.type_alias import (
@@ -19,6 +19,8 @@ COMMAND_EXECUTOR_COMMANDS = [
     "commands",
 ]
 CONTINUATION_ITEMS = ["onResponseReceivedActions", 0, "appendContinuationItemsAction", "continuationItems"]
+
+T = TypeVar("T")
 
 
 def get_continuation_token(results: JsonList) -> str | None:
@@ -58,6 +60,56 @@ def get_continuations_2025(
         continuation_token = get_continuation_token(continuation_items)
 
     return items
+
+
+def get_validated_continuations_2025(
+    results: JsonDict,
+    limit: int,
+    per_page: int,
+    request_func: RequestFuncBodyType,
+    parse_func: ParseFuncType,
+    max_retries: int = 3,
+) -> JsonList:
+    """Validated variant of :py:func:`get_continuations_2025`.
+
+    Some YouTube Music responses return fewer items than expected for a continuation.
+    This retries each continuation request until the expected amount of items is returned.
+
+    :param results: result dict containing the initial ``contents`` and continuation token
+    :param limit: minimum number of items to retrieve in total. Whole pages are fetched, so the
+        result may exceed this value
+    :param per_page: expected number of items per continuation request
+    :param request_func: request func that accepts a body dict (see :py:data:`RequestFuncBodyType`)
+    :param parse_func: parse func to apply on the returned continuation items
+    :param max_retries: how often to retry a single continuation request before giving up
+    :return: list of parsed continuation results
+    """
+    items: JsonList = []
+    continuation_token = get_continuation_token(results["contents"])
+    while continuation_token and len(items) < limit:
+        wrapped_parse_func = lambda raw_response: get_parsed_continuation_items_2025(raw_response, parse_func)
+        validate_func = lambda parsed: validate_response(parsed, per_page, limit, len(items))
+
+        response = resend_request_until_parsed_response_is_valid(
+            request_func, {"continuation": continuation_token}, wrapped_parse_func, validate_func, max_retries
+        )
+        continuation_items = response["results"]
+        if not continuation_items:
+            break
+
+        parsed = response["parsed"]
+        if len(parsed) == 0:
+            break
+        items.extend(parsed)
+        continuation_token = get_continuation_token(continuation_items)
+
+    return items
+
+
+def get_parsed_continuation_items_2025(response: JsonDict, parse_func: ParseFuncType) -> JsonDict:
+    continuation_items = nav(response, CONTINUATION_ITEMS, True) or []
+    parsed = parse_func(continuation_items) if continuation_items else []
+    return {"results": continuation_items, "parsed": parsed}
 
 
 def get_reloadable_continuations(
@@ -174,8 +226,8 @@ def get_continuation_contents(continuation: JsonDict, parse_func: ParseFuncType)
 
 
 def resend_request_until_parsed_response_is_valid(
-    request_func: RequestFuncType,
-    request_additional_params: str,
+    request_func: Callable[[T], JsonDict],
+    request_additional_params: T,
     parse_func: ParseFuncDictType,
     validate_func: Callable[[dict[str, Any]], bool],
     max_retries: int,
