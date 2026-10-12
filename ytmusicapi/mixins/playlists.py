@@ -457,11 +457,22 @@ class PlaylistsMixin(MixinProtocol):
             )
 
         if videoIds:
+            video_id_counts: dict[str, int] = {}
             for videoId in videoIds:
+                video_id_counts[videoId] = video_id_counts.get(videoId, 0) + 1
+
                 action = {"action": "ACTION_ADD_VIDEO", "addedVideoId": videoId}
                 if duplicates:
                     action["dedupeOption"] = "DEDUPE_OPTION_SKIP"
                 body["actions"].append(action)
+
+            if not duplicates:
+                duplicate_video_ids = [videoId for videoId, count in video_id_counts.items() if count > 1]
+                if duplicate_video_ids:
+                    raise YTMusicUserError(
+                        "Duplicate videoIds provided to add_playlist_items while duplicates=False: "
+                        + ", ".join(duplicate_video_ids)
+                    )
 
         if source_playlist:
             body["actions"].append({"action": "ACTION_ADD_PLAYLIST", "addedFullListId": source_playlist})
