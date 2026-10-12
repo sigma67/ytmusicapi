@@ -41,7 +41,7 @@ jobs:
       with:
         python-version: "3.10"
     - name: Setup PDM
-      uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f  # v4.5
+      uses: pdm-project/setup-pdm@544d7237314ee09c256785bd360f6b30add38b37  # v4.6
     - name: Write OAuth credentials
       env:
         OAUTH_JSON: ${{ secrets.OAUTH_JSON }}

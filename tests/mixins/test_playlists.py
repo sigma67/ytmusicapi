@@ -80,6 +80,21 @@ class TestPlaylists:
                     assert isinstance(vote_status["netVoteValue"], int)
                     assert vote_status["status"] in VoteStatus
 
+    def test_get_playlist_play_button_position(self, yt, data_path):
+        playlist_id = "RDCLAK5uy_lWy02cQBnTVTlwuRauaGKeUDH3L6PXNxI"
+        with open(data_path / "2024_03_get_playlist_public.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        header = mock_response["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"][
+            "content"
+        ]["sectionListRenderer"]["contents"][0]["musicResponsiveHeaderRenderer"]
+        header["buttons"].append(header["buttons"].pop(1))
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            playlist = yt.get_playlist(playlist_id)
+
+        assert playlist["id"] == playlist_id
+
     @pytest.mark.parametrize(
         "playlist_id, tracks_len, related_len",
         [
@@ -108,7 +123,7 @@ class TestPlaylists:
         "playlist_id",
         [
             "OLAK5uy_nT1mL8aZvxqfIRFN9L8FgIzfvk6HUkd0I",  # Show
-            "OLAK5uy_ksLYkcnrOSKYl62uxB3ga2zfBZfCuvnJ4",  # Audiobook
+            "OLAK5uy_kIzblCjlA2EThP40umbI81GfLrDaOhp5s",  # Audiobook
         ],
     )
     def test_get_playlist_audiobook(self, yt, playlist_id):

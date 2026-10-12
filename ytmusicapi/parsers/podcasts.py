@@ -24,7 +24,7 @@ class Link(DescriptionElement):
 
 @dataclass
 class Timestamp(DescriptionElement):
-    seconds: int
+    seconds: int | None
 
 
 @dataclass
@@ -54,7 +54,7 @@ class Description(list[DescriptionElement]):
                 elif "watchEndpoint" in navigationEndpoint:
                     element = Timestamp(
                         text=run["text"],
-                        seconds=nav(navigationEndpoint, ["watchEndpoint", "startTimeSeconds"]),
+                        seconds=nav(navigationEndpoint, ["watchEndpoint", "startTimeSeconds"], True),
                     )
             else:
                 element = DescriptionElement(text=nav(run, ["text"], True))  # type: ignore

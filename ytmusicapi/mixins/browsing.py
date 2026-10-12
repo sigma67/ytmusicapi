@@ -284,7 +284,11 @@ class BrowsingMixin(MixinProtocol):
         subscription_button = header["subscriptionButton"]["subscribeButtonRenderer"]
         artist["channelId"] = subscription_button["channelId"]
         artist["shuffleId"] = nav(header, ["playButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True)
-        artist["radioId"] = nav(header, ["startRadioButton", "buttonRenderer", *NAVIGATION_PLAYLIST_ID], True)
+        radio_button = nav(header, ["startRadioButton", "buttonRenderer"], True)
+        # the page for the artist's own channelId links the radio with a watchPlaylistEndpoint
+        artist["radioId"] = nav(radio_button, NAVIGATION_PLAYLIST_ID, True) or nav(
+            radio_button, NAVIGATION_WATCH_PLAYLIST_ID, True
+        )
         artist["subscribers"] = nav(subscription_button, ["subscriberCountText", "runs", 0, "text"], True)
         artist["monthlyListeners"] = nav(header, ["monthlyListenerCount", "runs", 0, "text"], True)
         artist["monthlyListeners"] = (
@@ -1033,11 +1037,19 @@ class BrowsingMixin(MixinProtocol):
             if "timedLyricsData" not in data:  # pragma: no cover
                 return None
 
-            lyrics = TimedLyrics(
-                lyrics=list(map(LyricLine.from_raw, data["timedLyricsData"])),
-                source=data.get("sourceMessage"),
-                hasTimestamps=True,
-            )
+            raw_lyrics = data["timedLyricsData"]
+            if all("cueRange" in raw_lyric for raw_lyric in raw_lyrics):
+                lyrics = TimedLyrics(
+                    lyrics=list(map(LyricLine.from_raw, raw_lyrics)),
+                    source=data.get("sourceMessage"),
+                    hasTimestamps=True,
+                )
+            else:
+                lyrics = Lyrics(
+                    lyrics="\n".join(raw_lyric["lyricLine"] for raw_lyric in raw_lyrics),
+                    source=data.get("sourceMessage"),
+                    hasTimestamps=False,
+                )
         else:
             lyrics_str = nav(
                 response, ["contents", *SECTION_LIST_ITEM, *DESCRIPTION_SHELF, *DESCRIPTION], True

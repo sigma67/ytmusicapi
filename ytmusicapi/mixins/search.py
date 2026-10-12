@@ -91,7 +91,8 @@ class SearchMixin(MixinProtocol):
                   "id": "MPREb_9nqEki4ZDpp"
                 },
                 "duration": "4:19",
-                "duration_seconds": 259
+                "duration_seconds": 259,
+                "isAvailable": true,
                 "isExplicit": false,
                 "inLibrary": false,
                 "feedbackTokens": {
@@ -138,7 +139,8 @@ class SearchMixin(MixinProtocol):
                 ],
                 "views": "386M",
                 "duration": "4:38",
-                "duration_seconds": 278
+                "duration_seconds": 278,
+                "isAvailable": true
               },
               {
                 "category": "Artists",
@@ -249,6 +251,8 @@ class SearchMixin(MixinProtocol):
 
             elif "musicShelfRenderer" in res:
                 shelf_contents = res["musicShelfRenderer"]["contents"]
+                if MRLIR not in shelf_contents[0]:
+                    continue
                 category = nav(res, MUSIC_SHELF + TITLE_TEXT, True)
 
             elif "itemSectionRenderer" in res:
@@ -268,8 +272,12 @@ class SearchMixin(MixinProtocol):
             ):
                 # YTM sometimes pads results with a differently-categorized shelf
                 # (e.g. a "Songs" shelf when filtering by featured_playlists) - skip
-                # it rather than mislabeling its contents as the requested type
-                if category and internal_filter[:-1].lower() not in category.lower():
+                # it rather than mislabeling its contents as the requested type.
+                # The shelf's category text is localized, so translate the expected
+                # category through the same gettext catalog instead of comparing
+                # against the English filter stem directly.
+                expected_category = self.parser.lang.gettext(internal_filter[:-1])
+                if category and expected_category.lower() not in category.lower():
                     continue
                 result_type = internal_filter[:-1].lower()
 

@@ -13,8 +13,10 @@ class TestBrowsing:
     def test_get_home(self, yt, yt_auth):
         result = yt.get_home()
         assert len(result) >= 2
+        first_page = yt_auth.get_home(limit=1)
         result = yt_auth.get_home(limit=20)
-        assert len(result) >= 15
+        # feed length is personalized and varies, so only assert that continuations were followed
+        assert len(result) > len(first_page)
         assert all(
             # ensure we aren't parsing specifiers like "Song" as artist names
             item["artists"][0]["id"]
@@ -34,6 +36,8 @@ class TestBrowsing:
         assert len(results) == 18
         assert results["shuffleId"] is not None
         assert results["radioId"] is not None
+        # the page for the artist's own channelId links the radio with a watchPlaylistEndpoint
+        assert yt.get_artist(results["channelId"])["radioId"] == results["radioId"]
 
         # test correctness of related artists
         related = results["related"]["results"]
@@ -307,6 +311,86 @@ class TestBrowsing:
         assert isinstance(song.text, str)
         assert song.start_time <= song.end_time
         assert isinstance(song.id, int)
+
+    @pytest.mark.parametrize(
+        ("timed_lyrics_data", "expected_lyrics", "has_timestamps"),
+        [
+            (
+                [
+                    {
+                        "lyricLine": "First line",
+                        "cueRange": {
+                            "startTimeMilliseconds": "1000",
+                            "endTimeMilliseconds": "2000",
+                            "metadata": {"id": "1"},
+                        },
+                    },
+                    {
+                        "lyricLine": "Second line",
+                        "cueRange": {
+                            "startTimeMilliseconds": "2000",
+                            "endTimeMilliseconds": "3000",
+                            "metadata": {"id": "2"},
+                        },
+                    },
+                ],
+                [
+                    LyricLine(text="First line", start_time=1000, end_time=2000, id=1),
+                    LyricLine(text="Second line", start_time=2000, end_time=3000, id=2),
+                ],
+                True,
+            ),
+            (
+                [{"lyricLine": "First line"}, {"lyricLine": "Second line"}],
+                "First line\nSecond line",
+                False,
+            ),
+            (
+                [
+                    {
+                        "lyricLine": "First line",
+                        "cueRange": {
+                            "startTimeMilliseconds": "1000",
+                            "endTimeMilliseconds": "2000",
+                            "metadata": {"id": "1"},
+                        },
+                    },
+                    {"lyricLine": "Second line"},
+                ],
+                "First line\nSecond line",
+                False,
+            ),
+        ],
+    )
+    def test_get_lyrics_timestamp_shapes(self, yt, timed_lyrics_data, expected_lyrics, has_timestamps):
+        mock_response = {
+            "contents": {
+                "elementRenderer": {
+                    "newElement": {
+                        "type": {
+                            "componentType": {
+                                "model": {
+                                    "timedLyricsModel": {
+                                        "lyricsData": {
+                                            "timedLyricsData": timed_lyrics_data,
+                                            "sourceMessage": "Source: Test",
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            lyrics_song = yt.get_lyrics("MPLYtest", timestamps=True)
+
+        assert lyrics_song is not None
+        assert lyrics_song["lyrics"] == expected_lyrics
+        assert lyrics_song["source"] == "Source: Test"
+        assert lyrics_song["hasTimestamps"] is has_timestamps
 
     def test_get_signatureTimestamp(self, yt):
         signature_timestamp = yt.get_signatureTimestamp()

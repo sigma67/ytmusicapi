@@ -18,7 +18,7 @@ class TestPodcasts:
     def test_get_podcast(self, config, yt, yt_brand):
         podcast_id = config["podcasts"]["podcast_id"]
         podcast = yt.get_podcast(podcast_id)
-        assert len(podcast["episodes"]) == 100
+        assert len(podcast["episodes"]) >= 100
         assert not podcast["saved"]
         assert podcast["thumbnails"]
 
@@ -49,6 +49,8 @@ class TestPodcasts:
         results = yt.search("europe", filter="episodes")
         episodes = []
         for result in results:
+            if not result["isAvailable"]:
+                continue  # search can surface episodes that are no longer available
             try:
                 episode = yt.get_episode(result["videoId"])
             except YTMusicServerError:

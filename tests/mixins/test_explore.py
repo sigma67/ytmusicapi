@@ -19,7 +19,11 @@ class TestExplore:
         for item in explore.get("top_songs", {"items": []})["items"]:
             assert item["videoId"], item
             assert item["videoType"], item
-            assert item.get("views") or item.get("album"), item
+            if podcast := item.get("podcast", None):
+                assert podcast["id"], item
+                assert podcast["name"], item
+            else:
+                assert item.get("views") or item.get("album"), item
 
         for item in explore["trending"]["items"]:
             assert item["videoId"], item

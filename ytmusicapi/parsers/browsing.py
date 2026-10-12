@@ -34,8 +34,12 @@ def parse_mixed_content(
                     if page_type is None:  # song or watch_playlist
                         if nav(data, NAVIGATION_WATCH_PLAYLIST_ID, True) is not None:
                             content = parse_watch_playlist(data)
-                        else:
+                        elif nav(data, NAVIGATION_VIDEO_ID, True) is not None:
                             content = parse_song(data)
+                        else:
+                            # Deleted uploads can still appear in Listen again
+                            # without a usable browse or playback destination.
+                            continue
                     elif page_type in ["MUSIC_PAGE_TYPE_ALBUM", "MUSIC_PAGE_TYPE_AUDIOBOOK"]:
                         content = parse_album(data)
                     elif page_type in ["MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL"]:
@@ -121,9 +125,14 @@ def parse_song(result: JsonDict) -> JsonDict:
 
 def parse_song_flat(data: JsonDict, with_playlist_id: bool = False) -> JsonDict:
     columns = [get_flex_column_item(data, i) for i in range(len(data["flexColumns"]))]
+    # podcast episodes link their title to the episode page instead of a watchEndpoint,
+    # so the playable videoId must come from the play button instead
+    video_id = nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True) or nav(
+        data, [*PLAY_BUTTON, "playNavigationEndpoint", *WATCH_VIDEO_ID], True
+    )
     song = {
         "title": nav(columns[0], TEXT_RUN_TEXT),
-        "videoId": nav(columns[0], TEXT_RUN + NAVIGATION_VIDEO_ID, True),
+        "videoId": video_id,
         "videoType": nav(data, [*PLAY_BUTTON, "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE], True),
         "thumbnails": nav(data, THUMBNAILS, True),
         "isExplicit": nav(data, BADGE_LABEL, True) is not None,
