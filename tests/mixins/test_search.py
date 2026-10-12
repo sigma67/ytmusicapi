@@ -47,10 +47,10 @@ class TestSearch:
                 },
             ),
             (
-                "Seven Martin Garrix",
+                "Madeon The City",
                 {
-                    "title": "Seven",
-                    "artists": [{"name": "Martin Garrix", "id": "UCqJnSdHjKtfsrHi9aI-9d3g"}],
+                    "title": "The City",
+                    "artists": [{"name": "Madeon", "id": "UC9TynkEiIsDxKjtDZKmiUvw"}],
                     "type": "EP",
                     "resultType": "album",
                 },
