@@ -140,6 +140,9 @@ class PlaylistsMixin(MixinProtocol):
                 }
             }
         """
+        if playlistId.startswith(("MLPR", "VLMLPR")):
+            raise YTMusicUserError("Upload album playlists are not supported, use get_library_upload_album.")
+
         browseId = "VL" + playlistId if not playlistId.startswith("VL") else playlistId
         body = {"browseId": browseId}
         endpoint = "browse"
