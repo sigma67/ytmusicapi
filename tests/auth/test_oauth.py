@@ -9,7 +9,7 @@ from requests import Response
 
 from ytmusicapi.auth.oauth import OAuthToken, RefreshingToken
 from ytmusicapi.auth.types import AuthType
-from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.setup import main
 from ytmusicapi.type_alias import JsonDict
 from ytmusicapi.ytmusic import OAuthCredentials, YTMusic
@@ -97,6 +97,105 @@ class TestOAuth:
             assert token.expires_at == 4600
             assert token.expires_in == 604799
             assert not hasattr(token, "refresh_token_expires_in")
+
+    @pytest.fixture(name="token_response")
+    def fixture_token_response(self) -> JsonDict:
+        return {
+            "access_token": "test_access_token",
+            "expires_in": 3600,
+            "refresh_token": "test_refresh_token",
+            "scope": "https://www.googleapis.com/auth/youtube",
+            "token_type": "Bearer",
+        }
+
+    def test_setup_oauth_non_interactive_polls_until_authorized(self, blank_code, token_response):
+        """Regression for #777: without a TTY there is no one to press Enter, so the
+        flow must poll the token endpoint instead of calling ``input()``."""
+        credentials = mock.Mock()
+        credentials.get_code.return_value = blank_code
+        credentials.token_from_code.side_effect = [
+            {"error": "authorization_pending"},
+            {"error": "slow_down"},
+            token_response,
+        ]
+
+        with (
+            mock.patch("builtins.input", side_effect=EOFError) as input_mock,
+            mock.patch("ytmusicapi.auth.oauth.token.time.sleep") as sleep_mock,
+        ):
+            token = RefreshingToken.prompt_for_token(credentials, interactive=False)
+
+        input_mock.assert_not_called()
+        assert token.access_token == "test_access_token"
+        assert token.refresh_token == "test_refresh_token"
+        assert credentials.token_from_code.call_count == 3
+        # slow_down adds 5 seconds to the polling interval, as per the device flow spec
+        assert [call.args[0] for call in sleep_mock.call_args_list] == [5, 10]
+
+    @pytest.mark.parametrize("error", ["access_denied", "expired_token"])
+    def test_setup_oauth_non_interactive_stops_on_error(self, blank_code, error):
+        credentials = mock.Mock()
+        credentials.get_code.return_value = blank_code
+        credentials.token_from_code.return_value = {"error": error}
+
+        with (
+            mock.patch("ytmusicapi.auth.oauth.token.time.sleep") as sleep_mock,
+            pytest.raises(YTMusicServerError, match=error),
+        ):
+            RefreshingToken.prompt_for_token(credentials, interactive=False)
+
+        sleep_mock.assert_not_called()
+
+    def test_setup_oauth_non_interactive_times_out(self, blank_code):
+        credentials = mock.Mock()
+        credentials.get_code.return_value = {**blank_code, "expires_in": 10, "interval": 5}
+        credentials.token_from_code.return_value = {"error": "authorization_pending"}
+
+        with (
+            mock.patch("ytmusicapi.auth.oauth.token.time.monotonic", side_effect=[0, 4, 8, 12]),
+            mock.patch("ytmusicapi.auth.oauth.token.time.sleep"),
+            pytest.raises(YTMusicServerError, match="expired"),
+        ):
+            RefreshingToken.prompt_for_token(credentials, interactive=False)
+
+    def test_setup_oauth_cli_non_interactive_flag(self, blank_code, token_response, tmp_path):
+        credentials = mock.Mock()
+        credentials.get_code.return_value = blank_code
+        credentials.token_from_code.return_value = token_response
+        oauth_filepath = tmp_path / "oauth.json"
+
+        with (
+            mock.patch("ytmusicapi.setup.OAuthCredentials", return_value=credentials),
+            mock.patch("builtins.input", side_effect=EOFError) as input_mock,
+            mock.patch("webbrowser.open"),
+            mock.patch(
+                "sys.argv",
+                [
+                    "ytmusicapi",
+                    "oauth",
+                    "--file",
+                    str(oauth_filepath),
+                    "--client-id",
+                    "test_id",
+                    "--client-secret",
+                    "test_secret",
+                    "--non-interactive",
+                ],
+            ),
+        ):
+            main()
+
+        input_mock.assert_not_called()
+        assert OAuthToken.is_oauth(json.loads(oauth_filepath.read_text(encoding="utf8")))
+
+    def test_setup_oauth_cli_non_interactive_requires_client_credentials(self, capsys):
+        with (
+            mock.patch("sys.argv", ["ytmusicapi", "oauth", "--non-interactive"]),
+            pytest.raises(SystemExit),
+        ):
+            main()
+
+        assert "--client-id" in capsys.readouterr().err
 
     def test_oauth_token_dict_ignores_unexpected_fields(self):
         """Regression for #887 / #921: a saved oauth.json may contain extra

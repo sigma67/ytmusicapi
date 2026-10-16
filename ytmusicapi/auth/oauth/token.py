@@ -4,12 +4,20 @@ import webbrowser
 from collections.abc import KeysView
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from requests.structures import CaseInsensitiveDict
 
 from ytmusicapi.auth.oauth.credentials import Credentials, OAuthCredentials
-from ytmusicapi.auth.oauth.models import BaseTokenDict, Bearer, DefaultScope, RefreshableTokenDict
+from ytmusicapi.auth.oauth.models import (
+    AuthCodeDict,
+    BaseTokenDict,
+    Bearer,
+    DefaultScope,
+    RefreshableTokenDict,
+)
+from ytmusicapi.exceptions import YTMusicServerError
+from ytmusicapi.type_alias import JsonDict
 
 
 @dataclass(kw_only=True)
@@ -109,9 +117,36 @@ class RefreshingToken(OAuthToken):
         self._local_cache = path
         self.store_token()
 
+    @staticmethod
+    def _poll_for_token(credentials: Credentials, code: AuthCodeDict) -> RefreshableTokenDict:
+        """Poll the token endpoint until the user has completed the device login.
+
+        Follows the polling rules of the OAuth device flow: wait ``interval`` seconds between
+        requests, wait 5 seconds longer after a ``slow_down`` error and give up once the
+        device code has expired.
+        """
+        interval = code.get("interval", 5)
+        deadline = time.monotonic() + code.get("expires_in", 1800)
+        while True:
+            response = cast(JsonDict, credentials.token_from_code(code["device_code"]))
+            error = response.get("error")
+            if error is None:
+                return cast(RefreshableTokenDict, response)
+            if error == "slow_down":
+                interval += 5
+            elif error != "authorization_pending":
+                raise YTMusicServerError(f"OAuth login failed: {error}")
+            if time.monotonic() >= deadline:
+                raise YTMusicServerError("OAuth login failed: the device code expired before login finished")
+            time.sleep(interval)
+
     @classmethod
     def prompt_for_token(
-        cls, credentials: OAuthCredentials, open_browser: bool = False, to_file: str | None = None
+        cls,
+        credentials: OAuthCredentials,
+        open_browser: bool = False,
+        to_file: str | None = None,
+        interactive: bool = True,
     ) -> "RefreshingToken":
         """
         Method for CLI token creation via user inputs.
@@ -119,14 +154,21 @@ class RefreshingToken(OAuthToken):
         :param credentials: Client credentials
         :param open_browser: Optional. Open browser to OAuth consent url automatically. (Default: ``False``).
         :param to_file: Optional. Path to store/sync json version of resulting token. (Default: ``None``).
+        :param interactive: Optional. If ``False``, do not wait for the user to press Enter.
+            Instead, poll until the login is completed or the device code expires.
+            Useful when stdin is not available, e.g. in a GUI app or script. (Default: ``True``).
         """
 
         code = credentials.get_code()
         url = f"{code['verification_url']}?user_code={code['user_code']}"
         if open_browser:
             webbrowser.open(url)
-        input(f"Go to {url} , finish the login flow and press Enter when done, Ctrl-C to abort")
-        raw_token = credentials.token_from_code(code["device_code"])
+        if interactive:
+            input(f"Go to {url} , finish the login flow and press Enter when done, Ctrl-C to abort")
+            raw_token = credentials.token_from_code(code["device_code"])
+        else:
+            print(f"Go to {url} and finish the login flow, waiting for it to complete, Ctrl-C to abort")
+            raw_token = cls._poll_for_token(credentials, code)
         refresh_token_expires_in = raw_token.get("refresh_token_expires_in", raw_token["expires_in"])
         ref_token = cls(
             credentials=credentials,

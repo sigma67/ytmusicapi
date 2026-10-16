@@ -18,6 +18,14 @@ After you have installed ``ytmusicapi``, run
 
 and follow the instructions. This will create a file ``oauth.json`` in the current directory.
 
+If there is no terminal to press Enter in (for example when running the command from a GUI app or a script),
+pass ``--non-interactive`` together with ``--client-id`` and ``--client-secret``. The command then waits
+until the login is completed in the browser instead of prompting:
+
+.. code-block:: bash
+
+    ytmusicapi oauth --client-id <client_id> --client-secret <client_secret> --non-interactive
+
 You can pass this file to :py:class:`YTMusic` as explained in :doc:`../usage`.
 
 You will also need to pass ``client_id`` and ``client_secret`` to :py:class:`YTMusic`:
