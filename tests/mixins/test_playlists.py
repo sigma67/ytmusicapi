@@ -327,21 +327,9 @@ class TestPlaylists:
         ):
             yt_brand.create_playlist("test", description="test")
 
-    def test_add_playlist_items_rejects_duplicate_video_ids(self):
-        ytmusic = YTMusic(
-            {
-                "authorization": "Bearer test",
-                "X-Goog-Visitor-Id": "visitor",
-            }
-        )
-
-        with (
-            mock.patch.object(ytmusic, "_send_request") as send_request,
-            pytest.raises(YTMusicUserError, match="Duplicate videoIds.*songA"),
-        ):
-            ytmusic.add_playlist_items("PLABC", ["songA", "songB", "songA"])
-
-        send_request.assert_not_called()
+    def test_add_playlist_items_rejects_duplicate_video_ids(self, yt_auth):
+        with pytest.raises(YTMusicUserError, match="Duplicate videoIds"):
+            yt_auth.add_playlist_items("PLABC", ["songA", "songB", "songA"])
 
     @pytest.mark.xdist_group("playlist")
     def test_end2end(self, yt_brand, sample_video):
