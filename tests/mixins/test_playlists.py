@@ -327,6 +327,10 @@ class TestPlaylists:
         ):
             yt_brand.create_playlist("test", description="test")
 
+    def test_add_playlist_items_rejects_duplicate_video_ids(self, yt_auth):
+        with pytest.raises(YTMusicUserError, match="Duplicate videoIds"):
+            yt_auth.add_playlist_items("PLABC", ["songA", "songB", "songA"])
+
     @pytest.mark.xdist_group("playlist")
     def test_end2end(self, yt_brand, sample_video):
         playlist_id = create_playlist(
