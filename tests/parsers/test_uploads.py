@@ -1,6 +1,7 @@
+from tests.model_helpers import assert_response_model
 from ytmusicapi.continuations import get_continuations
 from ytmusicapi.models.content.enums import LikeStatus
-from ytmusicapi.models.uploads import UploadAlbum, UploadSong
+from ytmusicapi.models.uploads import AlbumRef, ArtistRef, Thumbnail, UploadAlbum, UploadSong
 from ytmusicapi.parsers.uploads import parse_upload_album, parse_uploaded_items
 
 ARTIST_ID = "FEmusic_library_privately_owned_artist_detaila_po_CICr2crg7OWpchIIY29sZHBsYXk"
@@ -73,18 +74,28 @@ class TestParseUploadedItems:
     def test_parses_uploaded_song(self):
         song = parse_uploaded_items([_upload_song_item()])[0]
 
-        assert isinstance(song, UploadSong)
+        assert_response_model(
+            song,
+            UploadSong,
+            {
+                "entityId": "t_po_CICr2crg7OWpchDpjPjrBA",
+                "videoId": "Uise6RPKoek",
+                "title": "A Sky Full Of Stars",
+                "duration": "4:15",
+                "duration_seconds": 255,
+                "artists": [{"name": "Coldplay", "id": ARTIST_ID}],
+                "album": {"name": "Ghost Stories", "id": ALBUM_ID},
+                "likeStatus": "LIKE",
+                "thumbnails": [
+                    {"url": "https://i.ytimg.com/vi/Uise6RPKoek/s.jpg", "width": 60, "height": 60}
+                ],
+            },
+        )
         assert song["entityId"] == "t_po_CICr2crg7OWpchDpjPjrBA"
-        assert song.videoId == "Uise6RPKoek"
         assert song.title == "A Sky Full Of Stars"
-        assert song.duration == "4:15"
-        assert song.duration_seconds == 255
-        assert song.artists[0].name == "Coldplay"
-        assert song.artists[0].id == ARTIST_ID
-        assert song.album.name == "Ghost Stories"
-        assert song.album.id == ALBUM_ID
-        assert song.likeStatus == "LIKE"
-        assert song.thumbnails[0].url == "https://i.ytimg.com/vi/Uise6RPKoek/s.jpg"
+        assert isinstance(song.artists[0], ArtistRef)
+        assert isinstance(song.album, AlbumRef)
+        assert isinstance(song.thumbnails[0], Thumbnail)
 
     # Missing fields remain present as keys with None values.
     def test_missing_fields_are_present_with_none(self):
