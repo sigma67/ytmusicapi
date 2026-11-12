@@ -112,6 +112,23 @@ class TestBrowsing:
         assert result["albums"]["results"][0]["title"] == "Test Album"
         assert result["albums"]["results"][0]["browseId"] == "MPREb_test123"
 
+    def test_get_artist_header_less_promo_carousel(self, yt, data_path):
+        """regression test for #1031: some artist pages start with a promotional
+        musicCarouselShelfRenderer without a header, placed before the songs shelf"""
+        with open(data_path / "2026_11_get_artist_promo_carousel.json", encoding="utf8") as f:
+            mock_response = json.load(f)
+
+        with mock.patch("ytmusicapi.YTMusic._send_request", return_value=mock_response):
+            result = yt.get_artist("UCJyuVUIg-MCLF_LcccnzW3g")
+
+        assert result["name"] == "YSY A"
+        assert "results" in result["songs"]
+        assert len(result["songs"]["results"]) == 5
+        assert all(song["videoId"] for song in result["songs"]["results"])
+        assert len(result["albums"]["results"]) == 1
+        assert result["albums"]["results"][0]["title"] == "EL TRAP DE TU PAÍS"
+        assert result["albums"]["results"][0]["browseId"] == "MPREb_KLhmExkBStk"
+
     def test_get_artist_shows(self, yt_oauth):
         # with audiobooks - only with authentication
         results = yt_oauth.get_artist("UCyiY-0Af0O6emoI3YvCEDaA")
