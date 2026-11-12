@@ -76,7 +76,8 @@ class Parser:
                 r["musicCarouselShelfRenderer"]
                 for r in results
                 if "musicCarouselShelfRenderer" in r
-                and nav(r, CAROUSEL + CAROUSEL_TITLE)["text"].lower() == category_local.lower()
+                and (title := nav(r, CAROUSEL + CAROUSEL_TITLE, True)) is not None
+                and title["text"].lower() == category_local.lower()
             ]
             if len(data) > 0:
                 artist[category] = {"browseId": None, "results": []}
