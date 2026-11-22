@@ -61,7 +61,7 @@ class ExploreMixin(MixinProtocol):
 
         return sections
 
-    def get_mood_playlists(self, params: str) -> JsonList:
+    def get_moods_genres(self, params: str) -> JsonList:
         """
         Retrieve a list of songs, playlists, music videos and / or albums for a given "Moods & Genres" category.
 
@@ -74,6 +74,23 @@ class ExploreMixin(MixinProtocol):
         )
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST)
         return parse_mixed_content(results)
+
+    def get_mood_playlists(self, params: str) -> JsonList:
+        """
+        Retrieve a list of playlists for a given "Moods & Genres" category.
+        This method is provided for backwards compatibility.
+        It returns a list of all playlists found in the output of get_moods_genres.
+
+        :param params: params obtained by :py:func:`get_mood_categories`
+        :return: List of playlists in the format of :py:func:`get_library_playlists`
+
+        """
+        return [
+            item
+            for section in self.get_moods_genres(params)
+            for item in section.get("contents", [])
+            if item.get("playlistId")
+        ]
 
     def get_explore(self) -> JsonDict:
         """
