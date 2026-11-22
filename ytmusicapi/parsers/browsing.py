@@ -18,7 +18,7 @@ def parse_mixed_content(
             title = nav(results, ["header", *RUN_TEXT])
             contents = nav(results, DESCRIPTION)
         elif GRID[0] in row:
-            title = nav(row, [*GRID, *HEADER, 'gridHeaderRenderer', *TITLE_TEXT], True)
+            title = nav(row, [*GRID, *HEADER, "gridHeaderRenderer", *TITLE_TEXT], True)
             results = nav(row, GRID_ITEMS)
             contents = parse_content_list(results, parse_playlist)
         else:
@@ -204,7 +204,13 @@ def parse_non_music_audio_track(result: JsonDict) -> JsonDict:
         "videoId": video_id,
         "videoType": nav(
             result,
-            [*THUMBNAIL_OVERLAY, "content", "musicPlayButtonRenderer", "playNavigationEndpoint", *NAVIGATION_VIDEO_TYPE],
+            [
+                *THUMBNAIL_OVERLAY,
+                "content",
+                "musicPlayButtonRenderer",
+                "playNavigationEndpoint",
+                *NAVIGATION_VIDEO_TYPE,
+            ],
             True,
         ),
         "artists": artists,
