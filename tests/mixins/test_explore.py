@@ -1,19 +1,13 @@
 class TestExplore:
     def test_get_mood_playlists(self, yt):
+        # Since get_mood_playlists calls get_moods_genres, this test method actually tests both methods
         categories = yt.get_mood_categories()
         assert len(list(categories)) > 0
-        cat = next(iter(categories))
-        assert len(categories[cat]) > 0
-        playlists = yt.get_mood_playlists(categories[cat][0]["params"])
-        assert len(playlists) > 0
-
-    def test_get_moods_genres(self, yt):
-        categories = yt.get_mood_categories()
-        assert len(list(categories)) > 0
-        for cat in iter(categories):
-            assert len(categories[cat]) > 0
-            moods_genres = yt.get_moods_genres(categories[cat][0]["params"])
-            assert len(moods_genres) > 0
+        for section in iter(categories):
+            assert len(categories[section]) > 0
+            for cat in categories[section]:
+                playlists = yt.get_mood_playlists(cat["params"])
+                assert len(playlists) > 0
 
     def test_get_explore(self, yt, yt_oauth):
         assert len(yt.get_explore()) >= 4

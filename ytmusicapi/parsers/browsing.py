@@ -202,17 +202,6 @@ def parse_non_music_audio_track(result: JsonDict) -> JsonDict:
     return {
         "title": nav(result, TITLE_TEXT),
         "videoId": video_id,
-        "videoType": nav(
-            result,
-            [
-                *THUMBNAIL_OVERLAY,
-                "content",
-                "musicPlayButtonRenderer",
-                "playNavigationEndpoint",
-                *NAVIGATION_VIDEO_TYPE,
-            ],
-            True,
-        ),
         "artists": artists,
         "browseId": nav(result, NAVIGATION_BROWSE_ID, True),
         "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
