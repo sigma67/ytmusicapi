@@ -72,7 +72,7 @@ class TestLibrary:
         assert len(podcasts) > 25
 
         empty = yt_empty.get_library_podcasts()
-        assert len(empty) == 1  # saved episodes playlist is always there
+        assert len(empty) == 0
 
     def test_get_library_channels(self, yt_brand, yt_empty):
         channels = yt_brand.get_library_channels(limit=50, order="recently_added")
