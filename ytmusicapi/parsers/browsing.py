@@ -17,6 +17,10 @@ def parse_mixed_content(
             results = nav(row, DESCRIPTION_SHELF)
             title = nav(results, ["header", *RUN_TEXT])
             contents = nav(results, DESCRIPTION)
+        elif GRID[0] in row:
+            title = nav(row, [*GRID, *HEADER, "gridHeaderRenderer", *TITLE_TEXT], True)
+            results = nav(row, GRID_ITEMS)
+            contents = parse_content_list(results, parse_playlist)
         else:
             results = next(iter(row.values()))
             if "contents" not in results:
@@ -48,6 +52,10 @@ def parse_mixed_content(
                         content = parse_playlist(data)
                     elif page_type == "MUSIC_PAGE_TYPE_PODCAST_SHOW_DETAIL_PAGE":
                         content = parse_podcast(data)
+                    elif page_type == "MUSIC_PAGE_TYPE_NON_MUSIC_AUDIO_TRACK_PAGE":
+                        content = parse_non_music_audio_track(data)
+                    else:
+                        continue
                 elif data := nav(result, [MRLIR], True):
                     content = parse_song_flat(data)
                 elif data := nav(result, [MMRIR], True):
@@ -151,6 +159,54 @@ def parse_song_flat(data: JsonDict, with_playlist_id: bool = False) -> JsonDict:
         }
 
     return song
+
+
+def parse_non_music_audio_track(result: JsonDict) -> JsonDict:
+    """Parse a playable non-music audio track shown in a two-row carousel.
+
+    Unlike regular songs/videos these items navigate to an ``MPED...`` browse
+    page.  Their playable ``videoId`` is therefore stored on the thumbnail
+    play button (with the queue-menu endpoint as a fallback).  Subtitle runs
+    usually contain duration followed by one or more artist/channel runs; a
+    view-count run is optional.
+    """
+    runs = nav(result, SUBTITLE_RUNS, True) or []
+
+    video_id = nav(result, [*THUMBNAIL_OVERLAY_NAVIGATION, *WATCH_VIDEO_ID], True)
+    if not video_id:
+        video_id = next(
+            (
+                candidate
+                for entry in (nav(result, MENU_ITEMS, True) or [])
+                if (candidate := nav(entry, MENU_SERVICE + QUEUE_VIDEO_ID, True))
+            ),
+            None,
+        )
+
+    duration = next(
+        (run["text"] for run in runs if re.match(r"^\d+(?:\s+min)?\s+\d+\s+sec$", run.get("text", ""))),
+        None,
+    )
+
+    artists = [
+        {
+            "name": run["text"],
+            "id": nav(run, NAVIGATION_BROWSE_ID, True),
+        }
+        for run in runs
+        if nav(run, NAVIGATION_BROWSE_ID, True)
+        and nav(run, NAVIGATION_BROWSE + PAGE_TYPE, True)
+        in ("MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL")
+    ]
+
+    return {
+        "title": nav(result, TITLE_TEXT),
+        "videoId": video_id,
+        "artists": artists,
+        "browseId": nav(result, NAVIGATION_BROWSE_ID, True),
+        "thumbnails": nav(result, THUMBNAIL_RENDERER, True),
+        "duration": duration,
+    }
 
 
 def parse_video(result: JsonDict) -> JsonDict:
