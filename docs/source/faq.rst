@@ -29,6 +29,16 @@ How do I add content to my library?
 - **podcasts**: `rate_playlist <reference.html#ytmusicapi.YTMusic.rate_playlist>`__
 - **episodes**: `add_playlist_items("SE", episode_id) <reference.html#ytmusicapi.YTMusic.add_playlist_items>`__
 
+Why does ``get_song`` still return the old ``likeStatus`` right after ``rate_song``?
+****************************************************************************************
+YouTube Music is eventually consistent. A successful `rate_song <reference.html#ytmusicapi.YTMusic.rate_song>`__
+call means that YouTube accepted the new rating, but reading it back immediately, for example with
+`get_song <reference.html#ytmusicapi.YTMusic.get_song>`__, can still return the previous ``likeStatus``
+for a while. This happens on the YouTube Music servers and is not something ``ytmusicapi`` can influence.
+
+If your application needs to know the current rating, keep track of the rating you just set yourself instead
+of reading it back right after the write.
+
 What are the different feedback tokens?
 *******************************************************
 
