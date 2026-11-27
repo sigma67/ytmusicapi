@@ -9,7 +9,7 @@ from contextlib import contextmanager, suppress
 from functools import cached_property, partial
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import requests
 from requests import Response
@@ -18,7 +18,13 @@ from requests.structures import CaseInsensitiveDict
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-from ytmusicapi.constants import TV_CLIENT_NAME, TV_CLIENT_VERSION, TV_USER_AGENT, YT_DATA_API
+from ytmusicapi.constants import (
+    TV_CLIENT_NAME,
+    TV_CLIENT_VERSION,
+    TV_UNSUPPORTED,
+    TV_USER_AGENT,
+    YT_DATA_API,
+)
 from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_LOCATIONS,
@@ -131,6 +137,9 @@ class YTMusicBase:
             self.context["context"]["client"].update(
                 {"clientName": TV_CLIENT_NAME, "clientVersion": TV_CLIENT_VERSION}
             )
+            # fail early and clearly for functions the TV client has no equivalent for
+            for name in TV_UNSUPPORTED:
+                setattr(self, name, partial(self._raise_tv_unsupported, name))
 
         if location:
             if location not in SUPPORTED_LOCATIONS:
@@ -175,6 +184,13 @@ class YTMusicBase:
         the TV client, which supports a subset of the API and returns a different response format.
         """
         return self.auth_type in (AuthType.OAUTH_CUSTOM_CLIENT, AuthType.OAUTH_CUSTOM_FULL)
+
+    @staticmethod
+    def _raise_tv_unsupported(name: str, *args: Any, **kwargs: Any) -> None:
+        raise YTMusicUserError(
+            f"{name} is not supported with OAuth authentication, which is limited to what "
+            "YouTube's TV client offers (see the OAuth setup documentation). Use browser authentication instead."
+        )
 
     @cached_property
     def base_headers(self) -> CaseInsensitiveDict[str]:

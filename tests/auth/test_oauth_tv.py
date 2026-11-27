@@ -9,7 +9,7 @@ from requests import Response
 
 from ytmusicapi import OAuthCredentials, YTMusic
 from ytmusicapi.auth.types import AuthType
-from ytmusicapi.constants import TV_CLIENT_NAME, TV_USER_AGENT, YT_DATA_API
+from ytmusicapi.constants import TV_CLIENT_NAME, TV_UNSUPPORTED, TV_USER_AGENT, YT_DATA_API
 from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 
 
@@ -437,7 +437,18 @@ class TestOAuthTVClient:
             mock.patch.object(yt_tv._session, "post", return_value=response),
             pytest.raises(YTMusicServerError, match="not supported with OAuth"),
         ):
+            yt_tv.get_library_playlists()
+
+    def test_unsupported_functions(self, yt_tv: YTMusic):
+        yt = YTMusic()
+        for name in TV_UNSUPPORTED:
+            assert callable(getattr(yt, name)), name
+        with pytest.raises(YTMusicUserError, match="get_home is not supported with OAuth"):
             yt_tv.get_home()
+        with pytest.raises(YTMusicUserError, match="get_album is not supported with OAuth"):
+            yt_tv.get_album("MPREb_4pL8gzRtw1p")
+        # other instances are not affected
+        assert yt.get_home.__func__ is YTMusic.get_home
 
     def test_get_library_playlists(self, yt_tv: YTMusic):
         with mock.patch.object(yt_tv, "_send_request", return_value=LIBRARY_RESPONSE):

@@ -28,8 +28,11 @@ OAuth authentication
    - :py:func:`edit_playlist`, :py:func:`add_playlist_items`, :py:func:`remove_playlist_items`
    - :py:func:`create_playlist` and :py:func:`delete_playlist`, which use the YouTube Data API
      and consume quota of your OAuth client
+   - :py:func:`rate_song`, :py:func:`rate_playlist`, :py:func:`subscribe_artist` and
+     :py:func:`unsubscribe_artists`
 
-   Other functions either raise a :py:class:`YTMusicServerError` or fail to parse the response.
+   Functions without an equivalent on the TV client, such as :py:func:`get_home`, :py:func:`get_album`,
+   :py:func:`get_history` or uploads, raise a :py:class:`YTMusicUserError`.
    Use :doc:`browser` authentication if you need the full API.
 
 After you have installed ``ytmusicapi``, run
