@@ -2,6 +2,7 @@ from ytmusicapi.continuations import get_continuations
 from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.parsers.playlists import validate_playlist_id
+from ytmusicapi.parsers.tv import parse_tv_watch_playlist
 from ytmusicapi.parsers.watch import *
 from ytmusicapi.type_alias import JsonList, ParseFuncType, RequestFuncType
 
@@ -139,6 +140,10 @@ class WatchMixin(MixinProtocol):
             body["params"] = "wAEB"
         endpoint = "next"
         response = self._send_request(endpoint, body)
+        if self.uses_tv_client:
+            return parse_tv_watch_playlist(
+                response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+            )
         watchNextRenderer = nav(
             response,
             [

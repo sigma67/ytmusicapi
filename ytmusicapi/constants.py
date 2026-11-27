@@ -22,3 +22,8 @@ OAUTH_SCOPE = "https://www.googleapis.com/auth/youtube"
 OAUTH_CODE_URL = "https://www.youtube.com/o/oauth2/device/code"
 OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
 OAUTH_USER_AGENT = USER_AGENT + " Cobalt/Version"
+# OAuth tokens are only accepted by YouTube's TV client, see #813
+TV_CLIENT_NAME = "TVHTML5"
+TV_CLIENT_VERSION = "7.20250923.13.00"
+TV_USER_AGENT = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version"
+YT_DATA_API = "https://www.googleapis.com/youtube/v3/"

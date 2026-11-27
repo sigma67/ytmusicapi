@@ -10,6 +10,28 @@ OAuth authentication
 
    For your new credentials, select ``OAuth client ID`` and pick ``TVs and Limited Input devices``.
 
+.. warning::
+
+   Since August 2025, YouTube Music only accepts OAuth tokens from YouTube's TV client.
+   With OAuth authentication, ``ytmusicapi`` therefore sends its requests as that client, which only
+   supports a subset of the API and returns less detailed results (for example no album or like status
+   for playlist items). Currently supported with OAuth:
+
+   - :py:func:`get_library_playlists`, :py:func:`get_playlist`, :py:func:`get_liked_songs`
+   - :py:func:`get_library_songs`, :py:func:`get_library_albums`, :py:func:`get_library_subscriptions`
+     (subscriptions only contain the artist name and ``radioId``)
+   - :py:func:`get_artist`, which returns the artist's shelves as a list of ``sections`` instead of the
+     usual keys. Albums are returned as playlists: pass their ``playlistId`` to :py:func:`get_playlist`
+   - :py:func:`get_watch_playlist` (without ``lyrics`` and ``related``)
+   - :py:func:`search` (searches all of YouTube; only the ``songs``, ``videos``, ``albums``, ``artists``
+     and ``playlists`` filters, no scopes)
+   - :py:func:`edit_playlist`, :py:func:`add_playlist_items`, :py:func:`remove_playlist_items`
+   - :py:func:`create_playlist` and :py:func:`delete_playlist`, which use the YouTube Data API
+     and consume quota of your OAuth client
+
+   Other functions either raise a :py:class:`YTMusicServerError` or fail to parse the response.
+   Use :doc:`browser` authentication if you need the full API.
+
 After you have installed ``ytmusicapi``, run
 
 .. code-block:: bash

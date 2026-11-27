@@ -18,6 +18,7 @@ from ytmusicapi.parsers.browsing import (
 )
 from ytmusicapi.parsers.library import parse_albums
 from ytmusicapi.parsers.playlists import parse_playlist_items
+from ytmusicapi.parsers.tv import parse_tv_artist
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncType
 
 from ..exceptions import YTMusicError, YTMusicUserError
@@ -260,6 +261,9 @@ class BrowsingMixin(MixinProtocol):
         body = {"browseId": channelId}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
+        if self.uses_tv_client:
+            # the TV client returns the artist's shelves as a list of ``sections`` with ``title`` and ``contents``
+            return parse_tv_artist(response)
         # some artist pages use twoColumnBrowseResultsRenderer instead of singleColumn (#929)
         results = nav(response, SINGLE_COLUMN_TAB + SECTION_LIST, True)
         if results is None:

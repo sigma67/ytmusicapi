@@ -8,6 +8,7 @@ from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditO
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
 from ytmusicapi.parsers.playlists import *
+from ytmusicapi.parsers.tv import parse_tv_playlist
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
 
 from ._protocol import MixinProtocol
@@ -147,6 +148,10 @@ class PlaylistsMixin(MixinProtocol):
             endpoint, body, additionalParams
         )
         response = request_func("")
+        if self.uses_tv_client:
+            tv_playlist = parse_tv_playlist(response, request_func, limit)
+            tv_playlist["duration_seconds"] = sum_total_duration(tv_playlist)
+            return tv_playlist
 
         request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
         is_ola = playlistId.startswith(("OLA", "VLOLA"))
@@ -289,6 +294,22 @@ class PlaylistsMixin(MixinProtocol):
         if source_playlist is not None:
             body["sourcePlaylistId"] = source_playlist
 
+        if self.uses_tv_client:
+            # the TV client cannot create playlists, use the YouTube Data API instead
+            created = self._send_data_api_request(
+                "POST",
+                "playlists",
+                params={"part": "snippet,status"},
+                body={
+                    "snippet": {"title": title, "description": body["description"]},
+                    "status": {"privacyStatus": privacy_status.lower()},
+                },
+            )
+            created_id: str = created["id"]
+            if video_ids or source_playlist:
+                self.add_playlist_items(created_id, video_ids, source_playlist, duplicates=True)
+            return created_id
+
         endpoint = "playlist/create"
         response = self._send_request(endpoint, body)
         if "playlistId" in response:
@@ -428,6 +449,13 @@ class PlaylistsMixin(MixinProtocol):
         :return: Status String or full response
         """
         self._check_auth()
+        if self.uses_tv_client:
+            # the TV client cannot delete playlists, use the YouTube Data API instead
+            self._send_data_api_request(
+                "DELETE", "playlists", params={"id": validate_playlist_id(playlistId)}
+            )
+            return ResponseStatus.SUCCEEDED.value
+
         body = {"playlistId": validate_playlist_id(playlistId)}
         endpoint = "playlist/delete"
         response = self._send_request(endpoint, body)

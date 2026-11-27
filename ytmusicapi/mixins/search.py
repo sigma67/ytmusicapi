@@ -1,10 +1,11 @@
 from typing import Literal
 
-from ytmusicapi.continuations import get_continuations
+from ytmusicapi.continuations import get_continuation_params, get_continuations
 from ytmusicapi.exceptions import YTMusicUserError
 from ytmusicapi.mixins._protocol import MixinProtocol
 from ytmusicapi.navigation import MRLIR
 from ytmusicapi.parsers.search import *
+from ytmusicapi.parsers.tv import parse_tv_search_results, tv_text
 from ytmusicapi.type_alias import JsonList, RequestFuncType
 
 _SearchFilterType = Literal[
@@ -202,6 +203,9 @@ class SearchMixin(MixinProtocol):
                 + ", ".join(filters[0:3] + filters[5:])
             )
 
+        if self.uses_tv_client:
+            return self._search_tv(query, filter, scope, limit)
+
         params = get_search_params(filter, scope, ignore_spelling)
         if params:
             body["params"] = params
@@ -302,6 +306,79 @@ class SearchMixin(MixinProtocol):
                         parse_func,
                     )
                 )
+
+        return search_results
+
+    def _search_tv(
+        self, query: str, filter: _SearchFilterType | None, scope: _SearchScopeType | None, limit: int
+    ) -> JsonList:
+        """
+        Search with YouTube's TV client, which is used with OAuth authentication.
+
+        The TV client searches all of YouTube and ignores filter params,
+        so filters are applied to the parsed results instead.
+        Results contain ``category``, ``resultType``, ``title``, ``thumbnails`` and, depending on the
+        result type, ``videoId``/``artists``/``views``/``duration`` or ``playlistId``/``browseId``.
+        """
+        tv_filters = ["albums", "artists", "playlists", "songs", "videos"]
+        if scope or (filter and filter not in tv_filters):
+            raise YTMusicUserError(
+                "With OAuth authentication, search does not support scopes and only supports the filters "
+                + ", ".join(tv_filters)
+            )
+        result_type = filter[:-1] if filter else None
+        endpoint = "search"
+        body = {"query": query}
+        response = self._send_request(endpoint, body)
+        search_results: JsonList = []
+        for section in nav(response, ["contents", *SECTION_LIST], True) or []:
+            shelf = nav(section, ["shelfRenderer"], True)
+            results = nav(shelf, ["content", "horizontalListRenderer"], True)
+            if not results:
+                continue
+            category = tv_text(
+                nav(
+                    shelf,
+                    [
+                        "headerRenderer",
+                        "shelfHeaderRenderer",
+                        "avatarLockup",
+                        "avatarLockupRenderer",
+                        "title",
+                    ],
+                    True,
+                )
+            )
+
+            def parse_func(
+                contents: JsonList, result_type: str | None = result_type, category: str | None = category
+            ) -> JsonList:
+                parsed = parse_tv_search_results(contents, category)
+                return [r for r in parsed if result_type is None or r["resultType"] == result_type]
+
+            search_results.extend(parse_func(results.get("items", [])))
+            # continuations return a section list with a single shelf
+            while len(search_results) < limit and "continuations" in results:
+                continuation = self._send_request(endpoint, body, get_continuation_params(results))
+                results = nav(
+                    continuation,
+                    [
+                        "continuationContents",
+                        "sectionListContinuation",
+                        "contents",
+                        0,
+                        "shelfRenderer",
+                        "content",
+                        "horizontalListRenderer",
+                    ],
+                    True,
+                )
+                if not results or not results.get("items"):
+                    break
+                search_results.extend(parse_func(results["items"]))
+
+            if len(search_results) >= limit:
+                break
 
         return search_results
 
