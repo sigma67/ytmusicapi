@@ -130,8 +130,8 @@ class TestOAuth:
         with pytest.raises(FileNotFoundError):
             OAuthToken.from_json(missing)
 
-    @pytest.mark.skip(reason="oauth is currently not working, see #813")
-    def test_oauth_tokens(self, oauth_filepath: str, yt_oauth: YTMusic):
+    def test_oauth_tokens(self, oauth_filepath: str, yt_oauth_tv: YTMusic):
+        yt_oauth = yt_oauth_tv
         # ensure instance initialized token
         assert yt_oauth._token is not None
 

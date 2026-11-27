@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from tests.fixtures import *
-from ytmusicapi import YTMusic
+from ytmusicapi import OAuthCredentials, YTMusic
 
 #: serial xdist groups, longest first (see tests/README.rst)
 LANE_ORDER = ["playlist", "uploads", "search_history", "history"]
@@ -81,6 +81,15 @@ def fixture_yt_oauth(browser_filepath, config) -> YTMusic:
     #     client_id=config["auth"]["client_id"], client_secret=config["auth"]["client_secret"]
     # )
     # return YTMusic(oauth_filepath, oauth_credentials=credentials)
+
+
+@pytest.fixture(name="yt_oauth_tv")
+def fixture_yt_oauth_tv(oauth_filepath, config) -> YTMusic:
+    """OAuth authentication, which is limited to the YouTube Data API and the TV client, see #813"""
+    credentials = OAuthCredentials(
+        client_id=config["auth"]["client_id"], client_secret=config["auth"]["client_secret"]
+    )
+    return YTMusic(oauth_filepath, oauth_credentials=credentials)
 
 
 @pytest.fixture(name="yt_brand")

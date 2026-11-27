@@ -36,6 +36,7 @@ OAuth authentication
 
    - :py:func:`add_playlist_items` does not return the ``setVideoId`` of the added items.
      Use :py:func:`get_playlist` to retrieve them.
+   - :py:func:`get_watch_playlist` does not always return the requested video as the first track.
    - Changes can take a few seconds until they are returned by other functions. For example,
      :py:func:`get_playlist` may raise a :py:class:`YTMusicServerError` right after :py:func:`create_playlist`.
 

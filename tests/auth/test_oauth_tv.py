@@ -12,6 +12,7 @@ from ytmusicapi import OAuthCredentials, YTMusic
 from ytmusicapi.auth.types import AuthType
 from ytmusicapi.constants import TV_CLIENT_NAME, TV_UNSUPPORTED, TV_USER_AGENT, YT_DATA_API
 from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
+from ytmusicapi.type_alias import JsonDict
 
 
 def text(value: str) -> dict:
@@ -730,3 +731,103 @@ class TestOAuthTVClient:
         assert tracks[1]["duration"] == "1:02:03"
         assert [track["isAvailable"] for track in tracks] == [True, True, False]
         assert "duration" not in tracks[2]
+
+
+@pytest.mark.xdist_group("playlist")
+class TestOAuthLive:
+    """Tests against YouTube with real OAuth credentials"""
+
+    def test_library(self, yt_oauth_tv: YTMusic):
+        playlists = yt_oauth_tv.get_library_playlists(None)
+        assert "LM" in [playlist["playlistId"] for playlist in playlists]
+        assert all(playlist["title"] for playlist in playlists)
+        assert all(song["videoId"] and song["title"] for song in yt_oauth_tv.get_library_songs(30))
+        assert all(album["playlistId"].startswith("OLAK") for album in yt_oauth_tv.get_library_albums())
+        assert all(artist["artist"] for artist in yt_oauth_tv.get_library_subscriptions())
+
+    def test_get_liked_songs(self, yt_oauth_tv: YTMusic):
+        liked = yt_oauth_tv.get_liked_songs(limit=None)
+        assert liked["id"] == "LM"
+        assert len(liked["tracks"]) == liked["trackCount"]
+        assert liked["duration_seconds"] > 0
+
+    def test_get_playlist(self, yt_oauth_tv: YTMusic, sample_video: str):
+        album = yt_oauth_tv.get_playlist("OLAK5uy_noLNRtYnrcRVVO9rOyGMx64XyjVSCz1YU", limit=None)
+        assert len(album["tracks"]) == album["trackCount"] > 50
+        assert not album["owned"]
+        # radios are not returned by the Data API
+        radio = yt_oauth_tv.get_playlist("RDAMVM" + sample_video, limit=10)
+        assert len(radio["tracks"]) > 0
+        with pytest.raises(YTMusicServerError):
+            yt_oauth_tv.get_playlist("PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+    @pytest.mark.parametrize("filter", [None, "songs", "videos", "albums", "artists", "playlists"])
+    def test_search(self, yt_oauth_tv: YTMusic, filter: str | None):
+        results = yt_oauth_tv.search("daft punk discovery", filter=filter, limit=10)  # type: ignore[arg-type]
+        assert 0 < len(results) <= 10
+        assert all(result["title"] for result in results)
+        if filter:
+            assert {result["resultType"] for result in results} == {filter[:-1]}
+
+    def test_get_artist(self, yt_oauth_tv: YTMusic):
+        artist = yt_oauth_tv.get_artist("UCmMUZbaYdNH0bEd1PAlAqsA")
+        assert artist["name"]
+        assert artist["channelId"]
+        assert len(artist["sections"]) > 0
+        assert all(section["contents"] for section in artist["sections"])
+
+    def test_get_watch_playlist(self, yt_oauth_tv: YTMusic, sample_video: str):
+        watch = yt_oauth_tv.get_watch_playlist(sample_video, limit=30)
+        # the queue of the TV client does not always start with the requested video
+        assert len(watch["tracks"]) >= 30
+        assert all(track["videoId"] and track["title"] for track in watch["tracks"])
+        assert watch["playlistId"] == "RDAMVM" + sample_video
+
+    def test_unsupported(self, yt_oauth_tv: YTMusic):
+        with pytest.raises(YTMusicUserError, match="not supported with OAuth"):
+            yt_oauth_tv.get_history()
+
+    def test_playlist_end2end(self, yt_oauth_tv: YTMusic, sample_video: str):
+        def wait_for(condition, timeout: int = 30) -> JsonDict:
+            """changes take a few seconds until they are returned"""
+            deadline = time.time() + timeout
+            while True:
+                try:
+                    playlist = yt_oauth_tv.get_playlist(playlist_id)
+                    if condition(playlist):
+                        return playlist
+                except YTMusicServerError:
+                    pass
+                assert time.time() < deadline, "playlist did not reach the expected state"
+                time.sleep(2)
+
+        playlist_id = yt_oauth_tv.create_playlist(
+            "test oauth", "test <b>description</b>", video_ids=[sample_video]
+        )
+        assert isinstance(playlist_id, str)
+        try:
+            playlist = wait_for(lambda p: len(p["tracks"]) == 1)
+            assert playlist["owned"]
+            assert playlist["privacy"] == "PRIVATE"
+            assert playlist["description"] == "test description"
+
+            response = yt_oauth_tv.add_playlist_items(playlist_id, ["bx1Bh8ZvH84", "cmpRLQZkTb8"])
+            assert response["status"] == "STATUS_SUCCEEDED"  # type: ignore[index]
+            response = yt_oauth_tv.edit_playlist(playlist_id, title="test oauth 2", privacyStatus="UNLISTED")
+            assert response == "STATUS_SUCCEEDED"
+            playlist = wait_for(lambda p: len(p["tracks"]) == 3 and p["title"] == "test oauth 2")
+            assert playlist["privacy"] == "UNLISTED"
+            tracks = playlist["tracks"]
+            assert all(track["setVideoId"] and track["duration_seconds"] for track in tracks)
+
+            yt_oauth_tv.edit_playlist(
+                playlist_id, moveItem=(tracks[2]["setVideoId"], tracks[0]["setVideoId"])
+            )
+            assert yt_oauth_tv.remove_playlist_items(playlist_id, [tracks[1]]) == "STATUS_SUCCEEDED"
+            playlist = wait_for(lambda p: len(p["tracks"]) == 2)
+            assert [track["videoId"] for track in playlist["tracks"]] == [
+                tracks[2]["videoId"],
+                tracks[0]["videoId"],
+            ]
+        finally:
+            assert yt_oauth_tv.delete_playlist(playlist_id) == "STATUS_SUCCEEDED"
