@@ -598,3 +598,36 @@ class TestOAuthTVClient:
         assert [track["videoId"] for track in watch["tracks"]] == ["vid1", "vid2"]
         assert watch["tracks"][0]["length"] == "4:40"
         assert watch["tracks"][0]["artists"] == [{"name": "Oasis", "id": "UCartist"}]
+
+    def test_get_playlist_description(self, yt_tv: YTMusic):
+        response = json.loads(json.dumps(PLAYLIST_RESPONSE))
+        columns = response["contents"]["tvBrowseRenderer"]["content"]["tvSurfaceContentRenderer"]["content"]
+        popup: dict = {"subtitle": text("my description")}
+        for key in (
+            "overlayMessageRenderer",
+            "items",
+            "scrollPaneItemListRenderer",
+            "content",
+            "scrollPaneRenderer",
+            "content",
+            "overlayPanelRenderer",
+            "actionPanel",
+            "overlayTwoPanelRenderer",
+            "overlay",
+            "overlaySectionRenderer",
+            "popup",
+            "openPopupAction",
+            "command",
+            "buttonRenderer",
+        ):
+            popup = {key: [popup] if key == "items" else popup}
+        columns["twoColumnRenderer"]["leftColumn"]["entityMetadataRenderer"]["buttons"] = [
+            {"buttonRenderer": {"text": text("Play")}},
+            popup,
+        ]
+        with mock.patch.object(yt_tv, "_send_request", side_effect=[response, PLAYLIST_CONTINUATION]):
+            assert yt_tv.get_playlist("PLown")["description"] == "my description"
+
+    def test_search_limit(self, yt_tv: YTMusic):
+        with mock.patch.object(yt_tv, "_send_request", return_value=SEARCH_RESPONSE):
+            assert len(yt_tv.search("Oasis Wonderwall", limit=2)) == 2

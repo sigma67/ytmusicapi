@@ -203,6 +203,35 @@ def parse_tv_playlist_items(results: JsonList) -> JsonList:
     return [parse_tv_playlist_item(result[TV_TILE]) for result in results if TV_TILE in result]
 
 
+TV_DESCRIPTION_POPUP = [
+    "buttonRenderer",
+    "command",
+    "openPopupAction",
+    "popup",
+    "overlaySectionRenderer",
+    "overlay",
+    "overlayTwoPanelRenderer",
+    "actionPanel",
+    "overlayPanelRenderer",
+    "content",
+    "scrollPaneRenderer",
+    "content",
+    "scrollPaneItemListRenderer",
+    "items",
+    0,
+    "overlayMessageRenderer",
+    "subtitle",
+]
+
+
+def parse_tv_playlist_description(header: JsonDict) -> str | None:
+    """The description of a playlist is only part of a popup, which is opened by one of the header buttons"""
+    for button in header.get("buttons", []):
+        if description := tv_text(nav(button, TV_DESCRIPTION_POPUP, True)):
+            return description
+    return None
+
+
 def parse_tv_playlist(response: JsonDict, request_func: RequestFuncType, limit: int | None) -> JsonDict:
     columns = nav(response, [*TV_SURFACE, "twoColumnRenderer"])
     header = nav(columns, ["leftColumn", "entityMetadataRenderer"])
@@ -213,7 +242,7 @@ def parse_tv_playlist(response: JsonDict, request_func: RequestFuncType, limit: 
         "owned": results.get("isEditable", False),
         "privacy": "PUBLIC",
         "title": tv_text(header.get("title")),
-        "description": tv_text(header.get("description")),
+        "description": tv_text(header.get("description")) or parse_tv_playlist_description(header),
         "thumbnails": nav(header, ["thumbnail", "thumbnails"], True),
         "author": None,
         "trackCount": None,

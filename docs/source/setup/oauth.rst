@@ -31,6 +31,14 @@ OAuth authentication
    - :py:func:`rate_song`, :py:func:`rate_playlist`, :py:func:`subscribe_artist` and
      :py:func:`unsubscribe_artists`
 
+   Known differences of the supported functions:
+
+   - :py:func:`add_playlist_items` does not return the ``setVideoId`` of the added items.
+     Use :py:func:`get_playlist` to retrieve them.
+   - :py:func:`get_liked_songs` may return fewer items than the playlist's ``trackCount``.
+   - Changes can take a few seconds until they are returned by other functions. For example,
+     :py:func:`get_playlist` may raise a :py:class:`YTMusicServerError` right after :py:func:`create_playlist`.
+
    Functions without an equivalent on the TV client, such as :py:func:`get_home`, :py:func:`get_album`,
    :py:func:`get_history` or uploads, raise a :py:class:`YTMusicUserError`.
    Use :doc:`browser` authentication if you need the full API.

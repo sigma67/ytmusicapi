@@ -380,7 +380,7 @@ class SearchMixin(MixinProtocol):
             if len(search_results) >= limit:
                 break
 
-        return search_results
+        return search_results[:limit]
 
     def get_search_suggestions(self, query: str, detailed_runs: bool = False) -> list[str] | JsonList:
         """
