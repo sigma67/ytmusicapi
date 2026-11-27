@@ -9,7 +9,7 @@ from contextlib import contextmanager, suppress
 from functools import cached_property, partial
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import requests
 from requests import Response
@@ -18,6 +18,13 @@ from requests.structures import CaseInsensitiveDict
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+from ytmusicapi.constants import (
+    TV_CLIENT_NAME,
+    TV_CLIENT_VERSION,
+    TV_UNSUPPORTED,
+    TV_USER_AGENT,
+    YT_DATA_API,
+)
 from ytmusicapi.helpers import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_LOCATIONS,
@@ -126,6 +133,13 @@ class YTMusicBase:
 
         # prepare context
         self.context = initialize_context()
+        if self.uses_tv_client:
+            self.context["context"]["client"].update(
+                {"clientName": TV_CLIENT_NAME, "clientVersion": TV_CLIENT_VERSION}
+            )
+            # fail early and clearly for functions the TV client has no equivalent for
+            for name in TV_UNSUPPORTED:
+                setattr(self, name, partial(self._raise_tv_unsupported, name))
 
         if location:
             if location not in SUPPORTED_LOCATIONS:
@@ -162,6 +176,22 @@ class YTMusicBase:
             except KeyError:
                 raise YTMusicUserError("Your cookie is missing the required value __Secure-3PAPISID")
 
+    @property
+    def uses_tv_client(self) -> bool:
+        """
+        OAuth tokens are rejected by YouTube Music's web client since August 2025 (see #813),
+        but still accepted by YouTube's TV client. With OAuth, requests are therefore sent as
+        the TV client, which supports a subset of the API and returns a different response format.
+        """
+        return self.auth_type in (AuthType.OAUTH_CUSTOM_CLIENT, AuthType.OAUTH_CUSTOM_FULL)
+
+    @staticmethod
+    def _raise_tv_unsupported(name: str, *args: Any, **kwargs: Any) -> None:
+        raise YTMusicUserError(
+            f"{name} is not supported with OAuth authentication, which is limited to what "
+            "YouTube's TV client offers (see the OAuth setup documentation). Use browser authentication instead."
+        )
+
     @cached_property
     def base_headers(self) -> CaseInsensitiveDict[str]:
         headers = (
@@ -169,6 +199,8 @@ class YTMusicBase:
             if self.auth_type == AuthType.BROWSER or self.auth_type == AuthType.OAUTH_CUSTOM_FULL
             else initialize_headers()
         )
+        if self.auth_type == AuthType.OAUTH_CUSTOM_CLIENT:
+            headers["user-agent"] = TV_USER_AGENT
 
         if "X-Goog-Visitor-Id" not in headers:
             headers.update(get_visitor_id(partial(self._send_get_request, use_base_headers=True)))
@@ -247,8 +279,36 @@ class YTMusicBase:
         if response.status_code >= 400:
             message = "Server returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
             error = response_text.get("error", {}).get("message")
+            if self.uses_tv_client and response.status_code == 400:
+                error += (
+                    "\nThis request is likely not supported with OAuth authentication, "
+                    "which is limited to what YouTube's TV client offers. Use browser authentication instead."
+                )
             raise YTMusicServerError(message + error)
         return response_text
+
+    def _send_data_api_request(
+        self, method: str, resource: str, params: JsonDict | None = None, body: JsonDict | None = None
+    ) -> JsonDict:
+        """
+        Send a request to the official YouTube Data API v3 with the OAuth token.
+        Only used for the few requests the TV client does not support. Consumes API quota of the OAuth client.
+        """
+        response = self._session.request(
+            method,
+            YT_DATA_API + resource,
+            params=params,
+            json=body,
+            headers={"authorization": self.headers["authorization"]},
+            proxies=self.proxies,
+        )
+        response_json: JsonDict = json.loads(response.text) if response.text else {}
+        if response.status_code >= 400:
+            message = (
+                "YouTube Data API returned HTTP " + str(response.status_code) + ": " + response.reason + ".\n"
+            )
+            raise YTMusicServerError(message + str(response_json.get("error", {}).get("message", "")))
+        return response_json
 
     def _send_get_request(
         self, url: str, params: JsonDict | None = None, use_base_headers: bool = False

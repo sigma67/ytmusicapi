@@ -10,6 +10,7 @@ from ytmusicapi.models.content.enums import LikeStatus
 from ytmusicapi.parsers.browsing import *
 from ytmusicapi.parsers.library import *
 from ytmusicapi.parsers.playlists import parse_playlist_items
+from ytmusicapi.parsers.tv import parse_tv_library_playlists, parse_tv_library_tab
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncDictType, ParseFuncType, RequestFuncType
 
 from ..exceptions import YTMusicServerError
@@ -39,6 +40,10 @@ class LibraryMixin(MixinProtocol):
         body = {"browseId": "FEmusic_liked_playlists"}
         endpoint = "browse"
         response = self._send_request(endpoint, body)
+        if self.uses_tv_client:
+            return parse_tv_library_playlists(
+                response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+            )
 
         results = get_library_contents(response, GRID)
         if results is None:
@@ -77,6 +82,12 @@ class LibraryMixin(MixinProtocol):
             body["params"] = prepare_order_params(order)
         endpoint = "browse"
         per_page = 25
+        if self.uses_tv_client:
+            return parse_tv_library_tab(
+                self._send_request(endpoint, body),
+                lambda additionalParams: self._send_request(endpoint, body, additionalParams),
+                limit,
+            )
 
         request_func: RequestFuncType = lambda additionalParams: self._send_request(endpoint, body)
         parse_func: ParseFuncDictType = lambda raw_response: parse_library_songs(raw_response)
@@ -161,6 +172,10 @@ class LibraryMixin(MixinProtocol):
 
         endpoint = "browse"
         response = self._send_request(endpoint, body)
+        if self.uses_tv_client:
+            return parse_tv_library_tab(
+                response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+            )
         return parse_library_albums(
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )
@@ -208,6 +223,10 @@ class LibraryMixin(MixinProtocol):
             body["params"] = prepare_order_params(order)
         endpoint = "browse"
         response = self._send_request(endpoint, body)
+        if self.uses_tv_client:
+            return parse_tv_library_tab(
+                response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
+            )
         return parse_library_artists(
             response, lambda additionalParams: self._send_request(endpoint, body, additionalParams), limit
         )

@@ -2,12 +2,14 @@ from urllib.parse import parse_qs, urlparse
 
 from ytmusicapi.continuations import *
 from ytmusicapi.enums import ResponseStatus
-from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.helpers import sum_total_duration
 from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditOptions
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
+from ytmusicapi.parsers.data_api import parse_data_api_playlist, parse_data_api_playlist_items
 from ytmusicapi.parsers.playlists import *
+from ytmusicapi.parsers.tv import parse_tv_playlist
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
 
 from ._protocol import MixinProtocol
@@ -146,6 +148,15 @@ class PlaylistsMixin(MixinProtocol):
         request_func: RequestFuncType = lambda additionalParams: self._send_request(
             endpoint, body, additionalParams
         )
+        if self.uses_tv_client:
+            # the TV client omits unlisted songs. Use it only for playlists the Data API does not know, i.e. radios
+            try:
+                tv_playlist = self._get_playlist_data_api(browseId[2:], limit)
+            except YTMusicServerError:
+                tv_playlist = parse_tv_playlist(request_func(""), request_func, limit)
+            tv_playlist["duration_seconds"] = sum_total_duration(tv_playlist)
+            return tv_playlist
+
         response = request_func("")
 
         request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
@@ -233,6 +244,39 @@ class PlaylistsMixin(MixinProtocol):
         playlist["duration_seconds"] = sum_total_duration(playlist)
         return playlist
 
+    def _get_playlist_data_api(self, playlistId: str, limit: int | None) -> JsonDict:
+        """Get a playlist from the YouTube Data API, which is used with OAuth authentication"""
+        tracks: JsonList = []
+        params: JsonDict = {
+            "part": "snippet,contentDetails,status",
+            "playlistId": playlistId,
+            "maxResults": 50,
+        }
+        while limit is None or len(tracks) < limit:
+            response = self._send_data_api_request("GET", "playlistItems", params)
+            items = response.get("items", [])
+            # the duration is only part of the video resource
+            video_ids = ",".join(item["contentDetails"]["videoId"] for item in items)
+            videos = self._send_data_api_request(
+                "GET", "videos", {"part": "contentDetails", "id": video_ids, "maxResults": 50}
+            )
+            tracks.extend(parse_data_api_playlist_items(items, videos.get("items", [])))
+            if not items or "nextPageToken" not in response:
+                break
+            params["pageToken"] = response["nextPageToken"]
+
+        header = self._send_data_api_request(
+            "GET", "playlists", {"part": "snippet,contentDetails,status", "id": playlistId}
+        ).get("items")
+        channels = self._send_data_api_request("GET", "channels", {"part": "id", "mine": "true"}).get("items")
+        playlist = parse_data_api_playlist(
+            playlistId, header[0] if header else None, channels[0]["id"] if channels else None
+        )
+        if playlist["trackCount"] is None:
+            playlist["trackCount"] = nav(response, ["pageInfo", "totalResults"], True)
+        playlist["tracks"] = tracks if limit is None else tracks[:limit]
+        return playlist
+
     def get_liked_songs(self, limit: int = 100) -> JsonDict:
         """
         Gets playlist items for the 'Liked Songs' playlist
@@ -288,6 +332,22 @@ class PlaylistsMixin(MixinProtocol):
 
         if source_playlist is not None:
             body["sourcePlaylistId"] = source_playlist
+
+        if self.uses_tv_client:
+            # the TV client cannot create playlists, use the YouTube Data API instead
+            created = self._send_data_api_request(
+                "POST",
+                "playlists",
+                params={"part": "snippet,status"},
+                body={
+                    "snippet": {"title": title, "description": body["description"]},
+                    "status": {"privacyStatus": privacy_status.lower()},
+                },
+            )
+            created_id: str = created["id"]
+            if video_ids or source_playlist:
+                self.add_playlist_items(created_id, video_ids, source_playlist, duplicates=True)
+            return created_id
 
         endpoint = "playlist/create"
         response = self._send_request(endpoint, body)
@@ -428,6 +488,13 @@ class PlaylistsMixin(MixinProtocol):
         :return: Status String or full response
         """
         self._check_auth()
+        if self.uses_tv_client:
+            # the TV client cannot delete playlists, use the YouTube Data API instead
+            self._send_data_api_request(
+                "DELETE", "playlists", params={"id": validate_playlist_id(playlistId)}
+            )
+            return ResponseStatus.SUCCEEDED.value
+
         body = {"playlistId": validate_playlist_id(playlistId)}
         endpoint = "playlist/delete"
         response = self._send_request(endpoint, body)

@@ -21,6 +21,15 @@ class MixinProtocol(Protocol):
 
     proxies: dict[str, str] | None
 
+    @property
+    def uses_tv_client(self) -> bool:
+        """whether requests are sent as YouTube's TV client (OAuth authentication)"""
+
+    def _send_data_api_request(
+        self, method: str, resource: str, params: JsonDict | None = None, body: JsonDict | None = None
+    ) -> JsonDict:
+        """for sending requests to the YouTube Data API v3 (OAuth authentication only)"""
+
     def _check_auth(self) -> None:
         """checks if self has authentication"""
 

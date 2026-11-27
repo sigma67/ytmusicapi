@@ -10,6 +10,40 @@ OAuth authentication
 
    For your new credentials, select ``OAuth client ID`` and pick ``TVs and Limited Input devices``.
 
+.. warning::
+
+   Since August 2025, YouTube Music only accepts OAuth tokens from YouTube's TV client.
+   With OAuth authentication, ``ytmusicapi`` therefore uses the official YouTube Data API where it is
+   available and sends its remaining requests as the TV client. Both only support a subset of the API and
+   return less detailed results (for example no album or like status for playlist items).
+   Requests to the Data API consume quota of your OAuth client. Currently supported with OAuth:
+
+   - :py:func:`get_library_playlists`, :py:func:`get_playlist`, :py:func:`get_liked_songs`
+   - :py:func:`get_library_songs`, :py:func:`get_library_albums`, :py:func:`get_library_subscriptions`
+     (subscriptions only contain the artist name and ``radioId``)
+   - :py:func:`get_artist`, which returns the artist's shelves as a list of ``sections`` instead of the
+     usual keys. Albums are returned as playlists: pass their ``playlistId`` to :py:func:`get_playlist`
+   - :py:func:`get_watch_playlist` (without ``lyrics`` and ``related``)
+   - :py:func:`search` (searches all of YouTube; only the ``songs``, ``videos``, ``albums``, ``artists``
+     and ``playlists`` filters, no scopes)
+   - :py:func:`edit_playlist`, :py:func:`add_playlist_items`, :py:func:`remove_playlist_items`
+   - :py:func:`get_playlist`, :py:func:`get_liked_songs`, :py:func:`create_playlist` and
+     :py:func:`delete_playlist` use the YouTube Data API
+   - :py:func:`rate_song`, :py:func:`rate_playlist`, :py:func:`subscribe_artist` and
+     :py:func:`unsubscribe_artists`
+
+   Known differences of the supported functions:
+
+   - :py:func:`add_playlist_items` does not return the ``setVideoId`` of the added items.
+     Use :py:func:`get_playlist` to retrieve them.
+   - :py:func:`get_watch_playlist` does not always return the requested video as the first track.
+   - Changes can take a few seconds until they are returned by other functions. For example,
+     :py:func:`get_playlist` may raise a :py:class:`YTMusicServerError` right after :py:func:`create_playlist`.
+
+   Functions without an equivalent on the TV client, such as :py:func:`get_home`, :py:func:`get_album`,
+   :py:func:`get_history` or uploads, raise a :py:class:`YTMusicUserError`.
+   Use :doc:`browser` authentication if you need the full API.
+
 After you have installed ``ytmusicapi``, run
 
 .. code-block:: bash
