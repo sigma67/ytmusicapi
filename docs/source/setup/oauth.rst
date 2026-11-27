@@ -13,9 +13,10 @@ OAuth authentication
 .. warning::
 
    Since August 2025, YouTube Music only accepts OAuth tokens from YouTube's TV client.
-   With OAuth authentication, ``ytmusicapi`` therefore sends its requests as that client, which only
-   supports a subset of the API and returns less detailed results (for example no album or like status
-   for playlist items). Currently supported with OAuth:
+   With OAuth authentication, ``ytmusicapi`` therefore uses the official YouTube Data API where it is
+   available and sends its remaining requests as the TV client. Both only support a subset of the API and
+   return less detailed results (for example no album or like status for playlist items).
+   Requests to the Data API consume quota of your OAuth client. Currently supported with OAuth:
 
    - :py:func:`get_library_playlists`, :py:func:`get_playlist`, :py:func:`get_liked_songs`
    - :py:func:`get_library_songs`, :py:func:`get_library_albums`, :py:func:`get_library_subscriptions`
@@ -26,8 +27,8 @@ OAuth authentication
    - :py:func:`search` (searches all of YouTube; only the ``songs``, ``videos``, ``albums``, ``artists``
      and ``playlists`` filters, no scopes)
    - :py:func:`edit_playlist`, :py:func:`add_playlist_items`, :py:func:`remove_playlist_items`
-   - :py:func:`create_playlist` and :py:func:`delete_playlist`, which use the YouTube Data API
-     and consume quota of your OAuth client
+   - :py:func:`get_playlist`, :py:func:`get_liked_songs`, :py:func:`create_playlist` and
+     :py:func:`delete_playlist` use the YouTube Data API
    - :py:func:`rate_song`, :py:func:`rate_playlist`, :py:func:`subscribe_artist` and
      :py:func:`unsubscribe_artists`
 
@@ -35,7 +36,6 @@ OAuth authentication
 
    - :py:func:`add_playlist_items` does not return the ``setVideoId`` of the added items.
      Use :py:func:`get_playlist` to retrieve them.
-   - :py:func:`get_liked_songs` may return fewer items than the playlist's ``trackCount``.
    - Changes can take a few seconds until they are returned by other functions. For example,
      :py:func:`get_playlist` may raise a :py:class:`YTMusicServerError` right after :py:func:`create_playlist`.
 

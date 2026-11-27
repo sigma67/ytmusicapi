@@ -2,11 +2,12 @@ from urllib.parse import parse_qs, urlparse
 
 from ytmusicapi.continuations import *
 from ytmusicapi.enums import ResponseStatus
-from ytmusicapi.exceptions import YTMusicUserError
+from ytmusicapi.exceptions import YTMusicServerError, YTMusicUserError
 from ytmusicapi.helpers import sum_total_duration
 from ytmusicapi.models.content.enums import PlaylistSortOrder, PlaylistVoteEditOptions
 from ytmusicapi.navigation import *
 from ytmusicapi.parsers.browsing import parse_content_list, parse_playlist
+from ytmusicapi.parsers.data_api import parse_data_api_playlist, parse_data_api_playlist_items
 from ytmusicapi.parsers.playlists import *
 from ytmusicapi.parsers.tv import parse_tv_playlist
 from ytmusicapi.type_alias import JsonDict, JsonList, ParseFuncType, RequestFuncBodyType, RequestFuncType
@@ -147,11 +148,16 @@ class PlaylistsMixin(MixinProtocol):
         request_func: RequestFuncType = lambda additionalParams: self._send_request(
             endpoint, body, additionalParams
         )
-        response = request_func("")
         if self.uses_tv_client:
-            tv_playlist = parse_tv_playlist(response, request_func, limit)
+            # the TV client omits unlisted songs. Use it only for playlists the Data API does not know, i.e. radios
+            try:
+                tv_playlist = self._get_playlist_data_api(browseId[2:], limit)
+            except YTMusicServerError:
+                tv_playlist = parse_tv_playlist(request_func(""), request_func, limit)
             tv_playlist["duration_seconds"] = sum_total_duration(tv_playlist)
             return tv_playlist
+
+        response = request_func("")
 
         request_func_continuations: RequestFuncBodyType = lambda body: self._send_request(endpoint, body)
         is_ola = playlistId.startswith(("OLA", "VLOLA"))
@@ -236,6 +242,39 @@ class PlaylistsMixin(MixinProtocol):
             )
 
         playlist["duration_seconds"] = sum_total_duration(playlist)
+        return playlist
+
+    def _get_playlist_data_api(self, playlistId: str, limit: int | None) -> JsonDict:
+        """Get a playlist from the YouTube Data API, which is used with OAuth authentication"""
+        tracks: JsonList = []
+        params: JsonDict = {
+            "part": "snippet,contentDetails,status",
+            "playlistId": playlistId,
+            "maxResults": 50,
+        }
+        while limit is None or len(tracks) < limit:
+            response = self._send_data_api_request("GET", "playlistItems", params)
+            items = response.get("items", [])
+            # the duration is only part of the video resource
+            video_ids = ",".join(item["contentDetails"]["videoId"] for item in items)
+            videos = self._send_data_api_request(
+                "GET", "videos", {"part": "contentDetails", "id": video_ids, "maxResults": 50}
+            )
+            tracks.extend(parse_data_api_playlist_items(items, videos.get("items", [])))
+            if not items or "nextPageToken" not in response:
+                break
+            params["pageToken"] = response["nextPageToken"]
+
+        header = self._send_data_api_request(
+            "GET", "playlists", {"part": "snippet,contentDetails,status", "id": playlistId}
+        ).get("items")
+        channels = self._send_data_api_request("GET", "channels", {"part": "id", "mine": "true"}).get("items")
+        playlist = parse_data_api_playlist(
+            playlistId, header[0] if header else None, channels[0]["id"] if channels else None
+        )
+        if playlist["trackCount"] is None:
+            playlist["trackCount"] = nav(response, ["pageInfo", "totalResults"], True)
+        playlist["tracks"] = tracks if limit is None else tracks[:limit]
         return playlist
 
     def get_liked_songs(self, limit: int = 100) -> JsonDict:

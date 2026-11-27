@@ -1,5 +1,6 @@
 """Offline tests for the TV client code path used with OAuth authentication, see #813"""
 
+import base64
 import json
 import time
 from unittest import mock
@@ -465,9 +466,13 @@ class TestOAuthTVClient:
         }
 
     def test_get_playlist(self, yt_tv: YTMusic):
-        with mock.patch.object(
-            yt_tv, "_send_request", side_effect=[PLAYLIST_RESPONSE, PLAYLIST_CONTINUATION]
-        ) as send:
+        # the TV client is the fallback for playlists the Data API does not return
+        with (
+            mock.patch.object(yt_tv, "_send_data_api_request", side_effect=YTMusicServerError("404")),
+            mock.patch.object(
+                yt_tv, "_send_request", side_effect=[PLAYLIST_RESPONSE, PLAYLIST_CONTINUATION]
+            ) as send,
+        ):
             playlist = yt_tv.get_playlist("PLown", limit=None)
         assert send.call_args_list[0].args[1] == {"browseId": "VLPLown"}
         assert "TOKEN" in send.call_args_list[1].args[2]
@@ -569,7 +574,10 @@ class TestOAuthTVClient:
             "contents": [ALBUM_TRACK_TILE],
             "playlistId": "OLAK5uy_album",
         }
-        with mock.patch.object(yt_tv, "_send_request", return_value=response):
+        with (
+            mock.patch.object(yt_tv, "_send_data_api_request", side_effect=YTMusicServerError("404")),
+            mock.patch.object(yt_tv, "_send_request", return_value=response),
+        ):
             playlist = yt_tv.get_playlist("OLAK5uy_album")
         assert not playlist["owned"]
         assert playlist["tracks"][0]["videoId"] == "vid9"
@@ -625,9 +633,100 @@ class TestOAuthTVClient:
             {"buttonRenderer": {"text": text("Play")}},
             popup,
         ]
-        with mock.patch.object(yt_tv, "_send_request", side_effect=[response, PLAYLIST_CONTINUATION]):
+        with (
+            mock.patch.object(yt_tv, "_send_data_api_request", side_effect=YTMusicServerError("404")),
+            mock.patch.object(yt_tv, "_send_request", side_effect=[response, PLAYLIST_CONTINUATION]),
+        ):
             assert yt_tv.get_playlist("PLown")["description"] == "my description"
 
     def test_search_limit(self, yt_tv: YTMusic):
         with mock.patch.object(yt_tv, "_send_request", return_value=SEARCH_RESPONSE):
             assert len(yt_tv.search("Oasis Wonderwall", limit=2)) == 2
+
+    def test_get_playlist_data_api(self, yt_tv: YTMusic):
+        def item(video_id: str, set_video_id: str, title: str = "Wonderwall") -> dict:
+            item_id = base64.urlsafe_b64encode(f"PLown.{set_video_id}".encode()).decode().rstrip("=")
+            return {
+                "id": item_id,
+                "snippet": {
+                    "title": title,
+                    "videoOwnerChannelTitle": "Oasis - Topic",
+                    "videoOwnerChannelId": "UCartist",
+                    "thumbnails": {"high": {"url": "h", "width": 480}, "default": {"url": "d", "width": 120}},
+                },
+                "contentDetails": {"videoId": video_id},
+                "status": {"privacyStatus": "unlisted"},
+            }
+
+        responses = {
+            ("playlistItems", None): {
+                "items": [item("vid1", "56B44F6D10557CC6")],
+                "nextPageToken": "PAGE2",
+                "pageInfo": {"totalResults": 3},
+            },
+            ("playlistItems", "PAGE2"): {
+                "items": [item("vid2", "289F4A46DF0A30D2"), item("gone", "017208FAA85233F9", "Deleted video")]
+            },
+            ("playlists", None): {
+                "items": [
+                    {
+                        "snippet": {
+                            "title": "Mine",
+                            "description": "my description",
+                            "channelId": "UCme",
+                            "channelTitle": "me",
+                        },
+                        "status": {"privacyStatus": "private"},
+                        "contentDetails": {"itemCount": 3},
+                    }
+                ]
+            },
+            ("channels", None): {"items": [{"id": "UCme"}]},
+        }
+
+        def data_api(method: str, resource: str, params: dict) -> dict:
+            if resource == "videos":
+                durations = {"vid1": "PT4M40S", "vid2": "PT1H2M3S"}
+                return {
+                    "items": [
+                        {"id": video_id, "contentDetails": {"duration": durations[video_id]}}
+                        for video_id in params["id"].split(",")
+                        if video_id in durations
+                    ]
+                }
+            return responses[(resource, params.get("pageToken"))]
+
+        with (
+            mock.patch.object(yt_tv, "_send_data_api_request", side_effect=data_api),
+            mock.patch.object(yt_tv, "_send_request") as send,
+        ):
+            playlist = yt_tv.get_playlist("PLown", limit=None)
+        send.assert_not_called()
+        tracks = playlist.pop("tracks")
+        assert playlist == {
+            "id": "PLown",
+            "owned": True,
+            "privacy": "PRIVATE",
+            "title": "Mine",
+            "description": "my description",
+            "thumbnails": [],
+            "author": {"name": "me", "id": "UCme"},
+            "trackCount": 3,
+            "related": [],
+            "duration_seconds": 280 + 3723,
+        }
+        assert tracks[0] == {
+            "videoId": "vid1",
+            "title": "Wonderwall",
+            "artists": [{"name": "Oasis", "id": "UCartist"}],
+            "album": None,
+            "thumbnails": [{"url": "d", "width": 120}, {"url": "h", "width": 480}],
+            "isAvailable": True,
+            "videoType": None,
+            "duration": "4:40",
+            "duration_seconds": 280,
+            "setVideoId": "56B44F6D10557CC6",
+        }
+        assert tracks[1]["duration"] == "1:02:03"
+        assert [track["isAvailable"] for track in tracks] == [True, True, False]
+        assert "duration" not in tracks[2]
